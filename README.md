@@ -1,5 +1,5 @@
 # Nautilus
-Developed by Nemo starting in 2013 and continuing till present time (as of this writing, February 24, 2024).
+Developed by Nemo between 2013 and present time (as of this writing, February 24, 2024).
 
 Initially a tool suite to create, edit and work with Rock Band files, now it works with some files from other rhythm games.
 Check out the many buttons and see if it'll do what you need. Most features have a Help document but unfortunately I haven't kept up with updating them. Hopefully whoever starts working on this updates the Help documents.
@@ -45,8 +45,8 @@ https://github.com/AddyMills/GH-Toolkit-NET<br>
 jphn for figuring out the fix to PS3 looping songs<br>
 PikminGuts92 (again) for his songfuse tool<br>
 https://github.com/PikminGuts92/bfforever-rs<br>
-Dark for themethod3 (iykyk)<br>
 Onyxite and everyone working on LibForge now<br>
 https://github.com/mtolly/LibForge<br>
+Dark for themethod3 (iykyk)<br>
 <br>
 Thanks to everyone else who helped along the way
