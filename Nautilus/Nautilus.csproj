@@ -1,0 +1,725 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E72DC7F9-6786-4B1B-879B-2F81026FE688}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Nautilus</RootNamespace>
+    <AssemblyName>Nautilus</AssemblyName>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ApplicationIcon>submarine.ico</ApplicationIcon>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>473</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <PlatformTarget>x86</PlatformTarget>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <PlatformTarget>x86</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>784D93A373C79EF05CA9DA204667E0F0FD241A13</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>C3 Tools_1_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Nautilus.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Bass.Net, Version=2.4.11.0, Culture=neutral, PublicKeyToken=b7566c273e6ef480, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Bass.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="DevComponents.DotNetBar2">
+      <HintPath>.\DevComponents.DotNetBar2.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml">
+      <HintPath>bin\Debug\bin\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="IPAddressControlLib">
+      <HintPath>bin\Debug\bin\IPAddressControlLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Excel, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="NAudio">
+      <HintPath>bin\Debug\bin\NAudio.dll</HintPath>
+    </Reference>
+    <Reference Include="NautilusFREE">
+      <HintPath>bin\Debug\bin\NautilusFREE.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\bin\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PdfFileWriter, Version=1.0.0.2, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\bin\PdfFileWriter.dll</HintPath>
+    </Reference>
+    <Reference Include="PDFLibNet">
+      <HintPath>bin\Debug\bin\PDFLibNet.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="PsarcLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\bin\PsarcLib.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.FtpClient">
+      <HintPath>bin\Debug\bin\System.Net.FtpClient.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AdvancedArtConverter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AdvancedArtConverter.designer.cs">
+      <DependentUpon>AdvancedArtConverter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AudioAnalyzer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AudioAnalyzer.Designer.cs">
+      <DependentUpon>AudioAnalyzer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CRC2.cs" />
+    <Compile Include="BatchProcessor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BatchProcessor.Designer.cs">
+      <DependentUpon>BatchProcessor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BatchRenamer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BatchRenamer.Designer.cs">
+      <DependentUpon>BatchRenamer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CreateExcelFile.cs" />
+    <Compile Include="Cryptor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Cryptor.Designer.cs">
+      <DependentUpon>Cryptor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DriveSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DriveSelector.Designer.cs">
+      <DependentUpon>DriveSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EventManagerEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EventManagerEditor.Designer.cs">
+      <DependentUpon>EventManagerEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="libForgeDTA.cs" />
+    <Compile Include="libForgeTexture.cs" />
+    <Compile Include="MoggMaker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MoggMaker.Designer.cs">
+      <DependentUpon>MoggMaker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MoggSplitter.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="RBAEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RBAEditor.designer.cs">
+      <DependentUpon>RBAEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SMDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SMDialog.designer.cs">
+      <DependentUpon>SMDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Updater.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Updater.Designer.cs">
+      <DependentUpon>Updater.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RBtoUSB.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RBtoUSB.Designer.cs">
+      <DependentUpon>RBtoUSB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MiniStudio.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MiniStudio.Designer.cs">
+      <DependentUpon>MiniStudio.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Volume.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Volume.designer.cs">
+      <DependentUpon>Volume.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VolumeNormalizer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VolumeNormalizer.Designer.cs" />
+    <Compile Include="VolumeNormalizer1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VolumeNormalizer.resx</DependentUpon>
+    </Compile>
+    <Compile Include="x360\DevIL.cs" />
+    <Compile Include="DTAParser.cs" />
+    <Compile Include="EventManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EventManager.Designer.cs">
+      <DependentUpon>EventManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FileIndexer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FileIndexer.Designer.cs">
+      <DependentUpon>FileIndexer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ImageHeaders.cs" />
+    <Compile Include="LogViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LogViewer.Designer.cs">
+      <DependentUpon>LogViewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FileAnalyzer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FileAnalyzer.designer.cs">
+      <DependentUpon>FileAnalyzer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MIDISelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MIDISelector.Designer.cs">
+      <DependentUpon>MIDISelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MiloTools.cs" />
+    <Compile Include="PS3Converter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PS3Converter.Designer.cs">
+      <DependentUpon>PS3Converter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PS3Scanner.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PS3Scanner.Designer.cs">
+      <DependentUpon>PS3Scanner.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RBAConverter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RBAConverter.designer.cs">
+      <DependentUpon>RBAConverter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SaveFileImageEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SaveFileImageEditor.Designer.cs">
+      <DependentUpon>SaveFileImageEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SetlistExporter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetlistExporter.Designer.cs">
+      <DependentUpon>SetlistExporter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SetlistManager.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetlistManager.Designer.cs">
+      <DependentUpon>SetlistManager.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MIDICleaner.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MIDICleaner.designer.cs">
+      <DependentUpon>MIDICleaner.cs</DependentUpon>
+    </Compile>
+    <Compile Include="QuickDTAEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QuickDTAEditor.designer.cs">
+      <DependentUpon>QuickDTAEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="QuickPackEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QuickPackEditor.designer.cs">
+      <DependentUpon>QuickPackEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SetlistDetails.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetlistDetails.Designer.cs">
+      <DependentUpon>SetlistDetails.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DifficultySelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DifficultySelector.Designer.cs">
+      <DependentUpon>DifficultySelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BatchExtractor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BatchExtractor.Designer.cs">
+      <DependentUpon>BatchExtractor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HelpForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HelpForm.Designer.cs">
+      <DependentUpon>HelpForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NemoTools.cs" />
+    <Compile Include="PasswordUnlocker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PasswordUnlocker.Designer.cs">
+      <DependentUpon>PasswordUnlocker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PhaseShiftConverter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PhaseShiftConverter.Designer.cs">
+      <DependentUpon>PhaseShiftConverter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProUpgradeBundler.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProUpgradeBundler.Designer.cs">
+      <DependentUpon>ProUpgradeBundler.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PackCreator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PackCreator.Designer.cs">
+      <DependentUpon>PackCreator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CONCreator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CONCreator.Designer.cs">
+      <DependentUpon>CONCreator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CONExplorer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CONExplorer.Designer.cs">
+      <DependentUpon>CONExplorer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="StemsIsolator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="StemsIsolator.Designer.cs">
+      <DependentUpon>StemsIsolator.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ThemeSelector.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ThemeSelector.Designer.cs">
+      <DependentUpon>ThemeSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VideoPreparer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VideoPreparer.Designer.cs">
+      <DependentUpon>VideoPreparer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Visualizer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Visualizer.Designer.cs">
+      <DependentUpon>Visualizer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Wii.cs" />
+    <Compile Include="WiiConverter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WiiConverter.designer.cs">
+      <DependentUpon>WiiConverter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Worker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Worker.Designer.cs">
+      <DependentUpon>Worker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="x360\Create.cs" />
+    <Compile Include="x360\Cryptography.cs" />
+    <Compile Include="x360\DJsIO.cs" />
+    <Compile Include="x360\Other.cs" />
+    <Compile Include="x360\STFSDescriptor.cs" />
+    <Compile Include="x360\STFSPackage.cs" />
+    <Compile Include="x360\STFSStuff.cs" />
+    <Compile Include="zlib\Adler32.cs" />
+    <Compile Include="zlib\Deflate.cs" />
+    <Compile Include="zlib\InfBlocks.cs" />
+    <Compile Include="zlib\InfCodes.cs" />
+    <Compile Include="zlib\Inflate.cs" />
+    <Compile Include="zlib\InfTree.cs" />
+    <Compile Include="zlib\StaticTree.cs" />
+    <Compile Include="zlib\SupportClass.cs" />
+    <Compile Include="zlib\Tree.cs" />
+    <Compile Include="zlib\ZInputStream.cs" />
+    <Compile Include="zlib\Zlib.cs" />
+    <Compile Include="zlib\ZOutputStream.cs" />
+    <Compile Include="zlib\ZStream.cs" />
+    <Compile Include="zlib\ZStreamException.cs" />
+    <EmbeddedResource Include="AdvancedArtConverter.resx">
+      <DependentUpon>AdvancedArtConverter.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AudioAnalyzer.resx">
+      <DependentUpon>AudioAnalyzer.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BatchProcessor.resx">
+      <DependentUpon>BatchProcessor.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BatchRenamer.resx">
+      <DependentUpon>BatchRenamer.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Cryptor.resx">
+      <DependentUpon>Cryptor.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DriveSelector.resx">
+      <DependentUpon>DriveSelector.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EventManager.resx">
+      <DependentUpon>EventManager.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EventManagerEditor.resx">
+      <DependentUpon>EventManagerEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FileIndexer.resx">
+      <DependentUpon>FileIndexer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LogViewer.resx">
+      <DependentUpon>LogViewer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FileAnalyzer.resx">
+      <DependentUpon>FileAnalyzer.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MIDISelector.resx">
+      <DependentUpon>MIDISelector.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MoggMaker.resx">
+      <DependentUpon>MoggMaker.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PS3Converter.resx">
+      <DependentUpon>PS3Converter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PS3Scanner.resx">
+      <DependentUpon>PS3Scanner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RBAEditor.resx">
+      <DependentUpon>RBAEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RBAConverter.resx">
+      <DependentUpon>RBAConverter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SaveFileImageEditor.resx">
+      <DependentUpon>SaveFileImageEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SetlistExporter.resx">
+      <DependentUpon>SetlistExporter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SetlistManager.resx">
+      <DependentUpon>SetlistManager.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DifficultySelector.resx">
+      <DependentUpon>DifficultySelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BatchExtractor.resx">
+      <DependentUpon>BatchExtractor.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HelpForm.resx">
+      <DependentUpon>HelpForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MIDICleaner.resx">
+      <DependentUpon>MIDICleaner.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PasswordUnlocker.resx">
+      <DependentUpon>PasswordUnlocker.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PhaseShiftConverter.resx">
+      <DependentUpon>PhaseShiftConverter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProUpgradeBundler.resx">
+      <DependentUpon>ProUpgradeBundler.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QuickDTAEditor.resx">
+      <DependentUpon>QuickDTAEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QuickPackEditor.resx">
+      <DependentUpon>QuickPackEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PackCreator.resx">
+      <DependentUpon>PackCreator.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CONCreator.resx">
+      <DependentUpon>CONCreator.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SetlistDetails.resx">
+      <DependentUpon>SetlistDetails.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CONExplorer.resx">
+      <DependentUpon>CONExplorer.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SMDialog.resx">
+      <DependentUpon>SMDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StemsIsolator.resx">
+      <DependentUpon>StemsIsolator.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ThemeSelector.resx">
+      <DependentUpon>ThemeSelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Updater.resx">
+      <DependentUpon>Updater.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RBtoUSB.resx">
+      <DependentUpon>RBtoUSB.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VideoPreparer.resx">
+      <DependentUpon>VideoPreparer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Visualizer.resx">
+      <DependentUpon>Visualizer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MiniStudio.resx">
+      <DependentUpon>MiniStudio.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Volume.resx">
+      <DependentUpon>Volume.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="VolumeNormalizer.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>VolumeNormalizer1.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WiiConverter.resx">
+      <DependentUpon>WiiConverter.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Worker.resx">
+      <DependentUpon>Worker.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="Resources\XK0.bin" />
+    <None Include="Resources\XK1.bin" />
+    <None Include="Resources\XK2.bin" />
+    <None Include="Resources\XK3.bin" />
+    <None Include="Resources\XK4.bin" />
+    <None Include="Resources\XK5.bin" />
+    <None Include="Resources\XK6.bin" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="submarine.ico" />
+    <None Include="bin\Debug\res\thumbs\GH3.jpg" />
+    <None Include="bin\Debug\res\thumbs\GH4WT.jpg" />
+    <None Include="bin\Debug\res\thumbs\GH5.jpg" />
+    <None Include="bin\Debug\res\thumbs\GH6WOR.png" />
+    <None Include="bin\Debug\res\thumbs\GH2.jpg" />
+    <None Include="Resources\dc1.png" />
+    <None Include="Resources\dc2.png" />
+    <None Include="Resources\dc3.png" />
+    <Content Include="Resources\GDRB.png" />
+    <None Include="Resources\icon_yarg.png" />
+    <None Include="Resources\icon_ch.png" />
+    <None Include="Resources\icon.png" />
+    <Content Include="Resources\RBL.jpg" />
+    <None Include="Resources\TBRB.png" />
+    <None Include="Resources\bg3.jpg" />
+    <None Include="Resources\bg.jpg" />
+    <None Include="Resources\random.png" />
+    <None Include="Resources\icon_rb4.png" />
+    <None Include="Resources\icon_rb3.png" />
+    <None Include="Resources\icon_blitz.png" />
+    <None Include="Resources\unpinned.png" />
+    <None Include="Resources\pinned.png" />
+    <None Include="Resources\plus3.png" />
+    <None Include="Resources\unmute.png" />
+    <None Include="Resources\mute.png" />
+    <None Include="Resources\working.gif" />
+    <None Include="Resources\loading-blue.gif" />
+    <None Include="Resources\dragdropfiles1.jpg" />
+    <None Include="Resources\dragdropfolder2.jpg" />
+    <None Include="Resources\help1.png" />
+    <None Include="Resources\drag-drop.png" />
+    <None Include="bin\Debug\res\ghtorb3.png" />
+    <None Include="bin\Debug\res\logo.png" />
+    <None Include="bin\Debug\res\c3a.png" />
+    <None Include="bin\Debug\res\c3b.png" />
+    <None Include="bin\Debug\res\down.png" />
+    <None Include="bin\Debug\res\up.png" />
+    <None Include="bin\Debug\res\karaoke.png" />
+    <None Include="bin\Debug\res\multi.png" />
+    <None Include="bin\Debug\res\thumbs\TBRB.png" />
+    <None Include="bin\Debug\res\thumbs\GDRB.png" />
+    <None Include="bin\Debug\res\thumbs\RBL.jpg" />
+    <None Include="Resources\moveall.png" />
+    <None Include="Resources\up1.png" />
+    <None Include="Resources\down1.png" />
+    <None Include="Resources\RB1.png" />
+    <None Include="Resources\RB2.png" />
+    <None Include="Resources\RB3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\Debug\bin\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

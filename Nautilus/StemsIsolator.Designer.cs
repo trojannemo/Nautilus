@@ -1,0 +1,568 @@
+﻿namespace Nautilus
+{
+    partial class StemsIsolator
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            this.lstLog = new System.Windows.Forms.ListBox();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.exportLogFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnBegin = new System.Windows.Forms.Button();
+            this.txtTitle = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.picPin = new System.Windows.Forms.PictureBox();
+            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.audioFormatToolStrip = new System.Windows.Forms.ToolStripMenuItem();
+            this.doWAV = new System.Windows.Forms.ToolStripMenuItem();
+            this.doOGG = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnReset = new System.Windows.Forms.Button();
+            this.grpStems = new System.Windows.Forms.GroupBox();
+            this.chkBacking = new System.Windows.Forms.CheckBox();
+            this.chkCrowd = new System.Windows.Forms.CheckBox();
+            this.chkVocals = new System.Windows.Forms.CheckBox();
+            this.chkKeys = new System.Windows.Forms.CheckBox();
+            this.chkGuitar = new System.Windows.Forms.CheckBox();
+            this.chkBass = new System.Windows.Forms.CheckBox();
+            this.chkDrums = new System.Windows.Forms.CheckBox();
+            this.txtFile = new System.Windows.Forms.TextBox();
+            this.btnFile = new System.Windows.Forms.Button();
+            this.txtAppend = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.picWorking = new System.Windows.Forms.PictureBox();
+            this.grpMode = new System.Windows.Forms.GroupBox();
+            this.radioDownmix = new System.Windows.Forms.RadioButton();
+            this.radioPrepare = new System.Windows.Forms.RadioButton();
+            this.radioSplit = new System.Windows.Forms.RadioButton();
+            this.contextMenuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
+            this.menuStrip1.SuspendLayout();
+            this.grpStems.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
+            this.grpMode.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // lstLog
+            // 
+            this.lstLog.AllowDrop = true;
+            this.lstLog.BackColor = System.Drawing.Color.White;
+            this.lstLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lstLog.ContextMenuStrip = this.contextMenuStrip1;
+            this.lstLog.FormattingEnabled = true;
+            this.lstLog.HorizontalScrollbar = true;
+            this.lstLog.Location = new System.Drawing.Point(12, 407);
+            this.lstLog.Name = "lstLog";
+            this.lstLog.Size = new System.Drawing.Size(456, 119);
+            this.lstLog.TabIndex = 12;
+            this.lstLog.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.lstLog.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportLogFileToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.ShowImageMargin = false;
+            this.contextMenuStrip1.Size = new System.Drawing.Size(123, 26);
+            // 
+            // exportLogFileToolStripMenuItem
+            // 
+            this.exportLogFileToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.exportLogFileToolStripMenuItem.Name = "exportLogFileToolStripMenuItem";
+            this.exportLogFileToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.exportLogFileToolStripMenuItem.Text = "Export log file";
+            this.exportLogFileToolStripMenuItem.Click += new System.EventHandler(this.exportLogFileToolStripMenuItem_Click);
+            // 
+            // btnBegin
+            // 
+            this.btnBegin.AllowDrop = true;
+            this.btnBegin.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(144)))), ((int)(((byte)(51)))));
+            this.btnBegin.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnBegin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBegin.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBegin.ForeColor = System.Drawing.Color.White;
+            this.btnBegin.Location = new System.Drawing.Point(404, 372);
+            this.btnBegin.Name = "btnBegin";
+            this.btnBegin.Size = new System.Drawing.Size(64, 29);
+            this.btnBegin.TabIndex = 19;
+            this.btnBegin.Text = "&Begin";
+            this.btnBegin.UseVisualStyleBackColor = false;
+            this.btnBegin.Visible = false;
+            this.btnBegin.Click += new System.EventHandler(this.button1_Click);
+            this.btnBegin.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.btnBegin.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // txtTitle
+            // 
+            this.txtTitle.AllowDrop = true;
+            this.txtTitle.Enabled = false;
+            this.txtTitle.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtTitle.Location = new System.Drawing.Point(14, 195);
+            this.txtTitle.MaxLength = 80;
+            this.txtTitle.Multiline = true;
+            this.txtTitle.Name = "txtTitle";
+            this.txtTitle.Size = new System.Drawing.Size(454, 33);
+            this.txtTitle.TabIndex = 25;
+            this.txtTitle.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.txtTitle.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            this.txtTitle.DoubleClick += new System.EventHandler(this.txtTitle_DoubleClick);
+            this.txtTitle.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtTitle_KeyDown);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(11, 179);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(257, 13);
+            this.label2.TabIndex = 27;
+            this.label2.Text = "Enter pack / file name or leave auto-generated name";
+            // 
+            // picPin
+            // 
+            this.picPin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.picPin.BackColor = System.Drawing.Color.Transparent;
+            this.picPin.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picPin.Image = global::Nautilus.Properties.Resources.unpinned;
+            this.picPin.Location = new System.Drawing.Point(454, 4);
+            this.picPin.Name = "picPin";
+            this.picPin.Size = new System.Drawing.Size(20, 20);
+            this.picPin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picPin.TabIndex = 64;
+            this.picPin.TabStop = false;
+            this.picPin.Tag = "unpinned";
+            this.toolTip1.SetToolTip(this.picPin, "Click to pin on top");
+            this.picPin.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picPin_MouseClick);
+            // 
+            // backgroundWorker1
+            // 
+            this.backgroundWorker1.WorkerReportsProgress = true;
+            this.backgroundWorker1.WorkerSupportsCancellation = true;
+            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
+            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.audioFormatToolStrip,
+            this.helpToolStripMenuItem1});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(479, 24);
+            this.menuStrip1.TabIndex = 35;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // audioFormatToolStrip
+            // 
+            this.audioFormatToolStrip.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.doWAV,
+            this.doOGG});
+            this.audioFormatToolStrip.Name = "audioFormatToolStrip";
+            this.audioFormatToolStrip.Size = new System.Drawing.Size(92, 20);
+            this.audioFormatToolStrip.Text = "Audio Format";
+            // 
+            // doWAV
+            // 
+            this.doWAV.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.doWAV.Checked = true;
+            this.doWAV.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.doWAV.Name = "doWAV";
+            this.doWAV.Size = new System.Drawing.Size(148, 22);
+            this.doWAV.Text = "WAV (faster)";
+            this.doWAV.Click += new System.EventHandler(this.doWAV_Click);
+            // 
+            // doOGG
+            // 
+            this.doOGG.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.doOGG.Name = "doOGG";
+            this.doOGG.Size = new System.Drawing.Size(148, 22);
+            this.doOGG.Text = "OGG (smaller)";
+            this.doOGG.Click += new System.EventHandler(this.doOGG_Click);
+            // 
+            // helpToolStripMenuItem1
+            // 
+            this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
+            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem1.Text = "&Help";
+            this.helpToolStripMenuItem1.Click += new System.EventHandler(this.helpToolStripMenuItem1_Click);
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(32, 19);
+            // 
+            // btnReset
+            // 
+            this.btnReset.AllowDrop = true;
+            this.btnReset.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(144)))), ((int)(((byte)(51)))));
+            this.btnReset.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnReset.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnReset.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnReset.ForeColor = System.Drawing.Color.White;
+            this.btnReset.Location = new System.Drawing.Point(12, 372);
+            this.btnReset.Name = "btnReset";
+            this.btnReset.Size = new System.Drawing.Size(64, 29);
+            this.btnReset.TabIndex = 40;
+            this.btnReset.Text = "&Reset";
+            this.btnReset.UseVisualStyleBackColor = false;
+            this.btnReset.Visible = false;
+            this.btnReset.Click += new System.EventHandler(this.button3_Click);
+            this.btnReset.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.btnReset.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // grpStems
+            // 
+            this.grpStems.Controls.Add(this.chkBacking);
+            this.grpStems.Controls.Add(this.chkCrowd);
+            this.grpStems.Controls.Add(this.chkVocals);
+            this.grpStems.Controls.Add(this.chkKeys);
+            this.grpStems.Controls.Add(this.chkGuitar);
+            this.grpStems.Controls.Add(this.chkBass);
+            this.grpStems.Controls.Add(this.chkDrums);
+            this.grpStems.Location = new System.Drawing.Point(14, 111);
+            this.grpStems.Name = "grpStems";
+            this.grpStems.Size = new System.Drawing.Size(454, 63);
+            this.grpStems.TabIndex = 41;
+            this.grpStems.TabStop = false;
+            this.grpStems.Text = "Stems to Isolate";
+            this.grpStems.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.grpStems.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // chkBacking
+            // 
+            this.chkBacking.AutoSize = true;
+            this.chkBacking.Checked = true;
+            this.chkBacking.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkBacking.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkBacking.Enabled = false;
+            this.chkBacking.Location = new System.Drawing.Point(316, 27);
+            this.chkBacking.Name = "chkBacking";
+            this.chkBacking.Size = new System.Drawing.Size(65, 17);
+            this.chkBacking.TabIndex = 6;
+            this.chkBacking.Text = "Backing";
+            this.chkBacking.UseVisualStyleBackColor = true;
+            // 
+            // chkCrowd
+            // 
+            this.chkCrowd.AutoSize = true;
+            this.chkCrowd.Checked = true;
+            this.chkCrowd.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkCrowd.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkCrowd.Enabled = false;
+            this.chkCrowd.Location = new System.Drawing.Point(387, 27);
+            this.chkCrowd.Name = "chkCrowd";
+            this.chkCrowd.Size = new System.Drawing.Size(56, 17);
+            this.chkCrowd.TabIndex = 5;
+            this.chkCrowd.Text = "Crowd";
+            this.chkCrowd.UseVisualStyleBackColor = true;
+            // 
+            // chkVocals
+            // 
+            this.chkVocals.AutoSize = true;
+            this.chkVocals.Checked = true;
+            this.chkVocals.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkVocals.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkVocals.Enabled = false;
+            this.chkVocals.Location = new System.Drawing.Point(197, 27);
+            this.chkVocals.Name = "chkVocals";
+            this.chkVocals.Size = new System.Drawing.Size(58, 17);
+            this.chkVocals.TabIndex = 4;
+            this.chkVocals.Text = "Vocals";
+            this.chkVocals.UseVisualStyleBackColor = true;
+            // 
+            // chkKeys
+            // 
+            this.chkKeys.AutoSize = true;
+            this.chkKeys.Checked = true;
+            this.chkKeys.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkKeys.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkKeys.Enabled = false;
+            this.chkKeys.Location = new System.Drawing.Point(261, 27);
+            this.chkKeys.Name = "chkKeys";
+            this.chkKeys.Size = new System.Drawing.Size(49, 17);
+            this.chkKeys.TabIndex = 3;
+            this.chkKeys.Text = "Keys";
+            this.chkKeys.UseVisualStyleBackColor = true;
+            // 
+            // chkGuitar
+            // 
+            this.chkGuitar.AutoSize = true;
+            this.chkGuitar.Checked = true;
+            this.chkGuitar.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkGuitar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkGuitar.Enabled = false;
+            this.chkGuitar.Location = new System.Drawing.Point(137, 27);
+            this.chkGuitar.Name = "chkGuitar";
+            this.chkGuitar.Size = new System.Drawing.Size(54, 17);
+            this.chkGuitar.TabIndex = 2;
+            this.chkGuitar.Text = "Guitar";
+            this.chkGuitar.UseVisualStyleBackColor = true;
+            // 
+            // chkBass
+            // 
+            this.chkBass.AutoSize = true;
+            this.chkBass.Checked = true;
+            this.chkBass.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkBass.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkBass.Enabled = false;
+            this.chkBass.Location = new System.Drawing.Point(82, 27);
+            this.chkBass.Name = "chkBass";
+            this.chkBass.Size = new System.Drawing.Size(49, 17);
+            this.chkBass.TabIndex = 1;
+            this.chkBass.Text = "Bass";
+            this.chkBass.UseVisualStyleBackColor = true;
+            // 
+            // chkDrums
+            // 
+            this.chkDrums.AutoSize = true;
+            this.chkDrums.Checked = true;
+            this.chkDrums.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDrums.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkDrums.Enabled = false;
+            this.chkDrums.Location = new System.Drawing.Point(20, 27);
+            this.chkDrums.Name = "chkDrums";
+            this.chkDrums.Size = new System.Drawing.Size(56, 17);
+            this.chkDrums.TabIndex = 0;
+            this.chkDrums.Text = "Drums";
+            this.chkDrums.UseVisualStyleBackColor = true;
+            // 
+            // txtFile
+            // 
+            this.txtFile.AllowDrop = true;
+            this.txtFile.BackColor = System.Drawing.Color.White;
+            this.txtFile.ForeColor = System.Drawing.Color.Gray;
+            this.txtFile.Location = new System.Drawing.Point(14, 29);
+            this.txtFile.Name = "txtFile";
+            this.txtFile.ReadOnly = true;
+            this.txtFile.Size = new System.Drawing.Size(419, 20);
+            this.txtFile.TabIndex = 13;
+            this.txtFile.Text = "Select source file (or drag/drop it here)";
+            this.txtFile.TextChanged += new System.EventHandler(this.txtFile_TextChanged);
+            this.txtFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.txtFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // btnFile
+            // 
+            this.btnFile.AllowDrop = true;
+            this.btnFile.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(144)))), ((int)(((byte)(51)))));
+            this.btnFile.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnFile.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnFile.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnFile.ForeColor = System.Drawing.Color.White;
+            this.btnFile.Location = new System.Drawing.Point(439, 27);
+            this.btnFile.Name = "btnFile";
+            this.btnFile.Size = new System.Drawing.Size(29, 22);
+            this.btnFile.TabIndex = 14;
+            this.btnFile.Text = "...";
+            this.btnFile.UseVisualStyleBackColor = false;
+            this.btnFile.Click += new System.EventHandler(this.btnFile_Click);
+            this.btnFile.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.btnFile.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // txtAppend
+            // 
+            this.txtAppend.AllowDrop = true;
+            this.txtAppend.Enabled = false;
+            this.txtAppend.Location = new System.Drawing.Point(12, 252);
+            this.txtAppend.Multiline = true;
+            this.txtAppend.Name = "txtAppend";
+            this.txtAppend.Size = new System.Drawing.Size(456, 114);
+            this.txtAppend.TabIndex = 44;
+            this.txtAppend.WordWrap = false;
+            this.txtAppend.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.txtAppend.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            this.txtAppend.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtAppend_KeyDown);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(11, 236);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(197, 13);
+            this.label1.TabIndex = 45;
+            this.label1.Text = "Add missing songs.dta information below";
+            // 
+            // picWorking
+            // 
+            this.picWorking.Image = global::Nautilus.Properties.Resources.working;
+            this.picWorking.Location = new System.Drawing.Point(179, 386);
+            this.picWorking.Name = "picWorking";
+            this.picWorking.Size = new System.Drawing.Size(128, 15);
+            this.picWorking.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.picWorking.TabIndex = 57;
+            this.picWorking.TabStop = false;
+            this.picWorking.Visible = false;
+            // 
+            // grpMode
+            // 
+            this.grpMode.Controls.Add(this.radioDownmix);
+            this.grpMode.Controls.Add(this.radioPrepare);
+            this.grpMode.Controls.Add(this.radioSplit);
+            this.grpMode.Location = new System.Drawing.Point(14, 55);
+            this.grpMode.Name = "grpMode";
+            this.grpMode.Size = new System.Drawing.Size(454, 50);
+            this.grpMode.TabIndex = 58;
+            this.grpMode.TabStop = false;
+            this.grpMode.Text = "Mode";
+            this.grpMode.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.grpMode.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // radioDownmix
+            // 
+            this.radioDownmix.AllowDrop = true;
+            this.radioDownmix.AutoSize = true;
+            this.radioDownmix.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioDownmix.Location = new System.Drawing.Point(160, 19);
+            this.radioDownmix.Name = "radioDownmix";
+            this.radioDownmix.Size = new System.Drawing.Size(112, 17);
+            this.radioDownmix.TabIndex = 2;
+            this.radioDownmix.Text = "Downmix to stereo";
+            this.radioDownmix.UseVisualStyleBackColor = true;
+            this.radioDownmix.CheckedChanged += new System.EventHandler(this.radioSplit_CheckedChanged);
+            this.radioDownmix.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.radioDownmix.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // radioPrepare
+            // 
+            this.radioPrepare.AllowDrop = true;
+            this.radioPrepare.AutoSize = true;
+            this.radioPrepare.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioPrepare.Location = new System.Drawing.Point(293, 19);
+            this.radioPrepare.Name = "radioPrepare";
+            this.radioPrepare.Size = new System.Drawing.Size(150, 17);
+            this.radioPrepare.TabIndex = 1;
+            this.radioPrepare.Text = "Prepare CON for recording";
+            this.radioPrepare.UseVisualStyleBackColor = true;
+            this.radioPrepare.CheckedChanged += new System.EventHandler(this.radioSplit_CheckedChanged);
+            this.radioPrepare.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.radioPrepare.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // radioSplit
+            // 
+            this.radioSplit.AllowDrop = true;
+            this.radioSplit.AutoSize = true;
+            this.radioSplit.Checked = true;
+            this.radioSplit.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioSplit.Location = new System.Drawing.Point(20, 19);
+            this.radioSplit.Name = "radioSplit";
+            this.radioSplit.Size = new System.Drawing.Size(116, 17);
+            this.radioSplit.TabIndex = 0;
+            this.radioSplit.TabStop = true;
+            this.radioSplit.Text = "Split audio to stems";
+            this.radioSplit.UseVisualStyleBackColor = true;
+            this.radioSplit.CheckedChanged += new System.EventHandler(this.radioSplit_CheckedChanged);
+            this.radioSplit.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.radioSplit.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            // 
+            // StemsIsolator
+            // 
+            this.AllowDrop = true;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.ClientSize = new System.Drawing.Size(479, 537);
+            this.Controls.Add(this.picPin);
+            this.Controls.Add(this.grpMode);
+            this.Controls.Add(this.picWorking);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.txtAppend);
+            this.Controls.Add(this.grpStems);
+            this.Controls.Add(this.btnReset);
+            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.txtTitle);
+            this.Controls.Add(this.btnBegin);
+            this.Controls.Add(this.btnFile);
+            this.Controls.Add(this.txtFile);
+            this.Controls.Add(this.lstLog);
+            this.DoubleBuffered = true;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.Name = "StemsIsolator";
+            this.ShowIcon = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Stems Isolator";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.StemsIsolator_FormClosing);
+            this.Shown += new System.EventHandler(this.stemsISO_Shown);
+            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            this.contextMenuStrip1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picPin)).EndInit();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            this.grpStems.ResumeLayout(false);
+            this.grpStems.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).EndInit();
+            this.grpMode.ResumeLayout(false);
+            this.grpMode.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.ListBox lstLog;
+        private System.Windows.Forms.Button btnBegin;
+        private System.Windows.Forms.TextBox txtTitle;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem1;
+        private System.Windows.Forms.Button btnReset;
+        private System.Windows.Forms.GroupBox grpStems;
+        private System.Windows.Forms.CheckBox chkBacking;
+        private System.Windows.Forms.CheckBox chkCrowd;
+        private System.Windows.Forms.CheckBox chkVocals;
+        private System.Windows.Forms.CheckBox chkKeys;
+        private System.Windows.Forms.CheckBox chkGuitar;
+        private System.Windows.Forms.CheckBox chkBass;
+        private System.Windows.Forms.CheckBox chkDrums;
+        private System.Windows.Forms.TextBox txtFile;
+        private System.Windows.Forms.Button btnFile;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem exportLogFileToolStripMenuItem;
+        private System.Windows.Forms.TextBox txtAppend;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.PictureBox picWorking;
+        private System.Windows.Forms.GroupBox grpMode;
+        private System.Windows.Forms.RadioButton radioPrepare;
+        private System.Windows.Forms.RadioButton radioSplit;
+        private System.Windows.Forms.ToolStripMenuItem audioFormatToolStrip;
+        private System.Windows.Forms.ToolStripMenuItem doWAV;
+        private System.Windows.Forms.ToolStripMenuItem doOGG;
+        private System.Windows.Forms.RadioButton radioDownmix;
+        private System.Windows.Forms.PictureBox picPin;
+    }
+}
