@@ -1,0 +1,60 @@
+RBtoUSB: How To Use
+
+Before understanding how to use RBtoUSB, you need to understand what it is: this is NOT an all-around Xbox 360 file handler
+RBtoUSB is made specifically for use with Rock Band 3 files on Xbox 360, and it REQUIRES that you are on dashboard 17349 or newer (from late April 2015) that formats drives using FAT32 instead of the old proprietary Xbox partition
+
+RBtoUSB will handle song files and song pack files in both CON and LIVE formats, as well as Rock Band 3 songcache files, game saves and audio/video settings
+RBtoUSB will also accept Title Update (TU) files for Rock Band 3 - TU4 comes included with RBtoUSB, so if you want that just click on Tools -> Copy TU4 to drive - but if you want any other TU, just drag/drop it to the form
+
+Unlike all other Xbox file handlers, you do not have to specify what folder to put the file(s) in - just drag/drop any of the above files to RBtoUSB and it will place them in the correct directory for you
+
+So, let's get started on how to use RBtoUSB:
+
+First, format your USB drive or portable hard drive on your Xbox 360 that has the new firmware upgrade
+Connect it to your computer, and open RBtoUSB - you can do this by opening C3 CON Tools and clicking on the RBtoUSB button, or by creating a shortcut to C3 CON Tools with the argument -usb and this way you have a dedicated shortcut for RBtoUSB
+
+Click on File -> Open USB drive and select the right drive from the choices given - at this point RBtoUSB will read through the drive and load all RB3 related files
+
+By default, files will be sorted alphabetically by the package name, which is what you see on your Xbox dashboard - but you can sort however you want, by clicking on any of the information columns once for ascending order and twice for descending order
+
+You can click on any column and drag it to re-arrange how the information is presented to you - you can also pull on the edge of each column to resize it to your liking - and you can also choose which columns to show or hide by clicking on Options -> Toggle information columns and choosing what you like - RBtoUSB will remember all these choices next time you run it for your convenience
+
+You interact with the files by right-clicking on the form - right-clicking one file will give you different options than if you select multiple files prior to right-clicking (hold Control while clicking on the files to select multiples)
+
+Add files... allows you to select one or multiple files to add to your drive - you can also do this by drag/dropping the file(s) to the form - remember that RBtoUSB knows where to put the files for you, so there is no problem in mixing types of files when adding them
+
+Extract selected file(s) allows you to extract one or multiple files to any folder you like - you can also do this by drag/dropping the file(s) from the form to the destination folder
+
+Deleted selected file(s) allows you remove one or multiple files from your drive - this can't be undone, so be sure you want to do this - pressing the Delete key will do the same thing
+
+Locate file in drive will open your usb drive to the right directory and select the file so you can easily locate it
+
+Send to... will show you which of the tools in C3 CON Tools can interact with the selected file
+
+
+TOOLS
+
+Search... allows you to search for any word or phrase (case insensitive) in your files - this searches the package name, the file name, the song artist, the song title, the song id and the song internal name fields - pressing Control+F brings this option too - pressing F3 will search for the next instance of the search term
+
+Rename drive allows you to rename your customs drive using a name.txt file in the root directory of the file that the Xbox might use eventually - if the drive volume label (what you see on My Computer) is blank, RBtoUSB will set it to 'RB3_CUSTOMS' because of Windows limitations, but you can manually set it to something else
+
+Copy TU4 to drive will copy a known working copy of TU4 on your customs drive - this is necessary for proper customs play, so it's recommended you use it if you don't already have TU4
+
+
+OPTIONS
+
+Check for misplaced files - if checked, RBtoUSB will verify when loading your drive's contents that each Rock Band 3 files are in their correct folder based on their file type - this ensures that CON files are not in LIVE folders, which in turn show as corrupt on the Xbox dashboard, etc - recommended you leave this on
+
+Grab song metadata (slower) - when loading the files in your drive with this option enabled, RBtoUSB reads the contents of the files and grabs the metadata to display it for you alongside the other file information - this is useful if you want to see if you have duplicate songs or songs with duplicate song IDs - remember you can sort by any field, including these fields if you enable them - as the name implies, this makes reading your drive slower
+
+Auto-open last used drive - RBtoUSB will store the drive letter that you last used, and if it's still a valid drive, it will try to load from there next time you run it - the result is if you always connect your USB drive to the same usb port on your computer, you don't even have to manually open that drive
+
+Show gridlines - this shows thin gridlines for each file and column for easier readibility
+
+Filter files - allows you to select which files RBtoUSB will display, in case you want to track down a specific type of file
+
+Toggle information columns - allows you to select which columns to display, you can also resize and reorder the columns - to reset back to stock, click on Reset columns
+
+Reset form size - you can resize RBtoUSB to your liking, move it to a specific part of your screen, and maximize to full screen - RBtoUSB will remember these choices for your next use, but if you want to reset it all, just use this option
+
+Enjoy

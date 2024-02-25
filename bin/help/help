@@ -1,0 +1,49 @@
+C3 Tools supports the following command line arguments:
+
+-help			Opens this help message
+
+-analyzer			Opens File Analyzer
+-art			Opens Advanced Art Converter
+-audioa			Opens Audio Analyzer
+-character		Opens Character Editor
+-cleaner			Opens MIDI Cleaner
+-cleaner -midi_file		Opens MIDI file in MIDI Cleaner
+-clonehero		Opens YARG/CH/PS Converter
+-creator			Opens CON Creator
+-cryptor			Opens Batch Cryptor
+-dta			Opens Batch DTA Processor
+-event			Opens Event Manager
+-extractor			Opens Batch Extractor
+-indexer			Opens File Indexer
+-manager			Opens Setlist Manager
+-milo			Opens MiloMod
+-mogg			Opens Mogg Maker
+-normalizer		Opens Volume Normalizer
+-pack			Opens Pack Creator
+-phaseshift		Opens YARG/CH/PS Converter
+-bundler			Opens Upgrade Bundler
+-ps3			Opens PS3 Converter
+-quickdta			Opens Quick DTA Editor
+-quickpack		Opens Quick Pack Editor
+-rba			Opens RBA Editor
+-renamer			Opens Batch Renamer
+-save			Opens Save File Image Editor
+-studio			Opens Mini Studio
+-usb			Opens RBtoUSB
+-video			Opens Video Preparer
+-viewer			Opens Save Scores Viewer
+-visualizer			Opens Visualizer
+-visualizer -con_file		Opens CON file in Visualizer
+-visualizer -pkg_file		Opens PKG file in Visualizer
+-visualizer -psarc_file	Opens PSARC file in Visualizer
+-visualizer -sng_file		Opens SNG file in Visualizer
+-wii			Opens Wii Converter
+-wii -con_file		Opens CON file in Wii Converter
+-yarg			Opens YARG/CH/PS Converter
+
+Also supports direct feeding of the following files as argument:
+
+CON files
+MIDI files
+.mogg files
+.setlist files

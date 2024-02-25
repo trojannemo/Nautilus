@@ -1,0 +1,29 @@
+Phase Shift Converter: How To Use
+
+This program is intended to accurately convert Xbox 360 Rock Band songs for use with Phase Shift
+
+Place all the CON/LIVE files in one folder, and either select the folder using the button, or drag one of those files here
+
+A 'Music' subdirectory will be created and the converted songs will be placed there
+You can then just copy/paste this into your Phase Shift directory and merge with the existing 'Music' folder
+
+To avoid possibly deleting your existing songs, it is strongly suggested you use the default directory or a separate directory from the Phase Shift 'Music' directory to do the conversions
+
+By default, 'Separate to stems as possible' is selected - Phase Shift Converter will automatically separate the audio file (mogg) into its component ogg files if the audio file is not encrypted. Some encrypted mogg files will be downmixed into a single stereo ogg file - rather than preventing Phase Shift users from playing the encrypted song at all, this gives you the ability to play it, although without multitracks. This process takes some time, so be patient, but it's a lot less work and more accurate than doing it manually. So you can now batch convert a lot of songs with only one click, just sit back and let the program do its thing
+
+You can also choose to always downmix the audio file to a single stereo ogg file - select 'Always downmix to stereo' and even unencrypted multitrack audio will be downmixed
+
+You can also choose to manually process the audio file. To do that, select the 'Send to Audacity' option to have this program automatically send the audio file to Audacity for you as each song is converted
+
+You can also choose the 'Leave it alone' option if you want Phase Shift Converter to just leave the .mogg file there for manual editing later
+
+By default, there is no loading phrase - to add one, create a text file, name it loading_phrase.txt and place it in the /bin directory, enter anything you want to show up as your loading phrase in there
+
+OPTIONS
+Leave 'Use 'guitar.ogg' for non-multitrack songs' enabled to ensure backwards compatibility with FoF and FoFiX when the song only has one (backing) audio file. This is supported natively by Phase Shift. If disabled, the audio file will be named song.ogg as used by Phase Shift.
+
+Enable 'Use subgenre instead of genre' to tell Phase Shift to display the song's more specific subgenre rather than the more generic genre. Unlike Rock Band 3, Phase Shift does not natively support showing of both Genre and Subgenre, so this is one way to do it
+
+
+Huge thanks to bluzer and AkiraNomuraBCN for their help with perfecting the conversion process
+Enjoy

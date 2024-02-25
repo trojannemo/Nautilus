@@ -1,0 +1,49 @@
+Upgrade Bundler: How To Use
+
+Upgrade Bundler allows you to combine an existing song with a pro upgrade CON, loose pro upgrade files, and RBHP upgrade files, simply by drag and dropping files and clicking on 'Bundle'
+
+On the left box you can drag and drop:
+- ONE individual song file (no packs, sorry)
+- ONE loose MIDI file
+
+On the right box you can and drop:
+- ONE individual pro upgrade file (no packs, sorry)
+- ONE upgrades.dta file
+- ONE songs.dta file
+- ANY AMOUNT of MIDI files
+
+NOTE WHEN COMBINING WITH ROCK BAND: HARMONY PROJECT ('RBHP') FILES
+- RBHP uses three files: a MIDI file, a songs.dta file, and an upgrades.dta file...however, you IGNORE the upgrades.dta file included with RBHP UNLESS you're bundling the RBHP Pro Guitar/Bass Upgrade. Any other RBHP upgrade you're bundling only needs the songs.dta and MIDI file for our purposes, even though it will include an upgrades.dta file
+- This is extremely important if you plan to bundle RBHP files with a non-RBHP pro guitar/bass upgrade
+
+If you want to combine all files in a RBHP song folder (usually *.mid, upgrades.dta and songs.dta), you can select all three and drag and drop all three at once to the right box
+
+Don't worry, Upgrade Bundler will yell at you if you break any of the many rules involved. So just try your luck and follow prompts if it yells at you
+
+Here are two important (and obvious) rules:
+- you can't add DTA files to the right box unless you have a song file on the left box (i.e. loose MIDIs don't need DTA files)
+- you can't use the same MIDI file on the left box and the right box (duh)
+
+If put a loose MIDI file on the left box and a pro upgrade file on the right, only the pro upgrade MIDI is bundled with the original MIDI and the upgrades.dta is discarded
+
+If you put a replacement (RBHP) songs.dta file on the right box, it will completely replace the original songs.dta file in the original song file. If you also have an upgrades.dta file, it is then merged into the replacement songs.dta file
+
+If both the original song and the pro upgrade file or upgrades.dta file have song IDs, Upgrade Bundler will yell at you if they don't match, to make sure you're not mixing one song's upgrades with another song's charts
+
+You can mix various MIDI files together, but if there are duplicate tracks, last in time applies = the last MIDI to be processed overwrites the prior one. I recommend only using separate MIDIs that don't have duplicate tracks, but it works fine with them as long as you remember the overwriting order
+
+If you're only bundling MIDI files, the final product will be found in the same folder as the original MIDI file, with (bundled) added to the name. Similarly, if you're bundling a song file, the final product will be found in the same folder as the original song file, with (bundled) added to the name. 
+
+THE ORIGINAL FILES ARE NEVER MODIFIED!
+
+You can use CON or LIVE files, but the output will be an anonymous, signed CON file. Use CON Explorer to resign if you need the file as LIVE
+
+OPTIONS
+
+- Track overwriting options allow you to choose whether any MIDIs added to the right box will overwrite existing tracks (default behavior) or only add new tracks that aren't present
+- Ignore non-instrument tracks (default behavior) skips VENUE, BEAT, and EVENTS tracks. Unchecking it will also allow the MIDI files on the right box to overwrite/add these tracks
+- Clean-up after bundling files (default behavior) will delete all temporary files created by Upgrade Bundler. Uncheck to keep those files for your use
+
+If you're only bundling MIDI files, the process should take less than 5 seconds on most computers. If you're bundling song files, the process may take from 15 seconds to 5 minutes, depending on your computer
+
+Enjoy

@@ -1,0 +1,35 @@
+Visualizer: How To Use
+
+You can create an image in one of two ways:
+
+1) Manual:
+Type in all the information, click on the appropriate icons, drag-and-drop the album art to the box on the left (most formats are allowed, including the more exotic .dds and .png_xbox)
+Hover over almost anything in Visualizer to get a tip on how to use it
+
+2) Automatic:
+Click on 'Load Song' and select a CON or LIVE file
+You can also just drag and drop a CON or LIVE file on this form
+Visualizer will try to load everything it can from the file supplied, but you may need to fill in some fields (mostly for RB1 era files)
+
+The small rectangle on the bottom left is for you to drag / drop your user logo if you wish to use one
+This will be overlaid on top of the album art, and can be moved around by clicking on it
+
+Visualizer now includes several pre-made Holiday Themes!
+These will be automatically enabled by Visualizer based on the time of year, all you got to do is click on the Holiday Button to enable / disable the theme
+
+To use the Holiday Theme at different times of year, click on the plus icon and select one of the available themes
+
+You can also create your own themes!
+You need two files, one called 'theme_overlay.png' and one called 'theme_button.png' - use the included themes as reference
+Your files must match the dimensions of the included themes and be .png (with transparency)
+Replace 'theme' with the name of your holiday or whatever you want
+Place those two in the /res folder - that's it! Visualizer will show those themes next time you click on the plus icon
+
+You can choose between Myriad Pro (default), Calibri, Tahoma and Times New Roman fonts
+
+To use a custom font, create a text file named font.txt and place it in the /res folder. Enter one line of text that says FontName=Name Here and save it Visualizer will load that and make it the default font, but you can still choose any of the other fonts mentioned above. 
+Make sure the font name is spelled correctly (case sensitive) and is actually installed on your system.
+
+VISUALIZER WILL ONLY WORK WITH SINGLE SONGS, NO PACKS, NO PRO UPGRADES
+
+Enjoy

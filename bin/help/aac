@@ -1,0 +1,41 @@
+Advanced Art Converter: How To Use
+
+All Rock Band formats are now supported: *.png_xbox, *.png_ps3 and *.png_wii, as well as the intermediary *.dds and *.tpl formats
+Many, but not all, MILO files (*.milo_xbox and *.milo_ps3) are supported thanks to the hard work by PikminGuts92
+
+Start by selecting the folder where the input images or MILO files are
+You can also just drag and drop any file from that folder to the program
+
+The program will automatically detect existing images or Rock Band files and decide which functions to enable
+
+Allowed input formats: *.bmp | *.png | *.jpg | *.gif | *.tif | *.tga | *.png_xbox | *.png_ps3 | *.png_wii | *.dds | *.tpl | *.milo_xbox | *.milo_ps3
+
+Any size input image is allowed, program will automatically resize when converting to Rock Band format
+Default texture size when converting to *.png_xbox or *.png_ps3 is 512x512. You can change this by going to Advanced -> Texture size
+When converting to *.png_wii the texture size is 256x256 and, due to the Wii's limitations, can't be changed
+
+Available output formats: *.bmp | *.png | *.jpg. You can choose any combination of these formats
+You can also output *.dds files (X360/PS3) and .tpl files (Wii) by going to Advanced -> Don't delete .dds / .tpl files
+
+You can also convert directly from *.png_xbox to *.png_ps3 and vice-versa, and from *.png_xbox / *.png_ps3 to *.png_wii
+
+Besides Rock Band album art, most game textures from the following HMX games can be converted from *.png_xbox or *.png_ps3:
+Rock Band 1
+Rock Band 2
+Rock Band 3
+Rock Band: Blitz
+Lego Rock Band
+Green Day: Rock Band
+The Beatles: Rock Band
+AC/DC LIVE Track Pack
+Rock Band Track Pack 2
+Rock Band Metal Track Pack
+Rock Band Music Store
+Dance Central
+Dance Central 2
+Dance Central 3
+
+If you have a *.png_xbox or *.png_ps3 image that Advanced Art Converter can't convert, you may be able to help it understand the file and convert it
+See the _README.txt file in /bin/headers/ for more information
+
+Enjoy

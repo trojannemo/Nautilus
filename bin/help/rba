@@ -1,0 +1,23 @@
+CON Converter: How to Use
+
+This is a simple drag-drop and click process
+
+Put all the RBA and RBS files you want to convert in one folder, then drag and drop one of them to the program or use the 'Select Input Folder' button to browse for the folder
+
+Then press 'Begin' and let the program do its thing - that's it!
+
+CON Converter will convert both RBA and RBS files, from RBN1 and RBN2
+
+The default Display Title (what you see in the Xbox dashboard) follows the format Artist - Song. You can change this to use 'Song' or 'Song' by Artist formats by clicking on Options -> Display Title
+
+The default Package Thumbnail (what you see in the Xbox dashboard) is going to use the song's album art, if one is present. If you want to use the RB3 icon instead, you can choose that by going to Options -> Package Thumbnail
+
+CON Converter will remember the folder where you put the RBA files for quicker access next time, as well as the settings for Display Title and Package Thumbnail, so you don't have to worry about setting those everytime you use the program
+
+You can also use this tool to batch convert from LIVE to CON or CON to LIVE:
+
+You can drag and drop a CON file, and all files found in that folder will be converted to LIVE, and vice versa, if you drag and drop a LIVE file, all files found in that folder will be converted to CON
+
+You can also click on the LIVE <-> CON menu button and then select 'Batch convert LIVE to CON' or 'Batch convert CON to LIVE'
+
+Enjoy

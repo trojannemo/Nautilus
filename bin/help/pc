@@ -1,0 +1,30 @@
+Pack Creator: How To Use
+
+First, put all input files in one folder, default is 'input' in the same directory as this program
+Click on 'Select Input Folder' if your files are in a different folder,
+or you can drag and drop one of the files into anywhere in this form
+
+Input files can be
+1) individual songs
+2) individual pro ugprades
+3) existing song packs or exports
+4) existing pro upgrade packs
+5) any combination of the above
+
+Enter a title for your pack (optional)
+Enter a description for your pack (optional)
+
+You can choose any Package Image or Content Image that you'd like
+Just click on the box or drag and drop an image into it
+Images can be any size, in *.png, *.jpg or *.bmp formats
+The software will resize and convert for you automatically
+
+Choose the format you want the package to be in:
+CON (default - for retail consoles)
+LIVE (for modded consoles)
+
+Press 'Begin' and choose a location and file name for your pack
+As long as the progress bar is animated, the program is working hard for you
+Be patient, it might take a while
+
+Enjoy
