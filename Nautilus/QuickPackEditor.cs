@@ -705,7 +705,7 @@ namespace Nautilus
             {
                 var entry = lstSongs.Items[lstSongs.SelectedIndices[i]].ToString();
                 var index = entry.IndexOf("[#", StringComparison.Ordinal) + 2;
-                var index2 = entry.IndexOf("]", StringComparison.Ordinal);
+                var index2 = entry.IndexOf("]", index);
                 var number = Convert.ToInt16(entry.Substring(index, index2 - index));
                 removed.Add(number - 1);
                 lstSongs.Items.RemoveAt(lstSongs.SelectedIndices[i]);
