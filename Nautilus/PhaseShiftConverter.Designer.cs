@@ -62,6 +62,8 @@
             this.radioDownmix = new System.Windows.Forms.RadioButton();
             this.markAsC3 = new System.Windows.Forms.CheckBox();
             this.markAsRV = new System.Windows.Forms.CheckBox();
+            this.markAsCustom = new System.Windows.Forms.CheckBox();
+            this.txtCustomLabel = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -420,11 +422,11 @@
             // 
             this.markAsC3.AutoSize = true;
             this.markAsC3.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.markAsC3.Location = new System.Drawing.Point(127, 151);
+            this.markAsC3.Location = new System.Drawing.Point(141, 151);
             this.markAsC3.Name = "markAsC3";
-            this.markAsC3.Size = new System.Drawing.Size(124, 17);
+            this.markAsC3.Size = new System.Drawing.Size(80, 17);
             this.markAsC3.TabIndex = 72;
-            this.markAsC3.Text = "Mark converts as C3";
+            this.markAsC3.Text = "Mark as C3";
             this.markAsC3.UseVisualStyleBackColor = true;
             this.markAsC3.CheckedChanged += new System.EventHandler(this.markAsC3_CheckedChanged);
             // 
@@ -432,13 +434,33 @@
             // 
             this.markAsRV.AutoSize = true;
             this.markAsRV.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.markAsRV.Location = new System.Drawing.Point(257, 151);
+            this.markAsRV.Location = new System.Drawing.Point(227, 151);
             this.markAsRV.Name = "markAsRV";
-            this.markAsRV.Size = new System.Drawing.Size(126, 17);
+            this.markAsRV.Size = new System.Drawing.Size(82, 17);
             this.markAsRV.TabIndex = 73;
-            this.markAsRV.Text = "Mark converts as RV";
+            this.markAsRV.Text = "Mark as RV";
             this.markAsRV.UseVisualStyleBackColor = true;
             this.markAsRV.CheckedChanged += new System.EventHandler(this.markAsRV_CheckedChanged);
+            // 
+            // markAsCustom
+            // 
+            this.markAsCustom.AutoSize = true;
+            this.markAsCustom.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.markAsCustom.Location = new System.Drawing.Point(315, 151);
+            this.markAsCustom.Name = "markAsCustom";
+            this.markAsCustom.Size = new System.Drawing.Size(67, 17);
+            this.markAsCustom.TabIndex = 74;
+            this.markAsCustom.Text = "Mark as:";
+            this.markAsCustom.UseVisualStyleBackColor = true;
+            this.markAsCustom.CheckedChanged += new System.EventHandler(this.markAsCustom_CheckedChanged);
+            // 
+            // txtCustomLabel
+            // 
+            this.txtCustomLabel.Enabled = false;
+            this.txtCustomLabel.Location = new System.Drawing.Point(383, 148);
+            this.txtCustomLabel.Name = "txtCustomLabel";
+            this.txtCustomLabel.Size = new System.Drawing.Size(100, 20);
+            this.txtCustomLabel.TabIndex = 75;
             // 
             // PhaseShiftConverter
             // 
@@ -446,6 +468,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ClientSize = new System.Drawing.Size(592, 356);
+            this.Controls.Add(this.txtCustomLabel);
+            this.Controls.Add(this.markAsCustom);
             this.Controls.Add(this.markAsRV);
             this.Controls.Add(this.markAsC3);
             this.Controls.Add(this.picPin);
@@ -517,5 +541,7 @@
         private System.Windows.Forms.ToolStripMenuItem opusToOgg;
         private System.Windows.Forms.CheckBox markAsC3;
         private System.Windows.Forms.CheckBox markAsRV;
+        private System.Windows.Forms.CheckBox markAsCustom;
+        private System.Windows.Forms.TextBox txtCustomLabel;
     }
 }

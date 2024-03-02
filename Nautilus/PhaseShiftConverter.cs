@@ -437,6 +437,11 @@ namespace Nautilus
                             Song.icon = "rv";
                             Song.LoadingPhrase = "Brought to you by Rhythm Verse";
                         }
+                        else if (markAsCustom.Checked)
+                        {
+                            Song.icon = txtCustomLabel.Text;
+                            Song.LoadingPhrase = "";
+                        }
                         Song.WriteINIFile(songfolder, !dontAddHopoThreshold.Checked);                                              
 
                         success++;
@@ -878,6 +883,7 @@ namespace Nautilus
             if (markAsC3.Checked)
             {
                 markAsRV.Checked = false;
+                markAsCustom.Checked = false;
             }
         }
 
@@ -886,7 +892,18 @@ namespace Nautilus
             if (markAsRV.Checked)
             {
                 markAsC3.Checked = false;
+                markAsCustom.Checked = false;
             }
+        }
+
+        private void markAsCustom_CheckedChanged(object sender, EventArgs e)
+        {
+            if (markAsCustom.Checked)
+            {
+                markAsC3.Checked = false;
+                markAsRV.Checked = false;
+            }
+            txtCustomLabel.Enabled = markAsCustom.Checked;
         }
     }
 
