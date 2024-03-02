@@ -78,7 +78,7 @@
             this.textureTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textureDXT1 = new System.Windows.Forms.ToolStripMenuItem();
             this.textureDXT5 = new System.Windows.Forms.ToolStripMenuItem();
-            this.keepDDSFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.keepDDSFiles = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.picWorking = new System.Windows.Forms.PictureBox();
@@ -721,7 +721,7 @@
             this.advancedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.textureSizeToolStripMenuItem,
             this.textureTypeToolStripMenuItem,
-            this.keepDDSFilesToolStripMenuItem});
+            this.keepDDSFiles});
             this.advancedToolStripMenuItem.Name = "advancedToolStripMenuItem";
             this.advancedToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
             this.advancedToolStripMenuItem.Text = "Advanced";
@@ -802,12 +802,12 @@
             // 
             // keepDDSFilesToolStripMenuItem
             // 
-            this.keepDDSFilesToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.keepDDSFilesToolStripMenuItem.CheckOnClick = true;
-            this.keepDDSFilesToolStripMenuItem.Name = "keepDDSFilesToolStripMenuItem";
-            this.keepDDSFilesToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
-            this.keepDDSFilesToolStripMenuItem.Text = "Don\'t delete .dds / .tpl files";
-            this.keepDDSFilesToolStripMenuItem.Click += new System.EventHandler(this.keepDDSFilesToolStripMenuItem_Click);
+            this.keepDDSFiles.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.keepDDSFiles.CheckOnClick = true;
+            this.keepDDSFiles.Name = "keepDDSFilesToolStripMenuItem";
+            this.keepDDSFiles.Size = new System.Drawing.Size(215, 22);
+            this.keepDDSFiles.Text = "Don\'t delete .dds / .tpl files";
+            this.keepDDSFiles.Click += new System.EventHandler(this.keepDDSFilesToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem1
             // 
@@ -1065,7 +1065,7 @@
         private System.Windows.Forms.ToolStripMenuItem x256;
         private System.Windows.Forms.ToolStripMenuItem x512;
         private System.Windows.Forms.ToolStripMenuItem x1024;
-        private System.Windows.Forms.ToolStripMenuItem keepDDSFilesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem keepDDSFiles;
         private System.Windows.Forms.ToolStripMenuItem x2048;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip2;
         private System.Windows.Forms.ToolStripMenuItem copyFolderPathToolStripMenuItem;

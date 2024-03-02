@@ -576,5 +576,5 @@ namespace Nautilus
             }
             return false;
         }
-    }
+    }   
 }

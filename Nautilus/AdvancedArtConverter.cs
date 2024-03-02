@@ -25,6 +25,7 @@ namespace Nautilus
         private List<string> imagesTPL;
         private List<string> miloXbox;
         private List<string> miloPS3;
+        private List<string> miloWii;
         private static int imageCount;
         private static int imgCounter;
         private readonly string wimgt;
@@ -128,6 +129,7 @@ namespace Nautilus
                 imagesTPL = Directory.GetFiles(txtFolder.Text, "*.tpl").ToList();
                 miloXbox = Directory.GetFiles(txtFolder.Text, "*.milo_xbox").ToList();
                 miloPS3 = Directory.GetFiles(txtFolder.Text, "*.milo_ps3").ToList();
+                miloWii = Directory.GetFiles(txtFolder.Text, "*.milo_wii").ToList();
 
                 //remove png_xbox and png_wii images from the list of png images
                 var to_remove = new List<int>();
@@ -147,13 +149,13 @@ namespace Nautilus
 
                 imageCount = imagesBMP.Count() + imagesJPG.Count() + imagesPNG.Count() + imagesGIF.Count() + imagesTiff.Count() + imagesTGA.Count();
 
-                if (!imagesXbox.Any() && !imagesDDS.Any() && imageCount == 0 && !imagesWii.Any() && !imagesTPL.Any() && !imagesPS3.Any() && !imagesPS4.Any() && !miloXbox.Any() && !miloPS3.Any())
+                if (!imagesXbox.Any() && !imagesDDS.Any() && imageCount == 0 && !imagesWii.Any() && !imagesTPL.Any() && !imagesPS3.Any() && !imagesPS4.Any() && !miloXbox.Any() && !miloPS3.Any() && !miloWii.Any())
                 {
                     Log("No supported image files found");
                     Log("Choose a different folder");
                     Log("You can also drag-drop images here");
 
-                    if (!miloXbox.Any() && !miloPS3.Any())
+                    if (!miloXbox.Any() && !miloPS3.Any() && !miloWii.Any())
                     {
                         btnFromWii.Enabled = false;
                         btnToWii.Enabled = false;
@@ -232,6 +234,10 @@ namespace Nautilus
                     {
                         Log("Found " + miloPS3.Count() + " .milo_ps3 " + (miloPS3.Count() == 1 ? "file" : "files"));
                     }
+                    if (miloWii.Any())
+                    {
+                        Log("Found " + miloWii.Count() + " .milo_wii " + (miloWii.Count() == 1 ? "file" : "files"));
+                    }
                     Log("Ready to begin");
                 }
 
@@ -286,6 +292,10 @@ namespace Nautilus
                 if (miloPS3.Any())
                 {
                     btnFromPS3.Enabled = true;
+                }
+                if (miloWii.Any())
+                {
+                    btnFromWii.Enabled = true;
                 }
             }
             catch (Exception ex)
@@ -653,11 +663,11 @@ namespace Nautilus
                 if (!File.Exists(milo)) continue;
 
                 var format = "png";
-                if (chkXboxBMP.Checked)
+                if (chkPS3BMP.Checked)
                 {
                     format = "bmp";
                 }
-                if (chkXboxJPG.Checked)
+                else if (chkPS3JPG.Checked)
                 {
                     format = "jpg";
                 }
@@ -667,7 +677,7 @@ namespace Nautilus
                 try
                 {
                     int count;
-                    PikminMiloTools.ExtractTextures(milo, keepDDSFilesToolStripMenuItem.Checked, false, format, out count);
+                    PikminMiloTools.ExtractTextures(milo, keepDDSFiles.Checked, false, format, out count);
                     
                     Log(count > 0 ? "Extracted " + count + " " + (count == 1 ? "texture" : "textures") + " successfully" : "No textures found in that file");
                 }
@@ -709,7 +719,7 @@ namespace Nautilus
                 {
                     format = "bmp";
                 }
-                if (chkXboxJPG.Checked)
+                else if (chkXboxJPG.Checked)
                 {
                     format = "jpg";
                 }
@@ -718,7 +728,7 @@ namespace Nautilus
                 try
                 {
                     int count;
-                    PikminMiloTools.ExtractTextures(milo, keepDDSFilesToolStripMenuItem.Checked, false, format, out count);
+                    PikminMiloTools.ExtractTextures(milo, keepDDSFiles.Checked, false, format, out count);
                     
                     Log(count > 0 ? "Extracted " + count + " " + (count == 1 ? "texture" : "textures") + " successfully" : "No textures found in that file");
                 }
@@ -751,6 +761,35 @@ namespace Nautilus
             {
                 FromWii(image);
             }
+            foreach (var milo in miloWii)
+            {
+                if (!File.Exists(milo)) continue;
+
+                var format = "png";
+                if (chkWiiBMP.Checked)
+                {
+                    format = "bmp";
+                }
+                else if (chkWiiJPG.Checked)
+                {
+                    format = "jpg";
+                }
+
+                Log("Searching .milo_wii file for textures");
+                Log(" - " + Path.GetFileName(milo));
+                try
+                {
+                    int count;
+                    PikminMiloTools.ExtractTextures(milo, false, true, format, out count);
+
+                    Log(count > 0 ? "Extracted " + count + " " + (count == 1 ? "texture" : "textures") + " successfully" : "No textures found in that file");
+                }
+                catch (Exception)
+                {
+                    Log("Error extracting textures from .milo_ps3 file");
+                }
+            }
+
             Log("Done");
             picWorking.Visible = false;
             btnRefresh.PerformClick();
@@ -841,7 +880,7 @@ namespace Nautilus
 
         private void keepDDSFilesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Tools.KeepDDS = keepDDSFilesToolStripMenuItem.Checked;
+            Tools.KeepDDS = keepDDSFiles.Checked;
         }
 
         private void x2048muricaToolStrip_Click(object sender, EventArgs e)

@@ -47,7 +47,11 @@ namespace Nautilus
         /// <returns></returns>
         public bool ConvertWiiImage(string wii_image, string output_path, string format, bool delete_original)
         {
-            var tplfile = Path.GetDirectoryName(wii_image) + "\\" + Path.GetFileNameWithoutExtension(wii_image) + ".tpl";
+            var tplfile = Path.GetDirectoryName(wii_image) + "\\converted\\" + Path.GetFileNameWithoutExtension(wii_image) + ".tpl";
+            if (!Directory.Exists(Path.GetDirectoryName(wii_image) + "\\converted\\"))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(wii_image) + "\\converted\\");
+            }
             var pngfile = tplfile.Replace(".tpl", ".png");
             var Headers = new ImageHeaders();
 
@@ -70,7 +74,35 @@ namespace Nautilus
                     binaryReader.Read(wii_header, 0, 32);
 
                     byte[] tpl_header;
-                    if (wii_header.SequenceEqual(Headers.wii_128x256))
+                    if (wii_header.SequenceEqual(Headers.wii_32x64_pma))
+                    {
+                        tpl_header = Headers.tpl_32x64;
+                        isHorizontalTexture = true;
+                        TextureSize = 64;
+                    }
+                    else if (wii_header.SequenceEqual(Headers.wii_32x128_pma))
+                    {
+                        tpl_header = Headers.tpl_32x128;
+                        isHorizontalTexture = true;
+                        TextureDivider = 4;
+                    }
+                    else if (wii_header.SequenceEqual(Headers.wii_64x128_pma))
+                    {
+                        tpl_header = Headers.tpl_64x128;
+                        isVerticalTexture = true;
+                    }
+                    else if (wii_header.SequenceEqual(Headers.wii_128x32_pma))
+                    {
+                        tpl_header = Headers.tpl_128x32;
+                        isHorizontalTexture = true;
+                    }
+                    else if (wii_header.SequenceEqual(Headers.wii_128x64_pma))
+                    {
+                        tpl_header = Headers.tpl_128x64;
+                        isHorizontalTexture = true;
+                    }
+                    else if (wii_header.SequenceEqual(Headers.wii_128x256) ||
+                        wii_header.SequenceEqual(Headers.wii_128x256_unknown))
                     {
                         tpl_header = Headers.tpl_128x256;
                         isVerticalTexture = true;
@@ -82,16 +114,21 @@ namespace Nautilus
                     }
                     else if (wii_header.SequenceEqual(Headers.wii_256x256) ||
                              wii_header.SequenceEqual(Headers.wii_256x256_B) ||
-                             wii_header.SequenceEqual(Headers.wii_256x256_c8))
+                             wii_header.SequenceEqual(Headers.wii_256x256_c8)||
+                             wii_header.SequenceEqual(Headers.wii_256x256_unknown))
                     {
                         tpl_header = Headers.tpl_256x256;
                         TextureSize = 256;
                     }
-                    else if (wii_header.SequenceEqual(Headers.wii_128x128))
+                    else if (wii_header.SequenceEqual(Headers.wii_128x128) ||
+                            wii_header.SequenceEqual(Headers.wii_128x128_pma) ||
+                            wii_header.SequenceEqual(Headers.wii_128x128_unknown))
                     {
                         tpl_header = Headers.tpl_128x128;
                     }
-                    else if (wii_header.SequenceEqual(Headers.wii_64x64))
+                    else if (wii_header.SequenceEqual(Headers.wii_64x64) ||
+                            wii_header.SequenceEqual(Headers.wii_64x64_pma) ||
+                            wii_header.SequenceEqual(Headers.wii_64x64_unknown))
                     {
                         TextureSize = 64;
                         tpl_header = Headers.tpl_64x64;
@@ -226,7 +263,11 @@ namespace Nautilus
         /// <returns></returns>
         public bool ConvertImagetoWii(string wimgt_path, string image_path, string output_path, bool delete_original)
         {
-            var pngfile = Path.GetDirectoryName(image_path) + "\\" + Path.GetFileNameWithoutExtension(image_path) + ".png";
+            var pngfile = Path.GetDirectoryName(image_path) + "\\converted\\" + Path.GetFileNameWithoutExtension(image_path) + ".png";
+            if (!Directory.Exists(Path.GetDirectoryName(image_path) + "\\converted\\"))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(image_path) + "\\converted\\");
+            }
             var tplfile = Path.GetDirectoryName(image_path) + "\\" + Path.GetFileNameWithoutExtension(image_path) + ".tpl";
             var origfile = image_path;
             var Headers = new ImageHeaders();
