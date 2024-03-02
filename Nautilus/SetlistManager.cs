@@ -4347,7 +4347,7 @@ namespace Nautilus
             List<SongData> uniqueSongs = new List<SongData>();
             var initialCount = Songs.Count;
             
-            foreach (var song in from song in newSongs let exists = Songs.Any(s => s.Name == song.Name && s.Artist == song.Artist) where !exists select song)
+            foreach (var song in from song in newSongs let exists = Songs.Any(s => s.Name == song.Name && s.Artist == song.Artist) where (!exists || song.ShortName == "giveitaway2" || song.ShortName == "spoonman2") select song)
             {
                 Songs.Add(song);
                 uniqueSongs.Add(song);
