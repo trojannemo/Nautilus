@@ -1,0 +1,77 @@
+MIDI Cleaner: How To Use
+
+WHAT IS IT?
+MIDI Cleaner will process old RB/GH/FoF/Phase Shift MIDIs and/or CON/LIVE files to get them as close to RBN 2.0 compliance as possible via automation
+This will NOT make an old RB/GH/FoF/Phase Shift MIDI ready to compile in Magma, but it will reduce a lot of the time you have to spend cleaning it up
+Hell, it MAY even end up ready to compile, but the chances of that are very small
+
+MIDI Cleaner can also be used to clean new MIDIs before compiling with Magma for an extra level of polish
+MIDI CLEANER DOES NOT MODIFY YOUR ORIGINAL MIDI!!!
+Instead, MIDI Cleaner will make a copy in-memory and work from that, and then export the changes to a _new.mid file, so you have nothing to fear
+
+WHAT DOES IT DO?
+You can open one or multiple MIDI files by clicking on the 'Open MIDI' button or by drag and dropping the file(s) onto MIDI Cleaner
+
+Here's what it will do to a MIDI file that it successfully cleans:
+
+GENERAL / APPLIED TO ALL TRACKS
+- fix instances of unsupported ticks per quarter note values (usually based on a wrong setting in REAPER)
+- remove all non-compliant notes, meaning any note that isn't accepted by MagmaCompiler for that specific instrument/vocal/harm part
+- remove all non-compliant events, meaning SysEx events (from Phase Shift, etc), lyric or copyright events in instrument charts, etc
+- remove duplicate track names, move any track name event that isn't at 1.1.00 / 0ms to the start of the chart
+- if 'Zero-length note fix' is checked (on by default), FoF-style notes with 0 length are changed to have whatever value you set (default 1/32)
+- if 'Override velocity' is checked (on by default), note velocities are changed to whatever value you set (default = 96)
+
+DRUMS
+- remove all drum fills that occur before any overdrive markers
+- remove all drum fills that overlap overdrive markers
+- resize chart notes longer than 1/16th (not supported by MagmaCompiler)
+- modify old drum mix events that are no longer supported (i.e. drums0nokick, drums0easy, etc)
+- move GH tom markers to correct position for RB3 use - can be disabled under Options
+- leave GH Expert+ notes for user to modify later - can be disabled under Options and the notes will be removed along with other non-supported notes
+- (Optional) use GH Expert+ notes to create separate PART DRUMS_2X track in the MIDI file
+
+VOCALS/HARMONIES
+- all lyrics contained in Text Events are changed to be Lyric Events - this works the same in game, but in REAPER if you click on the note, the associated Lyric Event is also selected, not if it's a Text Event
+- all lyrics are cleaned for compliance = no commas, periods, or quotation marks
+- [range_shift] text events are changed to range shift notes (MIDI note 0)
+- [lyric_shift] text events are changed to lyric shift notes (MIDI note 1)
+- old PART HARM1/PART HARM2/PART HARM3 track names are changed to HARM1/HARM2/HARM3 respectively
+- old tonic note value MIDI notes are removed user is notified and told what setting to use in Magma: C3 Roks Edition
+- old 'player section markers' that would function as phrase markers are moved down to phrase marker note where needed
+- user can select to 'Allow MIDI notes 0 and 1 in vocals/harmonies' if the user is certain that they are being used for range/lyric shifting instead of the old tonic note value method
+- lyrics at the start of vocal phrases not capitalized are fixed - you can disable this behavior in the Options
+- lyrics with modifiers # $ ^ at the start of the lyric are fixed to have the modifier at the end of the lyric
+
+EVENTS
+- all MIDI notes are removed, as they are not used in RBN 2.0
+- practice sessions are modified: '[section ' is replaced with '[prc_'; all capital letters are changed to lower case, spaces are replaced by underscores. Example: '[section Verse 2]' now becomes '[prc_verse_2]'
+
+VENUE
+- outdated [do_directed_cut camera_cut] is replaced with [camera_cut]
+- old Next Keyframe MIDI notes are turned to [next] text events
+- old Post Processing MIDI notes are turned into their corresponding [postproc.pp] Text Event, including blending
+- old camera cut notes are turned into their corresponding [coop_x_x] Text Event - this is an interpretation of the combination of camera cut notes, should be something like 90% accurate or so
+- [chorus] and [verse] events are changed to [lighting (chorus)] and [lighting (verse)] events respectively
+- FogOn and FogOff events are removed
+- (Optional) if 'Delete VENUE tracks' is selected, VENUE will be removed from the MIDI rather than cleaned
+
+BEAT
+- all notes after [end] event are removed
+- If no BEAT track is present, a highly accurate one will be created if 'Create BEAT track' is enabled (on by default)
+
+By default, 'detailed logging' is disabled. This means all you see is 'Trying to clean MIDI file xxxxxx' and 'Cleaned MIDI file xxxxx successfully.' If you'd like to know exactly what is being modified, enable 'detailed logging' and sit back
+
+When cleaning a CON/LIVE file, make a backup first as the program WILL OVERWRITE THE ORIGINAL ('DIRTY') MIDI!
+Regardless of input format, the cleaned file will be saved as an unlocked, anonymous CON file ready to go on your Xbox
+
+When cleaning a MIDI File, the following behaviors are modified:
+- PART DRUMS_2X tracks will never be created
+- VENUES will never be deleted
+- VENUES will only by cleaned if CON file is RBN2 ('ugc_plus')
+
+HUGE THANKS TO RAYNEBC FOR ALL HIS HELP
+Seriously, without his help this would not be even half as polished as it is now
+Everyone say 'thank you raynebc'
+
+Enjoy

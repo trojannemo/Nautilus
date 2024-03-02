@@ -1,0 +1,32 @@
+Event Manager: How to Use
+
+This tool is designed to help you run a successful Rock Band event
+The basic idea is you enter the name of the 'band' performing, the name of the song, and the name of the original artist
+
+If you've been using Setlist Manager and have created a .Setlist file of your song cache, Event Manager can use it to auto-populate the Artist and Song name fields, as well as show you relevant song information before adding it to the queue. To use a .Setlist file, click on Options, then Select Setlist file and point it to your .Setlist file
+To view song details when using a .Setlist file, search for the song and select it on the list of songs, then click 'Song Details' - you'll get details like song length, rating, vocalist gender and instruments present, all very helpful to have handy when running a Rock Band event
+
+You DON'T have to use a .Setlist file with Event Manager (I'm looking at you, PS3 users). You can manually enter the name of the Song and Artist and it'll work as well. Obviously no Song Details will be available
+
+Once you've got the name of the Band, Song and Artist, click 'Add to Queue'. Before starting a performance, select one from the queue and press 'Play'. If you run events you know that people change their mind a lot. No problem! Select the performance to be edited and click 'Edit'. Editing works with and without using a .Setlist file
+
+Since you must select a performance before putting it to play, you can pick any performance in any order you'd like, or go by top most first. You can also use the up and down arrow buttons to move them through the queue
+
+Once you want to start a performance, select it, and press 'Play'. Now the performance information is up on the marquee, and if they're ready to start, press 'Start'. Sometimes things happen and you need to edit the performance - just click 'Edit'. Need to skip this band 'cause the vocalist is too drunk? No problem. Click 'Skip' and the band is put back on the queue
+
+Once you've clicked 'Start', your only option is to 'Stop' it after the performance ends. This moves the performance down to the previous acts side, where you can review, edit or delete performances
+
+Details provided for previous performances include when it was added to the queue, when it started playing, when it stopped playing, if it had been skipped, and if so, how many times
+DELETED PERFORMANCES ARE STILL STORED IN THE EVENT LOG - the log will reflect that they were deleted, but will still have all the information mentioned so far
+
+Event Manager provides you with an active clock on the form - you can click and drag it around to wherever is most convenient to you. You can also hide it from the form and/or show it on the title bar
+
+You can also lock the program in case you need to walk away from the computer. Users can still add new performances, but everything else is disabled. They can't edit, start, stop, delete anything. The program also won't close down while locked (only if they go to Task Manager and close it there)
+
+Event Manager will keep a detailed log of each event. To view existing logs, click on Options -> View Logs
+Select from the available logs and the information will be displayed for you with a couple of statistics
+Event logs can be exported to CSV format for whatever uses your dirty mind can come up with - click on File -> Export Log and select where to save it to
+
+The marquee image is loaded at runtime and can be changed by replacing the file /res/marquee.png with one you prefer if you don't like the one I provided
+
+Enjoy

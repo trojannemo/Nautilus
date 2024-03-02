@@ -1,0 +1,146 @@
+Setlist Manager: How to Use
+
+Setlist Manager is intended to be an one-stop solution for importing your Rock Band 3 or Rock Band Blitz song cache and maintaining a very detailed and finely tuned setlist.
+Please read through the entirety of this document, as Setlist Manager includes a lot of features that require some explanation.
+
+Setlist Manager can also be used with Rock Band 4! - See below for details.
+
+
+MODE
+Setlist Manager can be adjusted to work better for Rock Band 3, Rock Band 4, or Rock Band Blitz.
+
+To change the Mode, click on Options -> Mode -> and select the game you want to make this Setlist for - based on what game is selected different features will be enabled/disabled, so please use the correct mode.
+
+
+IMPORTING YOUR SONG CACHE
+When using Setlist Manager in RB3 or Blitz mode, you can import your song cache for more accurate and faster Setlist creation.  This relies on importing the actual cache file the games use, so it's 1:1 accurate with what the games see.
+
+First get your song cache file on your desktop. If you're a Xbox 360 user, that's the 'Rock Band 3 song cache' file found on your Xbox. If you're a Wii user, that will be your MSTORE.vff file. You DO NOT need to extract the cache from the CON file if you're coming from Xbox.
+
+To import your cache, click on File -> 'Import RB3 song cache...' or just drag and drop it anywhere on the form.
+
+You can also import a Rock Band Blitz song cache, just click on File -> 'Import Blitz song cache...' or add 'blitz' to the file name and then drag and drop it anywhere on the form. This program was designed for RB3 caches, which hold a LOT more information than the Blitz ones, so while it works, it's not as polished for Blitz use (i.e. Blitz doesn't store gender, rating, song length, etc).
+
+Give it a couple of seconds, a lot is taking place in the background.
+
+Once importing is done, you may delete the cache file. From here on you'll be using the .setlist file that Setlist Manager created for you. By default, the last .setlist file you opened will be automatically loaded next time you run Setlist Manager. You can disable this under Options. To load your Setlist or a different Setlist (you can have multiples and/or share the .setlist files with your friends) just click on File -> 'Load Setlist...'.
+
+If you're a PS3 user, your process is slightly different. Since the PS3 doesn't have a song cache, what we'll do is search your PS3's hard drive for all songs.dta files and then use that to populate a Setlist of the songs you have on your PS3.
+Many thanks to forum member traflaz for figuring this out and providing the base code and following instructions:
+1) Open your PS3 and Multiman or whatever app you use for FTP
+2) Click on 'File' -> 'Scan PS3 to create Setlist...'
+3) Type in you PS3's IP address and FTP port number
+4) Press start and then wait patiently - this step might take a while
+
+
+IMPORTING SONGS FROM DLCQUICKPLAY.COM
+Log in to DLCQuickplay.com with your account, then click on Songs -> Export. Select all the fields present to make sure you're giving Setlist Manager as much information as is available. Under Format choose XML, select options as you prefer, then click Export. You will get a text box with all your song data in XML format, press Ctrl+A to select all, then paste it into a new text file in Notepad or your preferred text editor. Save that as a .txt or a .xml file.
+
+You can now click on File -> Import DLC Quickplay XML and select that file - or drag/drop it to Setlist Manager.
+
+
+IMPORTING SONGS FROM MYROCKBANDSONGS.COM
+Log in to MyRockBandSongs.com with your account, then find the option to export your songs. Select all the fields present to make sure you're giving Setlist Manager as much information as is available. Export in XML format.
+You will get a direct link to the XML file, which will look like: http://myrockbandsongs.com/username/print-booklet/xml/xxxx/
+Once you have that link, click on File -> Import MyRockBandSongs XML and enter that link - Setlist Manager will try to download it and then import the XML file. If downloading by Setlist Manager fails, you can manually download the XML file to your computer and save it as either a .txt or .xml file and drag/drop it to Setlist Manager.
+
+Keep in mind that MyRockBandSongs.com gives you a lot of options but not nearly as much as is found in your song cache file. When creating an XML file, make sure to select all fields possible to give Setlist Manager as much information as possible.
+
+
+USING YOUR SETLIST
+Once you've loaded your Setlist in Setlist Manager, the song list is automatically populated and you'll see the total number of songs. That number should match exactly what you see in game. The color coding is there to help you determine how close you are to your console's max song limit. If you hover the mouse over the song count you'll get an explanation of how you're doing as far as song count.
+
+You can do three things: 1) Filter your Setlist to narrow it down to very specific things, 2) Modify the contents of your Setlist, 3) Export your Setlist.
+
+
+FILTERING YOUR SETLIST
+Once the Setlist is loaded into memory, that amount of songs and that information is always available to Setlist Manager. But you have the option of filtering, filtering, filtering. Let's start by figuring out how to reset everything in case you get lost. Tools -> 'Reset all filters' will set everything back and you will see all your songs.
+
+What can you filter by? Pretty much anything. The options are visually self-explanatory. 
+
+Want to see how many songs from RBN1 you have? Unselect all other Sources and select RBN1. If you now select RBN2, you'll see all your RBN1 songs AND all your RBN2 songs. If you select all Sources (default), you'll see all your songs. The same concept applies to all other filters.
+Sorting by Genre will narrow the songs displayed to those that match that Genre. (NOTE: Sub-genre is NOT stored in the song cache, so that will not be added to Setlist Manager). 
+If you type anything in the search field, the songs will be narrowed to those that contain those values in the Artist or Song Name or Album fields respectively.
+
+The Duration filter is flexible. 'Shorter Than' and 'Longer Than' are self-explanatory. 'Exactly' will return songs that are the same length in minutes as your selection AND a little bit longer as long as it doesn't get to the next minute. For example, if you choose 'Exactly' and 5 minutes, you'll get songs from 5:00 to 5:59. 'Around' gives you songs within +- 1.5 minutes of your selection. If you pick a 'Around' 5 minutes, you'll get songs from 3.5 minutes to 6.5 minutes. This is great for picking 'roughly similar length songs' for a challenge or goal.
+
+Instrument filtering works in reverse to the other filters. Anything you select will be REQUIRED for that song to be shown. So if you select '2x Bass' only songs with 2x Bass Pedal will show, regardless of what other instruments you pick. If you select 'Drums' and 'Pro Keys', only songs with those two instruments present will show. You are NOT limited to songs with ONLY your selected instruments, rather your selected instruments MUST be present.
+
+You have three other features that can drastically filter your songs. Under Tools, 'Find possible duplicates' will return songs with matching song names. This will have a lot of false positives, but it's a good way to go over your possible duplicates. In my case, my 2950 songs are narrowed down to 145 songs. Under Tools, 'Find exact duplicates' will return songs with matching song names AND matching artist names. This is much more exact, and in my case it returns 18 songs, all of which are 'original' and 'RB3 versions' of songs. Both of these searches ignore things like (RB3 version), (Live), etc, as well as inconsistent capitalization. Under Tools, 'Find unsupported characters' will find songs with broken encoding for special characters (i.e. California ï¿½ber Alles). You should do this at least once and fix those characters before exporting your Setlist.
+
+Under Options, you have a vast variety of options to further customize the display of your songs. All of these settings persist, so next time you start Setlist Manager you won't have to reselect them. Since the options are so varied, I won't cover them on here. They're very self-explanatory on their names, and also DO NOT affect your data, just how it's displayed. That means you can go back and forth between 'Remove (Live) from song names' to show and hide it, and it will work seamlessly.
+
+Lastly, you can sort the data being displayed by ANY of the fields. Just click on the header name (i.e. click on 'Artist' or 'Album') and the data will be sorted for you. However you have your data sorted before exporting is how your data will be exported. So if you want your songs sorted by Song instead of by Artist, click on 'Song' on the list. And that's how it'll be when you export. The same applies to all the fields.
+
+
+MODIFYING YOUR SETLIST
+MODIFYING AN EXISTING SONG
+Now you have your Setlist on the computer, but some information is not correct or you want to modify it. Easy. Just click on any song in the list and the information will be populated in the information panel. Keep in mind that, as mentioned above, the data is not modified with the filters, so even if you've hidden '(RB3 version)' and have 'Normalized featured artists', the full data will be displayed, including those things that are filtered in the list. Modifying the data is straightforward, just put the correct values, then press Save. You can add a web link for each song - to do that, right-click on the song and select 'Edit link to song.' You can right-click a song and select 'Open link in browser' or press F5 to open the selected song's link in your default browser.
+
+DELETING AN EXISTING SONG
+To delete any song (maybe you don't want to list Song of the Century 'cause it's a stupid song), select it, then click on 'Deleted Selected'. You can select multiple songs at a time, simply hold Control + click, or hold Shift + up/down arrow to select up or down. If you've filtered out a group of songs (i.e. only x amount of songs are showing) and you want to delete all of those, press Ctrl + A to select all, then press Delete. You'll be prompted with a Yes No question to make sure you don't delete the song(s) accidentally. That's it!
+
+ADDING A NEW SONG
+If you're going to add new songs to the game, you don't have to grab the song cache anymore. All you have to do is drag and drop the song's CON file anywhere on Setlist Manager and the information will be auto-filled for you and saved into the Setlist.   You can also drag and drop a songs.dta file, multiple CON files at once and even packs of songs - all songs found inside will be added to your Setlist.
+
+RENAMING YOUR SETLIST
+When you import your cache file, Setlist Manager generates a unique file name for it and assigns that as the name of your Setlist. You'll see that at the very top left of the program. You can right-click on that and click Rename. Put whatever name you want, press OK. Your Setlist now has a nice name! This also will change the file name to something based on the name you provided that is Windows file system safe. Now next time you want to open a Setlist, you don't have to find songcache_20140110121311.setlist, you just find MySetlistName.setlist. This should be helpful if you maintain multiple Setlists.
+
+
+EXPORTING YOUR SETLIST
+So what's the point of all this filtering and modifying? Well, whatever you're seeing in the list is what you'll be exporting. Want to export ALL your songs? Tools - Reset all filters. Want to only export Metal songs? Click on the Genre drop-down, select Metal. Bam. Once you have the data displayed and narrowed down to what you want, click on File -> Export As...
+
+EXPORT FORMAT
+These are pretty self-explanatory.
+I've included several PDF formats with different styles and levels of information. Try them all to see which you prefer. You can choose whether to add a page border, a page header with your Setlist name and/or song count, a page footer with song count and/or page numbers and/or link to C3, whether to alternate colors between artists, and if so, which color to use (with five default colors plus the choice to select your own custom color), whether to sort by Artist or by Song, and which of the four included fonts to use. Note that not all options are available for all PDF formats.
+
+The Excel format gives you a good balance of a nice layout with an easy to modify format. You can choose 'Stylized' to export an already-formatted Excel file. You can choose between the four included fonts and what color to alternate between artists (with five default colors plus the choice to select your own custom color). Choose 'Plain' for a no-frills blank export. Both are properly-formatted Microsoft Excel .xlsx files ready to be further modified using Microsoft Office or one of the many free alternatives.
+
+CSV is provided for those who want the data in a format that will work with other database software. You can choose between tab delimited (default) or comma delimited. Select 'Add Headers' to have the first line describe the data.
+
+EXPORT PRESETS
+There are three Excel / CSV presets with varying levels of information when exporting to Excel or CSV format. Try them all to see which you prefer. 'Default' is recommended as a good balance between helpful information for a party booklet while not wasting too much space on the page. 'Minimal' is aimed at those more interested in a karaoke style booklet. 'Everything' is really not practical for booklet printing, as it gives you ALL the information per song. But hey, at least you got the choice :-)
+
+Exporting presets are ALL subject to the current Mode - using Rock Band 4 mode ensures no preset exports keys/pro keys/pro guitar/pro bass and other metadata we have no access to at the moment - using Blitz mode ensures no preset exports pro keys/pro guitar/pro bass data as it's not present in the game
+
+
+OTHER OPTIONS
+Select 'Use difficulty tier numbers' (default) to have the bare tier numbers for the difficulties. You'll be looking at 0,1,2,3, etc. This is the suggested option for those of us very familiar with the game's tier systems. 
+
+Select 'Use difficulty tier names' for an-easier to understand difficulty system using the names that HMX uses in game. You'll be looking at 'No Part', 'Warmup', 'Solid', etc. This is easier to understand for people who are not familiar with the game's tier systems.
+
+Select 'Open file after exporting' to launch the file once / if exporting completes successfully. Please note you'll need to have the appropriate programs installed to launch whichever file format you're exporting to.
+
+
+CUSTOMIZING YOUR EXPERIENCE WITH SETLIST MANAGER
+We're not done! I know you guys like customizing stuff. So, if you right-click on any panel you'll get a menu, and here's what you can do:
+- Hide: self-explanatory, that panel will be hidden. Clean up some real estate.
+- Bring to Front: you can stagger the panels. This puts the panel in front of all other items.
+- Send to Back: same as above, but sends the panel to the back of all items.
+- Text Color: you can choose any color for the text of all the items contained within that panel
+- Background Color: you can choose any color for the background of that panel
+
+The song list has three additional options:
+- Edit columns: presents you with various options so you can select which data columns to show in the song list
+- Resize: move your mouse up and down to resize the list to your liking. Click your mouse or press Escape to stop.
+- Alternate Color: you can choose what color Setlist Manager should use when grouping by color, if you have those options selected in the Options menu
+
+You can also re-arrange the columns to whatever order you like by clicking and dragging them. To resize any column, click on its edge and drag.
+
+If you want to move the panels around, click on Panels -> User can modify panels. Then click and drag the panels anywhere on the form. You'll get helper lines that will make it easier to align the panels to each other. To move the song list, double click and then drag. To resize the song list, right-click then select Resize.
+
+If you need to put back any panel you've hidden, click on Panels -> Toggle PanelName. If you've created a mess and want to set everything back to default, click on Panels -> Reset all panels.
+
+You can resize the window to your liking, just click on the bottom right edge and drag. Then move the panels and/or resize the song list using the instructions above.
+
+Anything you move or customize will remain saved next time you start Setlist Manager, so your experience can be customized in a variety of ways to make it more enjoyable to you. Don't want so many filters? Hide the ones you don't want, move the others, and enlarge the song list to display more songs! Or make it into a rainbow of colors. Or don't. It's all up to you! You can share your custom configuration with your friends. The file can be found in /bin/setlist.config. You can send that to another user and all they have to do is drag and drop it to Setlist Manager or replace their own setlist.config file.
+
+
+VIEWING SETLIST DETAILS
+Click on File -> View Setlist details to see some cool numbers. This gives you a lot of statistics about your particular Setlist. Click on Export to save your Setlist Details to a text file. Share it online. Brag about it. Or don't. Up to you!
+
+
+That's it folks. I hope this is helpful. Enjoy!
+
+
+HUGE THANKS TO PKSAGE FOR FIGURING OUT THE SONG CACHE FORMAT. THIS WOULD NOT BE POSSIBLE WITHOUT HIS WORK!

@@ -1,0 +1,19 @@
+Audio Analyzer: How To Use
+
+This tool lets you create a visual representation of an audio file
+While it is intended for Rock Band .mogg files, it will also work with .ogg and .wav files
+Of course, Rock Band CON/LIVE files are also accepted
+
+You can analyze one or multiple files by drag/dropping the file(s) to Audio Analyzer
+The program will automatically create the visualization:
+- if you're doing multiple files at once, the program will automatically export the image in JPG format to the samd directory as the input file
+- if you're doing only one file, the program will create the image and you have the choice to upload to Imgur by pressing F1 or clicking on File -> Upload to Imgur or to save locally as a JPG file by pressing F2 or clicking on File -> Save to file
+
+OPTIONS
+Show legend - will enable/disable displaying of the basic legend that accompanies the visual representation of the audio
+
+Label each audio channel - if visualizing a .mogg file inside of a CON file, this will determine whether each audio channel should be labeled with its corresponding instrument track
+
+High quality drawing - uses high quality when drawing the audio wave forms, is slower but produces a slightly smoother image - your choice
+
+That's all there is to it. Enjoy!

@@ -1,0 +1,17 @@
+Using C3 Customs on Wii
+
+This archive contains the 2 content folders necessary to package these custom songs on your Wii.
+
+The naming format is for your reference and is required for your packing folder structure and C3 CON Tools.
+
+000_00000000_songname_meta
+000_00000000_songname_song
+
+The first three zeroes are the BIN file number (in decimal) it will pack to. You need to set this yourself to properly change the name path in songs.dta.
+
+The next eight zeroes become the app file it packs to. It will be the first number in hex, assuming the custom sZWE generation is used.
+
+Use the Smart Folder Merge feature in C3 CON Tools' Wii Converter to combine these song folders into one file.
+
+Wii Customs Tutorial (10.1.2013)
+http://forums.customscreators.com/viewtopic.php?f=21&t=375#p2470

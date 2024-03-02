@@ -1,0 +1,8 @@
+Volume Normalizer: How To Use
+
+This program is intended to normalize the volume of a entire folder of CON files by editing the DTA without modifying any audio.
+
+This operation will modify the volume levels of the song, as well as write the original volume levels inside of the DTA for the ability to reverse the changes if needed.
+
+OPTIONS
+'Restore Original Volumes' will read the original volume levels in the DTA, and restore them to their original state. This operation will also write the original volumes to the DTA if the DTA has not been modified.

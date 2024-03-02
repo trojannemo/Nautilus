@@ -1,0 +1,37 @@
+Wii Converter: How To Use
+
+Before using this program, make sure you understand what you need to do and what files you need to use customs on your Wii
+
+Click on the 'Tutorial' link in the menu bar to open our How-To on the process
+
+You can either select the folder where your CON file(s) are, or just drag and drop one of them anywhere on this form
+This program will batch process all CON files in that folder at once
+
+Song previews are optional but highly recommended
+Wii Converter will do it all for you, just leave 'Create automatically' enabled under the preview clip options
+Wii converter will start the preview clip at the time set by the song author
+You can change the duration of the clip up to 30 seconds, as well as adjust the fade in and fade out durations (0 for none), and the attenuation value (up to -5dB)
+Wii Converter uses Sox to process the mogg file when creating the preview clip. The default setting is to allow Sox to down mix the channels to stereo automatically. You can change this behavior and tell Sox to create a dual mono channel 'stereo' file by going to Options -> Preview clip mixing method
+
+If you plan to distribute the converted Wii files, select 'Create RAR archive for each song' and each song's files will be compressed into a RAR file, along with an instructions file
+
+----------
+
+If you've downloaded songs already converted for Wii and want to merge it with another song using the same BIN number, click on the Smart Folder Merge tab.
+
+Click on 'Choose source song folder' to select either the _meta or _song folder for the new song, then choose the existing song you'd like to merge with
+
+Smart Folder Merge will combine all the files for you and merge the song.dta files
+You can also just drag/drop the new song's _meta or _song folder here to start the Smart Folder Merge function
+
+I hope this saves you some time
+
+Check 'Use basic animation file' to replace the song's animation file ('.milo_wii') with one that is known to work (named 'dummy.milo_wii' and found in the /bin folder)
+
+Check 'Delete source folders after merging' to send the source song's _meta and _song folders to the Recycle Bin after a successful merge
+
+Huge thanks to StackOverflow0x for figuring out how to get customs working on Wii!
+Thanks to Wiimm for wimgt.exe, without which we could not convert the png_wii files
+Thanks to GM for the AlbumMake code we use to create the png_wii wiles
+
+Enjoy

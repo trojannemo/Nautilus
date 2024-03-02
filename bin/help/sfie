@@ -1,0 +1,49 @@
+Save File Image Editor: How to Use
+
+This tool allows you to look at a few things inside your Rock Band 3 save game file (Xbox 360, PS3 and Wii are supported)
+It also allows you to replace the existing character or art images, as well as rename your existing characters or rename your band (only Xbox 360 and PS3)
+
+Xbox 360 save game files are supported in CON format (typically named 'band3') - don't manually extract the save.dat file inside
+PS3 save game files are supported in *.dat format, but it MUST BE UNENCRYPTED before using here and MUST BE RE-ENCRYPTED after editing
+Wii save game files are supported in *.dat format (typically named 'band3.dat')
+
+To open your save game file, click on File -> Open file and select your file or drag and drop the file anywhere on the program
+
+To open an Xbox 360 CON file, nothing special is necessary. Open or drag and drop as instructed above
+
+To open a *.dat file, you should add _wii or _ps3 somewhere in the name of the file. This way the program knows and won't ask you which format it is in, and you can save a click. Then open or drag and drop as instructed above
+
+Xbox and PS3 character images are 256x512 and dictated the size of this program
+Wii character images are 128x256, and therefore look tiny in the program, but this way we keep image quality rather than stretching the images
+
+Five background images are provided for you. Just select from one of them in the backgrounds drop-down. You can then right click on your character image and export a composite image of the character image on top of the background, for some Photoshop-free image compositing
+
+You can change these backgrounds by replacing bg1.png, bg2.png, bg3.png, etc in the /res folder
+
+To export the character or art image you're looking at, click on the respective Export button
+To export all images found in that save game file, click on File -> Export all images
+
+
+XBOX 360 / PS3 ONLY
+
+To rename your band, just change the name in the text box
+
+To rename an existing character, select it on the drop-down menu and just click on Rename
+
+To replace an existing character image, select it on the drop-down menu and just drag and drop a .png file over it or click on the 'Replace' button
+--- This is the image you see in game when selecting characters. It will stay until you go and 'edit' your character, even if you back out with no changes to your character, the game overwrites it
+
+To replace an existing art image, select it on the drop-down menu and just drag and drop an image file over it or click on the 'Replace' button
+--- These are the images used for your band logo, t-shirt designs, tattoos, etc. They stay even if you go into 'edit' artwork, as long as you back out and don't modify it in game
+
+Once you've made all the changes you want to make, go to File -> Save changes to file and that's all there is to it, replace it back in your console and you're good to go
+
+Adding of new character / art images is not possible at this time
+
+WARNING - MUST READ!
+Editing is somewhat buggy for Xbox 360: It works with some files and it refuses to work with others
+The edited band3 file should be exactly 8,824 KB (8.22 MB). If so, it is likely the process worked
+If the file size is different, it definitely did not work, do not even try it on your Xbox
+If a fix is found, the program will be updated. Your mileage may vary in the meantime
+
+Enjoy

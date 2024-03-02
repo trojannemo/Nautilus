@@ -1,0 +1,20 @@
+File Indexer: How To Use
+
+This tool is aimed at making it easy to find your songs across all your (presumably) messy customs folders
+
+First, click on 'Add New Folder' to select the folders where you have customs in. You can add as many folders as you want, just keep in mind the program will search subdirectories by default so just adding the top level folder is good. You can also just drag and drop songs/packages to the program to add folders quicker
+
+Once you've added all the folders you want indexed, click on 'Build Index' and the program will search through all the folders and subfolders (if enabled) to find CON files, and then list them for you. This process only has to be done once, and the index file will be opened automatically next time you open this program
+
+If you've already built the Index once and you have deleted songs or added new songs, just click on 'Rebuild Index' and it will be updated
+
+You can select any one folder you no longer want indexed and click on 'Remove Selected' then click 'Rebuild Index'
+You can also clear all indexed folders by clicking 'Clear Folders'
+
+Once you've built an Index, you can search for a song, artist or file name - just type in the search bar and the program will automatically find the files for you in the index
+
+You have a variety of self-explanatory options by right-clicking on the list of songs...try them out!
+
+You don't have to delete your existing Index file, it will be overwritten when you rebuild your index. If you really want to delete it, click on File -> Clear indexed files
+
+Enjoy

@@ -1,0 +1,34 @@
+Song Analyzer: How To Use
+
+This tool was created to assist users in determining whether they want to play any given song based on the statistics of the MIDI file and or mogg (audio) file ... you throw a CON, MIDI or mogg file at it and Song Analyzer will give you a detailed analysis of the song file
+
+To get started, either drag and drop or use File -> 'Open song file' to select your file
+No packs, and only one CON, MIDI or mogg file at a time
+The analysis should be very quick (typically less than five seconds on my i7 processor)
+
+Among the details you will get are total notes charted, instruments present, total notes on each difficulty of each instrument present (including the very important NPS [notes per second] or NPM [notes per minute] metric) that tells you if, for example, a song only has 20 notes on Keys and you'd be really upset if you got that song - not anymore, this tells you that you'd be playing 5 NPM (assuming a 4 minute song) and you can ignore the song!
+
+There's a ton more details, try it out :-)
+When the analysis is complete, you can right-click on the log to export the information to a text file
+
+If the MIDI file has vocals or harmonies, you'll have the option to export them to a text file with one click. You can choose to export the lyrics in syllables as the are stored in the MIDI or as whole words for easier reading
+
+If you selected a CON file, you will also get an analysis of the mogg file for a variety of technical information
+
+Song Analyzer also allows you to run a batch analysis on songs to attempt and identify songs that have PART DRUMS with Pro Drums animations but no Pro Drums markers (typically old RBN1 songs).  Click on 'Pro Drums Analysis' and then select 'Batch analyze for missing Pro Drums' 
+This process will work with packs of songs, single songs and loose MIDI files all in one folder
+The process will output a list of MIDI and/or CON files that need Pro Drums markers added in the log, which can be exported as a text file
+By default (click on 'Separate files that are missing Pro Drums' to enable/disable), this process will move the CON or MIDI files that need Pro Drums markers to a subfolder named _NEED_PRO_DRUMS
+
+You can also use Song Analyzer to batch analyze mogg files. Click 'Mogg Analysis' and choose one of the following:
+'Batch analyze mogg files' will allow you to select a mogg file and all the mogg files in that folder will be analyzed
+
+'Visualize mogg file(s)' will launch Audio Analyzer so you can create visual representations of mogg, ogg and wav files
+
+If you're curious how many times a word or phrase appears in a song or in a group of songs, here's how to do it: put all the MIDI files (as many as you want, or just one) in one folder (tip: use Batch Extractor to extract all the MIDIs in your songs/packs), click on 'Lyric Analysis', then click on 'Search for lyric phrase', select the folder where the MIDI files are and enter the word or phrase to search for
+
+Click on 'Lyric phrase search options' to choose whether to only list the songs that contain the search word or phrase or whether to show all the lyric phrases that contain the search word or phrase. You can also choose to only look at PART VOCALS ('Ignore harmonies') or look at both PART VOCALS and any HARM parts present. The way the lyrics are displayed depends on your 'Exporting options'
+
+For an idea of what it will find: if you search for 'smoking gun', you will get results that include 'smoking guns', 'smokin' gun', 'smokin' gunners', etc
+
+Enjoy

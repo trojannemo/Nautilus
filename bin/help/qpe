@@ -1,0 +1,45 @@
+Quick Pack Editor: A Quick How-To
+
+This tool is designed to make modifying existing song packs easy and quick
+
+Drag and drop a pack (CON / LIVE / DTA format) to the form or use the 'Open file' button
+This program will read through the songs.dta file and let you know how many songs it finds
+
+The songs are listed as
+'X. Artist - Title (songid)'
+where X stands for the number of that entry in the songs.dta file
+
+All the songs listed in the Songs List will be LEFT in the pack
+Any songs you want to REMOVE from the pack, select and remove from the Songs List
+You can select multiple songs at once and just click 'Remove selected' once you've selected all the songs you wish to remove, or you can select and remove them one by one
+If you remove some songs and change your mind, click on 'Restore all' and the Songs List will be repopulated with all the original songs
+
+If you're editing a DTA file, Quick Pack Editor will disable most of its features and obviously will only allow you to edit and modify the DTA file, as there is no attached pack.
+
+If you're editing a pack and you only want to edit the contents of its DTA file and don't care about the song files being left in the pack, choose 'Edit DTA entries only' - this will remove the songs in game but will still take up the same hard drive space in your Xbox - this is the faster option
+The default behavior is to 'Edit DTA entries and pack contents', which will both remove the songs in the game as well as free up the space on your Xbox - this is the slower option
+
+In either case, how long it will take depends on your hard drive speed, your processor speed, and the size of the original and new packs
+
+If you would like, you can also modify the Package Title (what you see in your Xbox dashboard), the Package Description (what programs like this one see), the Package Image (the thumbnail you see in your Xbox dashboard) and the Content Image (only seen in programs like this one)
+
+Once you've made all the changes you want, press 'Begin' and watch the log
+
+Unless you get an error, assume that the program is working as intended
+The process can take from a few seconds to a few minutes depending on the factors mentioned above
+
+THIS TOOL WILL NOT ALLOW YOU TO ADD NEW SONGS TO AN EXISTING PACK
+The x360 library does not have a feature to add a new folder to an existing pack, so I can't do it here
+
+If you want to remove songs, this is your tool
+If you want to add songs, use Pack Creator from the main screen
+
+You can also convert a pack of songs into a multitude of individual CON files with one click - simply click on 'dePACK' and everything will be done for you
+Under Advanced -> dePACK options you can specify whether to use the song's album art for that CON's thumbnail (default) or to use the thumbnail from the source pack
+The individual CON files will keep the same game ID as the source pack, and will be converted to an unlocked, anonymous CON file automatically, ready to go on your Xbox
+
+You can also do run the dePACK process in batch mode by clicking on 'Batch dePACK' and pointing Quick Pack Editor at the folder that contains all your packs. This process may take a long time depending on how many packs you're dePACKaging, how big those packs are, and how fast your CPU and HDD are.
+
+All the dePACK options are also used when batch processing, so set those before you start Batch dePACK if you need to change settings from default
+
+Enjoy
