@@ -396,7 +396,7 @@ namespace Nautilus
                                         }
                                         else
                                         {
-                                            nautilus3.DecM(mData, false, false, false, DecryptMode.ToFile, newMogg);
+                                            nautilus3.DecM(mData, false, false, DecryptMode.ToFile, newMogg);
                                         }
                                         Log(Tools.SendtoAudacity(newMogg));
                                     }
@@ -515,7 +515,7 @@ namespace Nautilus
             Log("Downmixing audio file to stereo file:");
             Log(ogg);
             var Splitter = new MoggSplitter();
-            var mixed = Splitter.DownmixMogg(CON, ogg, true, MoggSplitter.MoggSplitFormat.OGG, Convert.ToInt16(domainQuality.Text));
+            var mixed = Splitter.DownmixMogg(CON, ogg, MoggSplitter.MoggSplitFormat.OGG, Convert.ToInt16(domainQuality.Text));
             foreach (var error in Splitter.ErrorLog)
             {
                 Log(error);

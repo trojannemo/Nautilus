@@ -554,7 +554,7 @@ namespace Nautilus
                         Tools.DeleteFile(output);
                         break;
                     case FileType.MOGG:
-                        nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(output)), output);
+                        nautilus3.WriteOutData(File.ReadAllBytes(output), output);
                         break;
                 }
             }
@@ -3755,7 +3755,7 @@ namespace Nautilus
                     if (isCON)
                     {
                         var Splitter = new MoggSplitter();
-                        if (!Splitter.ExtractDecryptMogg(file, true, nautilus3, Parser))
+                        if (!Splitter.ExtractDecryptMogg(file, nautilus3, Parser))
                         {
                             Log("Encrypted, can't get more information...");
                             continue;
@@ -3783,7 +3783,7 @@ namespace Nautilus
                                 }
                             }
                         }
-                        else if (!nautilus3.DecM(File.ReadAllBytes(file), true, false, false, DecryptMode.ToMemory))
+                        else if (!nautilus3.DecM(File.ReadAllBytes(file), false, false, DecryptMode.ToMemory))
                         {
                             Log("Encrypted, can't get more information...");
                             continue;
@@ -4583,7 +4583,7 @@ namespace Nautilus
                     }
                 }
             }
-            if (!nautilus3.DecM(File.ReadAllBytes(MOGG[0]), true, false, false, DecryptMode.ToMemory))
+            if (!nautilus3.DecM(File.ReadAllBytes(MOGG[0]), false, false, DecryptMode.ToMemory))
             {
                 MessageBox.Show("Failed to decrypt mogg file, can't analyze", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;

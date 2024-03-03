@@ -1949,7 +1949,7 @@ namespace Nautilus
             var mData = File.ReadAllBytes(mogg);
             if (mData[0] != 0x0A)
             {
-                nautilus.WriteOutData(nautilus.ObfM(mData), mogg);
+                nautilus.WriteOutData(mData, mogg);
                 return "Audio file " + Path.GetFileName(mogg) + " is encrypted and can't be sent to Audacity, sorry";
             }
             try

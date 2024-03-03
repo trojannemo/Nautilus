@@ -96,7 +96,7 @@ namespace Nautilus
                 if (VariousFunctions.ReadFileType(file) == XboxFileType.STFS)
                 {
                     var Splitter = new MoggSplitter();
-                    if (Splitter.ExtractDecryptMogg(file, true, nautilus3, Parser))
+                    if (Splitter.ExtractDecryptMogg(file, nautilus3, Parser))
                     {
                         InputFile = file;
                         DrawWaveForm();
@@ -125,7 +125,7 @@ namespace Nautilus
                             }
                         }                       
                     }
-                    if (nautilus3.DecM(File.ReadAllBytes(file), true, false, false, DecryptMode.ToMemory))
+                    if (nautilus3.DecM(File.ReadAllBytes(file), false, false, DecryptMode.ToMemory))
                     {
                         InputFile = file;
                         DrawWaveForm();
@@ -769,7 +769,7 @@ namespace Nautilus
                     }
                 }               
             }
-            if (!nautilus3.DecM(File.ReadAllBytes(MOGG[0]), true, false, false, DecryptMode.ToMemory))
+            if (!nautilus3.DecM(File.ReadAllBytes(MOGG[0]), false, false, DecryptMode.ToMemory))
             {
                 MessageBox.Show("Failed to decrypt mogg file, can't analyze", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;

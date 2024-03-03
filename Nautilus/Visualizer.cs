@@ -621,7 +621,7 @@ namespace Nautilus
                         MessageBox.Show("I recognize this encryption scheme as v17 (Rock Band 4) but it was not implemented in this Tool", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         return;
                     }
-                    if (!nautilus3.DecM(File.ReadAllBytes(mogg[0]), true, false, false, DecryptMode.ToMemory))
+                    if (!nautilus3.DecM(File.ReadAllBytes(mogg[0]), false, false, DecryptMode.ToMemory))
                     {
                         MessageBox.Show("Failed to decrypt *.mogg file, can't play audio", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
@@ -3414,7 +3414,7 @@ namespace Nautilus
             var Splitter = new MoggSplitter();
             try
             {
-                if (!Splitter.ExtractDecryptMogg(sCON, true, nautilus3, Parser))
+                if (!Splitter.ExtractDecryptMogg(sCON, nautilus3, Parser))
                 {
                     nautilus3.PlayingSongOggData = null;
                 }
@@ -4853,7 +4853,7 @@ namespace Nautilus
                 MessageBox.Show("I recognize this encryption scheme as v17 (Rock Band 4) but it was not implemented in this Tool", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            if (!nautilus3.DecM(File.ReadAllBytes(MOGG[0]), true, false, false, DecryptMode.ToMemory))
+            if (!nautilus3.DecM(File.ReadAllBytes(MOGG[0]), false, false, DecryptMode.ToMemory))
             {
                 MessageBox.Show("Failed to decrypt mogg file, can't play audio", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;

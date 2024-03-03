@@ -1409,7 +1409,7 @@ namespace Nautilus
                     Tools.DeleteFile(midi);
                     return false;
                 }
-                var dec = nautilus3.DecM(File.ReadAllBytes(mogg), true, false, false, DecryptMode.ToMemory);
+                var dec = nautilus3.DecM(File.ReadAllBytes(mogg), false, false, DecryptMode.ToMemory);
                 if (!dec)
                 {
                     Log("This mogg file is encrypted and I can't work with it");

@@ -280,7 +280,7 @@ namespace Nautilus
                     }
                     else
                     {
-                        success = nautilus3.DecM(mData, false, true, false, DecryptMode.ToFile, newMogg);
+                        success = nautilus3.DecM(mData, true, false, DecryptMode.ToFile, newMogg);
                     }
                     Log((success ? "Successfully decrypted" : "Failed to decrypt") + " mogg file " + Path.GetFileName(newMogg));
                     if (!success)
@@ -458,7 +458,7 @@ namespace Nautilus
                             }
                         }
                     }
-                    if (!nautilus3.DecM(mData, false, true, false, DecryptMode.ToFile, newMogg))
+                    if (!nautilus3.DecM(mData, true, false, DecryptMode.ToFile, newMogg))
                     {
                         Log("Failed to decrypt CON file " + Path.GetFileName(newCON) + " ... skipping");
                         xCON.CloseIO();

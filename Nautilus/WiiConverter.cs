@@ -785,7 +785,7 @@ namespace Nautilus
                                         MessageBox.Show("I recognize this encryption scheme as v17 (Rock Band 4) but it was not implemented in this Tool", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                                         continue;
                                     }
-                                    var dec = nautilus3.DecM(File.ReadAllBytes(newMogg), true, false, false, DecryptMode.ToMemory);
+                                    var dec = nautilus3.DecM(File.ReadAllBytes(newMogg), false, false, DecryptMode.ToMemory);
                                     if (!dec)
                                     {
                                         Log("This mogg file is encrypted and I can't work with it");
@@ -1211,7 +1211,7 @@ namespace Nautilus
                     splitter.WiiRate = 22500;
                     break;
             }
-            splitter.DownmixMogg(con, p_o, true, MoggSplitter.MoggSplitFormat.OGG, 3, true, time, (double)numLength.Value, (int)numFadeIn.Value, (int)numFadeOut.Value, (double)numAttenuation.Value, "allstems|NOcrowd");
+            splitter.DownmixMogg(con, p_o, MoggSplitter.MoggSplitFormat.OGG, 3, true, time, (double)numLength.Value, (int)numFadeIn.Value, (int)numFadeOut.Value, (double)numAttenuation.Value, "allstems|NOcrowd");
             if (!File.Exists(p_o))
             {
                 Log("Creating preview clip failed at downmixing");

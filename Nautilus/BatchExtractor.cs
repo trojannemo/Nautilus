@@ -261,8 +261,8 @@ namespace Nautilus
                 {
                     if (Path.GetExtension(newfile) == ".mogg")
                     {
-                        var nautilus = new nTools();
-                        nautilus.WriteOutData(nautilus.ObfM(File.ReadAllBytes(newfile)), newfile);
+                        //var nautilus = new nTools();
+                        //nautilus.WriteOutData(nautilus.                                                                                                                                           (File.ReadAllBytes(newfile)), newfile);
                     }
                     Log("File " + rename + ext + " extracted successfully");
                 }

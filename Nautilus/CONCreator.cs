@@ -417,7 +417,7 @@ namespace Nautilus
             picWorking.Visible = false;
             foreach (var mogg in moggs)
             {
-                nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(mogg)), mogg);
+                //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(mogg)), mogg);
             }
             var xExplorer = new CONExplorer(Color.FromArgb(34, 169, 31), Color.White);
             xExplorer.LoadCON(xOut);

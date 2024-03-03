@@ -325,7 +325,7 @@ namespace Nautilus
                 
                 if (Path.GetExtension(sfd.FileName) == ".mogg")
                 {
-                    nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(sfd.FileName)), sfd.FileName);
+                    //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(sfd.FileName)), sfd.FileName);
                 }
                 Log("File " + xent.Name + " extracted successfully");
             }
@@ -713,7 +713,7 @@ namespace Nautilus
                     var moggs = Directory.GetFiles(outFolder, "*.mogg", SearchOption.AllDirectories);
                     foreach (var mogg in moggs)
                     {
-                        nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(mogg)), mogg);
+                        //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(mogg)), mogg);
                     }
                     Log("File extracted successfully to:");
                     Log(outFolder);
@@ -932,7 +932,7 @@ namespace Nautilus
                 files.Add(ext_file);
                 if (Path.GetExtension(ext_file) == ".mogg")
                 {
-                    nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(ext_file)), ext_file);
+                    //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(ext_file)), ext_file);
                 }
             }
             Enabled = true;
@@ -1236,7 +1236,7 @@ namespace Nautilus
             
             if (Path.GetExtension(ext_file[0]) == ".mogg")
             {
-                nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(ext_file[0])), ext_file[0]);
+                //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(ext_file[0])), ext_file[0]);
             }
             Enabled = true;
 

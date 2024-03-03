@@ -460,7 +460,7 @@ namespace Nautilus
             string ogg = folder + "song.ogg";
             Log("Downmixing audio file to stereo file...");
             var Splitter = new MoggSplitter();
-            var mixed = Splitter.DownmixMogg(CON, ogg, true, MoggSplitter.MoggSplitFormat.OGG, 3, "allstems");
+            var mixed = Splitter.DownmixMogg(CON, ogg, MoggSplitter.MoggSplitFormat.OGG, 3, "allstems");
             foreach (var error in Splitter.ErrorLog)
             {
                 throw new Exception(error);

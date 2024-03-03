@@ -314,7 +314,7 @@ namespace Nautilus
             if (radioDownmix.Checked)
             {
                 Log("Trying to downmix mogg file to stereo " + (doWAV.Checked? "WAV" : "OGG") + " file");
-                var downmixed = Splitter.DownmixMogg(txtFile.Text, "", false, doWAV.Checked ? MoggSplitter.MoggSplitFormat.WAV : MoggSplitter.MoggSplitFormat.OGG, 5, chkCrowd.Checked ? "allstems" : "allstems|NOcrowd");
+                var downmixed = Splitter.DownmixMogg(txtFile.Text, "", doWAV.Checked ? MoggSplitter.MoggSplitFormat.WAV : MoggSplitter.MoggSplitFormat.OGG, 5, chkCrowd.Checked ? "allstems" : "allstems|NOcrowd");
                 foreach (var error in Splitter.ErrorLog)
                 {
                     Log(error);

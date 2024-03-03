@@ -1030,7 +1030,7 @@ namespace Nautilus
                 var moggs = Directory.GetFiles(tempFolder, "*.mogg", SearchOption.AllDirectories);
                 foreach (var mogg in moggs)
                 {
-                    nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(mogg)), mogg);
+                    //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(mogg)), mogg);
                 }
             }
 

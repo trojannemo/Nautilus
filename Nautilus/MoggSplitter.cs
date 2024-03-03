@@ -30,16 +30,16 @@ namespace Nautilus
             ErrorLog = new List<string>();            
         }
 
-        public bool ExtractDecryptMogg(string CON_file, bool bypass)
+        public bool ExtractDecryptMogg(string CON_file)
         {
             if (nautilus3 == null)
             {
                 nautilus3 = new nTools();
             }
-            return ExtractDecryptMogg(CON_file, bypass, nautilus3, new DTAParser());
+            return ExtractDecryptMogg(CON_file, nautilus3, new DTAParser());
         }
 
-        public bool ExtractDecryptMogg(string CON_file, bool bypass, nTools nautilus3, DTAParser parser)
+        public bool ExtractDecryptMogg(string CON_file, nTools nautilus3, DTAParser parser)
         {
             Initialize();
             Parser = parser;
@@ -85,10 +85,6 @@ namespace Nautilus
                 ErrorLog.Add("Couldn't extract the mogg file from that CON file");
                 return false;
             }
-            if (nautilus3.MoggIsEncrypted(mData))
-            {
-                return false;
-            }
             LoadLibraries();
             var Tools = new NemoTools();
             if (Tools.isV17(mData))
@@ -104,7 +100,7 @@ namespace Nautilus
                     }
                 }
             }
-            if (nautilus3.DecM(mData, bypass, false, false, DecryptMode.ToMemory)) return true;
+            if (nautilus3.DecM(mData, false, false, DecryptMode.ToMemory)) return true;
             ErrorLog.Add("Mogg file is encrypted and I could not decrypt it, can't split it");
             return false;
         }
@@ -122,14 +118,14 @@ namespace Nautilus
             Bass.BASS_GetVersion();
         }
 
-        public bool DownmixMogg(string CON_file, string output, bool bypass, MoggSplitFormat format, int quality, string stems)
+        public bool DownmixMogg(string CON_file, string output, MoggSplitFormat format, int quality, string stems)
         {
-            return DownmixMogg(CON_file, output, bypass, format, quality, false, 0.0, 0.0, 0.0, 0.0, 0.0, stems);
+            return DownmixMogg(CON_file, output, format, quality, false, 0.0, 0.0, 0.0, 0.0, 0.0, stems);
         }
 
-        public bool DownmixMogg(string CON_file, string output, bool bypass, MoggSplitFormat format, int quality, bool doWii = false, double start = 0.0, double length = 0.0, double fadeIn = 0.0, double fadeOut = 0.0, double volume = 0.0, string stems = "allstems")
+        public bool DownmixMogg(string CON_file, string output, MoggSplitFormat format, int quality, bool doWii = false, double start = 0.0, double length = 0.0, double fadeIn = 0.0, double fadeOut = 0.0, double volume = 0.0, string stems = "allstems")
         {
-            if (!ExtractDecryptMogg(CON_file, bypass)) return false;
+            if (!ExtractDecryptMogg(CON_file)) return false;
             try
             {
                 if (!InitBass()) return false;
@@ -208,7 +204,7 @@ namespace Nautilus
                     }
                 }
             }
-            if (!nautilus3.DecM(File.ReadAllBytes(mogg), true, false, false, DecryptMode.ToMemory)) return false;
+            if (!nautilus3.DecM(File.ReadAllBytes(mogg), false, false, DecryptMode.ToMemory)) return false;
             if (!InitBass()) return false;
 
             try
@@ -264,7 +260,7 @@ namespace Nautilus
 
         public bool SplitMogg(string CON_file, string output_folder, string StemsToSplit, MoggSplitFormat format, int quality, bool bypass = false)
         {
-            return ExtractDecryptMogg(CON_file, bypass) && DoSplitMogg(output_folder, StemsToSplit, format, quality);
+            return ExtractDecryptMogg(CON_file) && DoSplitMogg(output_folder, StemsToSplit, format, quality);
         }
 
         public enum MoggSplitFormat

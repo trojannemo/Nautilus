@@ -41,7 +41,7 @@ namespace Nautilus
                 MessageBox.Show("I recognize this encryption scheme as v17 (Rock Band 4) but it was not implemented in this Tool", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            WorkerSuccess = nautilus3.DecM(File.ReadAllBytes(WorkingFile), false, false, false, DecryptMode.ToFile, ogg);
+            WorkerSuccess = nautilus3.DecM(File.ReadAllBytes(WorkingFile), false, false, DecryptMode.ToFile, ogg);
         }
 
         private void Worker_FormClosing(object sender, FormClosingEventArgs e)
