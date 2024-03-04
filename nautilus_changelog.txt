@@ -6,6 +6,27 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+v5.1.0
+
+GENERAL
+- Fixed many instances of broken compatibility with encrypted mogg files
+- Removed all instances of mogg obfuscation as it is no longer needed
+
+YARG/CH/PS CONVERTER
+- Added ability to mark the converted song(s) to use a custom icon
+
+ADVANCED ART CONVERTER
+- Greatly expanded ability to convert .png_wii images to include more than 1,100 on-disc images plus album art as usual
+- Added support for extracting textures from milo_wii files - you're on your own in converting the .tex files to a usable format (for now)
+
+QUICK PACK EDITOR
+- Fixed bug where songs with [ and ] in the name would cause an unhandled exception error
+
+SETLIST MANAGER
+- Made it so it's possible for the export versions and Blitz versions of Give It Away and Spoonman to be on the same Setlist at the same time
+
+----------
+
 v5.0.0
 
 C3 TOOLS IS NOW NAUTILUS
