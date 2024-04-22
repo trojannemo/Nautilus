@@ -16,6 +16,7 @@ using NAudio.Midi;
 using Encoder = System.Drawing.Imaging.Encoder;
 using Path = System.IO.Path;
 using NautilusFREE;
+using static Nautilus.YARGSongFileStream;
 
 
 namespace Nautilus
@@ -2979,6 +2980,34 @@ namespace Nautilus
             }
             //Thread.Sleep(5000);
             return Directory.Exists(rsFolder);
+        }
+
+        public bool DecryptExtractYARGSONG(string inFile, string outFolder)
+        {
+            byte[] SNGPKG = { (byte)'S', (byte)'N', (byte)'G', (byte)'P', (byte)'K', (byte)'G' };
+            var tempFile = inFile.Replace(".yargsong", ".sng");
+            DeleteFile(tempFile);
+            using (FileStream fileStream = File.OpenRead(inFile))
+            {                
+                YARGSongFileStream yargFileStream = TryLoad(fileStream);
+                byte[] bytes = new byte[yargFileStream.Length];
+                yargFileStream.Read(bytes, 0, bytes.Length);
+                yargFileStream.Close();
+                using (var fs = File.Create(tempFile))
+                {
+                    using (var bw = new BinaryWriter(fs))
+                    {
+                        bw.Write(bytes);
+                    }
+                }
+            }
+            using (FileStream fileStream = new FileStream(tempFile, FileMode.Open, FileAccess.Write))
+            {
+                fileStream.Write(SNGPKG, 0, SNGPKG.Length);
+            }
+            var success = ExtractSNG(tempFile, outFolder);
+            DeleteFile(tempFile);
+            return success;
         }
 
         public bool ExtractSNG(string inFile, string outFolder)

@@ -680,6 +680,10 @@ namespace Nautilus
                     {
                         ExtractSNG(files[0]);
                     }
+                    else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".yargsong")
+                    {
+                        ExtractYARG(files[0]);
+                    }
                     else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".psarc")
                     {
                         ExtractPsArc(files[0]);
@@ -2041,6 +2045,10 @@ namespace Nautilus
                 {
                     ExtractSNG(file);
                 }
+                else if (Path.GetExtension(file.ToLowerInvariant()) == ".yargsong")
+                {
+                    ExtractYARG(file);
+                }
                 else if (Path.GetExtension(file.ToLowerInvariant()) == ".xml")
                 {
                     ExtractXMA(file);
@@ -2731,6 +2739,9 @@ namespace Nautilus
                                 break;
                             case ".sng":
                                 ExtractSNG(loadcon);
+                                break;
+                            case ".yargsong":
+                                ExtractYARG(loadcon);
                                 break;
                             case ".psarc":
                                 ExtractPsArc(loadcon);
@@ -4733,6 +4744,23 @@ namespace Nautilus
             picPlayPause.Cursor = Cursors.Hand;
             picStop.Cursor = Cursors.Hand;
             StartPlayback();           
+        }
+
+        private void ExtractYARG(string file)
+        {
+            var outFolder = Application.StartupPath + "\\visualizer\\extracted";
+            if (Directory.Exists(outFolder))
+            {
+                Tools.DeleteFolder(outFolder, true);
+            }
+            Directory.CreateDirectory(outFolder);
+
+            if (!Tools.DecryptExtractYARGSONG(file, outFolder))
+            {
+                MessageBox.Show("Failed to process that YARG file, can't Visualize", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            PlayCHFolder(outFolder);
         }
 
         private void ExtractSNG(string file)

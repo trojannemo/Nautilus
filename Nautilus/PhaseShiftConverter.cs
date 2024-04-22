@@ -905,6 +905,52 @@ namespace Nautilus
             }
             txtCustomLabel.Enabled = markAsCustom.Checked;
         }
+
+        private void decodeYARG_Click(object sender, EventArgs e)
+        {            
+            MessageBox.Show("This will batch decrypt and extract YARG \".yargsong\" game files", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var ofd = new FolderPicker
+            {
+                InputPath = Environment.CurrentDirectory,
+                Title = "Select the folder where your \".yargsong\" files are",
+            };
+            if (ofd.ShowDialog(IntPtr.Zero) != true || string.IsNullOrEmpty(ofd.ResultPath)) return;
+            var folder = ofd.ResultPath;
+
+            var yargFiles = new List<string>();
+            var inFiles = Directory.GetFiles(folder);
+            foreach (var file in inFiles.Where(yarg => Path.GetExtension(yarg) == ".yargsong"))
+            {
+                yargFiles.Add(file);
+            }
+            DecryptExtractYARG(yargFiles);
+        }
+
+        private void DecryptExtractYARG(List<string> yargFiles)
+        {
+            Log("");
+            Log("Found " + yargFiles.Count + " \".yargsong\" files");
+            Log("Starting process...");
+            var counter = 0;
+            var success = 0;
+
+            foreach (var file in yargFiles)
+            {
+                counter++;
+                Log("Decrypting file " + counter + " of " + yargFiles.Count());
+                var tempFile = file.Replace(".yargsong", ".sng");
+                var outFolder = Path.GetDirectoryName(tempFile) + "\\" + Path.GetFileNameWithoutExtension(tempFile).Trim();                
+                if (!Tools.DecryptExtractYARGSONG(file, outFolder))
+                {
+                    Log("Failed");
+                    continue;
+                }
+                success++;
+                Log("Decrypted file " + counter + " of " + yargFiles.Count() + " successfully");
+                Tools.DeleteFile(tempFile);
+            }
+            Log("Decrypted " + success + " file(s) successfully");
+        }
     }
 
     public class PhaseShiftSong

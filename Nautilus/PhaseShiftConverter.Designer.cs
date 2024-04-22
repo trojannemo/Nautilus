@@ -37,6 +37,7 @@
             this.picPin = new System.Windows.Forms.PictureBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.decodeYARG = new System.Windows.Forms.ToolStripMenuItem();
             this.decodeSNG = new System.Windows.Forms.ToolStripMenuItem();
             this.opusToOgg = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -156,11 +157,20 @@
             // toolsToolStripMenuItem
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.decodeYARG,
             this.decodeSNG,
             this.opusToOgg});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
+            // 
+            // decodeYARG
+            // 
+            this.decodeYARG.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.decodeYARG.Name = "decodeYARG";
+            this.decodeYARG.Size = new System.Drawing.Size(246, 22);
+            this.decodeYARG.Text = "Decrypt YARG yargsong files";
+            this.decodeYARG.Click += new System.EventHandler(this.decodeYARG_Click);
             // 
             // decodeSNG
             // 
@@ -543,5 +553,6 @@
         private System.Windows.Forms.CheckBox markAsRV;
         private System.Windows.Forms.CheckBox markAsCustom;
         private System.Windows.Forms.TextBox txtCustomLabel;
+        private System.Windows.Forms.ToolStripMenuItem decodeYARG;
     }
 }

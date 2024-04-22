@@ -180,7 +180,7 @@ namespace Nautilus
                 IEnumerable<string> dtafiles;
                 try
                 {
-                    dtafiles = getSongListings(client, "/dev_hdd0/game/" + folder + "/");
+                    dtafiles = getSongListings(client, "/dev_hdd0/game/" + folder + "/USRDIR/");
                 }
                 catch (Exception ex)
                 {

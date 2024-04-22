@@ -18,6 +18,8 @@ using Button = System.Windows.Forms.Button;
 using Path = System.IO.Path;
 using Point = System.Drawing.Point;
 using Newtonsoft.Json;
+using Nautilus.LibForge.SongData;
+using System.Runtime.CompilerServices;
 
 namespace Nautilus
 {
@@ -217,16 +219,18 @@ namespace Nautilus
             var isFolder = File.GetAttributes(files[0]).HasFlag(FileAttributes.Directory);
             if (isFolder)
             {
-                var result = MessageBox.Show("You've drag/dropped a folder, do you want me to recursively search for all songs.dta and song.ini files inside this folder and its subfolders and load them into your .setlist?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var result = MessageBox.Show("You've drag/dropped a folder, do you want me to recursively search for all .dta, .songdta_ps4 and .ini files inside this folder and its subfolders and load them into your .setlist?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result != DialogResult.Yes) return;
 
                 var DTAs = Directory.GetFiles(files[0], "*.dta", SearchOption.AllDirectories);
                 var INIs = Directory.GetFiles(files[0], "*.ini", SearchOption.AllDirectories);
+                var PS4s = Directory.GetFiles(files[0], "*.songdta_ps4", SearchOption.AllDirectories);
                 if (btnNew.Enabled)
                 {
                     var counter = 0;
                     foreach (var dta in DTAs)
                     {
+                        if (dta.EndsWith(".mogg.dta")) continue;//skip these PS4 specific DTA files that only have mogg values
                         if (PrepForNewSong() && Parser.ReadDTA((File.ReadAllBytes(dta))))
                         {
                             FinalizeImport(Parser.Songs, silentMode.Checked);
@@ -237,6 +241,14 @@ namespace Nautilus
                     {
                         if (PrepForNewSong() && Parser.ReadINIFile(ini))
                         {
+                            FinalizeImport(Parser.Songs, silentMode.Checked);
+                            counter++;
+                        }
+                    }
+                    foreach (var ps4 in PS4s)
+                    {
+                        if (PrepForNewSong() && ImportPS4DTA(ps4))
+                        {                            
                             FinalizeImport(Parser.Songs, silentMode.Checked);
                             counter++;
                         }
@@ -255,6 +267,52 @@ namespace Nautilus
             }
         }
 
+        private bool ImportPS4DTA(string ps4)
+        {
+            try
+            {
+                var dtaBytes = File.ReadAllBytes(ps4);
+                using (MemoryStream ms = new MemoryStream(dtaBytes))
+                {
+                    var ps4Data = new SongDataReader(ms);
+                    var songData = ps4Data.Read();
+
+                    Parser.Songs = new List<SongData>();
+                    var song = new SongData();
+                    song.SongId = (int)songData.SongId;
+                    song.GameVersion = songData.Version;
+                    song.PreviewStart = (int)songData.PreviewStart;
+                    song.PreviewEnd = (int)songData.PreviewEnd;
+                    song.Name = songData.Name;
+                    song.Artist = songData.Artist;
+                    song.Album = songData.AlbumName;
+                    song.YearReleased = songData.AlbumYear;
+                    song.TrackNumber = songData.AlbumTrackNumber;
+                    song.Genre = Parser.doGenre(songData.Genre, false);
+                    song.RawGenre = songData.Genre;
+                    song.Length = (int)songData.SongLength;
+                    song.GuitarDiff = Parser.GuitarDiff((int)songData.GuitarRank);
+                    song.BassDiff = Parser.BassDiff((int)songData.BassRank);
+                    song.DrumsDiff = Parser.DrumDiff((int)songData.DrumRank);
+                    song.VocalsDiff = Parser.VocalsDiff((int)songData.VocalsRank);
+                    song.BandDiff = Parser.BandDiff((int)songData.BandRank);
+                    song.KeysDiff = Parser.KeysDiff((int)songData.KeysRank);
+                    song.ProKeysDiff = Parser.ProKeysDiff((int)songData.RealKeysRank);
+                    song.Master = !songData.Cover;
+                    song.VocalParts = songData.VocalParts;
+                    song.ShortName = songData.Shortname;
+                    song.Source = songData.GameOrigin;
+                    song.Gender = songData.VocalGender == 1 ? "Masc." : "Fem.";
+                    Parser.Songs.Add(song);
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }            
+        }
+
         private void ValidateFile(IList<string> files, bool AskUser = false)
         {
             var cache_out = setlist_folder + "songcache" + (files[0].ToLowerInvariant().Contains("blitz") ? "_blitz.cache" : "cache");
@@ -269,7 +327,7 @@ namespace Nautilus
                     xPackage.CloseIO();
                     continue;
                 }
-                var xFile = xPackage.GetFile("songcache");
+                var xFile = xPackage.GetFile("songcache"); //standard cache
                 {
                     if (xFile != null)
                     {
@@ -287,6 +345,27 @@ namespace Nautilus
                         Tools.DeleteFile(ActiveCacheFile); //delete the temporary extracted cache file
                         return;
                     }
+
+                }
+                xFile = xPackage.GetFile("rbdxcache"); //custom RB3DX cache
+                {
+                    if (xFile != null)
+                    {
+                        Tools.DeleteFile(cache_out);
+                        if (!xFile.ExtractToFile(cache_out))
+                        {
+                            MessageBox.Show("Failed to extract song cache from STFS file " + Path.GetFileName(xPackage.FileNameLong) + ", can't continue", AppName,
+                                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            xPackage.CloseIO();
+                            return;
+                        }
+                        xPackage.CloseIO();
+                        ActiveCacheFile = cache_out;
+                        ParseCacheFile(ActiveCacheFile);
+                        Tools.DeleteFile(ActiveCacheFile); //delete the temporary extracted cache file
+                        return;
+                    }
+
                 }
                 xFile = xPackage.GetFile("songs/songs.dta");
                 {
@@ -402,6 +481,21 @@ namespace Nautilus
                     if (btnNew.Enabled)
                     {
                         if (PrepForNewSong() && Parser.ReadDTA(File.ReadAllBytes(files[0])))
+                        {
+                            importPath = files[0];
+                            FinalizeImport(Parser.Songs, silentMode.Checked);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("You must load an existing Setlist or create a blank Setlist before you can use the Autofill feature", AppName,
+                                        MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
+                    break;
+                case ".songdta_ps4":
+                    if (btnNew.Enabled)
+                    {
+                        if (PrepForNewSong() && ImportPS4DTA(files[0]))
                         {
                             importPath = files[0];
                             FinalizeImport(Parser.Songs, silentMode.Checked);
