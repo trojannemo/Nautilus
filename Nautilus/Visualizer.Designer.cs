@@ -175,6 +175,8 @@ namespace Nautilus
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.powerGigWorker = new System.ComponentModel.BackgroundWorker();
             this.bandFuseWorker = new System.ComponentModel.BackgroundWorker();
+            this.txtTrack = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreUp)).BeginInit();
@@ -245,6 +247,8 @@ namespace Nautilus
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.label10);
+            this.panel1.Controls.Add(this.txtTrack);
             this.panel1.Controls.Add(this.chkRating);
             this.panel1.Controls.Add(this.lblRating);
             this.panel1.Controls.Add(this.cboRating);
@@ -573,7 +577,7 @@ namespace Nautilus
             this.barAlbum.Cursor = System.Windows.Forms.Cursors.Hand;
             this.barAlbum.Location = new System.Drawing.Point(82, 100);
             this.barAlbum.Name = "barAlbum";
-            this.barAlbum.Size = new System.Drawing.Size(185, 10);
+            this.barAlbum.Size = new System.Drawing.Size(141, 10);
             this.barAlbum.TabIndex = 27;
             this.barAlbum.TabStop = false;
             this.toolTip1.SetToolTip(this.barAlbum, "Click here to change the font color");
@@ -867,7 +871,7 @@ namespace Nautilus
             // 
             this.txtAlbum.Location = new System.Drawing.Point(14, 114);
             this.txtAlbum.Name = "txtAlbum";
-            this.txtAlbum.Size = new System.Drawing.Size(253, 20);
+            this.txtAlbum.Size = new System.Drawing.Size(209, 20);
             this.txtAlbum.TabIndex = 12;
             this.txtAlbum.TextChanged += new System.EventHandler(this.txtAlbum_TextChanged);
             this.txtAlbum.DoubleClick += new System.EventHandler(this.TextBoxSelectAll);
@@ -1993,6 +1997,26 @@ namespace Nautilus
             this.bandFuseWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bandFuseWorker_DoWork);
             this.bandFuseWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bandFuseWorker_RunWorkerCompleted);
             // 
+            // txtTrack
+            // 
+            this.txtTrack.Location = new System.Drawing.Point(229, 114);
+            this.txtTrack.MaxLength = 4;
+            this.txtTrack.Name = "txtTrack";
+            this.txtTrack.Size = new System.Drawing.Size(42, 20);
+            this.txtTrack.TabIndex = 52;
+            this.txtTrack.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.toolTip1.SetToolTip(this.txtTrack, "Enter year of release here");
+            this.txtTrack.TextChanged += new System.EventHandler(this.txtTrack_TextChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(226, 99);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(45, 13);
+            this.label10.TabIndex = 53;
+            this.label10.Text = "Track #";
+            // 
             // Visualizer
             // 
             this.AllowDrop = true;
@@ -2252,5 +2276,7 @@ namespace Nautilus
         private ToolStripMenuItem encodeOGG;
         private ToolStripMenuItem exportYARGAudio;
         private ToolStripSeparator toolStripMenuItem4;
+        private Label label10;
+        private TextBox txtTrack;
     }
 }

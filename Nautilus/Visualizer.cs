@@ -1820,6 +1820,7 @@ namespace Nautilus
                 }
                 txtArtist.Text = artist;
                 txtAlbum.Text = Parser.Songs[0].Album;
+                txtTrack.Text = Parser.Songs[0].TrackNumber <= 0 ? "" : Parser.Songs[0].TrackNumber.ToString(CultureInfo.InvariantCulture);
                 txtYear.Text = Parser.Songs[0].YearReleased == 0 ? "" : Parser.Songs[0].YearReleased.ToString(CultureInfo.InvariantCulture);
                 txtYear2.Text = Parser.Songs[0].YearRecorded == 0 ? "" : Parser.Songs[0].YearRecorded.ToString(CultureInfo.InvariantCulture);
                 var vocal_parts = Parser.Songs[0].VocalParts;
@@ -4200,10 +4201,15 @@ namespace Nautilus
                 //redraw album name
                 if (!string.IsNullOrWhiteSpace(txtAlbum.Text))
                 {
+                    var track = "";
+                    if (txtTrack.Text.Trim().Length > 0)
+                    {
+                        track = " (Track #" + txtTrack.Text.Trim() + ")";
+                    }
                     stringFormat.Alignment = StringAlignment.Near;
                     using (var f = new Font(ActiveFont, 11, FontStyle.Bold))
                     {
-                        g.DrawString(txtAlbum.Text, f, new SolidBrush(albumColor), albumX, albumY, stringFormat);
+                        g.DrawString(txtAlbum.Text + track, f, new SolidBrush(albumColor), albumX, albumY, stringFormat);
                     }
                 }
 
@@ -5295,6 +5301,13 @@ namespace Nautilus
 
             e.Graphics.DrawLine(new Pen(Color.White), 30, sep.Height / 2, sep.Width - 4, sep.Height / 2);
 
+        }
+
+        private void txtTrack_TextChanged(object sender, EventArgs e)
+        {
+            picVisualizer.Invalidate();
+            if (reset) return;
+            MeasureAlbum();
         }
     }   
 }
