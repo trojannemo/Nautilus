@@ -199,6 +199,7 @@
     </Compile>
     <Compile Include="libForgeDTA.cs" />
     <Compile Include="libForgeTexture.cs" />
+    <Compile Include="MIDIStuff.cs" />
     <Compile Include="MoggMaker.cs">
       <SubType>Form</SubType>
     </Compile>

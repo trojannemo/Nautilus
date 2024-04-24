@@ -1454,7 +1454,7 @@ namespace Nautilus
                                 if (LeadVocals[i].PhraseStart > time) break;
                                 index = i;
                             }
-                            LeadVocals[index].Phrase = LeadVocals[index].Phrase + " " + lyric;
+                            LeadVocals[index].PhraseText = LeadVocals[index].PhraseText + " " + lyric;
                         }
                         break;
                     
@@ -1570,7 +1570,7 @@ namespace Nautilus
                                 if (Harmonies1[i].PhraseStart > time) break;
                                 index = i;
                             }
-                            Harmonies1[index].Phrase = Harmonies1[index].Phrase + " " + lyric;
+                            Harmonies1[index].PhraseText = Harmonies1[index].PhraseText + " " + lyric;
                         }
                         break;
 
@@ -1642,7 +1642,7 @@ namespace Nautilus
                                 if (Harmonies2[i].PhraseStart > time) break;
                                 index = i;
                             }
-                            Harmonies2[index].Phrase = Harmonies2[index].Phrase + " " + lyric;
+                            Harmonies2[index].PhraseText = Harmonies2[index].PhraseText + " " + lyric;
                         }
                         break;
 
@@ -1714,7 +1714,7 @@ namespace Nautilus
                                 if (Harmonies3[i].PhraseStart > time) break;
                                 index = i;
                             }
-                            Harmonies3[index].Phrase = Harmonies3[index].Phrase + " " + lyric;
+                            Harmonies3[index].PhraseText = Harmonies3[index].PhraseText + " " + lyric;
                         }
                         break;
 
@@ -2259,7 +2259,7 @@ namespace Nautilus
                     }
                     else if (trackname.Contains("HARM3") && chkHarms.Checked)
                     {
-                        foreach (var harmony in Harmonies1.Select(harm => new LyricPhrase {PhraseEnd = harm.PhraseEnd, PhraseStart = harm.PhraseStart, Phrase = ""}))
+                        foreach (var harmony in Harmonies1.Select(harm => new LyricPhrase {PhraseEnd = harm.PhraseEnd, PhraseStart = harm.PhraseStart, PhraseText = ""}))
                         {
                             Harmonies3.Add(harmony);
                         }
@@ -3549,9 +3549,9 @@ namespace Nautilus
                 if (LeadVocals.Count > 0)
                 {
                     var sw = new StreamWriter(folder + vocals, false);
-                    foreach (var line in LeadVocals.Where(line => !string.IsNullOrWhiteSpace(line.Phrase)))
+                    foreach (var line in LeadVocals.Where(line => !string.IsNullOrWhiteSpace(line.PhraseText)))
                     {
-                        sw.WriteLine(ProcessLine(line.Phrase));
+                        sw.WriteLine(ProcessLine(line.PhraseText));
                     }
                     sw.Dispose();
                     if (!export_harm)
@@ -3565,9 +3565,9 @@ namespace Nautilus
                 if (Harmonies1.Count > 0)
                 {
                     var sw = new StreamWriter(folder + harm1, false);
-                    foreach (var line in Harmonies1.Where(line => !string.IsNullOrWhiteSpace(line.Phrase)))
+                    foreach (var line in Harmonies1.Where(line => !string.IsNullOrWhiteSpace(line.PhraseText)))
                     {
-                        sw.WriteLine(ProcessLine(line.Phrase));
+                        sw.WriteLine(ProcessLine(line.PhraseText));
                     }
                     sw.Dispose();
                     exported = exported + "\n" + harm1;
@@ -3576,9 +3576,9 @@ namespace Nautilus
                 if (Harmonies2.Count > 0)
                 {
                     var sw = new StreamWriter(folder + harm2, false);
-                    foreach (var line in Harmonies2.Where(line => !string.IsNullOrWhiteSpace(line.Phrase)))
+                    foreach (var line in Harmonies2.Where(line => !string.IsNullOrWhiteSpace(line.PhraseText)))
                     {
-                        sw.WriteLine(ProcessLine(line.Phrase));
+                        sw.WriteLine(ProcessLine(line.PhraseText));
                     }
                     sw.Dispose();
                     exported = exported + "\n" + harm2;
@@ -3587,9 +3587,9 @@ namespace Nautilus
                 if (Harmonies3.Count > 0)
                 {
                     var sw = new StreamWriter(folder + harm3, false);
-                    foreach (var line in Harmonies3.Where(line => !string.IsNullOrWhiteSpace(line.Phrase)))
+                    foreach (var line in Harmonies3.Where(line => !string.IsNullOrWhiteSpace(line.PhraseText)))
                     {
-                        sw.WriteLine(ProcessLine(line.Phrase));
+                        sw.WriteLine(ProcessLine(line.PhraseText));
                     }
                     sw.Dispose();
                     exported = exported + "\n" + harm3;
@@ -4289,7 +4289,7 @@ namespace Nautilus
                         }
                         else if (trackname.Contains("HARM3") && chkHarms.Checked)
                         {
-                            foreach (var harmony in Harmonies1.Select(harm => new LyricPhrase { PhraseEnd = harm.PhraseEnd, PhraseStart = harm.PhraseStart, Phrase = "" }))
+                            foreach (var harmony in Harmonies1.Select(harm => new LyricPhrase { PhraseEnd = harm.PhraseEnd, PhraseStart = harm.PhraseStart, PhraseText = "" }))
                             {
                                 Harmonies3.Add(harmony);
                             }
@@ -4306,22 +4306,22 @@ namespace Nautilus
                 var FoundVocals = new List<LyricPhrase>();
                 if (LeadVocals.Any())
                 {
-                    FoundVocals.AddRange(from line in LeadVocals where LineContains(ProcessLine(line.Phrase, true), SearchTerm) select line);
+                    FoundVocals.AddRange(from line in LeadVocals where LineContains(ProcessLine(line.PhraseText, true), SearchTerm) select line);
                 }
                 var FoundHarm1 = new List<LyricPhrase>();
                 if (Harmonies1.Any())
                 {
-                    FoundHarm1.AddRange(from line in Harmonies1 where LineContains(ProcessLine(line.Phrase, true), SearchTerm) select line);
+                    FoundHarm1.AddRange(from line in Harmonies1 where LineContains(ProcessLine(line.PhraseText, true), SearchTerm) select line);
                 }
                 var FoundHarm2 = new List<LyricPhrase>();
                 if (Harmonies2.Any())
                 {
-                    FoundHarm2.AddRange(from line in Harmonies2 where LineContains(ProcessLine(line.Phrase, true), SearchTerm) select line);
+                    FoundHarm2.AddRange(from line in Harmonies2 where LineContains(ProcessLine(line.PhraseText, true), SearchTerm) select line);
                 }
                 var FoundHarm3 = new List<LyricPhrase>();
                 if (Harmonies3.Any())
                 {
-                    FoundHarm3.AddRange(from line in Harmonies3 where LineContains(ProcessLine(line.Phrase, true), SearchTerm) select line);
+                    FoundHarm3.AddRange(from line in Harmonies3 where LineContains(ProcessLine(line.PhraseText, true), SearchTerm) select line);
                 }
 
                 if (!FoundVocals.Any() && ((!FoundHarm1.Any() && !FoundHarm2.Any() && !FoundHarm3.Any()) || ignoreHarmonies.Checked)) continue;
@@ -4406,7 +4406,7 @@ namespace Nautilus
                 var end = Parser.GetSongDuration(Convert.ToInt64(line.PhraseEnd * 1000).ToString(CultureInfo.InvariantCulture));
                 Log(ProcessLine("[" + start + " to " + end + "]"));
             }
-            Log(ProcessLine(line.Phrase));
+            Log(ProcessLine(line.PhraseText));
         }
 
         private static bool LineContains(string line, string search_term)
@@ -4593,12 +4593,5 @@ namespace Nautilus
             AnalyzeMoggFiles(new List<string> { MOGG[0] });
             AnalyzeAlbumArt(PNG_PS3[0]);
         }              
-    }
-
-    public class LyricPhrase
-    {
-        public string Phrase { get; set; }
-        public double PhraseStart { get; set; }
-        public double PhraseEnd { get; set; }
-    }
+    }    
 }

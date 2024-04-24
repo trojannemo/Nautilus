@@ -32,6 +32,8 @@ namespace Nautilus
         {
             this.components = new System.ComponentModel.Container();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.label10 = new System.Windows.Forms.Label();
+            this.txtTrack = new System.Windows.Forms.TextBox();
             this.chkRating = new System.Windows.Forms.CheckBox();
             this.lblRating = new System.Windows.Forms.Label();
             this.cboRating = new System.Windows.Forms.ComboBox();
@@ -175,8 +177,7 @@ namespace Nautilus
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.powerGigWorker = new System.ComponentModel.BackgroundWorker();
             this.bandFuseWorker = new System.ComponentModel.BackgroundWorker();
-            this.txtTrack = new System.Windows.Forms.TextBox();
-            this.label10 = new System.Windows.Forms.Label();
+            this.lblLyrics = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreUp)).BeginInit();
@@ -298,6 +299,26 @@ namespace Nautilus
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(552, 142);
             this.panel1.TabIndex = 2;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(226, 99);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(45, 13);
+            this.label10.TabIndex = 53;
+            this.label10.Text = "Track #";
+            // 
+            // txtTrack
+            // 
+            this.txtTrack.Location = new System.Drawing.Point(229, 114);
+            this.txtTrack.MaxLength = 4;
+            this.txtTrack.Name = "txtTrack";
+            this.txtTrack.Size = new System.Drawing.Size(42, 20);
+            this.txtTrack.TabIndex = 52;
+            this.txtTrack.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.toolTip1.SetToolTip(this.txtTrack, "Enter year of release here");
+            this.txtTrack.TextChanged += new System.EventHandler(this.txtTrack_TextChanged);
             // 
             // chkRating
             // 
@@ -909,7 +930,7 @@ namespace Nautilus
             this.panel2.Controls.Add(this.btnLoad);
             this.panel2.Controls.Add(this.btnSave);
             this.panel2.Controls.Add(this.btnClear);
-            this.panel2.Location = new System.Drawing.Point(8, 531);
+            this.panel2.Location = new System.Drawing.Point(8, 556);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(552, 80);
             this.panel2.TabIndex = 3;
@@ -1934,7 +1955,7 @@ namespace Nautilus
             this.panelPlay.Controls.Add(this.picPlayGuitar);
             this.panelPlay.Controls.Add(this.picPlayBass);
             this.panelPlay.Controls.Add(this.picPlayDrums);
-            this.panelPlay.Location = new System.Drawing.Point(8, 619);
+            this.panelPlay.Location = new System.Drawing.Point(8, 644);
             this.panelPlay.Name = "panelPlay";
             this.panelPlay.Size = new System.Drawing.Size(552, 88);
             this.panelPlay.TabIndex = 31;
@@ -1997,32 +2018,25 @@ namespace Nautilus
             this.bandFuseWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bandFuseWorker_DoWork);
             this.bandFuseWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bandFuseWorker_RunWorkerCompleted);
             // 
-            // txtTrack
+            // lblLyrics
             // 
-            this.txtTrack.Location = new System.Drawing.Point(229, 114);
-            this.txtTrack.MaxLength = 4;
-            this.txtTrack.Name = "txtTrack";
-            this.txtTrack.Size = new System.Drawing.Size(42, 20);
-            this.txtTrack.TabIndex = 52;
-            this.txtTrack.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.toolTip1.SetToolTip(this.txtTrack, "Enter year of release here");
-            this.txtTrack.TextChanged += new System.EventHandler(this.txtTrack_TextChanged);
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(226, 99);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(45, 13);
-            this.label10.TabIndex = 53;
-            this.label10.Text = "Track #";
+            this.lblLyrics.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblLyrics.ForeColor = System.Drawing.Color.White;
+            this.lblLyrics.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblLyrics.Location = new System.Drawing.Point(8, 530);
+            this.lblLyrics.Name = "lblLyrics";
+            this.lblLyrics.Size = new System.Drawing.Size(553, 20);
+            this.lblLyrics.TabIndex = 65;
+            this.lblLyrics.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblLyrics.Paint += new System.Windows.Forms.PaintEventHandler(this.lblLyrics_Paint);
             // 
             // Visualizer
             // 
             this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.ClientSize = new System.Drawing.Size(568, 715);
+            this.ClientSize = new System.Drawing.Size(568, 739);
+            this.Controls.Add(this.lblLyrics);
             this.Controls.Add(this.picLogo);
             this.Controls.Add(this.picPin);
             this.Controls.Add(this.panelPlay);
@@ -2278,5 +2292,6 @@ namespace Nautilus
         private ToolStripSeparator toolStripMenuItem4;
         private Label label10;
         private TextBox txtTrack;
+        private Label lblLyrics;
     }
 }

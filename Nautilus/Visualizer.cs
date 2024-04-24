@@ -124,8 +124,8 @@ namespace Nautilus
         private readonly nTools nautilus3;
         private bool isTBRBDLC;
         private bool isGDRBDLC;
-        private int maxHeight = 760;
-        private int minHeight = 658;
+        private int maxHeight = 778;
+        private int minHeight = 682;
         private readonly List<int> BassStreams;
         private string[] opusFiles;
         private string[] oggFiles;
@@ -146,6 +146,7 @@ namespace Nautilus
         private string XMA_EXT_PATH;
         private bool isBandFuse;
         private bool isYARG;
+        private readonly MIDIStuff MIDITools;
 
         public Visualizer(Color ButtonBackColor, Color ButtonTextColor, string con)
         {
@@ -156,6 +157,7 @@ namespace Nautilus
             Tools = new NemoTools();
             nautilus3 = new nTools();
             Parser = new DTAParser();
+            MIDITools = new MIDIStuff();
             picLogo.AllowDrop = true;
             FilesToDelete = new List<string>();
             BassStreams = new List<int>();
@@ -234,10 +236,27 @@ namespace Nautilus
             }
         }
 
-        public void ReadMidi(string midifile)
+        public void ReadMidi(string midiFile)
         {
+            MIDITools.Initialize(true);
+            MIDITools.ReadMIDIFile(midiFile);
+            try
+            {
+                if (MIDITools.LyricsVocals.Lyrics.Any() || MIDITools.PhrasesVocals.Phrases.Any())
+                {
+                    lblLyrics.Visible = true;
+                }
+                else
+                {
+                    lblLyrics.Visible = false;
+                }
+            }
+            catch
+            {
+                lblLyrics.Visible = false;
+            }
             if (isXOnly) return;
-            if (Tools.DoesMidiHaveEMH(midifile, ProKeysEnabled)) return;
+            if (Tools.DoesMidiHaveEMH(midiFile, ProKeysEnabled)) return;
             if ((picIcon1.Image != null && picIcon2.Image != null) || isXOnly || Tools.MIDI_ERROR_MESSAGE.ToLowerInvariant().Contains("could not load midi file")) return;
             sendIcon(picXOnly);
             if (MessageBox.Show("Marked as expert only based on MIDI file\n\nClick OK to see more details, click Cancel to go back",
@@ -294,6 +313,9 @@ namespace Nautilus
             isTBRBDLC = false;
             isGDRBDLC = false;
             isBandFuse = false;
+            MIDITools.Initialize(false);
+            lblLyrics.Invalidate();
+            lblLyrics.Visible = false;
             StopPlayback();            
             picPlayPause.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\play\\play.png");
             picPlayPause.Tag = "play";
@@ -319,6 +341,7 @@ namespace Nautilus
             txtArtist2.Text = null;
             txtTime.Text = null;
             txtAlbum.Text = null;
+            txtTrack.Text = null;
             txtYear.Text = null;
             txtYear2.Text = null;
             txtGenre.Text = null;
@@ -4056,6 +4079,7 @@ namespace Nautilus
                     PlaybackSeconds = Bass.BASS_ChannelBytes2Seconds(BassStream, pos); // the elapsed time length
                     UpdateTime();
                     DrawSpectrum();
+                    lblLyrics.Invalidate();
                     if (picPreview.Tag.ToString() != "preview") return;
                     //calculate how many seconds are left to play
                     var time_left = (((double)Parser.Songs[0].PreviewStart+30000) / 1000) - PlaybackSeconds;
@@ -5308,6 +5332,107 @@ namespace Nautilus
             picVisualizer.Invalidate();
             if (reset) return;
             MeasureAlbum();
+        }
+
+        private void lblLyrics_Paint(object sender, PaintEventArgs e)
+        {
+            if (MIDITools == null) return;
+            if (MIDITools.PhrasesVocals == null) return;
+            if (!MIDITools.PhrasesVocals.Phrases.Any()) return;
+            if (MIDITools.LyricsVocals == null) return;
+            if (!MIDITools.LyricsVocals.Lyrics.Any()) return;
+            var phrases = MIDITools.PhrasesVocals.Phrases;
+            var lyrics = MIDITools.LyricsVocals.Lyrics;
+            DrawLyricsKaraoke(phrases, lyrics, lblLyrics, Harm1Color, e.Graphics);
+        }
+
+        private readonly System.Drawing.Color Harm1Color = System.Drawing.Color.Yellow;// FromArgb(29, 163, 201);
+        private readonly System.Drawing.Color LabelBackgroundColor = System.Drawing.Color.FromArgb(127, 40, 40, 40);
+        private void DrawLyricsKaraoke(IEnumerable<LyricPhrase> phrases, IEnumerable<Lyric> lyrics, Control label, Color color, Graphics graphics)
+        {
+            var time = GetCorrectedTime();
+            var doWholeWordsLyrics = true;//force it here
+            label.Text = "";
+            using (var pen = new SolidBrush(LabelBackgroundColor))
+            {
+                graphics.FillRectangle(pen, label.ClientRectangle);
+            }
+            LyricPhrase line = null;
+            foreach (var lyric in phrases.TakeWhile(lyric => lyric.PhraseStart <= time).Where(lyric => lyric.PhraseEnd >= time))
+            {
+                line = lyric;
+            }
+            if (line == null || string.IsNullOrEmpty(line.PhraseText)) return;
+            var measure = TextRenderer.MeasureText(ProcessLine(line.PhraseText, doWholeWordsLyrics), label.Font);
+            var left = (label.Width - measure.Width) / 2;
+            TextRenderer.DrawText(graphics, ProcessLine(line.PhraseText, doWholeWordsLyrics), label.Font, new Point(left, 0), Color.White);
+            var line2 = lyrics.Where(lyr => !(lyr.LyricStart < line.PhraseStart)).TakeWhile(lyr => !(lyr.LyricStart > time)).Aggregate("", (current, lyr) => current + " " + lyr.LyricText);
+            if (string.IsNullOrEmpty(line2)) return;
+            TextRenderer.DrawText(graphics, ProcessLine(line2, doWholeWordsLyrics), label.Font, new Point(left, 0), color);
+        }
+
+        private double GetCorrectedTime()
+        {
+            return PlaybackSeconds - ((double)BassBuffer / 1000);// - ((double)PlayingSong.PSDelay / 1000);
+        }
+
+        private string GetMusicNotes()
+        {
+            //"♫ ♫ ♫ ♫"
+            var quarter = (int)((PlaybackSeconds - (int)PlaybackSeconds) * 100);
+            string notes;
+            if (quarter >= 0 && quarter < 25)
+            {
+                notes = "♫";
+            }
+            else if (quarter >= 25 && quarter < 50)
+            {
+                notes = "♫ ♫";
+            }
+            else if (quarter >= 50 && quarter < 75)
+            {
+                notes = "♫ ♫ ♫";
+            }
+            else
+            {
+                notes = "♫ ♫ ♫ ♫";
+            }
+            return notes;
+        }
+
+        private static string ProcessLine(string line, bool clean)
+        {
+            if (line == null) return "";
+            string newline;
+            if (clean)
+            {
+                newline = line.Replace("$", "");
+                newline = newline.Replace("#", "");
+                newline = newline.Replace("^", "");
+                newline = newline.Replace("- + ", "");
+                newline = newline.Replace("+- ", "");
+                newline = newline.Replace("- ", "");
+                newline = newline.Replace(" + ", " ");
+                newline = newline.Replace(" +", "");
+                newline = newline.Replace("+ ", "");
+                newline = newline.Replace("+-", "");
+                newline = newline.Replace("=", "-");
+                newline = newline.Replace("§", "‿");
+                newline = newline.Replace("- ", "-").Trim();
+                if (newline.EndsWith("+", StringComparison.Ordinal))
+                {
+                    newline = newline.Substring(0, newline.Length - 1).Trim();
+                }
+                if (newline.EndsWith("-", StringComparison.Ordinal))
+                {
+                    newline = newline.Substring(0, newline.Length - 1);
+                }
+            }
+            else
+            {
+                newline = line;
+            }
+            return newline.Replace("/", "").Trim();
         }
     }   
 }

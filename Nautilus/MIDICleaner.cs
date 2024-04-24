@@ -2473,21 +2473,7 @@ namespace Nautilus
             }
             TopMost = picPin.Tag.ToString() == "pinned";
         }
-    }
-
-    public class TempoEvent
-    {
-        public long AbsoluteTime { get; set; }
-        public double RealTime { get; set; }
-        public double BPM { get; set; }
-    }
-
-    public class TimeSignature
-    {
-        public long AbsoluteTime { get; set; }
-        public int Numerator { get; set; }
-        public int Denominator { get; set; }
-    }
+    }          
 
     public class CameraCuts
     {
