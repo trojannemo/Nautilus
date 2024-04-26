@@ -1,10 +1,30 @@
 Nautilus
 Developed by TrojanNemo
-© 2013-2024
+¬© 2013-2024
 (with contributions from many!)
 -------------------
 
 FEATURES / CHANGE LOG:
+
+v5.1.1
+
+YARG/CH/PS CONVERTER
+- Added ability to decrypt and extract contents of YARG .yargsong files - click on "Tools -> Decrypt YARG yargsong files"
+
+VISUALIZER
+- Added support for YARG .yargsong files - just drag/drop and it'll play
+
+SETLIST MANAGER
+- Added ability to import PS4 songdta_ps4 files - you can either drag/drop one at time or drag a folder and let it search for all the songdta_ps4 files within that folder
+- Added ability to import rbdxcache files - just drag/drop like a regular songcache file
+
+PS3 SCANNER
+- Improved scanning of DTA files in all subfolders
+
+MIDI CLEANER
+- Fixed issue where it would remove the percussion markers for Harm1, which would in turn break percussion showing up in game - thanks to Blackened15 for raising the issue
+
+----------
 
 v5.1.0
 
@@ -2510,13 +2530,13 @@ X360 LIBRARY
 
 v1.3.0
 VISUALIZER (NEW!)
-ñ Just drag and drop your song into it and save the image locally and/or to imgur.com in seconds!
+‚Äì Just drag and drop your song into it and save the image locally and/or to imgur.com in seconds!
 
 ALBUM ART CONVERTER
-- mipmaps enabled again in Album Art Converter due to feedback that the song difficulty smaller icons werenít working well
+- mipmaps enabled again in Album Art Converter due to feedback that the song difficulty smaller icons weren‚Äôt working well
 
 CON EXPLORER
-- added button to ìVisualize!î the song, which will open it for you in Visualizer and preload all the information
+- added button to ‚ÄúVisualize!‚Äù the song, which will open it for you in Visualizer and preload all the information
 - fixed the bug that forced the form to close after extracting, now you can extract the package, and keep it open, visualize, re-sign, etc., without having to close and reopen the file!
 - heavily modified the look stay more in line with the rest of the software
 
@@ -2525,7 +2545,7 @@ PACK CREATOR
 - updated code that should yield faster packages and less errors
 
 GENERAL
-- added option to drag and drop up to 10 files at a time to the main form (to open in Package Explorer) ñ by request of C16
+- added option to drag and drop up to 10 files at a time to the main form (to open in Package Explorer) ‚Äì by request of C16
 - made small design changes throughout the whole program and further optimizing of the code
 
 ----------
