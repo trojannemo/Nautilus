@@ -1303,6 +1303,7 @@ namespace Nautilus
             rockBand2ToolStripMenuItem.Checked = false;
             rockBand3ToolStripMenuItem.Checked = false;
 
+            picPackage.Image = Resources.RB1;
             picContent.Image = Resources.RB1;
         }
 
@@ -1312,6 +1313,7 @@ namespace Nautilus
             rockBand2ToolStripMenuItem.Checked = true;
             rockBand3ToolStripMenuItem.Checked = false;
 
+            picPackage.Image = Resources.RB2;
             picContent.Image = Resources.RB2;
         }
 
@@ -1321,6 +1323,7 @@ namespace Nautilus
             rockBand2ToolStripMenuItem.Checked = false;
             rockBand3ToolStripMenuItem.Checked = true;
 
+            picPackage.Image = Resources.RB3;
             picContent.Image = Resources.RB3;
         }
 
