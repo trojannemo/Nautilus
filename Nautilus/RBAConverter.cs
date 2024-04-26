@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using Nautilus.Properties;
 using Nautilus.x360;
+using System.Security.Cryptography;
 
 namespace Nautilus
 {
@@ -27,6 +28,7 @@ namespace Nautilus
         private bool doLIVE;
         private readonly List<string> FilesToConvert;
         private readonly string StartupFolder;
+        private bool CONtoRBAMode;
 
         public RBAConverter(Color ButtonBackColor, Color ButtonTextColor, string inputfolder = "")
         {
@@ -34,7 +36,7 @@ namespace Nautilus
             Tools = new NemoTools();
             Parser = new DTAParser();
             FilesToConvert = new List<string>();
-            var formButtons = new List<Button> { btnRefresh, btnFolder, btnBegin };
+            var formButtons = new List<Button> { btnRefresh, btnFolder, btnBegin, btnCONtoRBA };
             foreach (var button in formButtons)
             {
                 button.BackColor = ButtonBackColor;
@@ -532,8 +534,13 @@ namespace Nautilus
 
         private void HandleDragDrop(object sender, DragEventArgs e)
         {
-            if (picWorking.Visible) return;
+            if (picWorking.Visible) return;            
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (CONtoRBAMode)
+            {
+                ConvertCONtoRBA(files[0]);
+                return;
+            }
             if (VariousFunctions.ReadFileType(files[0]) == XboxFileType.STFS)
             {
                 var xFile = new STFSPackage(files[0]);
@@ -558,7 +565,7 @@ namespace Nautilus
         {
             Log("Welcome to " + Text);
             Log("Drag and drop the RBA, CON or LIVE files here");
-            Log("Click 'Change Input Folder' to select folder with RBA files");
+            Log("Click 'Select Input Folder' to select folder with RBA files");
             Log("Click 'LIVE <-> CON' menu to batch convert LIVE and CON files");
             Log("Ready");
             LoadConfig();
@@ -847,5 +854,302 @@ namespace Nautilus
             }
             TopMost = picPin.Tag.ToString() == "pinned";
         }
+
+        private void btnCONtoRBA_Click(object sender, EventArgs e)
+        {
+            CONtoRBAMode = !CONtoRBAMode;
+            if (CONtoRBAMode)
+            {
+                Log("CON to RBA Mode enabled... drag and drop your CON file to be converted to RBA");
+            }
+            else
+            {
+                Log("CON to RBA Mode disabled... use as usual");
+            }
+        }
+
+        private void ConvertCONtoRBA(string file)
+        {
+            if (picWorking.Visible) return;            
+            if (VariousFunctions.ReadFileType(file) != XboxFileType.STFS) return;
+            var folder = Application.StartupPath + "\\conTemp\\";
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            Log("Received file " + Path.GetFileName(file));
+            var xCON = new STFSPackage(file);
+            if (!xCON.ParseSuccess)
+            {
+                Log("Couldn't parse that file, can't continue");
+                return;
+            }
+            Log("Converting from CON format to RBA format");
+            Parser.ReadDTA(xCON);
+            xCON.ExtractPayload(folder, true, true);
+            xCON.CloseIO();
+            var DTAs = Directory.GetFiles(folder, "songs.dta", SearchOption.AllDirectories);
+            if (!DTAs.Any())
+            {
+                Log("No songs.dta file found, can't continue");
+                return;
+            }
+            var MOGGs = Directory.GetFiles(folder, "*.mogg", SearchOption.AllDirectories);
+            if (!MOGGs.Any())
+            {
+                Log("No mogg file found, can't continue");
+                return;
+            }
+            var MIDIs = Directory.GetFiles(folder, "*.mid", SearchOption.AllDirectories);
+            if (!MIDIs.Any())
+            {
+                Log("No midi file found, can't continue");
+                return;
+            }
+            var MILOs = Directory.GetFiles(folder, "*.milo_xbox", SearchOption.AllDirectories);
+            if (!MILOs.Any())
+            {
+                Log("No milo_xbox file found, can't continue");
+                return;
+            }
+            var ARTs = Directory.GetFiles(folder, "*.png_xbox", SearchOption.AllDirectories);
+            if (!ARTs.Any())
+            {
+                Log("No album art file found, can't continue");
+                return;
+            }
+            var art = folder + "rba.bmp";
+            var midi = folder + "rba.mid";
+            var mogg = folder + "rba.mogg";
+            var milo = folder + "rba.milo_xbox";
+            Tools.ConvertRBImage(ARTs[0], art, "bmp");
+            File.Copy(MIDIs[0], midi, true);
+            File.Copy(MOGGs[0], mogg, true);
+            File.Copy(MILOs[0], milo, true);
+
+            var backend = folder + "backend.raw";
+            var sw = new StreamWriter(backend, false);
+            sw.WriteLine("(");
+            sw.WriteLine("   \"backend\"");
+            sw.WriteLine("   (");
+            sw.WriteLine("      'author'");
+            var author = string.IsNullOrEmpty(Parser.Songs[0].ChartAuthor) ? "Unknown" : Parser.Songs[0].ChartAuthor;
+            sw.WriteLine("      \"" + author + "\"");
+            sw.WriteLine("   )");
+            sw.WriteLine("   ('language_count' 1)");
+            sw.WriteLine("   (");
+            sw.WriteLine("      'languages'");
+            sw.WriteLine("      ('ugc_lang_english')");
+            sw.WriteLine("   )");
+            sw.WriteLine("   ('price' 80)");
+            sw.WriteLine("   ('country' 'ugc_country_us')");
+            sw.WriteLine("   (");
+            sw.WriteLine("      'release_label'");
+            sw.WriteLine("      \"Nautilus\"");
+            sw.WriteLine("   )");
+            sw.WriteLine(")");
+            sw.Dispose();
+
+            var rawDTA = folder + "songs.dta.raw";
+            var shortName = Parser.Songs[0].ShortName;
+            var songID = Parser.Songs[0].SongIdString;
+            var internalName = Parser.Songs[0].InternalName;
+            sw = new StreamWriter(rawDTA, false);
+            foreach (var line in Parser.Songs[0].DTALines)
+            {
+                if (line.Contains(shortName))
+                {
+                    sw.WriteLine(line.Replace(shortName, "song"));
+                }
+                else if (line.Contains(internalName))
+                {
+                    sw.WriteLine(line.Replace(internalName, "song"));
+                }
+                else if (line.Contains(songID))
+                {
+                    sw.WriteLine(line.Replace(songID, "0"));
+                }
+                else if (!line.StartsWith(";"))
+                {
+                    sw.WriteLine(line);
+                }
+            }
+            sw.Dispose();
+
+            var rba = file + ".rba";
+            Tools.DeleteFile(rba);
+
+            string dtaHash = "";
+            string dtaLength = "";
+            string midiHash = "";
+            string midiLength = "";
+            string moggHash = "";
+            string moggLength = "";
+            string miloHash = "";
+            string miloLength = "";
+            string artHash = "";
+            string artLength = "";
+            string backendHash = "";
+            string backendLength = "";
+
+            dtaHash = BitConverter.ToString(getHash(rawDTA)).Replace("-", string.Empty);
+            dtaLength = getLength(rawDTA).ToString();
+            //Log("DTA file hash is " + dtaHash);
+            //Log("DTA file length is " + dtaLength);
+
+            artHash = BitConverter.ToString(getHash(art)).Replace("-", string.Empty);
+            artLength = getLength(art).ToString();
+            //Log("ALBUM ART file hash is " + artHash);
+            //Log("ALBUM ART file length is " + artLength);
+
+            midiHash = BitConverter.ToString(getHash(midi)).Replace("-", string.Empty);
+            midiLength = getLength(midi).ToString();
+            //Log("MIDI file hash is " + midiHash);
+            //Log("MIDI file length is " + midiLength);
+
+            moggHash = BitConverter.ToString(getHash(mogg)).Replace("-", string.Empty);
+            moggLength = getLength(mogg).ToString();
+            //Log("MOGG file hash is " + moggHash);
+            //Log("MOGG file length is " + moggLength);
+
+            miloHash = BitConverter.ToString(getHash(milo)).Replace("-", string.Empty);
+            miloLength = getLength(milo).ToString();
+            //Log("MILO_XBOX file hash is " + miloHash);
+            //Log("MILO_XBOX file length is " + miloLength);
+
+            backendHash = BitConverter.ToString(getHash(backend)).Replace("-", string.Empty);
+            backendLength = getLength(backend).ToString();
+            //Log("BACKEND file hash is " + backendHash);
+            //Log("BACKEND file length is " + backendLength);
+
+            byte[] buffer1 = new byte[4]
+      {
+        (byte) 82,
+        (byte) 66,
+        (byte) 83,
+        (byte) 70
+      };
+            byte[] buffer2 = new byte[38]
+      {
+        (byte) 2,
+        (byte) 0,
+        (byte) 34,
+        (byte) 0,
+        (byte) 2,
+        (byte) 49,
+        (byte) 49,
+        (byte) 48,
+        (byte) 52,
+        (byte) 49,
+        (byte) 49,
+        (byte) 95,
+        (byte) 65,
+        (byte) 0,
+        (byte) 48,
+        (byte) 52,
+        (byte) 49,
+        (byte) 49,
+        (byte) 95,
+        (byte) 65,
+        (byte) 0,
+        (byte) 2,
+        (byte) 49,
+        (byte) 49,
+        (byte) 48,
+        (byte) 52,
+        (byte) 49,
+        (byte) 49,
+        (byte) 95,
+        (byte) 65,
+        (byte) 0,
+        (byte) 112,
+        (byte) 105,
+        (byte) 108,
+        (byte) 101,
+        (byte) 114,
+        (byte) 58,
+        (byte) 0
+      };
+            int num1 = Convert.ToInt32(dtaLength) + 262;
+            int num2 = Convert.ToInt32(midiLength) + num1;
+            int num3 = Convert.ToInt32(moggLength) + num2;
+            int num4 = Convert.ToInt32(miloLength) + num3;
+            int num5 = 0;
+            int num6 = Convert.ToInt32(artLength) + (num4);
+            using (BinaryWriter binaryWriter = new BinaryWriter((Stream)File.OpenWrite("header.temp")))
+            {
+                binaryWriter.Write(buffer1);
+                binaryWriter.Write(4);
+                binaryWriter.Write(262);
+                binaryWriter.Write(num1);
+                binaryWriter.Write(num2);
+                binaryWriter.Write(num3);
+                binaryWriter.Write(num4);
+                binaryWriter.Write(num5);
+                binaryWriter.Write(num6);
+                binaryWriter.BaseStream.Position = 36L;
+                binaryWriter.Write(Convert.ToInt32(dtaLength));
+                binaryWriter.Write(Convert.ToInt32(midiLength));
+                binaryWriter.Write(Convert.ToInt32(moggLength));
+                binaryWriter.Write(Convert.ToInt32(miloLength));
+                binaryWriter.Write(Convert.ToInt32(artLength));
+                binaryWriter.Write(0);
+                binaryWriter.Write(Convert.ToInt32(backendLength));
+                binaryWriter.BaseStream.Position = 64L;
+                binaryWriter.Write(getHash(rawDTA));
+                binaryWriter.Write(getHash(midi));
+                binaryWriter.Write(getHash(mogg));
+                binaryWriter.Write(getHash(milo));
+                binaryWriter.Write(getHash(art));
+                binaryWriter.Write(0);
+                binaryWriter.Write(getHash(backend));
+                binaryWriter.BaseStream.Position = 224L;
+                binaryWriter.Write(buffer2);
+                binaryWriter.Close();
+            }
+            byte[] hash = getHash("header.temp");
+            File.Copy("header.temp", rba);
+            File.Delete("header.temp");
+            using (BinaryWriter binaryWriter = new BinaryWriter((Stream)File.OpenWrite(rba)))
+            {
+                binaryWriter.BaseStream.Position = 204L;
+                binaryWriter.Write(hash);
+                binaryWriter.BaseStream.Position = 262L;
+                binaryWriter.Write(File.ReadAllBytes(rawDTA));
+                binaryWriter.Write(File.ReadAllBytes(midi));
+                binaryWriter.Write(File.ReadAllBytes(mogg));
+                binaryWriter.Write(File.ReadAllBytes(milo));
+                binaryWriter.Write(File.ReadAllBytes(art));
+                binaryWriter.Write(File.ReadAllBytes(backend));
+                binaryWriter.Close();
+            }
+
+            Tools.DeleteFolder(folder, true);
+
+            if (File.Exists(rba))
+            {
+                Log("Process completed");
+                MessageBox.Show("Process completed successfully ... I think\n\nRBA file is in the same folder as your source CON file", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private static byte[] getHash(string input)
+        {
+            //code taken from Pikmin's RBA Builder 2.0
+            using (FileStream inputStream = File.OpenRead(input))
+            {
+                return new SHA1Managed().ComputeHash((Stream)inputStream);
+            }
+        }
+
+        private static long getLength(string input)
+        {
+            //code taken from Pikmin's RBA Builder 2.0
+            using (FileStream fileStream = File.OpenRead(input))
+            {
+                return fileStream.Length;
+            }
+        }
+
     }
 }

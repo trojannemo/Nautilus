@@ -38,6 +38,7 @@
             this.btnBegin = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.picPin = new System.Windows.Forms.PictureBox();
+            this.btnCONtoRBA = new System.Windows.Forms.Button();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.picWorking = new System.Windows.Forms.PictureBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -174,6 +175,22 @@
             this.picPin.Tag = "unpinned";
             this.toolTip1.SetToolTip(this.picPin, "Click to pin on top");
             this.picPin.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picPin_MouseClick);
+            // 
+            // btnCONtoRBA
+            // 
+            this.btnCONtoRBA.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(129)))), ((int)(((byte)(216)))));
+            this.btnCONtoRBA.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnCONtoRBA.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCONtoRBA.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCONtoRBA.ForeColor = System.Drawing.Color.White;
+            this.btnCONtoRBA.Location = new System.Drawing.Point(12, 310);
+            this.btnCONtoRBA.Name = "btnCONtoRBA";
+            this.btnCONtoRBA.Size = new System.Drawing.Size(98, 30);
+            this.btnCONtoRBA.TabIndex = 65;
+            this.btnCONtoRBA.Text = "CON to RBA";
+            this.toolTip1.SetToolTip(this.btnCONtoRBA, "Click to begin");
+            this.btnCONtoRBA.UseVisualStyleBackColor = false;
+            this.btnCONtoRBA.Click += new System.EventHandler(this.btnCONtoRBA_Click);
             // 
             // backgroundWorker1
             // 
@@ -325,6 +342,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ClientSize = new System.Drawing.Size(614, 349);
+            this.Controls.Add(this.btnCONtoRBA);
             this.Controls.Add(this.picPin);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.picWorking);
@@ -382,5 +400,6 @@
         private System.Windows.Forms.ToolStripMenuItem CONtoLIVE;
         private System.ComponentModel.BackgroundWorker backgroundWorker2;
         private System.Windows.Forms.PictureBox picPin;
+        private System.Windows.Forms.Button btnCONtoRBA;
     }
 }
