@@ -5343,15 +5343,26 @@ namespace Nautilus
             if (!MIDITools.LyricsVocals.Lyrics.Any()) return;
             var phrases = MIDITools.PhrasesVocals.Phrases;
             var lyrics = MIDITools.LyricsVocals.Lyrics;
-            DrawLyricsKaraoke(phrases, lyrics, lblLyrics, Harm1Color, e.Graphics);
+            if (lyricsFixed.Checked)
+            {
+                DrawLyricsStatic(phrases, lblLyrics, Color.White, e.Graphics);
+            }
+            else if (lyricsScrolling.Checked)
+            {
+                DrawLyricsScrolling(lyrics, lblLyrics, Color.White, e.Graphics);
+            }
+            else
+            {
+                DrawLyricsKaraoke(phrases, lyrics, lblLyrics, lyricColor, e.Graphics);
+            }
         }
 
-        private readonly System.Drawing.Color Harm1Color = System.Drawing.Color.Yellow;// FromArgb(29, 163, 201);
+        private readonly System.Drawing.Color lyricColor = System.Drawing.Color.Yellow;
         private readonly System.Drawing.Color LabelBackgroundColor = System.Drawing.Color.FromArgb(127, 40, 40, 40);
         private void DrawLyricsKaraoke(IEnumerable<LyricPhrase> phrases, IEnumerable<Lyric> lyrics, Control label, Color color, Graphics graphics)
         {
             var time = GetCorrectedTime();
-            var doWholeWordsLyrics = true;//force it here
+            var doWholeWordsLyrics = useWholeWords.Checked;
             label.Text = "";
             using (var pen = new SolidBrush(LabelBackgroundColor))
             {
@@ -5369,6 +5380,52 @@ namespace Nautilus
             var line2 = lyrics.Where(lyr => !(lyr.LyricStart < line.PhraseStart)).TakeWhile(lyr => !(lyr.LyricStart > time)).Aggregate("", (current, lyr) => current + " " + lyr.LyricText);
             if (string.IsNullOrEmpty(line2)) return;
             TextRenderer.DrawText(graphics, ProcessLine(line2, doWholeWordsLyrics), label.Font, new Point(left, 0), color);
+        }
+
+        private void DrawLyricsStatic(IEnumerable<LyricPhrase> phrases, Control label, System.Drawing.Color color, Graphics graphics)
+        {
+            var time = GetCorrectedTime();
+            var doWholeWordsLyrics = useWholeWords.Checked;
+            label.Text = "";
+            using (var pen = new SolidBrush(LabelBackgroundColor))
+            {
+                graphics.FillRectangle(pen, label.ClientRectangle);
+            }
+            LyricPhrase phrase = null;
+            foreach (var lyric in phrases.TakeWhile(lyric => lyric.PhraseStart <= time).Where(lyric => lyric.PhraseEnd >= time))
+            {
+                phrase = lyric;
+            }
+            string line;
+            try
+            {
+                line = phrase == null || string.IsNullOrEmpty(phrase.PhraseText.Trim()) ? GetMusicNotes() : ProcessLine(phrase.PhraseText, doWholeWordsLyrics);
+            }
+            catch (Exception)
+            {
+                line = GetMusicNotes();
+            }
+            var measure = TextRenderer.MeasureText(ProcessLine(line, doWholeWordsLyrics), label.Font);
+            var left = (label.Width - measure.Width) / 2;
+            TextRenderer.DrawText(graphics, line, label.Font, new Point(left, 0), color);
+        }
+
+        private void DrawLyricsScrolling(List<Lyric> lyrics, Control label, System.Drawing.Color color, Graphics graphics)
+        {           
+            var time = GetCorrectedTime();
+            var playbackWindow = 3.0;
+            label.Text = "";
+            using (var pen = new SolidBrush(LabelBackgroundColor))
+            {
+                graphics.FillRectangle(pen, label.ClientRectangle);
+            }
+            for (var i = 0; i < lyrics.Count(); i++)
+            {
+                if (lyrics[i].LyricStart < time) continue;
+                if (lyrics[i].LyricStart > time + playbackWindow) return;
+                var left = (int)(((lyrics[i].LyricStart - time) / playbackWindow) * label.Width);
+                TextRenderer.DrawText(graphics, ProcessLine(lyrics[i].LyricText, true), label.Font, new Point(left, 0), color);
+            }
         }
 
         private double GetCorrectedTime()
@@ -5433,6 +5490,39 @@ namespace Nautilus
                 newline = line;
             }
             return newline.Replace("/", "").Trim();
+        }
+
+        private void lyricsKaraoke_Click(object sender, EventArgs e)
+        {
+            lyricsKaraoke.Checked = true;
+            lyricsFixed.Checked = false;
+            lyricsScrolling.Checked = false;
+        }
+
+        private void lyricsScrolling_Click(object sender, EventArgs e)
+        {
+            lyricsKaraoke.Checked = false;
+            lyricsFixed.Checked = false;
+            lyricsScrolling.Checked = true;
+        }
+
+        private void lyricsFixed_Click(object sender, EventArgs e)
+        {
+            lyricsKaraoke.Checked = false;
+            lyricsFixed.Checked = true;
+            lyricsScrolling.Checked = false;
+        }
+
+        private void useWholeWords_Click(object sender, EventArgs e)
+        {
+            useWholeWords.Checked = true;
+            useSyllables.Checked = false;
+        }
+
+        private void useSyllables_Click(object sender, EventArgs e)
+        {
+            useSyllables.Checked = true;
+            useWholeWords.Checked = false;
         }
     }   
 }

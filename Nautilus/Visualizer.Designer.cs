@@ -155,6 +155,10 @@ namespace Nautilus
             this.encodeOpus = new System.Windows.Forms.ToolStripMenuItem();
             this.encodeMP3 = new System.Windows.Forms.ToolStripMenuItem();
             this.encodeOGG = new System.Windows.Forms.ToolStripMenuItem();
+            this.lyricOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lyricsKaraoke = new System.Windows.Forms.ToolStripMenuItem();
+            this.lyricsScrolling = new System.Windows.Forms.ToolStripMenuItem();
+            this.lyricsFixed = new System.Windows.Forms.ToolStripMenuItem();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -178,6 +182,9 @@ namespace Nautilus
             this.powerGigWorker = new System.ComponentModel.BackgroundWorker();
             this.bandFuseWorker = new System.ComponentModel.BackgroundWorker();
             this.lblLyrics = new System.Windows.Forms.Label();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
+            this.useWholeWords = new System.Windows.Forms.ToolStripMenuItem();
+            this.useSyllables = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreUp)).BeginInit();
@@ -1662,6 +1669,7 @@ namespace Nautilus
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolsToolStripMenuItem,
+            this.lyricOptionsToolStripMenuItem,
             this.fileToolStripMenuItem,
             this.fontsToolStripMenuItem,
             this.helpToolStripMenuItem});
@@ -1831,6 +1839,45 @@ namespace Nautilus
             this.encodeOGG.Size = new System.Drawing.Size(126, 22);
             this.encodeOGG.Text = "Use OGG";
             this.encodeOGG.Click += new System.EventHandler(this.encodeFLAC_Click);
+            // 
+            // lyricOptionsToolStripMenuItem
+            // 
+            this.lyricOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lyricsKaraoke,
+            this.lyricsScrolling,
+            this.lyricsFixed,
+            this.toolStripMenuItem5,
+            this.useWholeWords,
+            this.useSyllables});
+            this.lyricOptionsToolStripMenuItem.Name = "lyricOptionsToolStripMenuItem";
+            this.lyricOptionsToolStripMenuItem.Size = new System.Drawing.Size(88, 20);
+            this.lyricOptionsToolStripMenuItem.Text = "Lyric Options";
+            // 
+            // lyricsKaraoke
+            // 
+            this.lyricsKaraoke.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.lyricsKaraoke.Checked = true;
+            this.lyricsKaraoke.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.lyricsKaraoke.Name = "lyricsKaraoke";
+            this.lyricsKaraoke.Size = new System.Drawing.Size(189, 22);
+            this.lyricsKaraoke.Text = "Karaoke";
+            this.lyricsKaraoke.Click += new System.EventHandler(this.lyricsKaraoke_Click);
+            // 
+            // lyricsScrolling
+            // 
+            this.lyricsScrolling.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.lyricsScrolling.Name = "lyricsScrolling";
+            this.lyricsScrolling.Size = new System.Drawing.Size(189, 22);
+            this.lyricsScrolling.Text = "Scrolling";
+            this.lyricsScrolling.Click += new System.EventHandler(this.lyricsScrolling_Click);
+            // 
+            // lyricsFixed
+            // 
+            this.lyricsFixed.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.lyricsFixed.Name = "lyricsFixed";
+            this.lyricsFixed.Size = new System.Drawing.Size(189, 22);
+            this.lyricsFixed.Text = "Fixed";
+            this.lyricsFixed.Click += new System.EventHandler(this.lyricsFixed_Click);
             // 
             // fileToolStripMenuItem
             // 
@@ -2029,6 +2076,29 @@ namespace Nautilus
             this.lblLyrics.TabIndex = 65;
             this.lblLyrics.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblLyrics.Paint += new System.Windows.Forms.PaintEventHandler(this.lblLyrics_Paint);
+            // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(186, 6);
+            // 
+            // useWholeWords
+            // 
+            this.useWholeWords.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.useWholeWords.Checked = true;
+            this.useWholeWords.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.useWholeWords.Name = "useWholeWords";
+            this.useWholeWords.Size = new System.Drawing.Size(189, 22);
+            this.useWholeWords.Text = "Use whole words";
+            this.useWholeWords.Click += new System.EventHandler(this.useWholeWords_Click);
+            // 
+            // useSyllables
+            // 
+            this.useSyllables.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.useSyllables.Name = "useSyllables";
+            this.useSyllables.Size = new System.Drawing.Size(189, 22);
+            this.useSyllables.Text = "Use game syl- la- bles";
+            this.useSyllables.Click += new System.EventHandler(this.useSyllables_Click);
             // 
             // Visualizer
             // 
@@ -2293,5 +2363,12 @@ namespace Nautilus
         private Label label10;
         private TextBox txtTrack;
         private Label lblLyrics;
+        private ToolStripMenuItem lyricOptionsToolStripMenuItem;
+        private ToolStripMenuItem lyricsKaraoke;
+        private ToolStripMenuItem lyricsScrolling;
+        private ToolStripMenuItem lyricsFixed;
+        private ToolStripSeparator toolStripMenuItem5;
+        private ToolStripMenuItem useWholeWords;
+        private ToolStripMenuItem useSyllables;
     }
 }
