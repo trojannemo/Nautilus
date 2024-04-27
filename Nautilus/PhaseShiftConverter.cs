@@ -14,6 +14,7 @@ using Un4seen.Bass.AddOn.Opus;
 using Un4seen.Bass.AddOn.Enc;
 using Un4seen.Bass.AddOn.EncOgg;
 using NautilusFREE;
+using System.Diagnostics;
 
 namespace Nautilus
 {
@@ -876,6 +877,14 @@ namespace Nautilus
                 success++;                
             }
             Log("Decoded " + success + " SNG files out of " + counter + " files attempted");
+            if (success == 0)
+            {
+                var choice = MessageBox.Show("Decoding Clone Hero SNG files requires .NET Desktop Runtime 7\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                if (choice == DialogResult.OK)
+                {
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                }
+            }
         }
 
         private void markAsC3_CheckedChanged(object sender, EventArgs e)
@@ -950,6 +959,15 @@ namespace Nautilus
                 Tools.DeleteFile(tempFile);
             }
             Log("Decrypted " + success + " file(s) successfully");
+
+            if (success == 0)
+            {
+                var choice = MessageBox.Show("Decrypting YARG .yargsong files requires .NET Desktop Runtime 7\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                if (choice == DialogResult.OK)
+                {
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                }
+            }
         }
     }
 
