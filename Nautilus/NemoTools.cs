@@ -2978,7 +2978,6 @@ namespace Nautilus
                 MessageBox.Show("Error extracting package:\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
-            //Thread.Sleep(5000);
             return Directory.Exists(rsFolder);
         }
 

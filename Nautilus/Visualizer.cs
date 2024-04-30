@@ -4664,6 +4664,12 @@ namespace Nautilus
 
         private void ExtractPsArc(string file)
         {
+            if (file.Contains("_p_") || file.Contains("_p."))
+            {
+                MessageBox.Show("Your file has a file name that contains '_p' and that confuses the program Visualizer relies on to unpack .psarc files\n\nPlease remove that from the file name and try again", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
             var outFolder = Application.StartupPath + "\\visualizer";
             if (Directory.Exists(outFolder))
             {
@@ -4683,14 +4689,14 @@ namespace Nautilus
 
         private void PlayARCFolder(string folder)
         {
-            var audioFolder = folder + "\\audio\\windows\\";
-            var OggFiles = Directory.GetFiles(audioFolder, "*.ogg");
+            var audioFolder = folder + "\\audio\\"; //windows\\";
+            var OggFiles = Directory.GetFiles(audioFolder, "*.ogg", SearchOption.AllDirectories);
             var artFolder = folder + "\\gfxassets\\album_art\\";            
             var pngFiles = Directory.GetFiles(artFolder, "*.png");
             var ddsFiles = Directory.GetFiles(artFolder, "*.dds");
             var manifestFolder = folder + "\\manifests\\";
             var metadataFiles = Directory.GetFiles(manifestFolder, "*.hsan", SearchOption.AllDirectories);
-            var sngFolder = folder + "\\songs\\bin\\generic\\";
+            var sngFolder = folder + "\\songs\\bin\\"; //generic\\";
             var sngFiles = Directory.GetFiles(sngFolder, "*.sng");
                         
             loadDefaults();
