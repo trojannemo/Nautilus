@@ -1520,7 +1520,11 @@ namespace Nautilus
 
                         line = sr.ReadLine();
                         linenum++;
-                        SongsGrabbed[index].TrackNumber = Convert.ToInt16(Tools.GetConfigString(line));
+                        SongsGrabbed[index].TrackNumber = Convert.ToInt32(Tools.GetConfigString(line));
+                        if (SongsGrabbed[index].TrackNumber == 65535) //Clone Hero bug???
+                        {
+                            SongsGrabbed[index].TrackNumber = 1;
+                        }
 
                         line = sr.ReadLine();
                         linenum++;
