@@ -6,6 +6,27 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+v5.1.2
+
+VISUALIZER
+- Added ability to display the PART VOCALS lyrics in karaoke style, static style or scrolling style when PART VOCALS is available in the MIDI file
+- Added option to choose between displaying the whole words or displaying game syl- la- bles when using either static or karaoke styles
+- Added ability to display the song's track # when available in the DTA file
+- Added message to let you know when your RS2014 .psarc file has '_p' in the file name as that breaks compatibility with the software Visualizer relies on to unpack those files
+- Added ability to play RS2014 customs made for Mac systems (it could already play customs made for PC systems)
+
+CON/RBA CONVERTER
+- Added ability to convert from CON back to RBA format
+
+PACK CREATOR
+- Changed behavior so when changing to RB1, RB2 or RB3, both the Content and Package images display the same icon - you can still override either or both of them manually but this makes it easier for some users
+
+SETLIST MANAGER
+- Fixed compatibility issue where it would throw a bunch of errors if the Setlist file had a bugged out Clone Hero file with Track Number 65535 - now it loads the Setlist file correctly and assigns Track Number 1 to the problem file
+
+----------
+
+
 v5.1.1
 
 YARG/CH/PS CONVERTER
