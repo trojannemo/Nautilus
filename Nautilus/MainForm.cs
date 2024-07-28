@@ -960,7 +960,7 @@ namespace Nautilus
         
         private void ChangeFormBorder(bool borderless)
         {
-            FormBorderStyle = borderless ? FormBorderStyle.None : FormBorderStyle.FixedSingle;
+            FormBorderStyle = borderless ? FormBorderStyle.None : FormBorderStyle.Sizable;//FormBorderStyle.FixedSingle;
             borderlessForm.Checked = borderless;
             ResizeBorderLines();
         }
@@ -1031,8 +1031,8 @@ namespace Nautilus
                 {
                     defaultColorToolStripMenuItem_Click(null, null);
                 }
-            }            
-            FormBorderStyle = FormBorderStyle.FixedSingle;
+            }
+            FormBorderStyle = FormBorderStyle.Sizable;// FormBorderStyle.FixedSingle;
             Lost(true);
             picBackground.Image = null;
             flappyTmr.Enabled = true;
@@ -2025,7 +2025,7 @@ namespace Nautilus
         private void flappy_Click(object sender, EventArgs e)
         {
             resetEverythingToolStripMenuItem_Click(sender, e);
-            FormBorderStyle = FormBorderStyle.FixedSingle;
+            FormBorderStyle = FormBorderStyle.Sizable;//FormBorderStyle.FixedSingle;
             LoadFlappyGraphics();
             allButtonsTransparencyToolStripMenuItem_Click(sender, e);
             ResetColumns();
