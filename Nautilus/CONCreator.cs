@@ -68,8 +68,7 @@ namespace Nautilus
 
         private void AddFolder(string folder, int node_depth = 0)
         {
-            var xPath = folder;
-            if (xSession.GetFolder(xPath) != null)
+            if (xSession.GetFolder(folder) != null)
             {
                 MessageBox.Show("There is already a folder with the name '" + folder + "'\nYou can't have multiple folders with the same name,\ntry deleting the existing folder first",
                     Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -77,10 +76,21 @@ namespace Nautilus
                 return;
             }
 
+            string xPath;
+            if (folderTree.SelectedNode != folderTree.Nodes[0])
+            {
+                xPath = ((CFolderEntry)folderTree.SelectedNode.Tag).Path + "/" + folder;
+            }
+            else
+            {
+                xPath = folder;
+            }
+
             if (!xSession.AddFolder(xPath))
             {
                 return;
             }
+
             folderTree.SelectedNode.Nodes.Add(GetFoldNode(xSession.GetFolder(xPath)));
             folderTree.SelectedNode.ExpandAll();
             switch (node_depth)
@@ -121,8 +131,8 @@ namespace Nautilus
                 folder = folderTree.SelectedNode.Text;
             }
 
-            var xPath = folder + "/" + Path.GetFileName(file);
-
+            string xPath = ((CFolderEntry)folderTree.SelectedNode.Tag).Path + "/" + Path.GetFileName(file);
+            
             if (xSession.GetFile(xPath) == null)
             {
                 if (Path.GetExtension(file) == ".mogg")

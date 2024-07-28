@@ -6,6 +6,9 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
 using System.Drawing;
+using Microsoft.VisualBasic.Logging;
+using System.Globalization;
+using System.Threading;
 
 namespace Nautilus.x360
 {
@@ -2429,11 +2432,48 @@ namespace Nautilus.x360
                 throw new Exception();
             try
             {
+                //AddToLog("Setting Package variables");
+                //new Thread(DLLIdentify.PrivilegeCheck).Start(Thread.CurrentThread);
                 xroot = new FolderEntry("", 0, 0xFFFF, 0xFFFF, this);
+                switch (xSession.HeaderData.ThisType)
+                {
+                    case PackageType.ThematicSkin:
+                        {
+                            var x1 = new DJsIO(true);
+                            var x2 = new DJsIO(true);
+                            x1.Write((int)xSession.ThemeSettings.StyleType);
+                            x1.Flush();
+                            x1.Close();
+                            if (!xSession.AddFile(x1.FileNameLong, "DashStyle"))
+                                throw STFSExcepts.ThemeError;
+                            x2.Write("SphereColor=" + ((byte)xSession.ThemeSettings.Sphere).ToString(CultureInfo.InvariantCulture).PadRight(2, '\0'));
+                            x2.Write(new byte[] { 0xD, 0xA });
+                            x2.Write("AvatarLightingDirectional=" +
+                                     xSession.ThemeSettings.AvatarLightingDirectional0.ToString("#0.0") + "," +
+                                     xSession.ThemeSettings.AvatarLightingDirectional1.ToString("#0.0000") + "," +
+                                     xSession.ThemeSettings.AvatarLightingDirectional2.ToString("#0.0") + ",0x" +
+                                     xSession.ThemeSettings.AvatarLightingDirectional3.ToString("X"));
+                            x2.Write(new byte[] { 0xD, 0xA });
+                            x2.Write("AvatarLightingAmbient=0x" + xSession.ThemeSettings.AvatarLightingAmbient.ToString("X"));
+                            x2.Write(new byte[] { 0xD, 0xA });
+                            x2.Flush();
+                            x2.Close();
+                            if (!xSession.AddFile(x2.FileNameLong, "parameters.ini"))
+                                throw STFSExcepts.ThemeError;
+                        }
+                        break;
+                    case PackageType.SocialTitle:
+                    case PackageType.OriginalXboxGame:
+                    case PackageType.HDDInstalledGame:
+                    case PackageType.GamesOnDemand:
+                        throw STFSExcepts.Game;
+                }
+                //xLog = LogIn;
                 xHeader = xSession.HeaderData;
                 xSTFSStruct = new STFSDescriptor(xSession.STFSType, 0);
                 xIO = new DJsIO(true);
                 var DirectoryBlockz = new List<BlockRecord>();
+                // switched2 = true;
                 uint xcurblock = 0;
                 for (ushort i = 0; i < xSession.GetDirectoryCount; i++)
                 {
@@ -2471,12 +2511,14 @@ namespace Nautilus.x360
                     xFileDirectory[xFileDirectory.Count - 1].xFixOffset();
                     xWriteChain(xAlloc.ToArray());
                 }
+                //AddToLog("Writing Entry Table");
                 DJsIO xent;
                 if (!xEntriesToFile(out xent))
                     throw new Exception();
                 xWriteTo(ref xent, xFileBlocks);
                 xent.Close();
                 VariousFunctions.DeleteFile(xent.FileNameLong);
+                //AddToLog("Writing Files");
                 uint curblck = xSession.GetDirectoryCount;
                 foreach (var z in xSession.xFileDirectory)
                 {
@@ -2493,8 +2535,7 @@ namespace Nautilus.x360
                         x = new DJsIO(z.FileLocale, DJFileMode.Open, true);
                         xWriteTo(ref x, w.ToArray());
                     }
-                    catch (Exception)
-                    {}
+                    catch { }
                     if (x != null)
                         x.Dispose();
                 }

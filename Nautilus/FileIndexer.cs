@@ -10,6 +10,7 @@ using Nautilus.x360;
 using Color = System.Drawing.Color;
 using Newtonsoft.Json;
 using System.Windows.Media;
+using System.Globalization;
 
 namespace Nautilus
 {
