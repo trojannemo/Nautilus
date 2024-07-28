@@ -83,6 +83,7 @@
             this.btnPNG = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.btnMILO = new System.Windows.Forms.Button();
+            this.menuDeleteFile = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip3.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabInformation.SuspendLayout();
@@ -661,11 +662,12 @@
             this.extractFileToolStripMenuItem,
             this.replaceFileToolStripMenuItem,
             this.injectSelectedFileToolStripMenuItem,
+            this.menuDeleteFile,
             this.toolStripMenuItem1,
             this.addNewFilesToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.ShowImageMargin = false;
-            this.contextMenuStrip1.Size = new System.Drawing.Size(156, 98);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(156, 142);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // extractFileToolStripMenuItem
@@ -807,6 +809,13 @@
             this.btnMILO.DragDrop += new System.Windows.Forms.DragEventHandler(this.btnMILO_DragDrop);
             this.btnMILO.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
             // 
+            // menuDeleteFile
+            // 
+            this.menuDeleteFile.Name = "menuDeleteFile";
+            this.menuDeleteFile.Size = new System.Drawing.Size(155, 22);
+            this.menuDeleteFile.Text = "Delete selected file";
+            this.menuDeleteFile.Click += new System.EventHandler(this.menuDeleteFile_Click);
+            // 
             // CONExplorer
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -902,5 +911,6 @@
         private System.Windows.Forms.Button btnMILO;
         private System.Windows.Forms.ToolStripMenuItem injectSelectedFileToolStripMenuItem;
         private System.Windows.Forms.ComboBox cboFormat;
+        private System.Windows.Forms.ToolStripMenuItem menuDeleteFile;
     }
 }

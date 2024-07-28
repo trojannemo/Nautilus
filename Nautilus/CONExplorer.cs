@@ -354,6 +354,7 @@ namespace Nautilus
             {
                 extractFileToolStripMenuItem.Text = "Extract selected files";
                 replaceFileToolStripMenuItem.Visible = false;
+                menuDeleteFile.Visible = false;
             }
         }
 
@@ -388,18 +389,17 @@ namespace Nautilus
             {
                 return;
             }
-            var xent = (FileEntry)fileList.SelectedItems[0].Tag;
+            var xEnt = (FileEntry)fileList.SelectedItems[0].Tag;
             var extension = Path.GetExtension(fileList.SelectedItems[0].Text);
             if (extension != null)
             {
-                var filterFiles = extension.Substring(1).ToUpper() + " File|*." +
-                                     extension.Substring(1);
+                var filterFiles = extension.Substring(1).ToUpper() + " File|*." + extension.Substring(1);
                 var file = VariousFunctions.GetUserFileLocale("Open a File", filterFiles, true);
                 if (file == null)
                 {
                     return;
                 }
-                Log((doInject ? "Injecting" : "Replacing")+ " file " + xent.Name);
+                Log((doInject ? "Injecting" : "Replacing")+ " file " + xEnt.Name);
                 var obf_file = Path.GetTempPath() + "m";
                 if (Path.GetExtension(file) == ".mogg")
                 {
@@ -413,23 +413,23 @@ namespace Nautilus
                 }
                 if (doInject)
                 {
-                    if (!xent.Inject(obf_file))
+                    if (!xEnt.Inject(obf_file))
                     {
-                        Log("Error injecting file " + xent.Name);
+                        Log("Error injecting file " + xEnt.Name);
                         return;
                     }
                 }
                 else
                 {
-                    if (!xent.Replace(obf_file))
+                    if (!xEnt.Replace(obf_file))
                     {
-                        Log("Error replacing file " + xent.Name);
+                        Log("Error replacing file " + xEnt.Name);
                         return;
                     }
                 }
                 Tools.CurrentFolder = Path.GetDirectoryName(file);
             }
-            Log((doInject ? "Injected" : "Replaced") + " file " + xent.Name + " successfully");
+            Log((doInject ? "Injected" : "Replaced") + " file " + xEnt.Name + " successfully");
             ShowChanges(true);
         }
 
@@ -443,6 +443,22 @@ namespace Nautilus
             }
         }
         
+        private void DeleteFile()
+        {
+            try
+            {
+                var x = (FileEntry)fileList.SelectedItems[0].Tag;
+                xPackage.xDeleteEntry(x);
+                Log("Deleted file " + x.Name + " successfully");
+                fileList.SelectedItems[0].Remove();
+                ShowChanges(true);
+            }
+            catch
+            {
+                Log("Error deleting that file");
+            }
+        }
+
         private void AddFiles(IEnumerable<string> files)
         {
             var existing = false;
@@ -1460,6 +1476,11 @@ namespace Nautilus
         {
             doInject = true;
             InjectReplaceFile();
+        }
+
+        private void menuDeleteFile_Click(object sender, EventArgs e)
+        {
+            DeleteFile();
         }
     }
 }
