@@ -74,6 +74,7 @@
             this.radioPackages = new System.Windows.Forms.RadioButton();
             this.picPin = new System.Windows.Forms.PictureBox();
             this.filteringWorker = new System.ComponentModel.BackgroundWorker();
+            this.chkPS3 = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
@@ -594,6 +595,18 @@
             this.filteringWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.filteringWorker_DoWork);
             this.filteringWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.filteringWorker_RunWorkerCompleted);
             // 
+            // chkPS3
+            // 
+            this.chkPS3.AllowDrop = true;
+            this.chkPS3.AutoSize = true;
+            this.chkPS3.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkPS3.Location = new System.Drawing.Point(247, 201);
+            this.chkPS3.Name = "chkPS3";
+            this.chkPS3.Size = new System.Drawing.Size(200, 17);
+            this.chkPS3.TabIndex = 72;
+            this.chkPS3.Text = "PS3 Mode (check for songs.dta files)";
+            this.chkPS3.UseVisualStyleBackColor = true;
+            // 
             // FileIndexer
             // 
             this.AllowDrop = true;
@@ -601,6 +614,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ClientSize = new System.Drawing.Size(616, 481);
+            this.Controls.Add(this.chkPS3);
             this.Controls.Add(this.picPin);
             this.Controls.Add(this.radioPackages);
             this.Controls.Add(this.radioSongs);
@@ -686,5 +700,6 @@
         private System.Windows.Forms.ToolStripMenuItem doubleclickToOpenInVisualizer;
         private System.Windows.Forms.ToolStripMenuItem moveSelectedFiles;
         private System.Windows.Forms.ToolStripMenuItem exportToJson;
+        private System.Windows.Forms.CheckBox chkPS3;
     }
 }

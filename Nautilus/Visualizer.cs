@@ -53,7 +53,7 @@ namespace Nautilus
         private string author;
         public string origAuthor;
         private Bitmap bitmap;
-        private readonly string loadcon = "";
+        private readonly string inputFile = "";
         private Point logoLocation;
         private readonly NemoTools Tools;
         public DTAParser Parser;
@@ -152,7 +152,7 @@ namespace Nautilus
         {
             InitializeComponent();
             intVocals = 1;
-            loadcon = con;
+            inputFile = con;
             config = Application.StartupPath + "\\bin\\config\\visualizer.config";
             Tools = new NemoTools();
             nautilus3 = new nTools();
@@ -584,79 +584,89 @@ namespace Nautilus
                 e.Effect = DragDropEffects.All;
         }
 
+        private void LoadYARGPS3Folder(string folder)
+        {
+            var dta = Directory.GetFiles(folder, "songs.dta", SearchOption.AllDirectories);
+            var png = Directory.GetFiles(folder, "*.png_xbox", SearchOption.AllDirectories);
+            var png_ps3 = Directory.GetFiles(folder, "*.png_ps3", SearchOption.AllDirectories);
+            var ymogg = Directory.GetFiles(folder, "*.yarg_mogg", SearchOption.AllDirectories);
+            var mogg = Directory.GetFiles(folder, "*.mogg", SearchOption.AllDirectories);
+
+            if (dta == null || dta.Count() == 0)
+            {
+                MessageBox.Show("Assumed YARG/PS3 folder structure but no songs.dta file found\n\nTIP: If you're trying to play a Clone Hero song, drag/drop the song.ini file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            if ((png == null || png.Count() == 0) && (png_ps3 == null || png_ps3.Count() == 0))
+            {
+                MessageBox.Show("Assumed YARG/PS3 folder structure but no *.png_xbox or *.png_ps3 file found\n\nTIP: If you're trying to play a Clone Hero song, drag/drop the song.ini file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+            if ((ymogg == null || ymogg.Count() == 0) && (mogg == null || mogg.Count() == 0))
+            {
+                MessageBox.Show("Assumed YARG/PS3 folder structure but no *.yarg_mogg or *.mogg file found\n\nTIP: If you're trying to play a Clone Hero song, drag/drop the song.ini file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            if (!Parser.ReadDTA(File.ReadAllBytes(dta[0])) || !Parser.Songs.Any())
+            {
+                MessageBox.Show("Something went wrong reading that songs.dta file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (Parser.Songs.Count > 1)
+            {
+                MessageBox.Show("It looks like this is a pack...\nWhat were you expecting me to do with this?\nTry a single song, please",
+                        Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            loadDefaults();
+            if (png != null && png.Count() > 0)
+            {
+                getImage(png[0]);
+            }
+            else if (png_ps3 != null && png_ps3.Count() > 0)
+            {
+                getImage(png_ps3[0]);
+            }
+            loadDTA();
+            if (ymogg.Count() > 0)
+            {
+                if (!nautilus3.DecY(ymogg[0], DecryptMode.ToMemory))
+                {
+                    MessageBox.Show("Failed to decrypt *.yarg_mogg file, can't play audio", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                isYARG = true;
+            }
+            else if (mogg.Count() > 0)
+            {
+                if (Tools.isV17(mogg[0]))
+                {
+                    MessageBox.Show("I recognize this encryption scheme as v17 (Rock Band 4) but it was not implemented in this Tool", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
+                if (!nautilus3.DecM(File.ReadAllBytes(mogg[0]), false, false, DecryptMode.ToMemory))
+                {
+                    MessageBox.Show("Failed to decrypt *.mogg file, can't play audio", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+            }
+            else
+            {
+                return;
+            }
+            //extract audio file for previewing
+            Height = maxHeight;
+            ProcessAudio();
+        }
+
         private void Visualizer_DragDrop(object sender, DragEventArgs e)
         {
             var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
             Tools.CurrentFolder = Path.GetDirectoryName(files[0]);
 
             bool isFolder = File.GetAttributes(files[0]).HasFlag(FileAttributes.Directory);
-            if (isFolder) //assume Yarg folder structure
+            if (isFolder) //assume Yarg/PS3 folder structure
             {
-                var dta = Directory.GetFiles(files[0], "songs.dta", SearchOption.AllDirectories);
-                var png = Directory.GetFiles(files[0], "*.png_xbox", SearchOption.AllDirectories);
-                var ymogg = Directory.GetFiles(files[0], "*.yarg_mogg", SearchOption.AllDirectories);
-                var mogg = Directory.GetFiles(files[0], "*.mogg", SearchOption.AllDirectories);
-
-                if (dta == null || dta.Count() == 0)
-                {
-                    MessageBox.Show("Assumed YARG folder structure but no songs.dta file found\n\nTIP: If you're trying to play a Clone Hero song, drag/drop the song.ini file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    return;
-                }
-                if (png == null || png.Count() == 0)
-                {
-                    MessageBox.Show("Assumed YARG folder structure but no *.png_xbox file found\n\nTIP: If you're trying to play a Clone Hero song, drag/drop the song.ini file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
-                if ((ymogg == null || ymogg.Count() == 0) && (mogg == null || mogg.Count() == 0))
-                {                    
-                    MessageBox.Show("Assumed YARG folder structure but no *.yarg_mogg or *.mogg file found\n\nTIP: If you're trying to play a Clone Hero song, drag/drop the song.ini file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    return;
-                }                
-                if (!Parser.ReadDTA(File.ReadAllBytes(dta[0])) || !Parser.Songs.Any())
-                {
-                    MessageBox.Show("Something went wrong reading that songs.dta file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                if (Parser.Songs.Count > 1)
-                {
-                    MessageBox.Show("It looks like this is a pack...\nWhat were you expecting me to do with this?\nTry a single song, please",
-                            Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    return;
-                }
-                loadDefaults();
-                if (png != null || png.Count() > 0)
-                {
-                    getImage(png[0]);
-                }
-                loadDTA();
-                if (ymogg.Count() > 0)
-                {
-                    if (!nautilus3.DecY(ymogg[0], DecryptMode.ToMemory))
-                    {
-                        MessageBox.Show("Failed to decrypt *.yarg_mogg file, can't play audio", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        return;
-                    }
-                    isYARG = true;
-                }
-                else if (mogg.Count() > 0)
-                {
-                    if (Tools.isV17(mogg[0]))
-                    {
-                        MessageBox.Show("I recognize this encryption scheme as v17 (Rock Band 4) but it was not implemented in this Tool", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        return;
-                    }
-                    if (!nautilus3.DecM(File.ReadAllBytes(mogg[0]), false, false, DecryptMode.ToMemory))
-                    {
-                        MessageBox.Show("Failed to decrypt *.mogg file, can't play audio", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        return;
-                    }
-                }
-                else
-                {
-                    return;
-                }
-                //extract audio file for previewing
-                Height = maxHeight;
-                ProcessAudio();
+                LoadYARGPS3Folder(files[0]);
                 return;
             }
             
@@ -1310,6 +1320,7 @@ namespace Nautilus
                             albumart = "";
                         }
                     }
+                    /*
                     var HMX_Sources = new List<string>
                     {
                         "rb1","acdc","rb2","rb3","rb1_dlc","rb2_dlc","rb3_dlc","rb4","rb4_dlc",
@@ -1338,8 +1349,7 @@ namespace Nautilus
                     if (xPackage.Header.Description.Contains("discord.gg/XM9gexj"))
                     {
                         origAuthor = "TBRB CDLC";
-                    }
-
+                    }*/
                     xPackage.CloseIO();
                     doShowAuthor();
                     
@@ -1913,7 +1923,7 @@ namespace Nautilus
                     MessageBox.Show("There was an error:\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 author = Parser.Songs[0].ChartAuthor;
-                if (string.IsNullOrWhiteSpace(author))
+                /*if (string.IsNullOrWhiteSpace(author))
                 {
                     var HMX_Sources = new List<string>
                     {
@@ -1924,7 +1934,7 @@ namespace Nautilus
                     {
                         author = "Harmonix";
                     }
-                }
+                }*/
                 if (Parser.Songs[0].DisableProKeys)
                 {
                     proKeys.Image = null;
@@ -2740,41 +2750,49 @@ namespace Nautilus
             LoadConfig();
             Application.DoEvents();
             CheckLoadFonts();
-            if (Path.GetExtension(loadcon) == ".png_xbox" || Path.GetExtension(loadcon) == ".bmp") //coming from RBA Editor
+
+            bool isFolder = !string.IsNullOrEmpty(inputFile) && File.GetAttributes(inputFile).HasFlag(FileAttributes.Directory);
+            if (isFolder) //assume Yarg/PS3 folder structure
             {
-                getImage(loadcon);
+                LoadYARGPS3Folder(inputFile);
+                return;
             }
-            else if (Path.GetFileName(loadcon) == "songs.dta" || Path.GetFileName(loadcon) == "songs.dta.raw") //coming from RBA Editor
+
+            if (Path.GetExtension(inputFile) == ".png_xbox" || Path.GetExtension(inputFile) == ".bmp") //coming from RBA Editor
+            {
+                getImage(inputFile);
+            }
+            else if (Path.GetFileName(inputFile) == "songs.dta" || Path.GetFileName(inputFile) == "songs.dta.raw") //coming from RBA Editor
             {
                 loadDefaults();
-                Parser.ReadDTA(File.ReadAllBytes(loadcon));
+                Parser.ReadDTA(File.ReadAllBytes(inputFile));
                 loadDTA();
             }
             else
             {
-                if (loadcon != "" && File.Exists(loadcon))
+                if (inputFile != "" && File.Exists(inputFile))
                 {
                     try
                     {
-                        switch(Path.GetExtension(loadcon))
+                        switch(Path.GetExtension(inputFile))
                         {
                             case ".pkg":
-                                ExtractPKG(loadcon);
+                                ExtractPKG(inputFile);
                                 break;
                             case ".sng":
-                                ExtractSNG(loadcon);
+                                ExtractSNG(inputFile);
                                 break;
                             case ".yargsong":
-                                ExtractYARG(loadcon);
+                                ExtractYARG(inputFile);
                                 break;
                             case ".psarc":
-                                ExtractPsArc(loadcon);
+                                ExtractPsArc(inputFile);
                                 break;
                             default:
-                                if (VariousFunctions.ReadFileType(loadcon) == XboxFileType.STFS)
+                                if (VariousFunctions.ReadFileType(inputFile) == XboxFileType.STFS)
                                 {
                                     loadDefaults();
-                                    loadCON(loadcon);
+                                    loadCON(inputFile);
                                 }
                                 break;
                         }                        

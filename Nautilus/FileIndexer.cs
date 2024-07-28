@@ -9,6 +9,7 @@ using Nautilus.Properties;
 using Nautilus.x360;
 using Color = System.Drawing.Color;
 using Newtonsoft.Json;
+using System.Windows.Media;
 
 namespace Nautilus
 {
@@ -32,6 +33,7 @@ namespace Nautilus
         private bool SearchForIDConflicts;
         private bool SearchForDuplicates;
         private Visualizer visualizer;
+        private bool PS3Mode;
 
         public FileIndexer(Color ButtonBackColor, Color ButtonTextColor)
         {
@@ -68,6 +70,7 @@ namespace Nautilus
             }
             sw.WriteLine("SearchSubDirs=" + chkSubDirs.Checked);
             sw.WriteLine("OpenMaximized=" + (WindowState == FormWindowState.Maximized));
+            sw.WriteLine("PS3Mode=" + chkPS3.Checked);
             sw.Dispose();
         }
 
@@ -92,6 +95,11 @@ namespace Nautilus
             }
             chkSubDirs.Checked = sr.ReadLine().Contains("True");
             DoMaximize = sr.ReadLine().Contains("True");
+            try
+            {
+                chkPS3.Checked = sr.ReadLine().Contains("True");
+            }
+            catch { }
             sr.Dispose();
             CheckFolderCount();
         }
@@ -126,7 +134,7 @@ namespace Nautilus
                         SongID = Tools.GetConfigString(sr.ReadLine()),
                         Location = Tools.GetConfigString(sr.ReadLine())
                     };
-                    if (!File.Exists(newSong.Location)) continue;
+                    if (!File.Exists(newSong.Location) && !Directory.Exists(newSong.Location)) continue;
                     Songs.Add(newSong);
                 }
             }
@@ -234,6 +242,7 @@ namespace Nautilus
             btnBuild.Text = "Cancel";
             lstSongs.Items.Clear();
             EnableDisable(false);
+            PS3Mode = chkPS3.Checked;
             indexingWorker.RunWorkerAsync();
         }
 
@@ -264,6 +273,7 @@ namespace Nautilus
             btnDelete.Enabled = enabled;
             btnNew.Enabled = enabled;
             chkSubDirs.Enabled = enabled;
+            chkPS3.Enabled = enabled;
             txtSearch.Enabled = enabled;
             radioSongs.Enabled = enabled;
             radioPackages.Enabled = enabled;
@@ -353,16 +363,22 @@ namespace Nautilus
                 if (CancelWorkers) return;
                 try
                 {
-                    if (VariousFunctions.ReadFileType(file) != XboxFileType.STFS) continue;
-                    if (!Parser.ExtractDTA(file)) continue;
-                    if (!Parser.ReadDTA(Parser.DTA) || !Parser.Songs.Any())
+                    if (PS3Mode)
                     {
-                        continue;
+                        if (Path.GetFileName(file) != "songs.dta") continue;
+                        if (!Parser.ReadDTA(File.ReadAllBytes(file)) || !Parser.Songs.Any()) continue;                        
                     }
+                    else
+                    {
+                        if (VariousFunctions.ReadFileType(file) != XboxFileType.STFS) continue;
+                        if (!Parser.ExtractDTA(file)) continue;
+                        if (!Parser.ReadDTA(Parser.DTA) || !Parser.Songs.Any()) continue;
+                    }
+                    
                     foreach (var newEntry in Parser.Songs.Select(song => new SongIndex
                     {
                         Name = song.Artist + " - " + song.Name,
-                        Location = file,
+                        Location = PS3Mode ? Path.GetDirectoryName (file) : file,
                         SongID = song.SongIdString
                     }))
                     {
@@ -505,7 +521,11 @@ namespace Nautilus
             onlyShowOtherSongs.Visible = visible;
             exportDisplayedSongs.Visible = visible;
             sendToMenu.Visible = visible;
-
+            moveSelectedFiles.Visible = !chkPS3.Checked;
+            SendToCONExplorer.Visible = !chkPS3.Checked;
+            SendToMIDICleaner.Visible = !chkPS3.Checked;
+            SendToSongAnalyzer.Visible = !chkPS3.Checked;
+            //SendToQuickPackEditor.Visible = !chkPS3.Checked;            
         }
 
         private void exportDisplayedSongs_Click(object sender, EventArgs e)
@@ -600,13 +620,33 @@ namespace Nautilus
 
         private void SendToAudioAnalyzer_Click(object sender, EventArgs e)
         {
-            var handler = new AudioAnalyzer(lstSongs.SelectedItems[0].SubItems[2].Text);
+            var file = lstSongs.SelectedItems[0].SubItems[2].Text;
+            if (chkPS3.Checked)
+            {
+                var moggs = Directory.GetFiles(file, "*.mogg", SearchOption.AllDirectories);
+                if (moggs != null && moggs.Count() > 0)
+                {
+                    file = moggs[0];
+                }
+            }
+            var handler = new AudioAnalyzer(file);
             handler.Show();
         }
         
         private void SendToQuickPackEditor_Click(object sender, EventArgs e)
         {
-            var handler = new QuickPackEditor(null, Color.FromArgb(34, 169, 31), Color.White, "", lstSongs.SelectedItems[0].SubItems[2].Text);
+            var dta = "";
+            var pack = lstSongs.SelectedItems[0].SubItems[2].Text;
+            if (chkPS3.Checked)
+            {
+                var dtas = Directory.GetFiles(lstSongs.SelectedItems[0].SubItems[2].Text, "songs.dta", SearchOption.AllDirectories);
+                if (dtas != null  && dtas.Count() > 0)
+                {
+                    dta = dtas[0];
+                    pack = "";
+                }
+            }
+            var handler = new QuickPackEditor(null, Color.FromArgb(34, 169, 31), Color.White, dta, pack);
             handler.ShowDialog();
         }
 
@@ -815,7 +855,7 @@ namespace Nautilus
             for (var i = 0; i < lstSongs.SelectedItems.Count; i++)
             {
                 var file = lstSongs.SelectedItems[i].SubItems[2].Text;
-                Tools.SendtoTrash(file);
+                Tools.SendtoTrash(file, chkPS3.Checked);
                 indices.Add(lstSongs.SelectedItems[i].Index);
             }
             if (indices.Count == 0) return;
@@ -931,7 +971,7 @@ namespace Nautilus
             {
                 MessageBox.Show("Error exporting to Json:\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             } 
-        }                     
+        }
     }
 
     public class SongIndex
