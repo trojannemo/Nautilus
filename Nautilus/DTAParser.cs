@@ -837,7 +837,7 @@ namespace Nautilus
                                 {
                                     z++;
                                     line = entry[z];
-                                    song.PanningValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("pans", "");
+                                    song.PanningValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("pans", "").Replace("\t"," ").Trim();
                                     didPans = true;
                                 }
                             }
@@ -863,7 +863,7 @@ namespace Nautilus
                             {
                                 z++;
                                 line = entry[z];
-                                song.AttenuationValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("vols", "").Trim();
+                                song.AttenuationValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("vols", "").Replace("\t", " ").Trim();
                                 song.OriginalAttenuationValues = song.AttenuationValues;
                                 didVols = true;
                             }
@@ -874,7 +874,7 @@ namespace Nautilus
                                     z++;
                                     line = entry[z];
                                 }
-                                song.AttenuationValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("vols", "").Trim();
+                                song.AttenuationValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("vols", "").Replace("\t", " ").Trim();
                                 song.OriginalAttenuationValues = song.AttenuationValues;
                                 didVols = true;
                             }
@@ -882,7 +882,7 @@ namespace Nautilus
                             {
                                 z++;
                                 line = entry[z];
-                                song.PanningValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("pans", "").Trim();
+                                song.PanningValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("pans", "").Replace("\t", " ").Trim();
                                 didPans = true;
                             }
                             else if (line.Contains("(pans") && !didPans)
@@ -892,7 +892,7 @@ namespace Nautilus
                                     z++;
                                     line = entry[z];
                                 }
-                                song.PanningValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("pans", "").Trim();
+                                song.PanningValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("pans", "").Replace("\t", " ").Trim();
                                 didPans = true;
                             }
                             else if (line.Contains("(cores") && !didCores)
@@ -2212,8 +2212,8 @@ namespace Nautilus
             channels = channels.Replace("(", "");
             channels = channels.Replace(")", "");
             channels = channels.Replace("-", "");
-            channels = channels.Replace(" ", "").Trim();
-
+            channels = channels.Replace(" ", "");
+            channels = channels.Replace("\t", "").Trim();
             return channels.Length;
         }
 

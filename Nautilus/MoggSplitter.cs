@@ -159,8 +159,6 @@ namespace Nautilus
                 }
                 if (format == MoggSplitFormat.OGG)
                 {
-                    //var cmd = "bin\\oggenc2.exe -q" + quality + " - -o\"" + output_file + "\"";
-                    //BassEnc.BASS_Encode_Start(BassMixer, cmd, BASSEncode.BASS_ENCODE_FP_24BIT | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
                     BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassMixer, "-q " + quality, BASSEncode.BASS_ENCODE_AUTOFREE, output_file);
                 }
                 else
@@ -280,14 +278,13 @@ namespace Nautilus
                     nautilus3.ReleaseStreamHandle();
                     return false;
                 }
-                Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_BUFFER, 20000);
+                Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_BUFFER, 20000);              
                 return true;
             }
             catch (Exception ex)
             {
                 ErrorLog.Add("Error initializing BASS.NET");
                 ErrorLog.Add(ex.Message);
-                ErrorLog.Add("Can't split the mogg file");
                 return false;
             }
         }

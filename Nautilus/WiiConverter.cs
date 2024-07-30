@@ -766,13 +766,13 @@ namespace Nautilus
                                     Log("Creating preview clip...");
                                     CreatePreviewClip(file, newMogg, (double)Parser.Songs[0].PreviewStart / 1000);
                                 }                                
-                                    if ((autodownmix.Checked && Parser.Songs[0].ChannelsDrums > 2) || deleteCrowdAudio.Checked && deleteCrowdAudio.Enabled && Parser.Songs[0].ChannelsCrowd > 0) 
-                                    {                                    
-                                    if (Parser.Songs[0].ChannelsDrums > 2)
+                                    if ((autoDownmixDrums.Checked && Parser.Songs[0].ChannelsDrums > 2) || (deleteCrowdAudio.Checked && deleteCrowdAudio.Enabled && Parser.Songs[0].ChannelsCrowd > 0))
+                                    {                                     
+                                    if (Parser.Songs[0].ChannelsDrums > 2 && autoDownmixDrums.Checked)
                                     {
                                         Log("Song has " + Parser.Songs[0].ChannelsDrums + " drum channels, will try to downmix");
                                     }
-                                    if (Parser.Songs[0].ChannelsCrowd > 0 && deleteCrowdAudio.Checked)
+                                    if (Parser.Songs[0].ChannelsCrowd > 0 && deleteCrowdAudio.Checked && deleteCrowdAudio.Enabled)
                                     {
                                         Log("Song has crowd audio present, will try to remove it");
                                     }
@@ -808,14 +808,14 @@ namespace Nautilus
                                         channels += Parser.Songs[0].ChannelsKeys;
                                         var backing = Parser.Songs[0].ChannelsTotal - Parser.Songs[0].ChannelsDrums - Parser.Songs[0].ChannelsBass - Parser.Songs[0].ChannelsGuitar - Parser.Songs[0].ChannelsVocals - Parser.Songs[0].ChannelsKeys - Parser.Songs[0].ChannelsCrowd;
                                         channels += backing;
-                                        if (!deleteCrowdAudio.Checked)
+                                        if (!deleteCrowdAudio.Checked || !deleteCrowdAudio.Enabled)
                                         {
                                             channels += Parser.Songs[0].ChannelsCrowd;
                                         }
 
                                         Control.CheckForIllegalCrossThreadCalls = false;                                        
                                         var splitter = new MoggSplitter();
-                                        var downmixed = splitter.DoMoggDownmix(nautilus3, Parser, newMogg, channels, deleteCrowdAudio.Checked);
+                                        var downmixed = splitter.DoMoggDownmix(nautilus3, Parser, newMogg, channels, deleteCrowdAudio.Checked && deleteCrowdAudio.Enabled);
                                         if (downmixed)
                                         {
                                             Log("Downmixed mogg file to ogg file successfully");
@@ -878,7 +878,7 @@ namespace Nautilus
                                             pans += backing == 1 ? "0.0 " : "-1.0 1.0 ";
                                             track_count += backing.ToString() + " ";
                                         }
-                                        if (Parser.Songs[0].ChannelsCrowd > 0 && !deleteCrowdAudio.Checked)
+                                        if (Parser.Songs[0].ChannelsCrowd > 0 && (!deleteCrowdAudio.Checked || !deleteCrowdAudio.Enabled))
                                         {
                                             pans += Parser.Songs[0].ChannelsCrowd == 1 ? "0.0 " : "-1.0 1.0 ";
                                             track_count += Parser.Songs[0].ChannelsCrowd.ToString() + " ";
@@ -1892,13 +1892,13 @@ namespace Nautilus
 
         private void autodownmix_Click(object sender, EventArgs e)
         {
-            autodownmix.Checked = true;
+            autoDownmixPreview.Checked = true;
             dualMonoChannels.Checked = false;
         }
 
         private void dualMonoChannels_Click(object sender, EventArgs e)
         {
-            autodownmix.Checked = false;
+            autoDownmixPreview.Checked = false;
             dualMonoChannels.Checked = true;
         }
 

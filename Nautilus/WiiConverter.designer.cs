@@ -46,7 +46,7 @@
             this.convertVenueDuringSongConversion = new System.Windows.Forms.ToolStripMenuItem();
             this.attemptToConvertPostprocEvents = new System.Windows.Forms.ToolStripMenuItem();
             this.previewClipMixingMethodToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.autodownmix = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoDownmixPreview = new System.Windows.Forms.ToolStripMenuItem();
             this.dualMonoChannels = new System.Windows.Forms.ToolStripMenuItem();
             this.autoDownmixDrums = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteCrowdAudio = new System.Windows.Forms.ToolStripMenuItem();
@@ -280,22 +280,22 @@
             // 
             this.previewClipMixingMethodToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.previewClipMixingMethodToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.autodownmix,
+            this.autoDownmixPreview,
             this.dualMonoChannels});
             this.previewClipMixingMethodToolStripMenuItem.Name = "previewClipMixingMethodToolStripMenuItem";
             this.previewClipMixingMethodToolStripMenuItem.Size = new System.Drawing.Size(279, 22);
             this.previewClipMixingMethodToolStripMenuItem.Text = "Preview clip mixing method";
             this.previewClipMixingMethodToolStripMenuItem.Visible = false;
             // 
-            // autodownmix
+            // autoDownmixPreview
             // 
-            this.autodownmix.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.autodownmix.Checked = true;
-            this.autodownmix.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.autodownmix.Name = "autodownmix";
-            this.autodownmix.Size = new System.Drawing.Size(231, 22);
-            this.autodownmix.Text = "Automatic downmix (default)";
-            this.autodownmix.Click += new System.EventHandler(this.autodownmix_Click);
+            this.autoDownmixPreview.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.autoDownmixPreview.Checked = true;
+            this.autoDownmixPreview.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.autoDownmixPreview.Name = "autoDownmixPreview";
+            this.autoDownmixPreview.Size = new System.Drawing.Size(231, 22);
+            this.autoDownmixPreview.Text = "Automatic downmix (default)";
+            this.autoDownmixPreview.Click += new System.EventHandler(this.autodownmix_Click);
             // 
             // dualMonoChannels
             // 
@@ -797,7 +797,7 @@
         private System.Windows.Forms.Label label4;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.ToolStripMenuItem previewClipMixingMethodToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem autodownmix;
+        private System.Windows.Forms.ToolStripMenuItem autoDownmixPreview;
         private System.Windows.Forms.ToolStripMenuItem dualMonoChannels;
         private System.Windows.Forms.ToolStripMenuItem grabNgidFromBINFile;
         private System.Windows.Forms.CheckBox chkEncrypt;
