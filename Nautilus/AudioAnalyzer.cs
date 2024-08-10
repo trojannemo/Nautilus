@@ -15,6 +15,7 @@ using Un4seen.Bass.Misc;
 using Color = System.Drawing.Color;
 using Font = System.Drawing.Font;
 using NautilusFREE;
+using Un4seen.Bass.AddOn.Enc;
 
 namespace Nautilus
 {
@@ -36,6 +37,7 @@ namespace Nautilus
         private string ImgToUpload;
         private string ImgURL;
         private readonly nTools nautilus3;
+        private bool isFNF;
 
         public AudioAnalyzer(string file)
         {
@@ -50,6 +52,7 @@ namespace Nautilus
             mMenuBackground = menuStrip1.BackColor;
             menuStrip1.Renderer = new DarkRenderer();
             nautilus3 = new nTools();
+            isFNF = false;
         }
 
         private void HandleDragDrop(object sender, DragEventArgs e)
@@ -89,6 +92,7 @@ namespace Nautilus
 
         private void ProcessInputFile(string file)
         {
+            isFNF = false;
             Parser.Songs = null;
             try
             {
@@ -99,7 +103,7 @@ namespace Nautilus
                     if (Splitter.ExtractDecryptMogg(file, nautilus3, Parser))
                     {
                         InputFile = file;
-                        DrawWaveForm();
+                        DrawWaveForm(0);
                     }
                     else
                     {
@@ -120,7 +124,7 @@ namespace Nautilus
                                 if (!nautilus3.RemoveMHeader(bytes, false, DecryptMode.ToMemory, "")) return;
                                     
                                 InputFile = file;
-                                DrawWaveForm();
+                                DrawWaveForm(0);
                                 return;
                             }
                         }                       
@@ -128,7 +132,7 @@ namespace Nautilus
                     if (nautilus3.DecM(File.ReadAllBytes(file), false, false, DecryptMode.ToMemory))
                     {
                         InputFile = file;
-                        DrawWaveForm();
+                        DrawWaveForm(0);
                         return;
                     }
                     MessageBox.Show("Mogg file '" + file + "' is encrypted and I couldn't process it", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -142,17 +146,50 @@ namespace Nautilus
                 {
                     switch (Path.GetExtension(file).ToLowerInvariant())
                     {
+                        case ".m4a":
+                            var fnfParser = new NemoFnFParser();
+                            var fnfStream = fnfParser.m4aToBassStream(file, Path.GetFileName(file).Equals("preview.m4a") ? 2 : 10);
+                            if (fnfStream == 0)
+                            {
+                                MessageBox.Show("File '" + file + "' is not a valid input file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);                                
+                            }
+                            else
+                            {
+                                isFNF = true;
+                                InputFile = file;
+                                Parser.Songs = new List<SongData>();
+                                var temp = Application.StartupPath + "\\bin\\temp";
+                                BassEnc.BASS_Encode_Start(fnfStream, temp, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
+                                while (true)
+                                {
+                                    var buffer = new byte[20000];
+                                    var c = Bass.BASS_ChannelGetData(fnfStream, buffer, buffer.Length);
+                                    if (c <= 0) break;
+                                }
+                                Bass.BASS_StreamFree(fnfStream);
+                                fnfStream = Bass.BASS_StreamCreateFile(temp, 0L, File.ReadAllBytes(temp).Length, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
+                                if (fnfStream == 0)
+                                {
+                                    MessageBox.Show("File '" + file + "' is not a valid input file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                                    break;
+                                }
+                                File.Delete(temp);
+                                DrawWaveForm(fnfStream);
+                                Bass.BASS_ChannelFree(fnfStream);                                
+                            }
+                            break;
                         case ".ogg":
                         case ".wav":
                             InputFile = file;
+                            Parser.Songs = new List<SongData>();
                             nautilus3.PlayingSongOggData = File.ReadAllBytes(file);
-                            DrawWaveForm();
+                            DrawWaveForm(0);
                             break;
                         case ".yarg_mogg":
                             if (nautilus3.DecY(file, DecryptMode.ToMemory))
                             {
                                 InputFile = file;
-                                DrawWaveForm();
+                                DrawWaveForm(0);
                                 return;
                             }
                             MessageBox.Show("YARG mogg file '" + file + "' is encrypted and I couldn't process it", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -207,7 +244,21 @@ namespace Nautilus
         {
             TrackNames = new List<string>();
             TrackIsStereo = new List<bool>();
-            if (Parser.Songs == null) return;
+            if (Parser.Songs == null && !isFNF) return;
+            if (isFNF) //fixed song structure
+            {
+                TrackNames.Add("Drums");
+                TrackIsStereo.Add(true);
+                TrackNames.Add("Bass");
+                TrackIsStereo.Add(true);
+                TrackNames.Add("Guitar");
+                TrackIsStereo.Add(true);
+                TrackNames.Add("Vocals");
+                TrackIsStereo.Add(true);
+                TrackNames.Add("Backing");
+                TrackIsStereo.Add(true);
+                return;
+            }
             switch (Parser.Songs[0].ChannelsDrums)
             {
                 case 2:
@@ -361,7 +412,7 @@ namespace Nautilus
             return WaveImage;
         }
 
-        private void DrawWaveForm()
+        private void DrawWaveForm(int BassStream)
         {
             ClearPanels();
             ClearLabels();
@@ -370,8 +421,11 @@ namespace Nautilus
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
             graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
 
-            lblFileName.Invoke(new MethodInvoker(() => lblFileName.Text = "Analysis of audio file: " + (Parser.Songs == null ? Path.GetFileName(InputFile) : Parser.Songs[0].InternalName + ".mogg")));
-            var BassStream = Bass.BASS_StreamCreateFile(nautilus3.GetOggStreamIntPtr(), 0L, nautilus3.PlayingSongOggData.Length, BASSFlag.BASS_STREAM_DECODE);
+            lblFileName.Invoke(new MethodInvoker(() => lblFileName.Text = "Analysis of audio file: " + (Parser.Songs.Count == 0 || Parser.Songs == null ? Path.GetFileName(InputFile) : Parser.Songs[0].InternalName + ".mogg")));
+            if (BassStream == 0) //always except for Fortnite Festival .m4a files
+            {
+                BassStream = Bass.BASS_StreamCreateFile(nautilus3.GetOggStreamIntPtr(), 0L, nautilus3.PlayingSongOggData.Length, BASSFlag.BASS_STREAM_DECODE);
+            }
             if (BassStream == 0)
             {
                 MessageBox.Show("Error processing audio stream:\n" + Bass.BASS_ErrorGetCode(), Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -381,19 +435,28 @@ namespace Nautilus
             var duration = Math.Round(Bass.BASS_ChannelBytes2Seconds(BassStream, length), 2);
             var audio_info = Bass.BASS_ChannelGetInfo(BassStream);
             string size;
-            if (nautilus3.PlayingSongOggData.Length >= 1048576)
+            long dataLength = 0;
+            if (isFNF)
             {
-                size = Math.Round((double)nautilus3.PlayingSongOggData.Length / 1048576, 2) + " MB";
+                dataLength = File.ReadAllBytes(InputFile).Length;
             }
             else
             {
-                size = Math.Round((double)nautilus3.PlayingSongOggData.Length / 1024, 2) + " KB";
+                dataLength = nautilus3.PlayingSongOggData.Length;
+            }
+            if (dataLength >= 1048576)
+            {
+                size = Math.Round((double)dataLength / 1048576, 2) + " MB";
+            }
+            else
+            {
+                size = Math.Round((double)dataLength / 1024, 2) + " KB";
             }
             var minutes = Parser.GetSongDuration((duration * 1000).ToString(CultureInfo.InvariantCulture));
             lblStart.Invoke(new MethodInvoker(() => lblStart.Text = "0:00"));
             lblLength.Invoke(new MethodInvoker(() => lblLength.Text = minutes));
             var info = "Channels: " + audio_info.chans + "   |   Sample rate: " + audio_info.freq + " Hz   |   Length: " + duration + " seconds ("
-                    + minutes + ")   |   File size: " + nautilus3.PlayingSongOggData.Length + " bytes (" + size + ")";
+                    + minutes + ")   |   File size: " + dataLength + " bytes (" + size + ")";
             lblFileInfo.Invoke(new MethodInvoker(() => lblFileInfo.Text = info));
             WaveForm WaveImage;
             switch (audio_info.chans)
@@ -764,7 +827,7 @@ namespace Nautilus
                         if (!nautilus3.RemoveMHeader(bytes, false, DecryptMode.ToMemory, "")) return;
 
                         InputFile = MOGG[0];
-                        DrawWaveForm();
+                        DrawWaveForm(0);
                         return;    
                     }
                 }               
@@ -774,7 +837,7 @@ namespace Nautilus
                 MessageBox.Show("Failed to decrypt mogg file, can't analyze", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            DrawWaveForm();
+            DrawWaveForm(0);
         }
     }
 }
