@@ -113,9 +113,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\bin\PdfFileWriter.dll</HintPath>
     </Reference>
-    <Reference Include="PDFLibNet">
-      <HintPath>bin\Debug\bin\PDFLibNet.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="PsarcLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">

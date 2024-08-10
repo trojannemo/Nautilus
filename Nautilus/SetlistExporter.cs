@@ -6,8 +6,8 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
-using PDFLibNet;
 using PdfFileWriter;
 
 namespace Nautilus
@@ -1920,37 +1920,76 @@ namespace Nautilus
 
         private void DisplayThumbnail()
         {
-            var pdf = Application.StartupPath + "\\bin\\temp.pdf";
-            var jpg = Application.StartupPath + "\\bin\\pdf.jpg";
-            Tools.DeleteFile(jpg);
-            if (!File.Exists(pdf))
+            var pdfPath = Application.StartupPath + "\\bin\\temp.pdf";
+            var jpgPath = Application.StartupPath + "\\bin\\pdf.jpg";
+            var dllPath = Application.StartupPath + "\\bin\\PDFLibNet.dll";
+            if (!File.Exists(dllPath))
+            {
+                MessageBox.Show("Missing PDFLibNet.dll file, can't create PDF thumbnail", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            Tools.DeleteFile(jpgPath);
+            if (!File.Exists(pdfPath))
             {
                 MessageBox.Show("Error displaying PDF thumbnail", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
             try
             {
-                var doc = new PDFWrapper();
-                doc.LoadPDF(pdf);
-                TotalPageNumbers = doc.PageCount;
-                doc.CurrentPage = 1;
-                doc.ExportJpg(jpg, 1, 1, 150, 99, -1);
-                doc.Dispose();
-                Tools.DeleteFile(pdf);
+                Assembly assembly = Assembly.LoadFrom(dllPath);
+
+                // Get the PDFWrapper type
+                Type pdfWrapperType = assembly.GetType("PDFLibNet.PDFWrapper");
+                if (pdfWrapperType != null)
+                {
+
+                    // Create an instance of PDFWrapper
+                    object pdfWrapperInstance = Activator.CreateInstance(pdfWrapperType);
+
+                    // Invoke LoadPDF method
+                    MethodInfo loadPdfMethod = pdfWrapperType.GetMethod("LoadPDF", new[] { typeof(string) });
+                    loadPdfMethod.Invoke(pdfWrapperInstance, new object[] { pdfPath });
+
+                    // Get the PageCount property
+                    PropertyInfo pageCountProperty = pdfWrapperType.GetProperty("PageCount");
+                    TotalPageNumbers = (int)pageCountProperty.GetValue(pdfWrapperInstance);                                     
+
+                    // Set the CurrentPage property
+                    PropertyInfo currentPageProperty = pdfWrapperType.GetProperty("CurrentPage");
+                    currentPageProperty.SetValue(pdfWrapperInstance, 1);
+
+                    // Invoke ExportJpg method
+                    MethodInfo exportJpgMethod = pdfWrapperType.GetMethod("ExportJpg", new[] { typeof(string), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int) });
+                    exportJpgMethod.Invoke(pdfWrapperInstance, new object[] { jpgPath, 1, 1, 150, 99, -1 });
+
+                    // Invoke Dispose method
+                    MethodInfo disposeMethod = pdfWrapperType.GetMethod("Dispose", Type.EmptyTypes);
+                    disposeMethod.Invoke(pdfWrapperInstance, null);
+                                        
+                    Tools.DeleteFile(pdfPath);
+                }
+                else
+                {
+                    MessageBox.Show("Error displaying PDF thumbnail", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("Error displaying PDF thumbnail", "Error", MessageBoxButtons.OK,
-                                MessageBoxIcon.Exclamation);
+                MessageBox.Show("Error displaying PDF thumbnail\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                if (MessageBox.Show("You shouldn't be seeing this error, but if you are, it probably means you don't have Microsoft Visual C++ 2010 installed\n\nClick OK to go to the Microsoft website and download it from there (get the x86 version!)\nClick Cancel to go back", "Missing Dependency", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+                {
+                    const string url = "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2010-vc-100-sp1-no-longer-supported";
+                    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                }
                 return;
             }
-            if (!File.Exists(jpg))
+            if (!File.Exists(jpgPath))
             {
-                MessageBox.Show("Error displaying thumbnail", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Error displaying PDF thumbnail", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            picThumbnail.Image = Tools.NemoLoadImage(jpg);
-            Tools.DeleteFile(jpg);
+            picThumbnail.Image = Tools.NemoLoadImage(jpgPath);
+            Tools.DeleteFile(jpgPath);
         }
         
         private void cboFonts_SelectedIndexChanged(object sender, EventArgs e)
