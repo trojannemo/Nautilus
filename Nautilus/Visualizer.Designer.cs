@@ -149,16 +149,13 @@ namespace Nautilus
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.exportYARGAudio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
-            this.audioEncodingOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.encodeFLAC = new System.Windows.Forms.ToolStripMenuItem();
-            this.encodeWAV = new System.Windows.Forms.ToolStripMenuItem();
-            this.encodeOpus = new System.Windows.Forms.ToolStripMenuItem();
-            this.encodeMP3 = new System.Windows.Forms.ToolStripMenuItem();
-            this.encodeOGG = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricsKaraoke = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricsScrolling = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricsFixed = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
+            this.useWholeWords = new System.Windows.Forms.ToolStripMenuItem();
+            this.useSyllables = new System.Windows.Forms.ToolStripMenuItem();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveProfileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -182,9 +179,7 @@ namespace Nautilus
             this.powerGigWorker = new System.ComponentModel.BackgroundWorker();
             this.bandFuseWorker = new System.ComponentModel.BackgroundWorker();
             this.lblLyrics = new System.Windows.Forms.Label();
-            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
-            this.useWholeWords = new System.Windows.Forms.ToolStripMenuItem();
-            this.useSyllables = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportFNFAudio = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreUp)).BeginInit();
@@ -1693,7 +1688,7 @@ namespace Nautilus
             this.toolStripMenuItem3,
             this.exportYARGAudio,
             this.toolStripMenuItem4,
-            this.audioEncodingOptionsToolStripMenuItem});
+            this.exportFNFAudio});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -1785,61 +1780,6 @@ namespace Nautilus
             this.toolStripMenuItem4.Size = new System.Drawing.Size(299, 6);
             this.toolStripMenuItem4.Paint += new System.Windows.Forms.PaintEventHandler(this.mnuToolStripSeparator_Custom_Paint);
             // 
-            // audioEncodingOptionsToolStripMenuItem
-            // 
-            this.audioEncodingOptionsToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.audioEncodingOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.encodeFLAC,
-            this.encodeWAV,
-            this.encodeOpus,
-            this.encodeMP3,
-            this.encodeOGG});
-            this.audioEncodingOptionsToolStripMenuItem.Name = "audioEncodingOptionsToolStripMenuItem";
-            this.audioEncodingOptionsToolStripMenuItem.Size = new System.Drawing.Size(302, 22);
-            this.audioEncodingOptionsToolStripMenuItem.Text = "Audio Encoding Options";
-            // 
-            // encodeFLAC
-            // 
-            this.encodeFLAC.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.encodeFLAC.Checked = true;
-            this.encodeFLAC.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.encodeFLAC.Name = "encodeFLAC";
-            this.encodeFLAC.Size = new System.Drawing.Size(126, 22);
-            this.encodeFLAC.Text = "Use FLAC";
-            this.encodeFLAC.Click += new System.EventHandler(this.encodeFLAC_Click);
-            // 
-            // encodeWAV
-            // 
-            this.encodeWAV.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.encodeWAV.Name = "encodeWAV";
-            this.encodeWAV.Size = new System.Drawing.Size(126, 22);
-            this.encodeWAV.Text = "Use WAV";
-            this.encodeWAV.Click += new System.EventHandler(this.encodeFLAC_Click);
-            // 
-            // encodeOpus
-            // 
-            this.encodeOpus.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.encodeOpus.Name = "encodeOpus";
-            this.encodeOpus.Size = new System.Drawing.Size(126, 22);
-            this.encodeOpus.Text = "Use OPUS";
-            this.encodeOpus.Click += new System.EventHandler(this.encodeFLAC_Click);
-            // 
-            // encodeMP3
-            // 
-            this.encodeMP3.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.encodeMP3.Name = "encodeMP3";
-            this.encodeMP3.Size = new System.Drawing.Size(126, 22);
-            this.encodeMP3.Text = "Use MP3";
-            this.encodeMP3.Click += new System.EventHandler(this.encodeFLAC_Click);
-            // 
-            // encodeOGG
-            // 
-            this.encodeOGG.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.encodeOGG.Name = "encodeOGG";
-            this.encodeOGG.Size = new System.Drawing.Size(126, 22);
-            this.encodeOGG.Text = "Use OGG";
-            this.encodeOGG.Click += new System.EventHandler(this.encodeFLAC_Click);
-            // 
             // lyricOptionsToolStripMenuItem
             // 
             this.lyricOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1878,6 +1818,29 @@ namespace Nautilus
             this.lyricsFixed.Size = new System.Drawing.Size(189, 22);
             this.lyricsFixed.Text = "Fixed";
             this.lyricsFixed.Click += new System.EventHandler(this.lyricsFixed_Click);
+            // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(186, 6);
+            // 
+            // useWholeWords
+            // 
+            this.useWholeWords.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.useWholeWords.Checked = true;
+            this.useWholeWords.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.useWholeWords.Name = "useWholeWords";
+            this.useWholeWords.Size = new System.Drawing.Size(189, 22);
+            this.useWholeWords.Text = "Use whole words";
+            this.useWholeWords.Click += new System.EventHandler(this.useWholeWords_Click);
+            // 
+            // useSyllables
+            // 
+            this.useSyllables.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.useSyllables.Name = "useSyllables";
+            this.useSyllables.Size = new System.Drawing.Size(189, 22);
+            this.useSyllables.Text = "Use game syl- la- bles";
+            this.useSyllables.Click += new System.EventHandler(this.useSyllables_Click);
             // 
             // fileToolStripMenuItem
             // 
@@ -2077,28 +2040,14 @@ namespace Nautilus
             this.lblLyrics.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblLyrics.Paint += new System.Windows.Forms.PaintEventHandler(this.lblLyrics_Paint);
             // 
-            // toolStripMenuItem5
+            // exportFNFAudio
             // 
-            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(186, 6);
-            // 
-            // useWholeWords
-            // 
-            this.useWholeWords.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.useWholeWords.Checked = true;
-            this.useWholeWords.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.useWholeWords.Name = "useWholeWords";
-            this.useWholeWords.Size = new System.Drawing.Size(189, 22);
-            this.useWholeWords.Text = "Use whole words";
-            this.useWholeWords.Click += new System.EventHandler(this.useWholeWords_Click);
-            // 
-            // useSyllables
-            // 
-            this.useSyllables.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.useSyllables.Name = "useSyllables";
-            this.useSyllables.Size = new System.Drawing.Size(189, 22);
-            this.useSyllables.Text = "Use game syl- la- bles";
-            this.useSyllables.Click += new System.EventHandler(this.useSyllables_Click);
+            this.exportFNFAudio.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.exportFNFAudio.CheckOnClick = true;
+            this.exportFNFAudio.Name = "exportFNFAudio";
+            this.exportFNFAudio.Size = new System.Drawing.Size(302, 22);
+            this.exportFNFAudio.Text = "Export Fortnite Festival audio as stereo file";
+            this.exportFNFAudio.Click += new System.EventHandler(this.exportFNFAudio_Click);
             // 
             // Visualizer
             // 
@@ -2352,12 +2301,6 @@ namespace Nautilus
         private ToolStripMenuItem exportBandFuseAudio;
         private ToolStripMenuItem allowAccessToBandFuse;
         private ToolStripSeparator toolStripMenuItem3;
-        private ToolStripMenuItem audioEncodingOptionsToolStripMenuItem;
-        private ToolStripMenuItem encodeFLAC;
-        private ToolStripMenuItem encodeWAV;
-        private ToolStripMenuItem encodeOpus;
-        private ToolStripMenuItem encodeMP3;
-        private ToolStripMenuItem encodeOGG;
         private ToolStripMenuItem exportYARGAudio;
         private ToolStripSeparator toolStripMenuItem4;
         private Label label10;
@@ -2370,5 +2313,6 @@ namespace Nautilus
         private ToolStripSeparator toolStripMenuItem5;
         private ToolStripMenuItem useWholeWords;
         private ToolStripMenuItem useSyllables;
+        private ToolStripMenuItem exportFNFAudio;
     }
 }

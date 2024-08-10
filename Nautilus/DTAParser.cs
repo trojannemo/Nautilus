@@ -473,7 +473,7 @@ namespace Nautilus
                         {
                             song.Artist = Tools.GetConfigString(line);
                         }
-                        else if (line.Contains("name=") || line.Contains("name ="))
+                        else if ((line.Contains("name=") || line.Contains("name =")) && !line.Contains("shortname"))
                         {
                             song.Name = Tools.GetConfigString(line);
                         }
