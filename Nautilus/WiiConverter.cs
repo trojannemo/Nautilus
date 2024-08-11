@@ -1211,7 +1211,7 @@ namespace Nautilus
                     splitter.WiiRate = 22500;
                     break;
             }
-            splitter.DownmixMogg(con, p_o, MoggSplitter.MoggSplitFormat.OGG, 3, true, time, (double)numLength.Value, (int)numFadeIn.Value, (int)numFadeOut.Value, (double)numAttenuation.Value, "allstems|NOcrowd");
+            splitter.DownmixMogg(con, p_o, MoggSplitter.MoggSplitFormat.OGG, true, time, (double)numLength.Value, (int)numFadeIn.Value, (int)numFadeOut.Value, (double)numAttenuation.Value, "allstems|NOcrowd");
             if (!File.Exists(p_o))
             {
                 Log("Creating preview clip failed at downmixing");

@@ -478,7 +478,7 @@ namespace Nautilus
             if (backgroundWorker1.CancellationPending) return;
             Log("Separating mogg file into its component ogg files");
             var Splitter = new MoggSplitter();
-            var split = Splitter.SplitMogg(CON, folder, "allstems|rhythm|song", MoggSplitter.MoggSplitFormat.OGG, Convert.ToInt16(domainQuality.Text));
+            var split = Splitter.SplitMogg(CON, folder, "allstems|rhythm|song", MoggSplitter.MoggSplitFormat.OGG);
             if (!split)
             {
                 foreach (var error in Splitter.ErrorLog)
@@ -516,7 +516,7 @@ namespace Nautilus
             Log("Downmixing audio file to stereo file:");
             Log(ogg);
             var Splitter = new MoggSplitter();
-            var mixed = Splitter.DownmixMogg(CON, ogg, MoggSplitter.MoggSplitFormat.OGG, Convert.ToInt16(domainQuality.Text));
+            var mixed = Splitter.DownmixMogg(CON, ogg, MoggSplitter.MoggSplitFormat.OGG);
             foreach (var error in Splitter.ErrorLog)
             {
                 Log(error);

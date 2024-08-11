@@ -1276,7 +1276,9 @@ namespace Nautilus
         public bool IsNumericID(string line)
         {
             var s_id = GetSongID(line);
-            //C3 unique numeric IDs are 10 digits
+            return int.TryParse(s_id, out int _id);
+            //only worry if it's not a numeric value, no longer need to check for all the below crazyness
+            /*//C3 unique numeric IDs are 10 digits
             //Xbox DLC/RBN IDs are 7 digits
             //Game IDs start at 1 and go to around 3000 (Green Day)
             //if (!PS3 && s_id.Length != 10 && s_id.Length != 7) return false;
@@ -1315,7 +1317,7 @@ namespace Nautilus
             catch
             {
                 return false;
-            }
+            }*/
         }
 
         /// <summary>

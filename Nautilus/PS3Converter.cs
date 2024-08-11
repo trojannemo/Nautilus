@@ -485,7 +485,7 @@ namespace Nautilus
                                     }
                                     else if (line.Contains("song_id") && chkSongID.Checked)
                                     {
-                                        if (!Parser.IsNumericID(line)) //only if not already a unique C3 numeric ID
+                                        if (!Parser.IsNumericID(line)) //only if not already a numeric ID
                                         {
                                             var origID = Parser.GetSongID(line);
                                             line = ";ORIG_ID=" + origID;
@@ -1128,7 +1128,7 @@ namespace Nautilus
                     var newline = line;
                     if (line.Contains("song_id") && !line.Contains(";ORIG_ID="))
                     {
-                        if (!Parser.IsNumericID(line)) //only if not already a unique C3 numeric ID
+                        if (!Parser.IsNumericID(line)) //only if not already a numeric ID
                         {
                             newline = ";ORIG_ID=" + Parser.GetSongID(line);
                             sw.WriteLine(newline);
@@ -2363,7 +2363,7 @@ namespace Nautilus
                 var splitter = new MoggSplitter();
                 var path = Path.GetTempPath();
 
-                if (!splitter.SplitMogg(loopingSong, path, "allstems", MoggSplitter.MoggSplitFormat.WAV, 5, true))
+                if (!splitter.SplitMogg(loopingSong, path, "allstems", MoggSplitter.MoggSplitFormat.WAV, true))
                 {
                     Log("Failed to separate the audio stems, can't proceed");                    
                     continue;

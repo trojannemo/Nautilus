@@ -100,7 +100,7 @@ namespace Nautilus
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint, true);
             InitializeComponent();
             AppName = Text;
-            Tools = new NemoTools();
+            Tools = new NemoTools();            
             activeForms = new List<Form>();
             ButtonColumns = new List<int>();
             ButtonRows = new List<int>();

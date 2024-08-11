@@ -8,6 +8,15 @@ using System.Text;
 using System.Windows.Forms;
 using Nautilus.Properties;
 using Nautilus.x360;
+using Un4seen.Bass.AddOn.Mix;
+using Un4seen.Bass;
+using Un4seen.Bass.AddOn.Enc;
+using Un4seen.Bass.AddOn.EncFlac;
+using Un4seen.Bass.AddOn.EncMp3;
+using Un4seen.Bass.AddOn.EncOgg;
+using Un4seen.Bass.AddOn.EncOpus;
+using Un4seen.Bass.AddOn.Fx;
+using DocumentFormat.OpenXml.EMMA;
 
 namespace Nautilus
 {
@@ -25,6 +34,12 @@ namespace Nautilus
         private readonly NemoTools Tools;
         private readonly DTAParser Parser;
         private string StemsToIsolate;
+        private string AudioType = "WAV";
+        private bool BASS_INIT = false;
+        private MoggSplitter.MoggSplitFormat AudioFormat = MoggSplitter.MoggSplitFormat.WAV;
+        private int BassStream;
+        private int BassMixer;
+        private List<int> Splits;
 
         public StemsIsolator(Color ButtonBackColor, Color ButtonTextColor)
         {
@@ -33,6 +48,7 @@ namespace Nautilus
             Tools = new NemoTools();
             Parser = new DTAParser();
             grpStems.AllowDrop = true;
+            Splits = new List<int>();
 
             toolTip1.SetToolTip(btnBegin, "Click to begin process");
             toolTip1.SetToolTip(btnFile, "Click to select the source file");
@@ -241,7 +257,11 @@ namespace Nautilus
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
             try
             {
-                if (VariousFunctions.ReadFileType(files[0]) != XboxFileType.STFS)
+                if (files[0].EndsWith(".m4a"))
+                {
+                    txtFile.Text = files[0];
+                }
+                else if (VariousFunctions.ReadFileType(files[0]) != XboxFileType.STFS)
                 {
                     MessageBox.Show("That's not a valid file to drop here", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
@@ -298,12 +318,25 @@ namespace Nautilus
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
+            if (txtFile.Text.EndsWith(".m4a"))
+            {
+                if (radioSplit.Checked)
+                {
+                    Log("Trying to separate .m4a file into its component stems");
+                }
+                else
+                {
+                    Log("Trying to downmix .m4a file to stereo");
+                }
+                ProcessFnFFile(txtFile.Text);
+                return;
+            }
             var Splitter = new MoggSplitter();
             var folder = txtFile.Text + " Stems\\";
             if (radioSplit.Checked)
             {
                 Log("Trying to separate mogg file into its component stems");
-                var split = Splitter.SplitMogg(txtFile.Text, folder, StemsToIsolate, doWAV.Checked ? MoggSplitter.MoggSplitFormat.WAV : MoggSplitter.MoggSplitFormat.OGG, 5);
+                var split = Splitter.SplitMogg(txtFile.Text, folder, StemsToIsolate, AudioFormat);
                 foreach (var error in Splitter.ErrorLog)
                 {
                     Log(error);
@@ -313,8 +346,8 @@ namespace Nautilus
             }
             if (radioDownmix.Checked)
             {
-                Log("Trying to downmix mogg file to stereo " + (doWAV.Checked? "WAV" : "OGG") + " file");
-                var downmixed = Splitter.DownmixMogg(txtFile.Text, "", doWAV.Checked ? MoggSplitter.MoggSplitFormat.WAV : MoggSplitter.MoggSplitFormat.OGG, 5, chkCrowd.Checked ? "allstems" : "allstems|NOcrowd");
+                Log("Trying to downmix mogg file to a stereo file");
+                var downmixed = Splitter.DownmixMogg(txtFile.Text, "", AudioFormat, chkCrowd.Checked ? "allstems" : "allstems|NOcrowd");
                 foreach (var error in Splitter.ErrorLog)
                 {
                     Log(error);
@@ -487,6 +520,221 @@ namespace Nautilus
             txtTitle.SelectAll();
         }
         
+        private void ProcessFnFFile(string file)
+        {
+            if (!InitBass()) return;
+
+            var fnfParser = new NemoFnFParser();
+            BassStream = fnfParser.m4aToBassStream(file, 10);
+
+            if (BassStream == 0)
+            {
+                Log("Error processing that M4A file, is this a Fortnite Festival file?");
+                return;
+            }          
+
+            var stream_info = Bass.BASS_ChannelGetInfo(BassStream);
+            int inputChannels = stream_info.chans;
+            int outputChannels = 2;
+            BassMixer = BassMix.BASS_Mixer_StreamCreate(stream_info.freq, outputChannels, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_MIXER_END);
+            BassMix.BASS_Mixer_StreamAddChannel(BassMixer, BassStream, BASSFlag.BASS_MIXER_MATRIX);
+
+            var matrix = new float[outputChannels, inputChannels];
+            var vol = (1.0f / inputChannels) * 3f;  //arbitrary math so the mix doesn't clip but doesn't sound too flat
+            for (var i = 0; i < inputChannels - 1; i++)
+            {
+                matrix[0, i] = vol;
+                matrix[1, i + 1] = vol;
+            }
+            BassMix.BASS_Mixer_ChannelSetMatrix(BassStream, matrix);
+
+            var outputFile = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(file) + "." + AudioType.ToLowerInvariant();
+            var arg = "";
+            if (radioSplit.Checked)
+            {
+                var folder = Path.GetDirectoryName(file) + "\\stems\\";
+                if (!string.IsNullOrEmpty(folder) && !Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+                var drums = folder + "\\drums." + AudioType.ToLowerInvariant();
+                var bass = folder + "\\bass." + AudioType.ToLowerInvariant();
+                var guitar = folder + "\\guitar." + AudioType.ToLowerInvariant();
+                var vocals = folder + "\\vocals." + AudioType.ToLowerInvariant();
+                var backing = folder + "\\backing." + AudioType.ToLowerInvariant();
+
+                var tracks = new List<string> { drums, bass, guitar, vocals, backing };
+                foreach (var track in tracks)
+                {
+                    File.Delete(track);
+                }
+                var ArrangedChannels = ArrangeStreamChannels(10);
+                PrepareChannelsToSplit(0, ArrangedChannels, 2, (float)1.0, drums, false);
+
+                PrepareChannelsToSplit(2, ArrangedChannels, 2, (float)1.0, bass, true);
+
+                PrepareChannelsToSplit(4, ArrangedChannels, 2, (float)1.0, guitar, true);
+
+                PrepareChannelsToSplit(6, ArrangedChannels, 2, (float)1.0, vocals, true);
+
+                PrepareChannelsToSplit(8, ArrangedChannels, 2, (float)1.0, backing, true);
+
+                while (true)
+                {
+                    var buffer = new byte[20000];
+                    var c = Bass.BASS_ChannelGetData(Splits[0], buffer, buffer.Length);
+                    if (c <= 0) break;
+                    for (var i = 1; i < Splits.Count; i++)
+                    {
+                        while (Bass.BASS_ChannelGetData(Splits[i], buffer, buffer.Length) > 0) { }
+                    }
+                }
+                foreach (var split in Splits)
+                {
+                    Bass.BASS_StreamFree(split);
+                }
+                Splits.Clear();
+
+                ReleaseBass();
+
+                if (File.Exists(drums))
+                {
+                    Log("Success");
+                }
+                else
+                {
+                    Log("Failed");
+                }
+                EnableDisable(true);
+            }
+            else
+            {
+                switch (AudioFormat)
+                {
+                    case MoggSplitter.MoggSplitFormat.FLAC:
+                        arg = "--compression-level-5 --fast -T \"COMMENT=Made by Nemo\"";
+                        BassEnc_Flac.BASS_Encode_FLAC_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, outputFile);
+                        break;
+                    case MoggSplitter.MoggSplitFormat.OPUS:
+                        arg = "--vbr --music --comment COMMENT=\"Made by Nemo\"";
+                        BassEnc_Opus.BASS_Encode_OPUS_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_DEFAULT | BASSEncode.BASS_ENCODE_AUTOFREE, outputFile);
+                        break;
+                    case MoggSplitter.MoggSplitFormat.OGG:
+                        arg = "-q 5 -c \"COMMENT=Made by Nemo\"";
+                        BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, outputFile);
+                        break;
+                    case MoggSplitter.MoggSplitFormat.MP3:
+                        arg = "-b 320 --add-id3v2 --ignore-tag-errors --tc \"Made by Nemo\"";
+                        BassEnc_Mp3.BASS_Encode_MP3_StartFile(BassMixer, arg, BASSEncode.BASS_UNICODE | BASSEncode.BASS_ENCODE_AUTOFREE, outputFile);
+                        break;
+                    default:
+                    case MoggSplitter.MoggSplitFormat.WAV:
+                        BassEnc.BASS_Encode_Start(BassMixer, outputFile, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
+                        break;
+                }
+
+                Log("Beginning encoding process to stereo file");
+                while (true)
+                {
+                    var buffer = new byte[20000];
+                    var c = Bass.BASS_ChannelGetData(BassMixer, buffer, buffer.Length);
+                    if (c <= 0) break;
+                }
+
+                ReleaseBass();
+                if (File.Exists(outputFile))
+                {
+                    Log("Success");
+                }
+                else
+                {
+                    Log("Failed");
+                }
+                EnableDisable(true);
+            }
+        }
+
+        private void PrepareChannelsToSplit(int index, IList<int> ArrangedChannels, int channels, float vol, string file, bool slave = true)
+        {
+            var channel_map = new int[channels == 2 ? 3 : 2];
+            channel_map[0] = ArrangedChannels[index];
+            channel_map[1] = channels == 2 ? ArrangedChannels[index + 1] : -1;
+            if (channels == 2)
+            {
+                channel_map[2] = -1;
+            }
+            var flags = slave ? BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SPLIT_SLAVE : BASSFlag.BASS_STREAM_DECODE;
+            var BassMixer = BassMix.BASS_Split_StreamCreate(BassStream, flags, channel_map);
+            var volumeFX = Bass.BASS_ChannelSetFX(BassMixer, BASSFXType.BASS_FX_BFX_VOLUME, 0);
+            var volume = new BASS_BFX_VOLUME { lChannel = 0, fVolume = vol };
+            Bass.BASS_FXSetParameters(volumeFX, volume);
+            Splits.Add(BassMixer);
+            var arg = "";
+            switch (AudioFormat)
+            {
+                case MoggSplitter.MoggSplitFormat.FLAC:
+                    arg = "--compression-level-5 --fast -T \"COMMENT=Made by Nemo\"";
+                    BassEnc_Flac.BASS_Encode_FLAC_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, file);
+                    break;
+                case MoggSplitter.MoggSplitFormat.OPUS:
+                    arg = "--vbr --music --comment COMMENT=\"Made by Nemo\"";
+                    BassEnc_Opus.BASS_Encode_OPUS_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_DEFAULT | BASSEncode.BASS_ENCODE_AUTOFREE, file);
+                    break;
+                case MoggSplitter.MoggSplitFormat.OGG:
+                    arg = "-q 5 -c \"COMMENT=Made by Nemo\"";
+                    BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, file);
+                    break;
+                case MoggSplitter.MoggSplitFormat.MP3:
+                    arg = "-b 320 --add-id3v2 --ignore-tag-errors --tc \"Made by Nemo\"";
+                    BassEnc_Mp3.BASS_Encode_MP3_StartFile(BassMixer, arg, BASSEncode.BASS_UNICODE | BASSEncode.BASS_ENCODE_AUTOFREE, file);
+                    break;
+                default:
+                case MoggSplitter.MoggSplitFormat.WAV:
+                    BassEnc.BASS_Encode_Start(BassMixer, file, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
+                    break;
+            }
+        }
+
+        public int[] ArrangeStreamChannels(int totalChannels)
+        {
+            var channels = new int[totalChannels];
+            for (var i = 0; i < totalChannels; i++)
+            {
+                channels[i] = i;
+            }
+            return channels;
+        }
+
+        private bool InitBass()
+        {
+            if (BASS_INIT) return true;
+            //initialize BASS.NET
+            if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
+            {
+                if (Bass.BASS_ErrorGetCode() == BASSError.BASS_ERROR_ALREADY)
+                {
+                    BASS_INIT = true;
+                    return true;
+                }
+                MessageBox.Show("Error initializing BASS.NET\n" + Bass.BASS_ErrorGetCode());
+                return false;
+            }
+            Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_BUFFER, 20000);
+            Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_UPDATEPERIOD, 50);
+            BASS_INIT = true;
+            return true;
+        }
+
+        private void ReleaseBass()
+        {
+            Bass.BASS_ChannelStop(BassMixer);
+            Bass.BASS_StreamFree(BassMixer);
+            Bass.BASS_ChannelStop(BassStream);
+            Bass.BASS_StreamFree(BassStream);
+            Bass.BASS_Free();
+            BASS_INIT = false;
+        }
+
         private void btnFile_Click(object sender, EventArgs e)
         {
             //if user selects new folder, assign that value
@@ -495,7 +743,7 @@ namespace Nautilus
             var ofd = new OpenFileDialog
                 {
                     InitialDirectory = Tools.CurrentFolder,
-                    Title = "Select the source CON/LIVE file"
+                    Title = "Select the source CON/LIVE/M4A file"
                 };
             txtFile.Text = "";
             ofd.ShowDialog();
@@ -503,7 +751,11 @@ namespace Nautilus
             {
                 try
                 {
-                    if (VariousFunctions.ReadFileType(ofd.FileName) == XboxFileType.STFS)
+                    if (Path.GetExtension(ofd.FileName)==".m4a")
+                    {                        
+                        txtFile.Text = ofd.FileName;
+                    }
+                    else if (VariousFunctions.ReadFileType(ofd.FileName) == XboxFileType.STFS)
                     {
                         Log("File is a valid CON file");
                         txtFile.Text = ofd.FileName;
@@ -511,7 +763,7 @@ namespace Nautilus
                     }
                     else
                     {
-                        MessageBox.Show("That is not a Rock Band song file!\nTry again", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        MessageBox.Show("That is not a valid file!\nTry again", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         txtFile.Text = tFile;
                     }
                 }
@@ -765,8 +1017,19 @@ namespace Nautilus
             txtFile.ForeColor = Color.Black;
             txtTitle.Text = "(Stems Recording Pack) " + Path.GetFileName(txtFile.Text);
             if (txtFile.Text != "")
-            {
+            {                
                 reset(false);
+                if (txtFile.Text.EndsWith(".m4a"))
+                {
+                    Log("Analyzing file ... hang on");
+                    Log("File is a Fortnite Festival audio file");
+                    btnBegin.Visible = true;
+                    btnReset.Visible = true;
+                    radioPrepare.Enabled = false;
+                    radioDownmix.Checked = true;
+                    EnableDisableStems();
+                    return;
+                }
                 Log("Analyzing file ... hang on");
                 var xPackage = new STFSPackage(txtFile.Text);
                 if (!xPackage.ParseSuccess)
@@ -823,7 +1086,7 @@ namespace Nautilus
         private void stemsISO_Shown(object sender, EventArgs e)
         {
             Log("Welcome to " + Text);
-            Log("Drag and drop the CON / LIVE file here");
+            Log("Drag and drop the CON / LIVE / M4A file here");
             Log("Or click on the button to select the file");
             Log("Ready to begin");
         }
@@ -846,25 +1109,36 @@ namespace Nautilus
         private void EnableDisableStems()
         {
             if (txtFile.Text.Length <= 0) return;
-            chkDrums.Enabled = !radioDownmix.Checked && ChannelsDrums > 0;
-            chkBass.Enabled = !radioDownmix.Checked && ChannelsBass > 0;
-            chkVocals.Enabled = !radioDownmix.Checked && ChannelsVocals > 0;
-            chkKeys.Enabled = !radioDownmix.Checked && ChannelsKeys > 0;
-            chkGuitar.Enabled = !radioDownmix.Checked && ChannelsGuitar > 0;
-            chkBacking.Enabled = !radioDownmix.Checked && ChannelsBacking > 0;
-            chkCrowd.Enabled = ChannelsCrowd > 0;
+            var isM4A = txtFile.Text.EndsWith(".m4a");
+            chkDrums.Enabled = !radioDownmix.Checked && (ChannelsDrums > 0 || isM4A);
+            chkBass.Enabled = !radioDownmix.Checked && (ChannelsBass > 0 || isM4A);
+            chkVocals.Enabled = !radioDownmix.Checked && (ChannelsVocals > 0 || isM4A);
+            chkKeys.Enabled = !radioDownmix.Checked && ChannelsKeys > 0 && !isM4A;
+            chkGuitar.Enabled = !radioDownmix.Checked && (ChannelsGuitar > 0 || isM4A);
+            chkBacking.Enabled = !radioDownmix.Checked && (ChannelsBacking > 0 || isM4A);
+            chkCrowd.Enabled = ChannelsCrowd > 0 && !isM4A;
         }
 
         private void doWAV_Click(object sender, EventArgs e)
         {
             doWAV.Checked = true;
             doOGG.Checked = false;
+            doFLAC.Checked = false;
+            doOPUS.Checked = false;
+            doMP3.Checked = false;
+            AudioType = "WAV";
+            AudioFormat = MoggSplitter.MoggSplitFormat.WAV;
         }
 
         private void doOGG_Click(object sender, EventArgs e)
         {
             doWAV.Checked = false;
             doOGG.Checked = true;
+            doFLAC.Checked = false;
+            doOPUS.Checked = false;
+            doMP3.Checked = false;
+            AudioType = "OGG";
+            AudioFormat = MoggSplitter.MoggSplitFormat.OGG;
         }
 
         private void picPin_MouseClick(object sender, MouseEventArgs e)
@@ -882,6 +1156,39 @@ namespace Nautilus
                     break;
             }
             TopMost = picPin.Tag.ToString() == "pinned";
+        }
+
+        private void doFLAC_Click(object sender, EventArgs e)
+        {
+            doWAV.Checked = false;
+            doOGG.Checked = false;
+            doFLAC.Checked = true;
+            doOPUS.Checked = false;
+            doMP3.Checked = false;
+            AudioType = "FLAC";
+            AudioFormat = MoggSplitter.MoggSplitFormat.FLAC;
+        }
+
+        private void doMP3_Click(object sender, EventArgs e)
+        {
+            doWAV.Checked = false;
+            doOGG.Checked = false;
+            doFLAC.Checked = false;
+            doOPUS.Checked = false;
+            doMP3.Checked = true;
+            AudioType = "MP3";
+            AudioFormat = MoggSplitter.MoggSplitFormat.MP3;
+        }
+
+        private void doOPUS_Click(object sender, EventArgs e)
+        {
+            doWAV.Checked = false;
+            doOGG.Checked = false;
+            doFLAC.Checked = false;
+            doOPUS.Checked = true;
+            doMP3.Checked = false;
+            AudioType = "OPUS";
+            AudioFormat = MoggSplitter.MoggSplitFormat.OPUS;
         }
     }
 }

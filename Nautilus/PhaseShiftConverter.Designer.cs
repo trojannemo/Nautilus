@@ -407,6 +407,7 @@
             this.domainQuality.Size = new System.Drawing.Size(36, 20);
             this.domainQuality.TabIndex = 71;
             this.domainQuality.Text = "5";
+            this.domainQuality.Visible = false;
             // 
             // lblQuality
             // 
@@ -416,6 +417,7 @@
             this.lblQuality.Size = new System.Drawing.Size(42, 13);
             this.lblQuality.TabIndex = 70;
             this.lblQuality.Text = "Quality:";
+            this.lblQuality.Visible = false;
             // 
             // radioDownmix
             // 

@@ -62,6 +62,9 @@
             this.radioDownmix = new System.Windows.Forms.RadioButton();
             this.radioPrepare = new System.Windows.Forms.RadioButton();
             this.radioSplit = new System.Windows.Forms.RadioButton();
+            this.doFLAC = new System.Windows.Forms.ToolStripMenuItem();
+            this.doOPUS = new System.Windows.Forms.ToolStripMenuItem();
+            this.doMP3 = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -184,8 +187,11 @@
             // audioFormatToolStrip
             // 
             this.audioFormatToolStrip.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.doWAV,
-            this.doOGG});
+            this.doFLAC,
+            this.doMP3,
+            this.doOGG,
+            this.doOPUS,
+            this.doWAV});
             this.audioFormatToolStrip.Name = "audioFormatToolStrip";
             this.audioFormatToolStrip.Size = new System.Drawing.Size(92, 20);
             this.audioFormatToolStrip.Text = "Audio Format";
@@ -196,16 +202,16 @@
             this.doWAV.Checked = true;
             this.doWAV.CheckState = System.Windows.Forms.CheckState.Checked;
             this.doWAV.Name = "doWAV";
-            this.doWAV.Size = new System.Drawing.Size(148, 22);
-            this.doWAV.Text = "WAV (faster)";
+            this.doWAV.Size = new System.Drawing.Size(180, 22);
+            this.doWAV.Text = "WAV";
             this.doWAV.Click += new System.EventHandler(this.doWAV_Click);
             // 
             // doOGG
             // 
             this.doOGG.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.doOGG.Name = "doOGG";
-            this.doOGG.Size = new System.Drawing.Size(148, 22);
-            this.doOGG.Text = "OGG (smaller)";
+            this.doOGG.Size = new System.Drawing.Size(180, 22);
+            this.doOGG.Text = "OGG";
             this.doOGG.Click += new System.EventHandler(this.doOGG_Click);
             // 
             // helpToolStripMenuItem1
@@ -484,6 +490,30 @@
             this.radioSplit.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
             this.radioSplit.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
             // 
+            // doFLAC
+            // 
+            this.doFLAC.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.doFLAC.Name = "doFLAC";
+            this.doFLAC.Size = new System.Drawing.Size(180, 22);
+            this.doFLAC.Text = "FLAC";
+            this.doFLAC.Click += new System.EventHandler(this.doFLAC_Click);
+            // 
+            // doOPUS
+            // 
+            this.doOPUS.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.doOPUS.Name = "doOPUS";
+            this.doOPUS.Size = new System.Drawing.Size(180, 22);
+            this.doOPUS.Text = "OPUS";
+            this.doOPUS.Click += new System.EventHandler(this.doOPUS_Click);
+            // 
+            // doMP3
+            // 
+            this.doMP3.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.doMP3.Name = "doMP3";
+            this.doMP3.Size = new System.Drawing.Size(180, 22);
+            this.doMP3.Text = "MP3";
+            this.doMP3.Click += new System.EventHandler(this.doMP3_Click);
+            // 
             // StemsIsolator
             // 
             this.AllowDrop = true;
@@ -564,5 +594,8 @@
         private System.Windows.Forms.ToolStripMenuItem doOGG;
         private System.Windows.Forms.RadioButton radioDownmix;
         private System.Windows.Forms.PictureBox picPin;
+        private System.Windows.Forms.ToolStripMenuItem doFLAC;
+        private System.Windows.Forms.ToolStripMenuItem doMP3;
+        private System.Windows.Forms.ToolStripMenuItem doOPUS;
     }
 }

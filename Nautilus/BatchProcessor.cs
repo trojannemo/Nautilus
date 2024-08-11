@@ -308,7 +308,7 @@ namespace Nautilus
                                                 }
                                                 else if (line.Contains("song_id") && !line.Contains(";ORIG_ID=") && !line.Trim().StartsWith(";") && chkSongID.Checked)
                                                 {
-                                                    if (!Parser.IsNumericID(line)) //only if not already a unique C3 numeric ID
+                                                    if (!Parser.IsNumericID(line)) //only if not already a numeric ID
                                                     {
                                                         var origID = Parser.GetSongID(line);
                                                         sw.WriteLine(";ORIG_ID=" + origID);

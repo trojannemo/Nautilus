@@ -11,6 +11,9 @@ using Un4seen.Bass.AddOn.EncOgg;
 using Path = System.IO.Path;
 using System.Windows.Forms;
 using NautilusFREE;
+using Un4seen.Bass.AddOn.EncFlac;
+using Un4seen.Bass.AddOn.EncMp3;
+using Un4seen.Bass.AddOn.EncOpus;
 
 namespace Nautilus
 {
@@ -118,12 +121,12 @@ namespace Nautilus
             Bass.BASS_GetVersion();
         }
 
-        public bool DownmixMogg(string CON_file, string output, MoggSplitFormat format, int quality, string stems)
+        public bool DownmixMogg(string CON_file, string output, MoggSplitFormat format, string stems)
         {
-            return DownmixMogg(CON_file, output, format, quality, false, 0.0, 0.0, 0.0, 0.0, 0.0, stems);
+            return DownmixMogg(CON_file, output, format,false, 0.0, 0.0, 0.0, 0.0, 0.0, stems);
         }
 
-        public bool DownmixMogg(string CON_file, string output, MoggSplitFormat format, int quality, bool doWii = false, double start = 0.0, double length = 0.0, double fadeIn = 0.0, double fadeOut = 0.0, double volume = 0.0, string stems = "allstems")
+        public bool DownmixMogg(string CON_file, string output, MoggSplitFormat format, bool doWii = false, double start = 0.0, double length = 0.0, double fadeIn = 0.0, double fadeOut = 0.0, double volume = 0.0, string stems = "allstems")
         {
             if (!ExtractDecryptMogg(CON_file)) return false;
             try
@@ -155,15 +158,31 @@ namespace Nautilus
                 var output_file = output;
                 if (string.IsNullOrWhiteSpace(output))
                 {
-                    output_file = Path.GetDirectoryName(CON_file) + "\\" + Parser.Songs[0].InternalName + (format == MoggSplitFormat.WAV ? ".wav" : ".ogg");
+                    output_file = Path.GetDirectoryName(CON_file) + "\\" + Parser.Songs[0].InternalName + GetExtensionFromAudioFormat(format);
                 }
-                if (format == MoggSplitFormat.OGG)
+                var arg = "";
+                switch (format)
                 {
-                    BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassMixer, "-q " + quality, BASSEncode.BASS_ENCODE_AUTOFREE, output_file);
-                }
-                else
-                {
-                    BassEnc.BASS_Encode_Start(BassMixer, output_file, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
+                    case MoggSplitFormat.FLAC:
+                        arg = "--compression-level-5 --fast -T \"COMMENT=Made by Nemo\"";
+                        BassEnc_Flac.BASS_Encode_FLAC_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, output);
+                        break;
+                    case MoggSplitFormat.OPUS:
+                        arg = "--vbr --music --comment COMMENT=\"Made by Nemo\"";
+                        BassEnc_Opus.BASS_Encode_OPUS_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_DEFAULT | BASSEncode.BASS_ENCODE_AUTOFREE, output);
+                        break;
+                    case MoggSplitFormat.OGG:
+                        arg = "-q 5 -c \"COMMENT=Made by Nemo\"";
+                        BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, output);
+                        break;
+                    case MoggSplitFormat.MP3:
+                        arg = "-b 320 --add-id3v2 --ignore-tag-errors --tc \"Made by Nemo\"";
+                        BassEnc_Mp3.BASS_Encode_MP3_StartFile(BassMixer, arg, BASSEncode.BASS_UNICODE | BASSEncode.BASS_ENCODE_AUTOFREE, output);
+                        break;
+                    default:
+                    case MoggSplitFormat.WAV:
+                        BassEnc.BASS_Encode_Start(BassMixer, output, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
+                        break;
                 }
                 while (true)
                 {
@@ -185,6 +204,32 @@ namespace Nautilus
             }
         }
 
+        private string GetExtensionFromAudioFormat(MoggSplitFormat format)
+        {
+            var extension = ".";
+
+            switch (format)
+            {
+                case MoggSplitFormat.FLAC:
+                    extension += "flac";
+                    break;
+                case MoggSplitFormat.MP3:
+                    extension += "mp3";
+                    break;
+                case MoggSplitFormat.OGG:
+                    extension += "ogg";
+                    break;
+                case MoggSplitFormat.OPUS:
+                    extension += "opus";
+                    break;
+                case MoggSplitFormat.WAV:
+                default:
+                    extension += "wav";
+                    break;
+            }
+
+            return extension;
+        }
         public bool ReEncodeMogg(SongData song, string mogg, int quality, bool encrypt = true)
         {
             var nautilus3 = new nTools();
@@ -256,14 +301,14 @@ namespace Nautilus
             }
         }
 
-        public bool SplitMogg(string CON_file, string output_folder, string StemsToSplit, MoggSplitFormat format, int quality, bool bypass = false)
+        public bool SplitMogg(string CON_file, string output_folder, string StemsToSplit, MoggSplitFormat format, bool bypass = false)
         {
-            return ExtractDecryptMogg(CON_file) && DoSplitMogg(output_folder, StemsToSplit, format, quality);
+            return ExtractDecryptMogg(CON_file) && DoSplitMogg(output_folder, StemsToSplit, format);
         }
 
         public enum MoggSplitFormat
         {
-            OGG, WAV
+            FLAC, MP3, OGG, OPUS, WAV
         }
 
         private bool InitBass()
@@ -348,8 +393,9 @@ namespace Nautilus
             return channels;
         }
 
-        private bool DoSplitMogg(string folder, string StemsToSplit, MoggSplitFormat format, int quality)
+        private bool DoSplitMogg(string folder, string StemsToSplit, MoggSplitFormat format)
         {
+            int quality = 5;//just hard code it
             var ext = "ogg";
             if (format == MoggSplitFormat.WAV)
             {
