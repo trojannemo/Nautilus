@@ -240,14 +240,14 @@ namespace Nautilus
                         MIDIInfo.ProKeys.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.ProKeys.ChartedNotes);
                         MIDIInfo.ProKeys.Solos = GetInstrumentSolos(MIDIFile.Events[i], 115);
                     }
-                    else if (trackname.Contains("VOCALS"))
+                    else if (trackname.Contains("VOCALS") || trackname.Contains("vocals_1_expert")) //PowerGig
                     {
                         List<MIDINote> toadd;
                         CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.Vocals.ValidNotes, out toadd);
                         if (!output_info) continue;
                         MIDIInfo.Vocals.ChartedNotes.AddRange(toadd);
                         MIDIInfo.Vocals.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.Vocals.ChartedNotes);
-                        GetPhraseMarkers(MIDIFile.Events[i], InternalPhrasesVocals);
+                        GetPhraseMarkers(MIDIFile.Events[i], InternalPhrasesVocals, trackname.Contains("vocals_1_expert"));
                         GetInternalLyrics(MIDIFile.Events[i], 0, InternalPhrasesVocals);
                         MIDIInfo.UsesCowbell = SongUsesCowbell(MIDIFile.Events[i]);
                     }
@@ -460,8 +460,9 @@ namespace Nautilus
             InternalPracticeSessions.Add(practice);
         }
 
-        private void GetPhraseMarkers(IEnumerable<MidiEvent> track, PhraseCollection collection)
+        private void GetPhraseMarkers(IEnumerable<MidiEvent> track, PhraseCollection collection, bool isPowerGig = false)
         {
+            double lastStartTime = 0.0;
             foreach (var notes in track)
             {
                 switch (notes.CommandCode)
@@ -492,13 +493,36 @@ namespace Nautilus
                                 break;
                         }
                         break;
+                    case MidiCommandCode.MetaEvent:
+                        if (!isPowerGig) continue;
+                        var vocal_event = (MetaEvent)notes;
+                        if ((vocal_event.MetaEventType == MetaEventType.Lyric ||
+                             vocal_event.MetaEventType == MetaEventType.TextEvent) &&
+                            !vocal_event.ToString().Contains("["))
+                        {
+                            var lyric = GetCleanMIDILyric(vocal_event.ToString());
+                            if (string.IsNullOrEmpty(lyric)) continue;
+                            if (lyric.Equals("\\r")) //as best as I can guess, this is their phrase marker
+                            {
+                                var endTime = GetRealtime(vocal_event.AbsoluteTime);
+                                var phrase = new LyricPhrase
+                                {
+                                    PhraseStart = lastStartTime,
+                                    PhraseEnd = endTime,//we have no end time so just use the same start and end
+                                };
+                                collection.Phrases.Add(phrase); //new line
+                                lastStartTime = endTime;
+                                break;
+                            }                            
+                        }
+                        break;
                 }
             }
         }
 
         private void GetInternalLyrics(IEnumerable<MidiEvent> track, int type, PhraseCollection collection)
         {
-            if (!collection.Phrases.Any()) return;
+            if (!collection.Phrases.Any()) return;            
             foreach (var notes in track)
             {
                 switch (notes.CommandCode)
@@ -510,7 +534,7 @@ namespace Nautilus
                             !vocal_event.ToString().Contains("["))
                         {
                             var lyric = GetCleanMIDILyric(vocal_event.ToString());
-                            if (string.IsNullOrEmpty(lyric)) continue;
+                            if (string.IsNullOrEmpty(lyric.Replace("\\r",""))) continue;
                             var time = GetRealtime(vocal_event.AbsoluteTime);
                             var index = 0;
                             for (var i = 0; i < collection.Phrases.Count; i++)
@@ -561,7 +585,7 @@ namespace Nautilus
                 }
                 if (index == -1) return "";
                 var lyric = raw_event.Substring(index + 1, raw_event.Length - index - 1);
-                return lyric;
+                return lyric.Replace("\\n", "").Replace("*", ""); //clean up weird PowerGig lyric symbols
             }
             catch (Exception)
             {

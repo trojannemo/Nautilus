@@ -149,6 +149,7 @@ namespace Nautilus
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.exportYARGAudio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
+            this.exportFNFAudio = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricsKaraoke = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricsScrolling = new System.Windows.Forms.ToolStripMenuItem();
@@ -175,11 +176,10 @@ namespace Nautilus
             this.picWorking = new System.Windows.Forms.PictureBox();
             this.picVisualizer = new System.Windows.Forms.PictureBox();
             this.ghwtdeWorker = new System.ComponentModel.BackgroundWorker();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.fnfWorker = new System.ComponentModel.BackgroundWorker();
             this.powerGigWorker = new System.ComponentModel.BackgroundWorker();
             this.bandFuseWorker = new System.ComponentModel.BackgroundWorker();
             this.lblLyrics = new System.Windows.Forms.Label();
-            this.exportFNFAudio = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreUp)).BeginInit();
@@ -1780,6 +1780,15 @@ namespace Nautilus
             this.toolStripMenuItem4.Size = new System.Drawing.Size(299, 6);
             this.toolStripMenuItem4.Paint += new System.Windows.Forms.PaintEventHandler(this.mnuToolStripSeparator_Custom_Paint);
             // 
+            // exportFNFAudio
+            // 
+            this.exportFNFAudio.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.exportFNFAudio.CheckOnClick = true;
+            this.exportFNFAudio.Name = "exportFNFAudio";
+            this.exportFNFAudio.Size = new System.Drawing.Size(302, 22);
+            this.exportFNFAudio.Text = "Export Fortnite Festival audio as stereo file";
+            this.exportFNFAudio.Click += new System.EventHandler(this.exportFNFAudio_Click);
+            // 
             // lyricOptionsToolStripMenuItem
             // 
             this.lyricOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -2014,6 +2023,13 @@ namespace Nautilus
             this.ghwtdeWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.ghwtdeWorker_DoWork);
             this.ghwtdeWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.ghwtdeWorker_RunWorkerCompleted);
             // 
+            // fnfWorker
+            // 
+            this.fnfWorker.WorkerReportsProgress = true;
+            this.fnfWorker.WorkerSupportsCancellation = true;
+            this.fnfWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.fnfWorker_DoWork);
+            this.fnfWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.fnfWorker_RunWorkerCompleted);
+            // 
             // powerGigWorker
             // 
             this.powerGigWorker.WorkerReportsProgress = true;
@@ -2039,15 +2055,6 @@ namespace Nautilus
             this.lblLyrics.TabIndex = 65;
             this.lblLyrics.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblLyrics.Paint += new System.Windows.Forms.PaintEventHandler(this.lblLyrics_Paint);
-            // 
-            // exportFNFAudio
-            // 
-            this.exportFNFAudio.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.exportFNFAudio.CheckOnClick = true;
-            this.exportFNFAudio.Name = "exportFNFAudio";
-            this.exportFNFAudio.Size = new System.Drawing.Size(302, 22);
-            this.exportFNFAudio.Text = "Export Fortnite Festival audio as stereo file";
-            this.exportFNFAudio.Click += new System.EventHandler(this.exportFNFAudio_Click);
             // 
             // Visualizer
             // 
@@ -2288,7 +2295,7 @@ namespace Nautilus
         private ContextMenuStrip contextMenuStrip2;
         private ToolStripMenuItem toolStripClearIcons;
         private System.ComponentModel.BackgroundWorker ghwtdeWorker;
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.ComponentModel.BackgroundWorker fnfWorker;
         private ToolStripMenuItem toolsToolStripMenuItem;
         private ToolStripMenuItem exportGHWTDEAudio;
         private ToolStripMenuItem allowAccessToGHWTDE;

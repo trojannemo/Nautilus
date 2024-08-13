@@ -25,7 +25,6 @@ using Un4seen.Bass.AddOn.EncFlac;
 using Nautilus.Texture;
 using NautilusFREE;
 using Nautilus.LibForge.SongData;
-using System.Runtime.Remoting;
 
 namespace Nautilus
 {
@@ -86,7 +85,7 @@ namespace Nautilus
         private int BassMixer;
         private int BassStream;
         private const int BassBuffer = 1000;
-        private const int FadeTime = 3;
+        private const double FadeTime = 3.0;
         public double VolumeLevel = 12.5;
         private string UserProfile = "";
         private float songX = 272f;
@@ -148,9 +147,14 @@ namespace Nautilus
         private string XMA_EXT_PATH;
         private bool isBandFuse;
         private bool isYARG;
+        private bool isGHWTDE;
+        private bool isPowerGig;
         private readonly MIDIStuff MIDITools;
         private double songLength;
-        private readonly string tempWav;
+        private readonly string tempFile;
+        private readonly NemoFnFParser fnfParser;
+        private string m4aFilePath;
+        private bool volSlide;
 
         public Visualizer(Color ButtonBackColor, Color ButtonTextColor, string con)
         {
@@ -162,6 +166,7 @@ namespace Nautilus
             nautilus3 = new nTools();
             Parser = new DTAParser();
             MIDITools = new MIDIStuff();
+            fnfParser = new NemoFnFParser();
             picLogo.AllowDrop = true;
             FilesToDelete = new List<string>();
             BassStreams = new List<int>();
@@ -171,7 +176,7 @@ namespace Nautilus
             wavFiles = new string[20];
             cltFiles = new string[20];
             var author_logo = Application.StartupPath + "\\author.png";
-            tempWav = Application.StartupPath + "\\bin\\temp.wav";
+            tempFile = Application.StartupPath + "\\bin\\temp";
             if (File.Exists(author_logo))
             {
                 GetLogo(author_logo);
@@ -318,6 +323,9 @@ namespace Nautilus
             isTBRBDLC = false;
             isGDRBDLC = false;
             isBandFuse = false;
+            isPowerGig = false;
+            isGHWTDE = false;
+            isRS2014 = false;
             MIDITools.Initialize(false);
             lblLyrics.Invalidate();
             lblLyrics.Visible = false;
@@ -444,7 +452,7 @@ namespace Nautilus
             }            
             RESOURCE_ICON1 = null;
             RESOURCE_ICON2 = null;
-            Tools.DeleteFile(tempWav);
+            Tools.DeleteFile(tempFile);
             reset = false;
             picVisualizer.Invalidate();
         }
@@ -598,6 +606,7 @@ namespace Nautilus
             var png_ps3 = Directory.GetFiles(folder, "*.png_ps3", SearchOption.AllDirectories);
             var ymogg = Directory.GetFiles(folder, "*.yarg_mogg", SearchOption.AllDirectories);
             var mogg = Directory.GetFiles(folder, "*.mogg", SearchOption.AllDirectories);
+            var midi = Directory.GetFiles(folder, "*.mid", SearchOption.AllDirectories);
 
             if (dta == null || dta.Count() == 0)
             {
@@ -660,33 +669,20 @@ namespace Nautilus
             {
                 return;
             }
+            if (midi.Any())
+            {
+                ReadMidi(midi[0]);
+            }
             //extract audio file for previewing
             Height = maxHeight;
             ProcessAudio();
-        }
+        } 
 
         private void PlayFnFSong(string m4a)
         {
             loadDefaults();
-            InitBass();
-
-            var fnfParser = new NemoFnFParser();
-            var fnfStream = fnfParser.m4aToBassStream(m4a, 10);//always 10 channels, no preview allowed here
-            if (fnfStream == 0)
-            {
-                MessageBox.Show("File '" + m4a + "' is not a valid input file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-
-            //this next bit is an ugly hack but temporary until Ian @ BASS implements a better solution
-            BassEnc.BASS_Encode_Start(fnfStream, tempWav, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
-            while (true)
-            {
-                var buffer = new byte[20000];
-                var c = Bass.BASS_ChannelGetData(fnfStream, buffer, buffer.Length);
-                if (c <= 0) break;
-            }
-            Bass.BASS_StreamFree(fnfStream);
+            picWorking.Visible = true;
+            m4aFilePath = m4a;
 
             var folder = Path.GetDirectoryName(m4a);
             var ini = Directory.GetFiles(folder, "song.ini");
@@ -704,6 +700,8 @@ namespace Nautilus
             else
             {
                 MessageBox.Show("Assumed Fortnite Festival structure but did not find metadata. Aborting.", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                picWorking.Visible = false;
+                return;
             }
 
             var artPNG = Directory.GetFiles(folder, "album.png");
@@ -717,33 +715,8 @@ namespace Nautilus
                 getImage(artJPG[0]);
             }
 
-            isOpus = false;
-            isOgg = false;
-            isWAV = false;
-            isMP3 = false;            
-            isM4A = true;
-            Height = maxHeight;
-            picPlayPause.Cursor = Cursors.Hand;
-            picStop.Cursor = Cursors.Hand;
-
-            if (isM4A) //fixed song structure
-            {
-                Parser.Songs[0].ChannelsDrums = 2;
-                Parser.Songs[0].ChannelsBassStart = 0;
-                Parser.Songs[0].ChannelsBass = 2;
-                Parser.Songs[0].ChannelsBassStart = 2;
-                Parser.Songs[0].ChannelsGuitar = 2;
-                Parser.Songs[0].ChannelsGuitarStart = 4;
-                Parser.Songs[0].ChannelsVocals = 2;
-                Parser.Songs[0].ChannelsVocalsStart = 6;
-                Parser.Songs[0].ChannelsTotal = 10;
-                updatePlaybackInstruments();
-            }
-            Parser.Songs[0].OriginalAttenuationValues = "";
-            Parser.Songs[0].AttenuationValues = "";
-            Parser.Songs[0].PanningValues = "";
-            updatePlaybackInstruments();
-            StartPlayback();
+            InitBass();
+            fnfWorker.RunWorkerAsync();
         }
 
         private void Visualizer_DragDrop(object sender, DragEventArgs e)
@@ -1252,6 +1225,11 @@ namespace Nautilus
             Parser.ReadXMLFile(XML_PATH);
             loadDTA();
 
+            var midi = XML_PATH.Replace(".xml", ".mid");
+            if (File.Exists(midi))
+            {
+                ReadMidi(midi);
+            }
             var visualizer = Application.StartupPath + "\\visualizer\\";
             if (!Directory.Exists(visualizer))
             {
@@ -1298,6 +1276,7 @@ namespace Nautilus
             loadDefaults();
             Parser.ReadGHWTDEFile(GHWTDE_INI_PATH);
             loadDTA();
+            isGHWTDE = true;
 
             var default_art = Application.StartupPath + "\\res\\ghwtde.png";
             var albumPNG = Path.GetDirectoryName(GHWTDE_INI_PATH) + "\\Content\\album.png";
@@ -3495,11 +3474,11 @@ namespace Nautilus
 
                 if (isM4A) //otherwise we already gave a value to BassStream
                 {
-                    BassStream = Bass.BASS_StreamCreateFile(tempWav, 0L, File.ReadAllBytes(tempWav).Length, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
+                    BassStream = BassOpus.BASS_OPUS_StreamCreateFile(tempFile, 0L, File.ReadAllBytes(tempFile).Length, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
                     if (BassStream == 0)
                     {
                         MessageBox.Show("That is not a valid .m4a input file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        File.Delete(tempWav);
+                        File.Delete(tempFile);
                         return;
                     }
 
@@ -3555,13 +3534,21 @@ namespace Nautilus
             //apply volume correction to entire track
             SetPlayLocation(PlaybackSeconds);
             var track_vol = (float)Utils.DBToLevel(Convert.ToDouble(-1 * VolumeLevel), 1.0);
-            var previewStart = Parser.Songs == null || Parser.Songs[0].PreviewStart == 0 ? 30000 : Parser.Songs[0].PreviewStart;
-            if (picPreview.Tag.ToString() == "preview" && PlaybackSeconds == (double)previewStart/1000) //enable fade-in
+            if (picPreview.Tag.ToString() == "preview")
             {
-                Bass.BASS_ChannelSetAttribute(BassMixer, BASSAttribute.BASS_ATTRIB_VOL, 0);
-                Bass.BASS_ChannelSlideAttribute(BassMixer, BASSAttribute.BASS_ATTRIB_VOL, track_vol, FadeTime * 1000);
+                double previewStart = isM4A || isBandFuse || isGHWTDE || isRS2014 ? 30.0 : (double)(Parser.Songs[0].PreviewStart / 1000);                
+                if (PlaybackSeconds >= previewStart && PlaybackSeconds <= previewStart + FadeTime && !volSlide)
+                {
+                    Bass.BASS_ChannelSetAttribute(BassMixer, BASSAttribute.BASS_ATTRIB_VOL, 0);
+                    Bass.BASS_ChannelSlideAttribute(BassMixer, BASSAttribute.BASS_ATTRIB_VOL, track_vol, (int)(FadeTime * 1000));
+                    volSlide = true;
+                }
+            }         
+            else
+            {
+                volSlide = false;
             }
-            else //no fade-in
+            if (!volSlide)
             {
                 Bass.BASS_ChannelSetAttribute(BassMixer, BASSAttribute.BASS_ATTRIB_VOL, track_vol);
             }
@@ -3854,14 +3841,7 @@ namespace Nautilus
             UpdateInfoPreview();
             try
             {
-                if (isM4A)
-                {
-                    PlaybackSeconds = picPreview.Tag.ToString() == "song" ? 0 : 30;
-                }
-                else
-                {
-                    PlaybackSeconds = Parser.Songs[0].PreviewStart == 0 || picPreview.Tag.ToString() == "song" ? 0 : (double)Parser.Songs[0].PreviewStart / 1000;
-                }
+                PlaybackSeconds = Parser.Songs[0].PreviewStart == 0 || picPreview.Tag.ToString() == "song" ? 0 : (double)Parser.Songs[0].PreviewStart / 1000;
                 SetPlayLocation(PlaybackSeconds);
                 UpdateTime();
             }
@@ -4029,7 +4009,7 @@ namespace Nautilus
         {
             try
             {
-                int previewStart;
+                double previewStart = isM4A || isBandFuse || isGHWTDE || isRS2014 ? 30.0 : (double)(Parser.Songs[0].PreviewStart / 1000);
                 if (Bass.BASS_ChannelIsActive(BassMixer) == BASSActive.BASS_ACTIVE_PLAYING)
                 {
                     // the stream is still playing...
@@ -4038,23 +4018,33 @@ namespace Nautilus
                     UpdateTime();
                     DrawSpectrum();
                     lblLyrics.Invalidate();
-                    if (picPreview.Tag.ToString() != "preview") return;
-                    //calculate how many seconds are left to play
-                    previewStart = isM4A ? 30000 : Parser.Songs[0].PreviewStart;
-                    var time_left = (((double)previewStart+30000) / 1000) - PlaybackSeconds;
-                    if ((int)time_left == FadeTime) //start fade-out
+                    var track_vol = (float)Utils.DBToLevel(Convert.ToDouble(-1 * VolumeLevel), 1.0);
+                    if (picPreview.Tag.ToString() != "preview")
                     {
-                        Bass.BASS_ChannelSlideAttribute(BassMixer, BASSAttribute.BASS_ATTRIB_VOL, 0, FadeTime * 1000);
+                        if (!volSlide)
+                        {
+                            Bass.BASS_ChannelSetAttribute(BassMixer, BASSAttribute.BASS_ATTRIB_VOL, track_vol);
+                        }
+                        return;
+                    }                                                       
+                    if (PlaybackSeconds >= previewStart + FadeTime)
+                    {
+                        volSlide = false;
                     }
-                    if (!(time_left <= 0)) return;
+                    var previewEnd = previewStart + 30.0;
+                    if (PlaybackSeconds >= (previewEnd - FadeTime) && PlaybackSeconds < previewEnd && !volSlide)                    
+                    {
+                        Bass.BASS_ChannelSlideAttribute(BassMixer, BASSAttribute.BASS_ATTRIB_VOL, 0, (int)(FadeTime * 1000));
+                        volSlide = true;
+                    }
+                    if (PlaybackSeconds < previewEnd) return;
                 }
                 else
                 {
                     PlaybackTimer.Enabled = false;
                 }
                 StopPlayback();
-                previewStart = Parser.Songs == null ? 30000 : Parser.Songs[0].PreviewStart;
-                PlaybackSeconds = previewStart == 0 || picPreview.Tag.ToString() == "song" ? 0 : (double)previewStart / 1000;
+                PlaybackSeconds = previewStart == 0 || picPreview.Tag.ToString() == "song" ? 0 : previewStart;
                 if (picLoop.Tag.ToString() != "loop") return;
                 StartPlayback();
             }
@@ -4728,6 +4718,7 @@ namespace Nautilus
             Height = maxHeight;
             picPlayPause.Cursor = Cursors.Hand;
             picStop.Cursor = Cursors.Hand;
+            PlaybackSeconds = picPreview.Tag.ToString() == "preview" ? 30.0 : 0.0;
             StartPlayback();           
         }
 
@@ -4794,7 +4785,11 @@ namespace Nautilus
             {
                 getImage(artJPG[0]);
             }
-
+            var midi = Directory.GetFiles(outFolder, "notes.mid");
+            if (midi.Count() > 0)
+            {
+                ReadMidi(midi[0]);
+            }
             opusFiles = Directory.GetFiles(outFolder, "*.opus");
             oggFiles = Directory.GetFiles(outFolder, "*.ogg");
             if (opusFiles.Count() > 0)
@@ -5015,6 +5010,7 @@ namespace Nautilus
                 Height = maxHeight;
                 picPlayPause.Cursor = Cursors.Hand;
                 picStop.Cursor = Cursors.Hand;
+                PlaybackSeconds = picPreview.Tag.ToString() == "preview" ? 30.0 : 0.0;
                 StartPlayback();
             }
             else
@@ -5143,6 +5139,7 @@ namespace Nautilus
                 Height = maxHeight;
                 picPlayPause.Cursor = Cursors.Hand;
                 picStop.Cursor = Cursors.Hand;
+                isPowerGig = true;
                 StartPlayback();
             }
             else
@@ -5234,6 +5231,7 @@ namespace Nautilus
             Height = maxHeight;
             picPlayPause.Cursor = Cursors.Hand;
             picStop.Cursor = Cursors.Hand;
+            PlaybackSeconds = picPreview.Tag.ToString() == "preview" ? 30.0 : 0.0;
             StartPlayback();
         }
 
@@ -5280,6 +5278,7 @@ namespace Nautilus
             if (MIDITools.LyricsVocals == null) return;
             if (!MIDITools.LyricsVocals.Lyrics.Any()) return;
             var phrases = MIDITools.PhrasesVocals.Phrases;
+
             var lyrics = MIDITools.LyricsVocals.Lyrics;
             if (lyricsFixed.Checked)
             {
@@ -5472,6 +5471,57 @@ namespace Nautilus
         {
             if (!menu.Checked) return;
             MessageBox.Show("With this option enabled, Visualizer won't play back the audio of your " + game + " song\nOnce it exports it to an audio file it will stop\nTo get started, drag/drop your song again\n\nIf you want to be able to play the songs instead, you must disable this option", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void fnfWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            var fnfStream = fnfParser.m4aToBassStream(m4aFilePath, 10);//always 10 channels, no preview allowed here
+            if (fnfStream == 0)
+            {
+                MessageBox.Show("File '" + m4aFilePath + "' is not a valid input file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            //this next bit is an ugly hack but temporary until Ian @ BASS implements a better solution
+            BassEnc_Opus.BASS_Encode_OPUS_StartFile(fnfStream, "--vbr --music", BASSEncode.BASS_ENCODE_DEFAULT | BASSEncode.BASS_ENCODE_AUTOFREE, tempFile);
+            while (true)
+            {
+                var buffer = new byte[20000];
+                var c = Bass.BASS_ChannelGetData(fnfStream, buffer, buffer.Length);
+                if (c <= 0) break;
+            }
+            Bass.BASS_StreamFree(fnfStream);                      
+
+            isOpus = false;
+            isOgg = false;
+            isWAV = false;
+            isMP3 = false;
+            isM4A = true;            
+
+            Parser.Songs[0].ChannelsDrums = 2;
+            Parser.Songs[0].ChannelsBassStart = 0;
+            Parser.Songs[0].ChannelsBass = 2;
+            Parser.Songs[0].ChannelsBassStart = 2;
+            Parser.Songs[0].ChannelsGuitar = 2;
+            Parser.Songs[0].ChannelsGuitarStart = 4;
+            Parser.Songs[0].ChannelsVocals = 2;
+            Parser.Songs[0].ChannelsVocalsStart = 6;
+            Parser.Songs[0].ChannelsTotal = 10;
+            Parser.Songs[0].OriginalAttenuationValues = "";
+            Parser.Songs[0].AttenuationValues = "";
+            Parser.Songs[0].PanningValues = "";
+            Parser.Songs[0].PreviewStart = 30000;
+        }
+
+        private void fnfWorker_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            Height = maxHeight;
+            picPlayPause.Cursor = Cursors.Hand;
+            picStop.Cursor = Cursors.Hand;
+            picWorking.Visible = false;
+            PlaybackSeconds = picPreview.Tag.ToString() == "preview" ? 30.0 : 0.0;
+            updatePlaybackInstruments();
+            StartPlayback();
         }
     }   
 }

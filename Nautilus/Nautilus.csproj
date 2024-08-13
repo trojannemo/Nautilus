@@ -39,7 +39,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -63,10 +63,10 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>784D93A373C79EF05CA9DA204667E0F0FD241A13</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>BB0D58C81CC55399E86A483AD85D0F6C7101F938</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>C3 Tools_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Nautilus_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -635,6 +635,7 @@
       <DependentUpon>Worker.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
+    <None Include="Nautilus_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
