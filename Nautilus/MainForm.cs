@@ -90,7 +90,7 @@ namespace Nautilus
         private int flappyMouseX;
         private int flappyMouseY;
         private bool isPlayingFlappy;
-        const int FlappyLeft = 12;
+        const int FlappyLeft = 44;
         const int FlappyTop = 383;
         private string GameName;
 
@@ -115,7 +115,7 @@ namespace Nautilus
                 btnVisualizer, btnMIDICleaner, btnSongAnalyzer, btnAudioAnalyzer, btnVolumeNormalizer, btnSaveFileImageEditor, btnScores,
                 btnSetlistManager, btnBatchExtractor, btnBatchRenamer, btnBatchProcessor, btnEventManager, btnFileIndexer, btnCharEditor,
                 btnAdvancedArtConverter, btnCONConverter, btnWiiConverter, btnPS3Converter, btnPhaseShiftConverter, btnRBAEditor, btnMiloMod,
-                btnUpgradeBundler, btnVideoPreparer, btnStemsIsolator, btnBatchCryptor, btnMoggMaker, btnStudio, btnSettings
+                btnUpgradeBundler, btnVideoPreparer, btnStemsIsolator, btnBatchCryptor, btnMoggMaker, btnStudio, btnSettings, btnAudioConverter
             };
             FormButtons = new List<MyButton>();
             foreach (var mybutton in buttons.Select(button => new MyButton
@@ -932,7 +932,7 @@ namespace Nautilus
             var reds = new List<Button> { btnVisualizer, btnMIDICleaner, btnSongAnalyzer, btnAudioAnalyzer, btnVolumeNormalizer, btnSaveFileImageEditor, btnScores };
             var yellows = new List<Button> { btnSetlistManager, btnBatchExtractor, btnBatchRenamer, btnBatchProcessor, btnEventManager, btnFileIndexer, btnCharEditor };
             var blues = new List<Button> { btnAdvancedArtConverter, btnCONConverter, btnWiiConverter, btnPS3Converter, btnPhaseShiftConverter, btnRBAEditor, btnMiloMod };
-            var oranges = new List<Button> { btnUpgradeBundler, btnVideoPreparer, btnStemsIsolator, btnMoggMaker, btnBatchCryptor, btnStudio};
+            var oranges = new List<Button> { btnUpgradeBundler, btnVideoPreparer, btnStemsIsolator, btnMoggMaker, btnBatchCryptor, btnStudio, btnAudioConverter};
 
             if (greens.Contains(CurrentButton))
             {
@@ -2106,11 +2106,11 @@ namespace Nautilus
             {
                 flappy.Left -= 2;
             }
-            if (flappy.Left + flappy.Width >= btnRBtoUSB.Left + btnRBtoUSB.Width)
+            if (flappy.Left + flappy.Width >= btnScores.Left - 2)
             {
                 slideRight = false;
             }
-            if (flappy.Left <= btnRBtoUSB.Left)
+            if (flappy.Left <= picSettings.Left + picSettings.Width)
             {
                 slideRight = true;
             }
@@ -2131,8 +2131,24 @@ namespace Nautilus
         {
             foreach (var button in FormButtons)
             {
+                if (button.Button == btnSettings) continue; //keep it hidden
                 button.Button.Visible = true;
             }
+        }
+
+        private void picSettings_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            btnSettings_Click(sender, e);
+        }
+
+        private void btnAudioConverter_Click(object sender, EventArgs e)
+        {
+            if (MovedButton) return;
+            var converter = new AudioConverter();
+            activeForm = converter;
+            activeForms.Add(converter);
+            converter.Show();
         }
     }
 

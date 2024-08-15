@@ -187,8 +187,7 @@ namespace Nautilus
                 {
                     head.chanmap[i] = (byte)i;
                 }
-
-                int streamHandle = BASS_OPUS_StreamCreate(ref head, (int)(BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT), STREAMPROC_PUSH, IntPtr.Zero);
+                int streamHandle = BASS_OPUS_StreamCreate(ref head, (uint)(BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT), STREAMPROC_PUSH, IntPtr.Zero);
 
                 if (streamHandle == 0)
                 {
@@ -204,7 +203,6 @@ namespace Nautilus
                 MessageBox.Show("Error creating stream handle: " + e.Message + "\nBASS says: " + Bass.BASS_ErrorGetCode());
                 return 0;
             }
-
         }
 
         private static void PushOpusPacketsToStream(int streamHandle)

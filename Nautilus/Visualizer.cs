@@ -606,8 +606,7 @@ namespace Nautilus
             var png_ps3 = Directory.GetFiles(folder, "*.png_ps3", SearchOption.AllDirectories);
             var ymogg = Directory.GetFiles(folder, "*.yarg_mogg", SearchOption.AllDirectories);
             var mogg = Directory.GetFiles(folder, "*.mogg", SearchOption.AllDirectories);
-            var midi = Directory.GetFiles(folder, "*.mid", SearchOption.AllDirectories);
-
+            
             if (dta == null || dta.Count() == 0)
             {
                 MessageBox.Show("Assumed YARG/PS3 folder structure but no songs.dta file found\n\nTIP: If you're trying to play a Clone Hero song, drag/drop the song.ini file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -668,7 +667,17 @@ namespace Nautilus
             else
             {
                 return;
+            }            
+            var edat = Directory.GetFiles(folder, "*.edat", SearchOption.AllDirectories);
+            if (edat.Any())
+            {
+                if (!Tools.DecryptEdat(edat[0], edat[0].Replace(".edat", ""), Tools.GetKLIC(folder))) //might fail if it's a C3 folder???
+                {
+                    //try again but with C3 fixed klic
+                    Tools.DecryptEdat(edat[0], edat[0].Replace(".edat", ""));
+                }
             }
+            var midi = Directory.GetFiles(folder, "*.mid", SearchOption.AllDirectories);
             if (midi.Any())
             {
                 ReadMidi(midi[0]);
@@ -3472,16 +3481,17 @@ namespace Nautilus
                     return;
                 }
 
-                if (isM4A) //otherwise we already gave a value to BassStream
+                if (isM4A)
                 {
-                    BassStream = BassOpus.BASS_OPUS_StreamCreateFile(tempFile, 0L, File.ReadAllBytes(tempFile).Length, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
+                    BassStream = Bass.BASS_StreamCreateFile(tempFile, 0L, File.ReadAllBytes(tempFile).Length, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
                     if (BassStream == 0)
                     {
                         MessageBox.Show("That is not a valid .m4a input file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                         File.Delete(tempFile);
+                        Bass.BASS_ChannelFree(BassStream);
                         return;
                     }
-
+                    
                     var len = Bass.BASS_ChannelGetLength(BassStream);
                     var totaltime = Bass.BASS_ChannelBytes2Seconds(BassStream, len); // the total time length
                     songLength = (int)(totaltime * 1000);
@@ -3493,7 +3503,11 @@ namespace Nautilus
                     BassStream = Bass.BASS_StreamCreateFile(nautilus3.GetOggStreamIntPtr(), 0L, nautilus3.PlayingSongOggData.Length, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
                 }
                 var channel_info = Bass.BASS_ChannelGetInfo(BassStream);
-
+                if (channel_info == null && !isM4A)
+                {
+                    MessageBox.Show("Error getting stream info\n\nBASS status: " + Bass.BASS_ErrorGetCode(), Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
                 // create a stereo mixer with same frequency rate as the input file
                 if (exportYARGAudio.Checked && isYARG)
                 {
@@ -3503,15 +3517,19 @@ namespace Nautilus
                 {
                     BassMixer = BassMix.BASS_Mixer_StreamCreate(channel_info.freq, 2, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_MIXER_END);
                 }
+                else if (isM4A)
+                {
+                    BassMixer = BassMix.BASS_Mixer_StreamCreate(48000, 2, BASSFlag.BASS_MIXER_END);
+                }
                 else
                 {
                     BassMixer = BassMix.BASS_Mixer_StreamCreate(channel_info.freq, 2, BASSFlag.BASS_MIXER_END);
                 }
                 BassMix.BASS_Mixer_StreamAddChannel(BassMixer, BassStream, BASSFlag.BASS_MIXER_MATRIX);
 
-                var matrix = new float[2, channel_info.chans];
+                var matrix = new float[2, isM4A ? 10 : channel_info.chans];
                 var splitter = new MoggSplitter();
-                matrix = splitter.GetChannelMatrix(Parser.Songs[0], channel_info.chans, GetStemsToPlay());
+                matrix = splitter.GetChannelMatrix(Parser.Songs[0], isM4A ? 10 : channel_info.chans, GetStemsToPlay());
                 BassMix.BASS_Mixer_ChannelSetMatrix(BassStream, matrix);                
             }                   
             else
@@ -3557,7 +3575,6 @@ namespace Nautilus
             UpdateTime();
             //start mix playback
             Bass.BASS_ChannelPlay(BassMixer, false);
-            
             PlaybackTimer.Enabled = true;
             picPlayPause.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\play\\pause.png");
             picPlayPause.Tag = "pause";
@@ -4006,7 +4023,7 @@ namespace Nautilus
         }
 
         private void PlaybackTimer_Tick(object sender, EventArgs e)
-        {
+        {            
             try
             {
                 double previewStart = isM4A || isBandFuse || isGHWTDE || isRS2014 ? 30.0 : (double)(Parser.Songs[0].PreviewStart / 1000);
@@ -4041,7 +4058,7 @@ namespace Nautilus
                 }
                 else
                 {
-                    PlaybackTimer.Enabled = false;
+                    PlaybackTimer.Enabled = false;                  
                 }
                 StopPlayback();
                 PlaybackSeconds = previewStart == 0 || picPreview.Tag.ToString() == "song" ? 0 : previewStart;
@@ -4878,6 +4895,20 @@ namespace Nautilus
                 MessageBox.Show("Failed to decrypt mogg file, can't play audio", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
+            var edat = Directory.GetFiles(outFolder, "*.edat", SearchOption.AllDirectories);
+            if (edat.Any())
+            {
+                if (!Tools.DecryptEdat(edat[0], edat[0].Replace(".edat", ""), klic)) //might fail if it's a C3 folder???
+                {
+                    //try again but with C3 fixed klic
+                    Tools.DecryptEdat(edat[0], edat[0].Replace(".edat", ""));
+                }
+            }
+            var midi = Directory.GetFiles(outFolder, "*.mid", SearchOption.AllDirectories);
+            if (midi.Any())
+            {
+                ReadMidi(midi[0]);
+            }
             //extract audio file for previewing
             Height = maxHeight;
             ProcessAudio();
@@ -5475,22 +5506,23 @@ namespace Nautilus
 
         private void fnfWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            var fnfStream = fnfParser.m4aToBassStream(m4aFilePath, 10);//always 10 channels, no preview allowed here
-            if (fnfStream == 0)
+            BassStream = fnfParser.m4aToBassStream(m4aFilePath, 10);//always 10 channels, no preview allowed here
+            if (BassStream == 0)
             {
                 MessageBox.Show("File '" + m4aFilePath + "' is not a valid input file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
             //this next bit is an ugly hack but temporary until Ian @ BASS implements a better solution
-            BassEnc_Opus.BASS_Encode_OPUS_StartFile(fnfStream, "--vbr --music", BASSEncode.BASS_ENCODE_DEFAULT | BASSEncode.BASS_ENCODE_AUTOFREE, tempFile);
+            //writes the raw opus data to a temporary wav file (fastest encoder) and then reads it back in the StartPlayback function
+            BassEnc.BASS_Encode_Start(BassStream, tempFile, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
             while (true)
             {
                 var buffer = new byte[20000];
-                var c = Bass.BASS_ChannelGetData(fnfStream, buffer, buffer.Length);
+                var c = Bass.BASS_ChannelGetData(BassStream, buffer, buffer.Length);
                 if (c <= 0) break;
             }
-            Bass.BASS_StreamFree(fnfStream);                      
+            Bass.BASS_ChannelFree(BassStream);
 
             isOpus = false;
             isOgg = false;

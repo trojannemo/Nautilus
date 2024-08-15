@@ -99,6 +99,7 @@
             this.btnPhaseShiftConverter = new System.Windows.Forms.Button();
             this.btnBatchExtractor = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.picSettings = new System.Windows.Forms.PictureBox();
             this.flappy = new System.Windows.Forms.PictureBox();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.btnSettings = new System.Windows.Forms.Button();
@@ -119,9 +120,21 @@
             this.btnRBAEditor = new System.Windows.Forms.Button();
             this.btnScores = new System.Windows.Forms.Button();
             this.btnMiloMod = new System.Windows.Forms.Button();
+            this.lblScore = new System.Windows.Forms.Label();
+            this.gravity = new System.Windows.Forms.Timer(this.components);
+            this.jump = new System.Windows.Forms.Timer(this.components);
+            this.move = new System.Windows.Forms.Timer(this.components);
+            this.showScore = new System.Windows.Forms.Timer(this.components);
+            this.checkCollision = new System.Windows.Forms.Timer(this.components);
+            this.pointTmr = new System.Windows.Forms.Timer(this.components);
+            this.btnCharEditor = new System.Windows.Forms.Button();
+            this.btnMoggMaker = new System.Windows.Forms.Button();
+            this.gifTmr = new System.Windows.Forms.Timer(this.components);
+            this.btnStudio = new System.Windows.Forms.Button();
+            this.flappyTmr = new System.Windows.Forms.Timer(this.components);
+            this.picBackground = new System.Windows.Forms.PictureBox();
             this.GoldStarB = new System.Windows.Forms.PictureBox();
             this.GoldStarA = new System.Windows.Forms.PictureBox();
-            this.lblScore = new System.Windows.Forms.Label();
             this.columnB6 = new System.Windows.Forms.PictureBox();
             this.columnB5 = new System.Windows.Forms.PictureBox();
             this.columnB4 = new System.Windows.Forms.PictureBox();
@@ -134,21 +147,12 @@
             this.columnA3 = new System.Windows.Forms.PictureBox();
             this.columnA2 = new System.Windows.Forms.PictureBox();
             this.columnA1 = new System.Windows.Forms.PictureBox();
-            this.gravity = new System.Windows.Forms.Timer(this.components);
-            this.jump = new System.Windows.Forms.Timer(this.components);
-            this.move = new System.Windows.Forms.Timer(this.components);
-            this.showScore = new System.Windows.Forms.Timer(this.components);
-            this.checkCollision = new System.Windows.Forms.Timer(this.components);
-            this.pointTmr = new System.Windows.Forms.Timer(this.components);
-            this.picBackground = new System.Windows.Forms.PictureBox();
-            this.btnCharEditor = new System.Windows.Forms.Button();
-            this.btnMoggMaker = new System.Windows.Forms.Button();
-            this.gifTmr = new System.Windows.Forms.Timer(this.components);
-            this.btnStudio = new System.Windows.Forms.Button();
-            this.flappyTmr = new System.Windows.Forms.Timer(this.components);
+            this.btnAudioConverter = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picSettings)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.flappy)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picBackground)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GoldStarB)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GoldStarA)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.columnB6)).BeginInit();
@@ -163,7 +167,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.columnA3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.columnA2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.columnA1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picBackground)).BeginInit();
             this.SuspendLayout();
             // 
             // openAFileToolStripMenuItem1
@@ -989,11 +992,25 @@
             this.btnBatchExtractor.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseMove);
             this.btnBatchExtractor.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseUp);
             // 
+            // picSettings
+            // 
+            this.picSettings.BackColor = System.Drawing.Color.Transparent;
+            this.picSettings.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picSettings.Image = global::Nautilus.Properties.Resources.settings;
+            this.picSettings.Location = new System.Drawing.Point(12, 401);
+            this.picSettings.Name = "picSettings";
+            this.picSettings.Size = new System.Drawing.Size(32, 32);
+            this.picSettings.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picSettings.TabIndex = 55;
+            this.picSettings.TabStop = false;
+            this.toolTip1.SetToolTip(this.picSettings, "Click to open settings");
+            this.picSettings.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picSettings_MouseClick);
+            // 
             // flappy
             // 
             this.flappy.BackColor = System.Drawing.Color.Transparent;
             this.flappy.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.flappy.Location = new System.Drawing.Point(12, 383);
+            this.flappy.Location = new System.Drawing.Point(45, 383);
             this.flappy.Name = "flappy";
             this.flappy.Size = new System.Drawing.Size(50, 50);
             this.flappy.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -1010,12 +1027,13 @@
             this.btnSettings.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSettings.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSettings.ForeColor = System.Drawing.Color.Black;
-            this.btnSettings.Location = new System.Drawing.Point(580, 390);
+            this.btnSettings.Location = new System.Drawing.Point(12, 390);
             this.btnSettings.Name = "btnSettings";
             this.btnSettings.Size = new System.Drawing.Size(122, 43);
             this.btnSettings.TabIndex = 33;
             this.btnSettings.Text = "Settings";
             this.btnSettings.UseVisualStyleBackColor = false;
+            this.btnSettings.Visible = false;
             this.btnSettings.Click += new System.EventHandler(this.btnSettings_Click);
             this.btnSettings.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseDown);
             this.btnSettings.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseMove);
@@ -1130,7 +1148,7 @@
             this.btnBatchCryptor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBatchCryptor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnBatchCryptor.ForeColor = System.Drawing.Color.Black;
-            this.btnBatchCryptor.Location = new System.Drawing.Point(580, 264);
+            this.btnBatchCryptor.Location = new System.Drawing.Point(580, 390);
             this.btnBatchCryptor.Name = "btnBatchCryptor";
             this.btnBatchCryptor.Size = new System.Drawing.Size(122, 43);
             this.btnBatchCryptor.TabIndex = 31;
@@ -1304,6 +1322,118 @@
             this.btnMiloMod.Visible = false;
             this.btnMiloMod.Click += new System.EventHandler(this.btnMiloMod_Click);
             // 
+            // lblScore
+            // 
+            this.lblScore.AutoSize = true;
+            this.lblScore.BackColor = System.Drawing.Color.Black;
+            this.lblScore.Font = new System.Drawing.Font("Impact", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblScore.ForeColor = System.Drawing.Color.LightCyan;
+            this.lblScore.Location = new System.Drawing.Point(857, 109);
+            this.lblScore.Name = "lblScore";
+            this.lblScore.Size = new System.Drawing.Size(35, 39);
+            this.lblScore.TabIndex = 50;
+            this.lblScore.Text = "0";
+            this.lblScore.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblScore.Visible = false;
+            // 
+            // gravity
+            // 
+            this.gravity.Interval = 15;
+            this.gravity.Tick += new System.EventHandler(this.gravity_Tick);
+            // 
+            // jump
+            // 
+            this.jump.Interval = 15;
+            this.jump.Tick += new System.EventHandler(this.jump_Tick);
+            // 
+            // move
+            // 
+            this.move.Interval = 15;
+            this.move.Tick += new System.EventHandler(this.move_Tick);
+            // 
+            // showScore
+            // 
+            this.showScore.Interval = 1000;
+            this.showScore.Tick += new System.EventHandler(this.showScore_Tick);
+            // 
+            // checkCollision
+            // 
+            this.checkCollision.Tick += new System.EventHandler(this.checkCollision_Tick);
+            // 
+            // pointTmr
+            // 
+            this.pointTmr.Interval = 350;
+            this.pointTmr.Tick += new System.EventHandler(this.pointTmr_Tick);
+            // 
+            // btnCharEditor
+            // 
+            this.btnCharEditor.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnCharEditor.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnCharEditor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCharEditor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCharEditor.ForeColor = System.Drawing.Color.Black;
+            this.btnCharEditor.Location = new System.Drawing.Point(297, 390);
+            this.btnCharEditor.Name = "btnCharEditor";
+            this.btnCharEditor.Size = new System.Drawing.Size(122, 43);
+            this.btnCharEditor.TabIndex = 19;
+            this.btnCharEditor.Text = "Character Editor";
+            this.btnCharEditor.UseVisualStyleBackColor = false;
+            this.btnCharEditor.Visible = false;
+            this.btnCharEditor.Click += new System.EventHandler(this.btnCharEditor_Click);
+            // 
+            // btnMoggMaker
+            // 
+            this.btnMoggMaker.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnMoggMaker.ContextMenuStrip = this.contextMenuStrip1;
+            this.btnMoggMaker.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnMoggMaker.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnMoggMaker.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnMoggMaker.ForeColor = System.Drawing.Color.Black;
+            this.btnMoggMaker.Location = new System.Drawing.Point(580, 138);
+            this.btnMoggMaker.Name = "btnMoggMaker";
+            this.btnMoggMaker.Size = new System.Drawing.Size(122, 43);
+            this.btnMoggMaker.TabIndex = 29;
+            this.btnMoggMaker.Text = "Mogg Maker";
+            this.btnMoggMaker.UseVisualStyleBackColor = false;
+            this.btnMoggMaker.Click += new System.EventHandler(this.btnMoggMaker_Click);
+            // 
+            // gifTmr
+            // 
+            this.gifTmr.Interval = 20000;
+            this.gifTmr.Tick += new System.EventHandler(this.gifTmr_Tick);
+            // 
+            // btnStudio
+            // 
+            this.btnStudio.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnStudio.ContextMenuStrip = this.contextMenuStrip1;
+            this.btnStudio.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnStudio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnStudio.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStudio.ForeColor = System.Drawing.Color.Black;
+            this.btnStudio.Location = new System.Drawing.Point(580, 264);
+            this.btnStudio.Name = "btnStudio";
+            this.btnStudio.Size = new System.Drawing.Size(122, 43);
+            this.btnStudio.TabIndex = 30;
+            this.btnStudio.Text = "Mini Studio";
+            this.btnStudio.UseVisualStyleBackColor = false;
+            this.btnStudio.Click += new System.EventHandler(this.btnStudio_Click);
+            // 
+            // flappyTmr
+            // 
+            this.flappyTmr.Interval = 50;
+            this.flappyTmr.Tick += new System.EventHandler(this.flappyTmr_Tick);
+            // 
+            // picBackground
+            // 
+            this.picBackground.BackColor = System.Drawing.Color.Transparent;
+            this.picBackground.Location = new System.Drawing.Point(912, 32);
+            this.picBackground.Name = "picBackground";
+            this.picBackground.Size = new System.Drawing.Size(108, 86);
+            this.picBackground.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picBackground.TabIndex = 54;
+            this.picBackground.TabStop = false;
+            this.picBackground.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picBackground_MouseDown);
+            // 
             // GoldStarB
             // 
             this.GoldStarB.BackColor = System.Drawing.Color.Transparent;
@@ -1325,20 +1455,6 @@
             this.GoldStarA.TabIndex = 52;
             this.GoldStarA.TabStop = false;
             this.GoldStarA.Visible = false;
-            // 
-            // lblScore
-            // 
-            this.lblScore.AutoSize = true;
-            this.lblScore.BackColor = System.Drawing.Color.Black;
-            this.lblScore.Font = new System.Drawing.Font("Impact", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblScore.ForeColor = System.Drawing.Color.LightCyan;
-            this.lblScore.Location = new System.Drawing.Point(857, 109);
-            this.lblScore.Name = "lblScore";
-            this.lblScore.Size = new System.Drawing.Size(35, 39);
-            this.lblScore.TabIndex = 50;
-            this.lblScore.Text = "0";
-            this.lblScore.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.lblScore.Visible = false;
             // 
             // columnB6
             // 
@@ -1472,103 +1588,21 @@
             this.columnA1.TabStop = false;
             this.columnA1.Visible = false;
             // 
-            // gravity
+            // btnAudioConverter
             // 
-            this.gravity.Interval = 15;
-            this.gravity.Tick += new System.EventHandler(this.gravity_Tick);
-            // 
-            // jump
-            // 
-            this.jump.Interval = 15;
-            this.jump.Tick += new System.EventHandler(this.jump_Tick);
-            // 
-            // move
-            // 
-            this.move.Interval = 15;
-            this.move.Tick += new System.EventHandler(this.move_Tick);
-            // 
-            // showScore
-            // 
-            this.showScore.Interval = 1000;
-            this.showScore.Tick += new System.EventHandler(this.showScore_Tick);
-            // 
-            // checkCollision
-            // 
-            this.checkCollision.Tick += new System.EventHandler(this.checkCollision_Tick);
-            // 
-            // pointTmr
-            // 
-            this.pointTmr.Interval = 350;
-            this.pointTmr.Tick += new System.EventHandler(this.pointTmr_Tick);
-            // 
-            // picBackground
-            // 
-            this.picBackground.BackColor = System.Drawing.Color.Transparent;
-            this.picBackground.Location = new System.Drawing.Point(912, 32);
-            this.picBackground.Name = "picBackground";
-            this.picBackground.Size = new System.Drawing.Size(108, 86);
-            this.picBackground.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.picBackground.TabIndex = 54;
-            this.picBackground.TabStop = false;
-            this.picBackground.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picBackground_MouseDown);
-            // 
-            // btnCharEditor
-            // 
-            this.btnCharEditor.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.btnCharEditor.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnCharEditor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCharEditor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCharEditor.ForeColor = System.Drawing.Color.Black;
-            this.btnCharEditor.Location = new System.Drawing.Point(297, 390);
-            this.btnCharEditor.Name = "btnCharEditor";
-            this.btnCharEditor.Size = new System.Drawing.Size(122, 43);
-            this.btnCharEditor.TabIndex = 19;
-            this.btnCharEditor.Text = "Character Editor";
-            this.btnCharEditor.UseVisualStyleBackColor = false;
-            this.btnCharEditor.Visible = false;
-            this.btnCharEditor.Click += new System.EventHandler(this.btnCharEditor_Click);
-            // 
-            // btnMoggMaker
-            // 
-            this.btnMoggMaker.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.btnMoggMaker.ContextMenuStrip = this.contextMenuStrip1;
-            this.btnMoggMaker.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnMoggMaker.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnMoggMaker.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnMoggMaker.ForeColor = System.Drawing.Color.Black;
-            this.btnMoggMaker.Location = new System.Drawing.Point(580, 138);
-            this.btnMoggMaker.Name = "btnMoggMaker";
-            this.btnMoggMaker.Size = new System.Drawing.Size(122, 43);
-            this.btnMoggMaker.TabIndex = 29;
-            this.btnMoggMaker.Text = "Mogg Maker";
-            this.btnMoggMaker.UseVisualStyleBackColor = false;
-            this.btnMoggMaker.Click += new System.EventHandler(this.btnMoggMaker_Click);
-            // 
-            // gifTmr
-            // 
-            this.gifTmr.Interval = 20000;
-            this.gifTmr.Tick += new System.EventHandler(this.gifTmr_Tick);
-            // 
-            // btnStudio
-            // 
-            this.btnStudio.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.btnStudio.ContextMenuStrip = this.contextMenuStrip1;
-            this.btnStudio.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnStudio.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStudio.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnStudio.ForeColor = System.Drawing.Color.Black;
-            this.btnStudio.Location = new System.Drawing.Point(580, 201);
-            this.btnStudio.Name = "btnStudio";
-            this.btnStudio.Size = new System.Drawing.Size(122, 43);
-            this.btnStudio.TabIndex = 30;
-            this.btnStudio.Text = "Mini Studio";
-            this.btnStudio.UseVisualStyleBackColor = false;
-            this.btnStudio.Click += new System.EventHandler(this.btnStudio_Click);
-            // 
-            // flappyTmr
-            // 
-            this.flappyTmr.Interval = 50;
-            this.flappyTmr.Tick += new System.EventHandler(this.flappyTmr_Tick);
+            this.btnAudioConverter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnAudioConverter.ContextMenuStrip = this.contextMenuStrip1;
+            this.btnAudioConverter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnAudioConverter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnAudioConverter.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAudioConverter.ForeColor = System.Drawing.Color.Black;
+            this.btnAudioConverter.Location = new System.Drawing.Point(580, 201);
+            this.btnAudioConverter.Name = "btnAudioConverter";
+            this.btnAudioConverter.Size = new System.Drawing.Size(122, 43);
+            this.btnAudioConverter.TabIndex = 56;
+            this.btnAudioConverter.Text = "Audio Converter";
+            this.btnAudioConverter.UseVisualStyleBackColor = false;
+            this.btnAudioConverter.Click += new System.EventHandler(this.btnAudioConverter_Click);
             // 
             // MainForm
             // 
@@ -1579,6 +1613,8 @@
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(714, 444);
             this.ContextMenuStrip = this.contextMenuStrip2;
+            this.Controls.Add(this.btnAudioConverter);
+            this.Controls.Add(this.picSettings);
             this.Controls.Add(this.btnStudio);
             this.Controls.Add(this.btnMoggMaker);
             this.Controls.Add(this.btnCharEditor);
@@ -1657,7 +1693,9 @@
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.contextMenuStrip1.ResumeLayout(false);
             this.contextMenuStrip2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picSettings)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.flappy)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picBackground)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.GoldStarB)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.GoldStarA)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.columnB6)).EndInit();
@@ -1672,7 +1710,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.columnA3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.columnA2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.columnA1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picBackground)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1797,6 +1834,8 @@
         private System.Windows.Forms.Timer flappyTmr;
         private System.Windows.Forms.ToolStripMenuItem showHideMario;
         private System.Windows.Forms.ToolStripMenuItem resetEverythingNew;
+        private System.Windows.Forms.PictureBox picSettings;
+        private System.Windows.Forms.Button btnAudioConverter;
     }
 }
 

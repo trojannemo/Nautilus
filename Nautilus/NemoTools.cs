@@ -3092,10 +3092,15 @@ namespace Nautilus
 
             folder += "\\USRDIR\\";
             var int_folder = Directory.GetDirectories(folder);
-            var folder_value = Path.GetFileName(int_folder[0]);
-            var unhashed_klic = "Ih38rtW1ng3r" + folder_value + "10025250";
-            klic = CreateMD5(unhashed_klic);
+            klic = GetKLIC(int_folder[0]);
             return success;
+        }
+
+        public string GetKLIC(string folder)
+        {
+            var folder_value = Path.GetFileName(folder);
+            var unhashed_klic = "Ih38rtW1ng3r" + folder_value + "10025250";
+            return CreateMD5(unhashed_klic);
         }
 
         public string CreateMD5(string input)

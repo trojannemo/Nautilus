@@ -30,6 +30,7 @@ namespace Nautilus
         private readonly List<string> PackagesToUnpack;
         private string songToDePack;
         public string fileToExtract;
+        private bool isPKG;
  
         public QuickPackEditor(MainForm xParent, Color ButtonBackColor, Color ButtonTextColor, string dta = "", string inpack = "")
         {
@@ -346,7 +347,10 @@ namespace Nautilus
         {
             try
             {
-                xPackage.CloseIO(); //release in case in case
+                if (xPackage != null)
+                {
+                    xPackage.CloseIO(); //release in case in case
+                }
             }
             catch (Exception)
             {}
@@ -401,6 +405,11 @@ namespace Nautilus
 
         private void btnBegin_Click(object sender, EventArgs e)
         {
+            if (isPKG)
+            {
+                MessageBox.Show("Not supported (yet) when working with PKG files", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             backup = pack + "_backup";
             EnableDisable(false);
             ChangeCursors(true);
@@ -701,6 +710,11 @@ namespace Nautilus
 
         private void btnRemove_Click(object sender, EventArgs e)
         {
+            if(isPKG)
+            {
+                MessageBox.Show("Not supported (yet) when working with PKG files", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             for (var i = lstSongs.SelectedIndices.Count - 1; i >= 0; i--)
             {
                 var entry = lstSongs.Items[lstSongs.SelectedIndices[i]].ToString();
@@ -726,6 +740,11 @@ namespace Nautilus
 
         private void btnRestore_Click(object sender, EventArgs e)
         {
+            if (isPKG)
+            {
+                MessageBox.Show("Not supported (yet) when working with PKG files", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             var count = removed.Count;
             lstSongs.Items.Clear();
             removed.Clear();
@@ -908,6 +927,11 @@ namespace Nautilus
 
         private void btnDePack_Click(object sender, EventArgs e)
         {
+            if (isPKG)
+            {
+                MessageBox.Show("Not supported (yet) when working with PKG files", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             if (btnDePack.Text == "Cancel")
             {
                 Log("User cancelled process...stopping as soon as possible");
@@ -1413,6 +1437,11 @@ namespace Nautilus
 
         private void btnExtract_Click(object sender, EventArgs e)
         {
+            if (isPKG)
+            {
+                MessageBox.Show("Not supported (yet) when working with PKG files", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             Log("Extracting the selected file ... sit tight");
             Log("THIS MIGHT TAKE A WHILE. DON'T CLOSE ME DOWN!");
 
@@ -1605,6 +1634,7 @@ namespace Nautilus
                 return;
             }
             ReadDTA(File.ReadAllBytes(DTA[0]));
+            isPKG = true;
         }
 
         private void signAsCON_Click(object sender, EventArgs e)
