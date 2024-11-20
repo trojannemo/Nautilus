@@ -163,6 +163,7 @@ namespace Nautilus
                 {
                     if (xFolders[i].Name != f) continue;
                     xsender.Nodes.Add(GetNode(xFolders[i]));
+                    xsender.Nodes[i].Tag = xFolders[i];
                 }
             }
         }
@@ -340,21 +341,25 @@ namespace Nautilus
             {
                 extractFileToolStripMenuItem.Enabled = false;
                 replaceFileToolStripMenuItem.Enabled = false;
+                menuRenameFile.Enabled = false;
                 return;
             }
 
             extractFileToolStripMenuItem.Enabled = true;
             replaceFileToolStripMenuItem.Enabled = true;
+            menuRenameFile.Enabled = true;
 
             if (fileList.SelectedIndices.Count == 1)
             {
                 replaceFileToolStripMenuItem.Visible = true;
+                menuRenameFile.Visible = true;
             }
             else if (fileList.SelectedIndices.Count > 1)
             {
                 extractFileToolStripMenuItem.Text = "Extract selected files";
                 replaceFileToolStripMenuItem.Visible = false;
                 menuDeleteFile.Visible = false;
+                menuRenameFile.Visible = false;
             }
         }
 
@@ -1481,6 +1486,76 @@ namespace Nautilus
         private void menuDeleteFile_Click(object sender, EventArgs e)
         {
             DeleteFile();
+        }
+
+        private void menuRenameFile_Click(object sender, EventArgs e)
+        {
+            RenameFile(); 
+        }
+
+        private void RenameFile()
+        {
+            try
+            {
+                var x = (FileEntry)fileList.SelectedItems[0].Tag;
+                var currentName = x.Name;
+                var popup = new PasswordUnlocker(currentName);
+                popup.Renamer();
+                popup.ShowDialog();
+                var newName = popup.EnteredText;
+                popup.Dispose();
+                if (currentName == newName) return;
+                if (string.IsNullOrEmpty(newName))
+                {
+                    MessageBox.Show("New name can't be blank", "CON Explorer", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                x.Name = newName;
+                fileList.SelectedItems[0].Text = newName;
+                Log("Renamed file '" + currentName + "' to '" + newName + "' successfully");
+                Log("Don't forget to save your changes");
+                ShowChanges(true);
+            }
+            catch
+            {
+                Log("Error renaming that file");
+            }
+        }
+
+        private void contextMenuStrip4_Opening(object sender, CancelEventArgs e)
+        {
+            menuRenameFolder.Visible = folderTree.SelectedNode != null;        
+        }
+
+        private void menuRenameFolder_Click(object sender, EventArgs e)
+        {
+            if (folderTree.SelectedNode == null) return;
+            try
+            {
+                var f = (FolderEntry)folderTree.SelectedNode.Tag;
+                var folder = folderTree.SelectedNode;
+                var currentName = f.Name;
+                var popup = new PasswordUnlocker(currentName);
+                popup.Renamer();
+                popup.ShowDialog();
+                var newName = popup.EnteredText;
+                popup.Dispose();
+                if (string.IsNullOrEmpty(newName))
+                {
+                    MessageBox.Show("New name can't be blank", "CON Explorer", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                folder.Text = newName;
+                folder.Name = newName;
+                f.Name = newName;               
+                Log("Renamed folder '" + currentName + "' to '" + newName + "' successfully");
+                Log("Don't forget to save your changes");
+                ShowChanges(true);
+            }
+            catch
+            {
+                Log("Error renaming that folder");
+            }
         }
     }
 }

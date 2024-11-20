@@ -19,10 +19,10 @@ namespace Nautilus
         private static int channelCount;
         private static readonly IntPtr STREAMPROC_PUSH = new IntPtr(-1);
 
-        [DllImport("bassopus.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("bin\\bassopus.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
         private static extern int BASS_OPUS_StreamCreate(ref BASS_OPUS_HEAD head, uint flags, IntPtr proc, IntPtr user);
 
-        [DllImport("bassopus.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
+        [DllImport("bin\\bassopus.dll", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.StdCall)]
         private static extern int BASS_OPUS_StreamPutData(int handle, IntPtr buffer, int length);
 
         private delegate int STREAMPROC(int handle, IntPtr buffer, int length, IntPtr user);

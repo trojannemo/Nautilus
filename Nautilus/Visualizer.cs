@@ -1610,6 +1610,7 @@ namespace Nautilus
                 //let's not leave over any files by mistake
                 Tools.DeleteFile(Path.GetTempPath() + "o");
                 Tools.DeleteFile(Path.GetTempPath() + "m");
+                Tools.DeleteFile(tempFile);
                 foreach (var file in FilesToDelete)
                 {
                     Tools.DeleteFile(file);
@@ -5554,6 +5555,6 @@ namespace Nautilus
             PlaybackSeconds = picPreview.Tag.ToString() == "preview" ? 30.0 : 0.0;
             updatePlaybackInstruments();
             StartPlayback();
-        }
+        }        
     }   
 }

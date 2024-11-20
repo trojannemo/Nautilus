@@ -14,6 +14,7 @@ using NautilusFREE;
 using Un4seen.Bass.AddOn.EncFlac;
 using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.EncOpus;
+using Un4seen.Bass.AddOn.Opus;
 
 namespace Nautilus
 {
@@ -401,6 +402,10 @@ namespace Nautilus
             {
                 ext = "wav";
             }
+            else if (format == MoggSplitFormat.OPUS)
+            {
+                ext = "opus";
+            }
             if (!Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
@@ -553,8 +558,12 @@ namespace Nautilus
             Bass.BASS_FXSetParameters(volumeFX, volume);
             Splits.Add(out_stream);
             if (format == MoggSplitFormat.OGG)
-            {                
-                BassEnc_Ogg.BASS_Encode_OGG_StartFile(out_stream, "-q " + quality, BASSEncode.BASS_ENCODE_AUTOFREE, file);
+            {
+                BassEnc_Ogg.BASS_Encode_OGG_StartFile(out_stream, "-q " + quality + " \" -c \"COMMENT=Made by Nemo\"", BASSEncode.BASS_ENCODE_AUTOFREE, file);
+            }
+            else if (format == MoggSplitFormat.OPUS)
+            {
+                BassEnc_Opus.BASS_Encode_OPUS_StartFile(out_stream, "--vbr --music --comment COMMENT=\"Made by Nemo\"", BASSEncode.BASS_ENCODE_DEFAULT | BASSEncode.BASS_ENCODE_AUTOFREE, file);
             }
             else
             {

@@ -1417,7 +1417,7 @@ namespace Nautilus
             {
                 try
                 {
-                    client.DownloadFile("https://keepitfishy.com/rb3/Nautilus/update.txt", path);
+                    client.DownloadFile("https://nemosnautilus.com/nautilus/update.txt", path);
                 }
                 catch (Exception)
                 { }

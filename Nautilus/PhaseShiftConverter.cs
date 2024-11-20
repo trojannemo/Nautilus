@@ -24,7 +24,7 @@ namespace Nautilus
         private static List<string> inputFiles;
         private DateTime endTime;
         private DateTime startTime;
-        private string PSFolder;
+        private string CHFolder;
         private readonly string rar;
         private readonly PhaseShiftSong Song;
         private readonly NemoTools Tools;
@@ -45,7 +45,7 @@ namespace Nautilus
             nautilus3 = new nTools();
 
             inputFiles = new List<string>();
-            inputDir = Application.StartupPath + "\\phaseshift\\";
+            inputDir = Application.StartupPath + "\\clonehero\\";
             if (!Directory.Exists(inputDir))
             {
                 Directory.CreateDirectory(inputDir);
@@ -263,9 +263,9 @@ namespace Nautilus
 
                     try
                     {
-                        if (!Directory.Exists(PSFolder))
+                        if (!Directory.Exists(CHFolder))
                         {
-                            Directory.CreateDirectory(PSFolder);
+                            Directory.CreateDirectory(CHFolder);
                         }
                         counter++;
                         Parser.ExtractDTA(file);
@@ -301,7 +301,7 @@ namespace Nautilus
                             return false;
                         }
                         
-                        var songfolder = PSFolder + Tools.CleanString(Song.Artist,false) + " - " + Tools.CleanString(Song.Name, false) + "\\";
+                        var songfolder = CHFolder + Tools.CleanString(Song.Artist,false) + " - " + Tools.CleanString(Song.Name, false) + "\\";
                         if (!Directory.Exists(songfolder))
                         {
                             Directory.CreateDirectory(songfolder);
@@ -366,54 +366,11 @@ namespace Nautilus
                                 xPackage.CloseIO();
                                 SeparateAudio(file, newMogg, songfolder);
                             }
-                            else if (radioDownmix.Checked)
+                            else
                             {
                                 xPackage.CloseIO();
                                 DownMixAudio(file, songfolder);
-                            }
-                            else
-                            {
-                                var msg = "Extracting audio file " + (radioAudacity.Checked ? "to send to Audacity" : "and leaving it as is");
-                                Log(msg);
-                                var mData = xMOGG.Extract();
-                                if (mData != null && mData.Length > 0)
-                                {
-                                    var nautilus3 = new nTools();
-                                    Log("Successfully extracted audio file '" + Path.GetFileName(newMogg) + "'");
-                                    if (radioAudacity.Checked)
-                                    { 
-                                        Log("Sending audio file to Audacity now");
-                                        if (Tools.isV17(mData))
-                                        {
-                                            unsafe
-                                            {
-                                                var bytes = mData;
-                                                fixed (byte* ptr = bytes)
-                                                {
-                                                    if (!TheMethod3.decrypt_mogg(ptr, (uint)bytes.Length)) continue;
-                                                    nautilus3.WriteOutData(bytes, newMogg);
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            nautilus3.DecM(mData, false, false, DecryptMode.ToFile, newMogg);
-                                        }
-                                        Log(Tools.SendtoAudacity(newMogg));
-                                    }
-                                    else
-                                    {
-                                        nautilus3.WriteOutData(nautilus3.ObfM(mData), newMogg);
-                                    }
-                                }
-                                else
-                                {
-                                    Log("There was a problem extracting the audio file");
-                                    Log("Skipping this song...");
-                                    xPackage.CloseIO();
-                                    continue;
-                                }
-                            }
+                            }                          
                         }
                         else
                         {
@@ -436,7 +393,7 @@ namespace Nautilus
                         else if (markAsRV.Checked)
                         {
                             Song.icon = "rv";
-                            Song.LoadingPhrase = "Brought to you by Rhythm Verse";
+                            Song.LoadingPhrase = "Brought to you by RhythmVerse";
                         }
                         else if (markAsCustom.Checked)
                         {
@@ -450,7 +407,7 @@ namespace Nautilus
                         var archive = Path.GetFileName(file);
                         archive = archive.Replace(" ", "").Replace("-", "_").Replace("\\", "").Replace("'", "").Replace(",", "").Replace("_rb3con", "");
                         archive = Tools.CleanString(archive, false);
-                        archive = PSFolder + archive + "_ps.rar";
+                        archive = CHFolder + archive + "_ps.rar";
                         
                         var arg = "a -m5 -ep1 -r \"" + archive + "\" \"" + songfolder.Substring(0,songfolder.Length-1) + "\"";
                         Log("Creating RAR archive");
@@ -476,9 +433,9 @@ namespace Nautilus
         private void SeparateAudio(string CON, string mogg, string folder)
         {
             if (backgroundWorker1.CancellationPending) return;
-            Log("Separating mogg file into its component ogg files");
+            Log("Separating mogg file into its component files");
             var Splitter = new MoggSplitter();
-            var split = Splitter.SplitMogg(CON, folder, "allstems|rhythm|song", MoggSplitter.MoggSplitFormat.OGG);
+            var split = Splitter.SplitMogg(CON, folder, "allstems|rhythm|song", radioOgg.Checked ? MoggSplitter.MoggSplitFormat.OGG : MoggSplitter.MoggSplitFormat.OPUS);
             if (!split)
             {
                 foreach (var error in Splitter.ErrorLog)
@@ -494,7 +451,8 @@ namespace Nautilus
 
         private void FinishAudioSeparation(string mogg, string folder)
         {
-            var oggs = Directory.GetFiles(folder, "*.ogg");
+            var ext = radioOgg.Checked ? ".ogg" : ".opus";
+            var oggs = Directory.GetFiles(folder, "*" + ext);
             if (!oggs.Any())
             {
                 Log("Failed");
@@ -502,35 +460,51 @@ namespace Nautilus
             }
             Log("Success");
             Tools.DeleteFile(mogg);
-            AnalyzeOggs(oggs);
+            AnalyzeAudioFiles(oggs);
             if (!useguitaroggForNonmultitrackSongs.Checked) return;
-            oggs = Directory.GetFiles(folder, "*.ogg");
-            if (!oggs.Any() || oggs.Count() > 1 || !oggs[0].Contains("song.ogg")) return;
-            Tools.MoveFile(oggs[0], folder + "guitar.ogg");
+            oggs = Directory.GetFiles(folder, "*" + ext);
+            if (!oggs.Any() || oggs.Count() > 1 || !oggs[0].Contains("song" + ext)) return;
+            Tools.MoveFile(oggs[0], folder + "guitar" + ext);
         }
 
         private void DownMixAudio(string CON, string folder)
         {
+            var ext = radioOgg.Checked ? ".ogg" : ".opus";
             if (backgroundWorker1.CancellationPending) return;
-            var ogg = folder + (useguitaroggForNonmultitrackSongs.Checked ? "guitar.ogg" : "song.ogg");
+            var ogg = folder + (useguitaroggForNonmultitrackSongs.Checked ? "guitar" + ext : "song" + ext);
             Log("Downmixing audio file to stereo file:");
             Log(ogg);
             var Splitter = new MoggSplitter();
-            var mixed = Splitter.DownmixMogg(CON, ogg, MoggSplitter.MoggSplitFormat.OGG);
+            var mixed = Splitter.DownmixMogg(CON, ogg, radioOgg.Checked ? MoggSplitter.MoggSplitFormat.OGG : MoggSplitter.MoggSplitFormat.OPUS);
             foreach (var error in Splitter.ErrorLog)
             {
                 Log(error);
             }
             Log(mixed && File.Exists(ogg) ? "Success" : "Failed");
         }
-        
-        private void AnalyzeOggs(IEnumerable<string> oggs)
+
+        private bool BassInit = false;
+        private void AnalyzeAudioFiles(IEnumerable<string> audioFiles)
         {
-            Log("Analyzing ogg files and deleting silent files");
-            Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero);
-            foreach (var ogg in oggs)
+            Log("Analyzing audio files and deleting silent files");
+            if (!BassInit)
             {
-                var BassStream = Bass.BASS_StreamCreateFile(ogg, 0, 0, BASSFlag.BASS_STREAM_DECODE);
+                Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero);
+                BassInit = true;
+            }
+            
+            foreach (var audioFile in audioFiles)
+            {
+                var BassStream = 0;
+                if (radioOgg.Checked)
+                {
+                    BassStream = Bass.BASS_StreamCreateFile(audioFile, 0, 0, BASSFlag.BASS_STREAM_DECODE);
+                }
+                else
+                {
+                    BassStream = BassOpus.BASS_OPUS_StreamCreateFile(audioFile, 0, 0, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
+                }
+                if (BassStream == 0) break;
                 var level = new float[1];
                 while (Bass.BASS_ChannelGetLevel(BassStream, level, 1, BASSLevel.BASS_LEVEL_MONO))
                 {
@@ -539,7 +513,7 @@ namespace Nautilus
                 Bass.BASS_StreamFree(BassStream);
                 if (level[0] == 0)
                 {
-                    Tools.DeleteFile(ogg);
+                    Tools.DeleteFile(audioFile);
                 }
             }
             Bass.BASS_Free();
@@ -616,12 +590,14 @@ namespace Nautilus
         {
             markAsRV.Enabled = enabled;
             markAsC3.Enabled = enabled;
+            markAsCustom.Enabled = enabled;
             btnFolder.Enabled = enabled;
             btnRefresh.Enabled = enabled;
             menuStrip1.Enabled = enabled;
             txtFolder.Enabled = enabled;
             chkRAR.Enabled = enabled;
             grpMogg.Enabled = enabled;
+            grpFormat.Enabled = enabled;
             picWorking.Visible = !enabled;
             lstLog.Cursor = enabled ? Cursors.Default : Cursors.WaitCursor;
             Cursor = lstLog.Cursor;
@@ -638,13 +614,13 @@ namespace Nautilus
             }
 
             startTime = DateTime.Now;
-            PSFolder = txtFolder.Text + "\\Music\\";
+            CHFolder = txtFolder.Text + "\\Clone Hero\\";
             Tools.CurrentFolder = txtFolder.Text;
             EnableDisable(false);
             
-            if (!Directory.Exists(PSFolder))
+            if (!Directory.Exists(CHFolder))
             {
-                Directory.CreateDirectory(PSFolder);
+                Directory.CreateDirectory(CHFolder);
             }
 
             try
@@ -687,7 +663,7 @@ namespace Nautilus
         {
             if (!picWorking.Visible)
             {
-                Tools.DeleteFolder(Application.StartupPath + "\\phaseshift\\");
+                Tools.DeleteFolder(Application.StartupPath + "\\clonehero\\");
                 return;
             }
             MessageBox.Show("Please wait until the current process finishes", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);

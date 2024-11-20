@@ -131,7 +131,16 @@ namespace Nautilus
                 folder = folderTree.SelectedNode.Text;
             }
 
-            string xPath = ((CFolderEntry)folderTree.SelectedNode.Tag).Path + "/" + Path.GetFileName(file);
+            var xPath = "";
+            try
+            {
+                xPath = ((CFolderEntry)folderTree.SelectedNode.Tag).Path + "/" + Path.GetFileName(file);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("There was an error on the GetFiles function\nError says:\n\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             
             if (xSession.GetFile(xPath) == null)
             {
@@ -532,6 +541,8 @@ namespace Nautilus
 
         private void advTree1_DragDrop(object sender, DragEventArgs e)
         {
+            MessageBox.Show("Drag and drop feature for folders has been disabled for being problematic", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
             if (picWorking.Visible) return;
             var folder = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (!Directory.Exists(folder[0])) return;

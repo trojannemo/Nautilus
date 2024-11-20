@@ -966,7 +966,7 @@
             this.btnPhaseShiftConverter.Name = "btnPhaseShiftConverter";
             this.btnPhaseShiftConverter.Size = new System.Drawing.Size(122, 43);
             this.btnPhaseShiftConverter.TabIndex = 24;
-            this.btnPhaseShiftConverter.Text = "YARG/CH/PS Converter\r\n";
+            this.btnPhaseShiftConverter.Text = "Clone Hero Converter\r\n";
             this.btnPhaseShiftConverter.UseVisualStyleBackColor = false;
             this.btnPhaseShiftConverter.Click += new System.EventHandler(this.btnPhaseShift_Click);
             this.btnPhaseShiftConverter.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseDown);

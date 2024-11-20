@@ -280,7 +280,7 @@ namespace Nautilus.x360
         }
 
         /// <summary>
-        /// Grabsthe path
+        /// Grabs the path
         /// </summary>
         /// <returns></returns>
         public string GetPath()
