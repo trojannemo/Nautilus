@@ -162,8 +162,11 @@ namespace Nautilus
                 for (var i = 0; i < xfolders.Count; i++)
                 {
                     if (xFolders[i].Name != f) continue;
-                    xsender.Nodes.Add(GetNode(xFolders[i]));
-                    xsender.Nodes[i].Tag = xFolders[i];
+                    var node = GetNode(xFolders[i]);
+                    node.Tag = xFolders[i];
+                    xsender.Nodes.Add(node);
+                    //xsender.Nodes.Add(GetNode(xFolders[i]));
+                    //xsender.Nodes[i].Tag = xFolders[i];
                 }
             }
         }
@@ -1540,6 +1543,7 @@ namespace Nautilus
                 popup.ShowDialog();
                 var newName = popup.EnteredText;
                 popup.Dispose();
+                if (currentName == newName) return;
                 if (string.IsNullOrEmpty(newName))
                 {
                     MessageBox.Show("New name can't be blank", "CON Explorer", MessageBoxButtons.OK, MessageBoxIcon.Warning);
