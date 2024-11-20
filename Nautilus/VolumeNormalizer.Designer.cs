@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(VolumeNormalizer));
             this.lstLog = new System.Windows.Forms.ListBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.exportLogFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,8 +63,8 @@
             // lstLog
             // 
             this.lstLog.AllowDrop = true;
-            this.lstLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.lstLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lstLog.BackColor = System.Drawing.Color.White;
             this.lstLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -196,7 +195,7 @@
             // 
             // txtFolder
             // 
-            this.txtFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.txtFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtFolder.BackColor = System.Drawing.Color.White;
             this.txtFolder.Location = new System.Drawing.Point(12, 60);
@@ -313,24 +312,26 @@
             // radioDoNotRender
             // 
             this.radioDoNotRender.AutoSize = true;
+            this.radioDoNotRender.Checked = true;
             this.radioDoNotRender.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioDoNotRender.Enabled = false;
             this.radioDoNotRender.Location = new System.Drawing.Point(153, 20);
             this.radioDoNotRender.Name = "radioDoNotRender";
             this.radioDoNotRender.Size = new System.Drawing.Size(124, 17);
             this.radioDoNotRender.TabIndex = 69;
+            this.radioDoNotRender.TabStop = true;
             this.radioDoNotRender.Text = "Don\'t re-render audio";
             this.radioDoNotRender.UseVisualStyleBackColor = true;
             // 
             // radioAllowRender
             // 
             this.radioAllowRender.AutoSize = true;
-            this.radioAllowRender.Checked = true;
             this.radioAllowRender.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioAllowRender.Enabled = false;
             this.radioAllowRender.Location = new System.Drawing.Point(9, 20);
             this.radioAllowRender.Name = "radioAllowRender";
             this.radioAllowRender.Size = new System.Drawing.Size(138, 17);
             this.radioAllowRender.TabIndex = 63;
-            this.radioAllowRender.TabStop = true;
             this.radioAllowRender.Text = "Allow re-rendering audio";
             this.radioAllowRender.UseVisualStyleBackColor = true;
             // 
@@ -351,7 +352,6 @@
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.lstLog);
             this.DoubleBuffered = true;
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "VolumeNormalizer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

@@ -259,11 +259,8 @@
     <Compile Include="VolumeNormalizer.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="VolumeNormalizer.Designer.cs" />
-    <Compile Include="VolumeNormalizer1.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>VolumeNormalizer.resx</DependentUpon>
+    <Compile Include="VolumeNormalizer.Designer.cs">
+      <DependentUpon>VolumeNormalizer.cs</DependentUpon>
     </Compile>
     <Compile Include="x360\DevIL.cs" />
     <Compile Include="DTAParser.cs" />
@@ -634,8 +631,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="VolumeNormalizer.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>VolumeNormalizer1.Designer.cs</LastGenOutput>
+      <DependentUpon>VolumeNormalizer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WiiConverter.resx">
       <DependentUpon>WiiConverter.cs</DependentUpon>
