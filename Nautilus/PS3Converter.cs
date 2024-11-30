@@ -16,6 +16,7 @@ using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.AddOn.Enc;
 using Un4seen.Bass.AddOn.EncOgg;
 using NautilusFREE;
+using System.Security.Cryptography;
 
 namespace Nautilus
 {
@@ -748,9 +749,9 @@ namespace Nautilus
                 toolTip1.SetToolTip(btnBegin, "Click here to begin");
             }
         }
-
+                
         private void btnBegin_Click(object sender, EventArgs e)
-        {
+        {       
             if (btnBegin.Text == "Cancel")
             {
                 backgroundWorker1.CancelAsync();
@@ -1564,7 +1565,7 @@ namespace Nautilus
                             sr.ReadLine();
                             sw.WriteLine("         (" + pans.TrimEnd() + ")");
                             continue;
-                        }
+                        }                        
                         if (line.Contains("vols") && !line.Contains("'vols'"))
                         {
                             line = "     (vols        (" + vols.TrimEnd() + "))";
@@ -1792,7 +1793,7 @@ namespace Nautilus
                     return false;
                 }
             }
-
+                        
             Log("Repackaging CON file...");
 
             if (xMogg.Replace(mogg))
@@ -1810,22 +1811,23 @@ namespace Nautilus
                 return false;
             }
 
-            if (Parser.Songs[0].ChannelsTotal > 16 || !isLinosSpecial)
+            doBatchReplace(dta);
+            if (xDTA.Replace(dta))
             {
-                if (xDTA.Replace(dta))
-                {
-                    Log("Repackaged songs.dta file successfully");
-                    Tools.DeleteFile(dta);
-                }
-                else
-                {
-                    Log("Failed to repackage songs.dta file, skipping this file...");
-                    Tools.DeleteFile(dta);
-                    Tools.DeleteFile(midi);
-                    xCON.CloseIO();
-                    return false;
-                }
+                Log("Repackaged songs.dta file successfully");
+                Tools.DeleteFile(dta);
+            }
+            else
+            {
+                Log("Failed to repackage songs.dta file, skipping this file...");
+                Tools.DeleteFile(dta);
+                Tools.DeleteFile(midi);
+                xCON.CloseIO();
+                return false;
+            }
 
+            if (Parser.Songs[0].ChannelsTotal > 16 || !isLinosSpecial)
+            {             
                 if (xMIDI.Replace(midi))
                 {
                     Log("Repackaged MIDI file successfully");
@@ -2260,7 +2262,7 @@ namespace Nautilus
 
         private void pS3Fixer_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("\"The Linos Special\"\n\nThis tool will check for the total amount of channels and do the following:\n\nScenario 1: If equal to or less than 12 channels, will only apply the PS3 mogg patch (if necessary)\n\nScenario 2: If over 12 channels but less than or equal to 16 channels, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nScenario 3: If more than 16 channels will downmix the drums, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("\"The Linos Special\"\n\nThis tool will check for the total amount of audio channels and do the following:\n\nScenario 1: If equal to or less than 12 channels, will only apply the PS3 mogg patch (if necessary)\n\nScenario 2: If over 12 channels but less than or equal to 16 channels, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nScenario 3: If more than 16 channels will downmix the drums, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nAs requested, it will now also apply the alphanumeric song_id fix under all scenarios", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             var ofd = new FolderPicker
             {
                 Title = "Select the folder where your CON files are",
