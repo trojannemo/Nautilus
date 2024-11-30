@@ -18,7 +18,6 @@ using Path = System.IO.Path;
 using Point = System.Drawing.Point;
 using System.Media;
 using System.Globalization;
-using NautilusFREE;
 
 namespace Nautilus
 {
@@ -491,7 +490,7 @@ namespace Nautilus
                     button.Button.FlatAppearance.MouseOverBackColor = button.Button.BackColor == Color.Transparent ? Color.FromArgb(127, Color.AliceBlue.R, Color.AliceBlue.G, Color.AliceBlue.B) : Tools.LightenColor(button.Button.BackColor);
                     button.Button.Left = Convert.ToInt16(Tools.GetConfigString(sr.ReadLine()));
                     button.Button.Top = Convert.ToInt16(Tools.GetConfigString(sr.ReadLine()));
-                    var visible = sr.ReadLine().Contains("True");
+                    button.Button.Visible = sr.ReadLine().Contains("True");
                 }         
                 borderlessForm.Checked = sr.ReadLine().Contains("True"); //borderless form?
                 activebgcolor = sr.ReadLine().Contains("True");
@@ -543,9 +542,9 @@ namespace Nautilus
                     "\nIt's recommended you move " + Text + " to a different folder for future use", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             updater.RunWorkerAsync();
-            btnScores.Visible = File.Exists(Application.StartupPath + "\\bin\\RB3SaveScoresViewer.exe");
-            btnMiloMod.Visible = File.Exists(Application.StartupPath + "\\bin\\MiloMod.exe");
-            btnCharEditor.Visible = File.Exists(Application.StartupPath + "\\bin\\CharEditor.exe");
+            //btnScores.Visible = File.Exists(Application.StartupPath + "\\bin\\RB3SaveScoresViewer.exe");
+            //btnMiloMod.Visible = File.Exists(Application.StartupPath + "\\bin\\MiloMod.exe");
+            //btnCharEditor.Visible = File.Exists(Application.StartupPath + "\\bin\\CharEditor.exe");
             flappyTmr.Enabled = true;
 
             /*var k50 = Application.StartupPath + "\\bin\\50k.c3";
@@ -2106,7 +2105,24 @@ namespace Nautilus
             {
                 flappy.Left -= 2;
             }
-            if (flappy.Left + flappy.Width >= btnScores.Left - 2)
+            var left = btnScores.Left;
+            if (!btnScores.Visible)
+            {
+                left = btnCharEditor.Left;
+                if (!btnCharEditor.Visible)
+                {
+                    left = btnMiloMod.Left;
+                    if (!btnMiloMod.Visible)
+                    {
+                        left = btnMiloMod.Left;
+                        if (!btnBatchCryptor.Visible)
+                        {
+                            left = Width - (flappy.Width/2);
+                        }
+                    }                    
+                }
+            }            
+            if (flappy.Left + flappy.Width >= left - 2)
             {
                 slideRight = false;
             }
