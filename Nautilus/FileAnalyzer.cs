@@ -1760,6 +1760,7 @@ namespace Nautilus
 
         private void AnalyzeMIDI(string midi, bool DoNotDisplay = false, bool clearItems = false)
         {
+            ResetAll(!clearItems);
             HaveFile = true;
             lstStats.Invoke(new MethodInvoker(() => lstStats.BackgroundImage = null));
             if (clearItems)
@@ -3147,9 +3148,12 @@ namespace Nautilus
             return totalmeasures;
         }
 
-        private void ResetAll()
+        private void ResetAll(bool batch = false)
         {
-            HaveFile = false;
+            if (!batch)
+            {
+                HaveFile = false;
+            }            
             TotalMIDINotes = 0;
             TotalPlayableNotes = 0;
             TicksPerQuarter = 0;
