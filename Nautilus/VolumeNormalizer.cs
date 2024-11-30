@@ -7,6 +7,7 @@ using Nautilus.Properties;
 using Nautilus.x360;
 using Un4seen.Bass;
 using System.Drawing;
+using System.Globalization;
 
 namespace Nautilus
 {
@@ -558,10 +559,11 @@ namespace Nautilus
             else
             {
                 // Here we limit the length of the output string to two decimal places.
-                string levelString = level.ToString();
+                /*string levelString = level.ToString();
                 string _tempString = levelString.Split('.')[0] + "." + levelString.Split('.')[1].Substring(0, Math.Min(2, levelString.Split('.')[1].Length));
 
-                return _tempString;
+                return _tempString;*/
+                return level.ToString("F", CultureInfo.InvariantCulture); //this avoids scientific notation
             }
         }
 
