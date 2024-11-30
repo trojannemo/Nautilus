@@ -280,53 +280,64 @@ namespace Nautilus
             return sort;
         }
 
-        private string arrangeName(string song, string artist)
+        private string arrangeName(string song, string artist, int year)
         {
             var arranged = "";
-            if (renameTheArtistSong.Checked)
+            if (renameYearArtist.Checked && year > 0)
             {
-                arranged = artist + " - " + song;
+                arranged = "(" + year + ") " + artist + " - " + song;
             }
-            else if (renameArtistTheSong.Checked)
+            else if (renameYearSong.Checked && year > 0)
             {
-                if (artist.Length > 6)
+                arranged = "(" + year + ") " + song + " - " + artist;
+            }
+            else
+            {
+                if (renameTheArtistSong.Checked)
                 {
-                    if (artist.Substring(0, 4) == "The ")
+                    arranged = artist + " - " + song;
+                }
+                else if (renameArtistTheSong.Checked)
+                {
+                    if (artist.Length > 6)
                     {
-                        arranged = artist.Substring(4, artist.Length - 4) + ", The - " + song;
+                        if (artist.Substring(0, 4) == "The ")
+                        {
+                            arranged = artist.Substring(4, artist.Length - 4) + ", The - " + song;
+                        }
+                        else
+                        {
+                            arranged = artist + " - " + song;
+                        }
                     }
                     else
                     {
                         arranged = artist + " - " + song;
                     }
                 }
-                else
+                else if (renameSongTheArtist.Checked)
                 {
-                    arranged = artist + " - " + song;
+                    arranged = song + " - " + artist;
                 }
-            }
-            else if (renameSongTheArtist.Checked)
-            {
-                arranged = song + " - " + artist;
-            }
-            else if (renameSongArtistThe.Checked)
-            {
-                if (artist.Length > 6)
+                else if (renameSongArtistThe.Checked)
                 {
-                    if (artist.Substring(0, 4) == "The ")
+                    if (artist.Length > 6)
                     {
-                        arranged = song + " - " + artist.Substring(4, artist.Length - 4) + ", The";
+                        if (artist.Substring(0, 4) == "The ")
+                        {
+                            arranged = song + " - " + artist.Substring(4, artist.Length - 4) + ", The";
+                        }
+                        else
+                        {
+                            arranged = song + " - " + artist;
+                        }
                     }
                     else
                     {
                         arranged = song + " - " + artist;
                     }
                 }
-                else
-                {
-                    arranged = song + " - " + artist;
-                }
-            }
+            }            
             return arranged;
         }
 
@@ -445,7 +456,7 @@ namespace Nautilus
                         {
                             artist = Tools.CleanString(artist, true);
 
-                            rename = arrangeName(song, artist);
+                            rename = arrangeName(song, artist, 0);
                         }
                         else
                         {
@@ -476,7 +487,7 @@ namespace Nautilus
             }
             if (megasusMod)
             {
-                rename = arrangeName(song, song);
+                rename = arrangeName(song, song, 0);
             }
             rename = rename.Replace(".", "").Trim();
             if (string.IsNullOrWhiteSpace(rename))
@@ -524,6 +535,7 @@ namespace Nautilus
             if (!Parser.ReadDTA(xDTA) || !Parser.Songs.Any()) return "";
             var name = Tools.CleanString(Parser.Songs[0].Name, false, ignoreXboxFilesystemLimitations.Checked);
             var artist = Tools.CleanString(Parser.Songs[0].Artist, false, ignoreXboxFilesystemLimitations.Checked);
+            var year = Parser.Songs[0].YearReleased;
             var internalName = Parser.Songs[0].InternalName;
             if (renameInternalName.Checked) return internalName;
             if (!string.IsNullOrWhiteSpace(internalName) && !XOnly && xPackage.ParseSuccess)
@@ -548,7 +560,7 @@ namespace Nautilus
             string rename;
             if (Parser.Songs.Count == 1) //if single song, packs will have values > 1
             {
-                rename = arrangeName(name, artist);
+                rename = arrangeName(name, artist, year);
                 if (replaceSpacesWithUnderscores.Checked)
                 {
                     rename = rename.Replace(" ", "_");
@@ -662,6 +674,8 @@ namespace Nautilus
             renameArtistTheSong.Enabled = renameFiles.Checked;
             renameSongTheArtist.Enabled = renameFiles.Checked;
             renameSongArtistThe.Enabled = renameFiles.Checked;
+            renameYearSong.Enabled = renameFiles.Checked;
+            renameYearArtist.Enabled = renameFiles.Checked;
         }
 
         private void replaceSpacesWithUnderscoresToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1156,7 +1170,7 @@ namespace Nautilus
                 sr.Dispose();
                 if (string.IsNullOrWhiteSpace(Artist) || string.IsNullOrWhiteSpace(Song)) continue;
                 Log("Song #" + (i + 1) + " is '" + Artist + " - " + Song + "'");
-                var new_name = arrangeName(Song, Artist);
+                var new_name = arrangeName(Song, Artist, 0);
                 if (normalizeFeaturedArtists.Checked)
                 {
                     new_name = Tools.FixFeaturedArtist(new_name);
@@ -1260,6 +1274,8 @@ namespace Nautilus
             renameArtistTheSong.Checked = false;
             renameSongTheArtist.Checked = false;
             renameSongArtistThe.Checked = false;
+            renameYearArtist.Checked = false;
+            renameYearSong.Checked = false;
             ((ToolStripMenuItem) sender).Checked = true;
         }
     }
