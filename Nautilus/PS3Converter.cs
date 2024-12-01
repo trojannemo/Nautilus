@@ -1355,25 +1355,25 @@ namespace Nautilus
             string dta = "";            
             string midi = "";
 
-            if (Parser.Songs[0].ChannelsTotal > 16 || !isLinosSpecial)
+            if (xDTA == null)
             {
-                if (xDTA == null)
-                {
-                    Log("Couldn't find songs.dta file inside " + Path.GetFileName(conFilePath) + " ... skipping");
-                    xCON.CloseIO();
-                    return false;
-                }
-                dta = folderPath + "\\songs.dta";
-                Tools.DeleteFile(dta);
-                xDTA.ExtractToFile(dta);
-                if (!File.Exists(dta))
-                {
-                    Log("Couldn't extract songs.dta file from " + Path.GetFileName(conFilePath) + " ... skipping");
-                    xCON.CloseIO();
-                    Tools.DeleteFile(mogg);
-                    return false;
-                }
-                                
+                Log("Couldn't find songs.dta file inside " + Path.GetFileName(conFilePath) + " ... skipping");
+                xCON.CloseIO();
+                return false;
+            }
+            dta = folderPath + "\\songs.dta";
+            Tools.DeleteFile(dta);
+            xDTA.ExtractToFile(dta);
+            if (!File.Exists(dta))
+            {
+                Log("Couldn't extract songs.dta file from " + Path.GetFileName(conFilePath) + " ... skipping");
+                xCON.CloseIO();
+                Tools.DeleteFile(mogg);
+                return false;
+            }
+
+            if (Parser.Songs[0].ChannelsTotal > 16 || !isLinosSpecial)
+            {               
                 if (xMIDI == null)
                 {
                     Log("Couldn't find MIDI file inside " + Path.GetFileName(conFilePath) + " ... skipping");
