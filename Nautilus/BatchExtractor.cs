@@ -229,14 +229,24 @@ namespace Nautilus
             }
         }
 
-        private bool ExtractFile(string extension, bool sublevel, string internalname, string rename, bool keep = false)
+        private bool ExtractFile(string extension, bool sublevel, string internalName, string rename, bool keep = false, bool isDTA = false)
         {
             if (xPackage == null || !xPackage.ParseSuccess) return false;
 
-            var outputfolder = txtFolder.Text + "\\" + (organizeFilesByType.Checked ? (extension == "mid" ? "midi" : extension) + "_files\\" : "");
+            var mainFolder = txtFolder.Text + "\\" + (organizeFilesByType.Checked ? (extension == "mid" ? "midi" : extension) + "_files\\" : "");
+            if (extractToYARG.Checked)
+            {
+                mainFolder = txtFolder.Text + "\\_YARG\\" + rename + "\\songs\\";
+            }
+            var rootFolder = mainFolder + internalName + "\\";
+            var genFolder = rootFolder + "\\gen\\";
             var ext = "." + extension;
-            var dir = "songs/" + internalname + (sublevel ? "/gen/" : "/") + internalname;
+            var dir = "songs/" + internalName + (sublevel ? "/gen/" : "/") + internalName;
             var file = dir + (keep ? "_keep" : "") + ext;
+            if (isDTA)
+            {
+                file = "songs/songs.dta";
+            }
 
             var xfile = xPackage.GetFile(file);
             if (xfile == null)
@@ -246,25 +256,37 @@ namespace Nautilus
             }
             try
             {
-                var newfile = outputfolder + rename + (keep && !removekeepFromPNGXBOXFiles.Checked ? "_keep" : "") + ext;
+                var newFile = (extractToYARG.Checked && sublevel? genFolder : rootFolder) + (extractToYARG.Checked ? internalName : rename) + (keep && (extractToYARG.Checked || !removekeepFromPNGXBOXFiles.Checked) ? "_keep" : "") + ext;
+                if (extractToYARG.Checked && isDTA)
+                {
+                    newFile = mainFolder + "songs.dta";
+                }
                 extension = extension.ToLowerInvariant() == "mid" ? "MIDI" : extension.ToUpper();
 
-                Log("Extracting " + extension + " file " + Path.GetFileName(newfile));
+                Log("Extracting " + extension + " file " + Path.GetFileName(newFile));
 
-                if (!Directory.Exists(outputfolder))
+                if (!Directory.Exists(rootFolder))
                 {
-                    Directory.CreateDirectory(outputfolder);
+                    Directory.CreateDirectory(rootFolder);
                 }
-
-                Tools.DeleteFile(newfile);
-                if (xfile.ExtractToFile(newfile))
+                if (!Directory.Exists(rootFolder))
                 {
-                    if (Path.GetExtension(newfile) == ".mogg")
+                    Directory.CreateDirectory(rootFolder);
+                }
+                if (!Directory.Exists(genFolder))
+                {
+                    Directory.CreateDirectory(genFolder);
+                }
+                Tools.DeleteFile(newFile);
+                if (xfile.ExtractToFile(newFile))
+                {
+                    if (Path.GetExtension(newFile) == ".mogg")
                     {
-                        //var nautilus = new nTools();
-                        //nautilus.WriteOutData(nautilus.                                                                                                                                           (File.ReadAllBytes(newfile)), newfile);
+                        Log("Decrypting mogg file (if necessary)");
+                        var nautilus = new nTools();
+                        nautilus.DecM(File.ReadAllBytes(newFile), true, false, DecryptMode.ToFile, newFile);
                     }
-                    Log("File " + rename + ext + " extracted successfully");
+                    Log("File " + Path.GetFileName(newFile) + " extracted successfully");
                 }
                 else
                 {
@@ -282,12 +304,8 @@ namespace Nautilus
 
         private void EnableDisable(bool enabled)
         {
-            chkDTA.Enabled = enabled;
-            chkPNG.Enabled = enabled;
-            chkMIDI.Enabled = enabled;
-            chkMOGG.Enabled = enabled;
-            chkMILO.Enabled = enabled;
-            chkThumbs.Enabled = enabled;
+            lstLog.Cursor = enabled ? Cursors.Default : Cursors.WaitCursor;
+            Cursor = lstLog.Cursor;
             menuStrip1.Enabled = enabled;
             btnFolder.Enabled = enabled;
             btnRefresh.Enabled = enabled;
@@ -295,8 +313,14 @@ namespace Nautilus
             btnDeselect.Enabled = enabled;
             txtFolder.Enabled = enabled;
             picWorking.Visible = !enabled;
-            lstLog.Cursor = enabled ? Cursors.Default : Cursors.WaitCursor;
-            Cursor = lstLog.Cursor;
+
+            if (extractToYARG.Checked) return;
+            chkDTA.Enabled = enabled;
+            chkPNG.Enabled = enabled;
+            chkMIDI.Enabled = enabled;
+            chkMOGG.Enabled = enabled;
+            chkMILO.Enabled = enabled;
+            chkThumbs.Enabled = enabled;                    
         }
 
         private void btnBegin_Click(object sender, EventArgs e)
@@ -403,6 +427,11 @@ namespace Nautilus
             var rename = "";
             var counter = 0;
 
+            if (extractToYARG.Checked)
+            {
+                Log("Batch extracting to YARG exCON format...");
+            }
+
             foreach (var file in inputFiles.Where(File.Exists).TakeWhile(file => !FileExtractor.CancellationPending))
             {
                 try
@@ -451,31 +480,40 @@ namespace Nautilus
                                 rename = arrangeName(name, artist, songid).Replace("!", "").Replace("'", "");
                                 rename = Tools.CleanString(rename, false);
 
-                                if (chkMIDI.Checked && !FileExtractor.CancellationPending)
+                                if (chkDTA.Checked || extractToYARG.Checked && !FileExtractor.CancellationPending)
+                                {
+                                    if (ExtractFile("dta", false, songid, rename, false, true))
+                                    {
+                                        dtacount++;
+                                    }
+                                }
+                                if (chkMIDI.Checked || extractToYARG.Checked && !FileExtractor.CancellationPending)
                                 {
                                     if (ExtractFile("mid", false, songid, rename))
                                     {
                                         midicount++;
                                     }
                                 }
-                                if (chkMOGG.Checked && !FileExtractor.CancellationPending)
+                                if (chkMOGG.Checked || extractToYARG.Checked && !FileExtractor.CancellationPending)
                                 {
                                     if (ExtractFile("mogg", false, songid, rename))
                                     {
                                         moggcount++;
                                     }
                                 }
-                                if (chkPNG.Checked && !FileExtractor.CancellationPending)
+                                if (chkPNG.Checked || extractToYARG.Checked && !FileExtractor.CancellationPending)
                                 {
                                     if (ExtractFile("png_xbox", true, songid, rename, true))
                                     {
                                         pngcount++;
                                     }
                                 }
-                                if (!chkMILO.Checked) continue;
-                                if (ExtractFile("milo_xbox", true, songid, rename))
+                                if (chkMILO.Checked || extractToYARG.Checked && !FileExtractor.CancellationPending)
                                 {
-                                    milocount++;
+                                    if (ExtractFile("milo_xbox", true, songid, rename))
+                                    {
+                                        milocount++;
+                                    }
                                 }
                             }
 
@@ -485,7 +523,7 @@ namespace Nautilus
                                 break;
                             }
                             var xUpgrade = xPackage.GetFile("songs_upgrades/upgrades.dta");
-                            if (xUpgrade != null)
+                            if (xUpgrade != null && !extractToYARG.Checked)
                             {
                                 var temp_upg = Path.GetTempPath() + "upg.dta";
                                 Tools.DeleteFile(temp_upg);
@@ -539,7 +577,7 @@ namespace Nautilus
                                     }
                                     sr.Dispose();
 
-                                    if (chkDTA.Checked)
+                                    if (chkDTA.Checked && !extractToYARG.Checked)
                                     {
                                         if (!Directory.Exists(dtafolder))
                                         {
@@ -575,11 +613,11 @@ namespace Nautilus
                             .Replace("'", "").Replace(" ", replaceSpacesWithUnderscores.Checked ? "_" : (removeSpacesFromFileName.Checked ? "" : " "));
                         packname = Parser.Songs.Count == 1 && !string.IsNullOrWhiteSpace(rename) ? rename : Tools.CleanString(packname, false);
 
-                        if (chkDTA.Checked && hasdta)
+                        if (chkDTA.Checked && !extractToYARG.Checked && hasdta)
                         {
                             try
                             {
-                                var newDTA = dtafolder + packname + (appendsongsToFiles.Checked ? "_songs" : "") + ".dta";
+                                var newDTA = dtafolder + packname + (appendsongsToFiles.Checked ? "_songs" : "") + ".dta";                                
                                 Log("Extracting DTA file " + Path.GetFileName(newDTA));
                                 if (!Directory.Exists(dtafolder))
                                 {
@@ -816,6 +854,16 @@ namespace Nautilus
             {
                 Log("Ready to begin");
             }
+        }
+
+        private void extractToYARG_Click(object sender, EventArgs e)
+        {
+            chkDTA.Enabled = !extractToYARG.Checked;
+            chkMOGG.Enabled = !extractToYARG.Checked;
+            chkMIDI.Enabled = !extractToYARG.Checked;
+            chkMILO.Enabled = !extractToYARG.Checked;
+            chkPNG.Enabled = !extractToYARG.Checked;
+            chkThumbs.Enabled = !extractToYARG.Checked;            
         }
     }
 }
