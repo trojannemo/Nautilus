@@ -459,7 +459,12 @@ namespace Nautilus
                         else
                         {
                             hasdta = true;
-
+                            if (Parser.Songs.Count > 1 && extractToYARG.Checked)
+                            {
+                                Log("File '" + Path.GetFileName(file) + "' is a pack ... packs are not supported ... skipping");
+                                xPackage.CloseIO();
+                                continue;
+                            }
                             Log("CON file '" + Path.GetFileNameWithoutExtension(file) + "' contains " + Parser.Songs.Count + " " + (Parser.Songs.Count == 1 ? "song" : "songs"));
                             for (var i = 0; i < Parser.Songs.Count; i++)
                             {
@@ -470,7 +475,7 @@ namespace Nautilus
                                 }
                                 var song = Parser.Songs[i];
                                 counter++;
-                                Log("Extracting files for song #" + (counter) + ": '" + song.Artist + " - " + song.Name + "'");
+                                Log("Extracting files for song #" + (counter) + " out of " + inputFiles.Count() + ": '" + song.Artist + " - " + song.Name + "'");
                                 var songid = song.InternalName;
 
                                 var name = Tools.CleanString(song.Name, true);
