@@ -1129,13 +1129,18 @@ namespace Nautilus
                     var newline = line;
                     if (line.Contains("song_id") && !line.Contains(";ORIG_ID="))
                     {
+                        var origID = Parser.GetSongID(line);
                         if (!Parser.IsNumericID(line)) //only if not already a numeric ID
-                        {
-                            newline = ";ORIG_ID=" + Parser.GetSongID(line);
+                        {                            
+                            newline = ";ORIG_ID=" + origID;
                             sw.WriteLine(newline);
                             var corrector = new SongIDCorrector();
                             newline = "   ('song_id' " + corrector.ShortnameToSongID(Parser.GetSongID(line)) + ")";//GetNumericID() + ")";
                             counter++;
+                        }
+                        else
+                        {
+                            Log("This song already has a numeric ID: " + origID + " ... leaving it alone");
                         }
                     }
                     if (newline.Trim() != "")
@@ -1783,7 +1788,7 @@ namespace Nautilus
             {
                 if (!CheckApplyPS3MoggPatch(mogg, true))
                 {
-                    Log("Leaving original CON file alone...");
+                    Log("Not applying PS3 Mogg Patch...");
                     fixIgnore++;
                     Tools.DeleteFile(backup);
                     Tools.DeleteFile(mogg);
@@ -1811,7 +1816,7 @@ namespace Nautilus
                 return false;
             }
 
-            doBatchReplace(dta);
+            doBatchReplace(dta, true);
             if (xDTA.Replace(dta))
             {
                 Log("Repackaged songs.dta file successfully");
@@ -2191,7 +2196,7 @@ namespace Nautilus
                     MessageBox.Show("That mogg file is not encrypted, will encrypt (automatically applies PS3 patch)", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
                 nautilus3.EncM(File.ReadAllBytes(inMogg), inMogg);
-                encrypted = true;
+                return true;
             }
             var patched = nautilus3.MoggIsAlreadyPatched(File.ReadAllBytes(inMogg));
             if (patched)
@@ -2204,7 +2209,7 @@ namespace Nautilus
                 {
                     MessageBox.Show("That mogg file was already patched, no need to patch it again", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                return encrypted;
+                return true;
             }
             
             //only patch 0x0C and 0x0D moggs
