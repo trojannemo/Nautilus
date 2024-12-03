@@ -6,6 +6,42 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+v5.2.2
+
+AUDIO CONVERTER
+- Can now drag/drop multiple source files to each convert button and it'll process them in batch
+- Changed behavior in the CLI version so converted files save to the original source folder rather than the fixed "Converted" folder in \bin- this makes more sense and allows additional features...
+- When using the CLI version using one of the provided batch scripts, now it can be used to recursively search directories and subdirectories and it will convert all supported files found to the script format (i.e. Clone Hero folders can be copy/pasted into the _source_audio folder in \bin then run the batch script and all .opus files will be converted to .ogg, for example)
+
+BATCH EXTRACTOR
+- Added new feature to Extract to YARG "exCON" format as requested by the great Nyxyxylyth
+
+PS3 CONVERTER
+- Implemented Linos' request to have the One-Click Batch PS3 Fixer apply the alphanumeric song_id fix at the same time
+- Fixed issue with "bad encryption masks" for certain old C3 customs - thanks to LocalH
+
+BATCH RENAMER
+- Added option to rename to (Year) The Artist - Song and (Year) Song - The Artist as requested by wkdbounce
+
+BATCH PROCESSOR
+- Added option to add (Year) to the song title in the DTA as requested by wkdbounce
+
+FILE ANALYZER
+- Fixed issue raised in Github by EafAtta where when batch analyzing files it would add on to the prior song's numbers so each song would have its numbers plus the prior song numbers, and so on and so forth
+
+VOLUME NORMALIZER
+- Merged pull request from SuperRiderTH with minor changes
+- Modified SuperRiderTH's code to hopefully avoid scientific notation in the DTA files - issue raised by RazQ
+
+CON EXPLORER
+- Fixed bug introduced in v5.2.1 where it would crash when loading certain packs
+
+MAIN FORM
+- Fixed button visibility not saving across uses for certain buttons
+- Fixed Character Editor button not having the correct context menu
+
+----------
+
 v5.2.1
 
 CLONE HERO CONVERTER
