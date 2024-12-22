@@ -2717,7 +2717,9 @@ namespace Nautilus
             calibriToolStrip.Enabled = isFontAvailable("Calibri");
             tahomaToolStrip.Enabled = isFontAvailable("Tahoma");
             timesNewRomanToolStrip.Enabled = isFontAvailable("Times New Roman");
-            
+            verdanaToolStrip.Enabled = isFontAvailable("Verdana");
+            segoeUIToolStrip.Enabled = isFontAvailable("Segoe UI");
+
             if (File.Exists(Application.StartupPath + "\\res\\font.txt"))
             {
                 var sr = new StreamReader(Application.StartupPath + "\\res\\font.txt");
@@ -2729,7 +2731,7 @@ namespace Nautilus
                     customFontToolStrip.Text = "Custom Font: " + fontName;
                     customFontToolStrip.Visible = true;
                     customFontToolStrip.Checked = true;
-                    ActiveFont = fontName;
+                    //ActiveFont = fontName;
                     CustomFontName = fontName;
                 }
                 else
@@ -2740,36 +2742,30 @@ namespace Nautilus
                 }
             }
 
-            if (!customFontToolStrip.Checked)
+            switch (ActiveFont)
             {
-                myriadProToolStrip.Checked = isFontAvailable("Myriad Pro"); //use this as one default
-            }
-            if (myriadProToolStrip.Checked)
-            {
-                ActiveFont = "Myriad Pro";
-            }
-            else if (!customFontToolStrip.Checked)
-            {
-                if (calibriToolStrip.Enabled)
-                {
+                case "Myriad Pro":
+                    myriadProToolStrip.Checked = true;
+                    break;
+                case "Calibri":
                     calibriToolStrip.Checked = true;
-                    ActiveFont = "Calibri";
-                }
-                else if (tahomaToolStrip.Enabled)
-                {
+                    break;
+                case "Tahoma":
                     tahomaToolStrip.Checked = true;
-                    ActiveFont = "Tahoma";
-                }
-                else if (timesNewRomanToolStrip.Enabled)
-                {
+                    break;
+                case "Times New Roman":
                     timesNewRomanToolStrip.Checked = true;
-                    ActiveFont = "Times New Roman";
-                }
-                else
-                {
-                    ActiveFont = "Arial";
-                }
-            }
+                    break;
+                case "Verdana":
+                    verdanaToolStrip.Checked = true;
+                    break;
+                case "Segoe UI":
+                    segoeUIToolStrip.Checked = true;
+                    break;
+                default:
+                    calibriToolStrip.Checked = true;
+                    break;
+            }            
         }
 
         private void LoadConfig()
@@ -2790,6 +2786,7 @@ namespace Nautilus
                 sr.ReadLine();//no longer used
                 UserProfile = Tools.GetConfigString(sr.ReadLine());
                 autoloadLastProfile.Checked = sr.ReadLine().Contains("True");
+                ActiveFont = Tools.GetConfigString(sr.ReadLine());
             }
             catch (Exception)
             {}
@@ -2836,6 +2833,7 @@ namespace Nautilus
             sw.WriteLine("SpectrumID=0");
             sw.WriteLine("LastUsedProfile=" + (autoloadLastProfile.Checked ? UserProfile : ""));
             sw.WriteLine("AutoLoadProfile=" + autoloadLastProfile.Checked);
+            sw.WriteLine("ActiveFont=" + ActiveFont);
             sw.Dispose();
         }
 
@@ -3275,48 +3273,41 @@ namespace Nautilus
             picVisualizer.Invalidate();
         }               
         
-        private void calibriToolStrip_Click(object sender, EventArgs e)
+        private void UncheckAllFonts(ToolStripMenuItem menu)
         {
-            ActiveFont = "Calibri";
             myriadProToolStrip.Checked = false;
-            calibriToolStrip.Checked = true;
+            calibriToolStrip.Checked = false;
             tahomaToolStrip.Checked = false;
             timesNewRomanToolStrip.Checked = false;
             customFontToolStrip.Checked = false;
+            verdanaToolStrip.Checked = false;
+            segoeUIToolStrip.Checked = false;
+            menu.Checked = true;
             picVisualizer.Invalidate();
+        }
+
+        private void calibriToolStrip_Click(object sender, EventArgs e)
+        {
+            ActiveFont = "Calibri";
+            UncheckAllFonts((ToolStripMenuItem)sender);
         }
 
         private void tahomaToolStrip_Click(object sender, EventArgs e)
         {
             ActiveFont = "Tahoma";
-            myriadProToolStrip.Checked = false;
-            calibriToolStrip.Checked = false;
-            tahomaToolStrip.Checked = true;
-            timesNewRomanToolStrip.Checked = false;
-            customFontToolStrip.Checked = false;
-            picVisualizer.Invalidate();
+            UncheckAllFonts((ToolStripMenuItem)sender);
         }
 
         private void timesNewRomanToolStrip_Click(object sender, EventArgs e)
         {
             ActiveFont = "Times New Roman";
-            myriadProToolStrip.Checked = false;
-            calibriToolStrip.Checked = false;
-            tahomaToolStrip.Checked = false;
-            timesNewRomanToolStrip.Checked = true;
-            customFontToolStrip.Checked = false;
-            picVisualizer.Invalidate();
+            UncheckAllFonts((ToolStripMenuItem)sender);
         }
 
         private void customFontToolStrip_Click(object sender, EventArgs e)
         {
             ActiveFont = CustomFontName;
-            myriadProToolStrip.Checked = false;
-            calibriToolStrip.Checked = false;
-            tahomaToolStrip.Checked = false;
-            timesNewRomanToolStrip.Checked = false;
-            customFontToolStrip.Checked = true;
-            picVisualizer.Invalidate();
+            UncheckAllFonts((ToolStripMenuItem)sender);
         }
 
         private void myriadProToolStrip_Click(object sender, EventArgs e)
@@ -3324,11 +3315,7 @@ namespace Nautilus
             if (isFontAvailable("Myriad Pro"))
             {
                 ActiveFont = "Myriad Pro";
-                myriadProToolStrip.Checked = true;
-                calibriToolStrip.Checked = false;
-                tahomaToolStrip.Checked = false;
-                timesNewRomanToolStrip.Checked = false;
-                customFontToolStrip.Checked = false;
+                UncheckAllFonts((ToolStripMenuItem)sender);
             }
             else
             {
@@ -5555,6 +5542,18 @@ namespace Nautilus
             PlaybackSeconds = picPreview.Tag.ToString() == "preview" ? 30.0 : 0.0;
             updatePlaybackInstruments();
             StartPlayback();
-        }        
+        }
+
+        private void segoeUIToolStrip_Click(object sender, EventArgs e)
+        {
+            ActiveFont = "Segoe UI";
+            UncheckAllFonts((ToolStripMenuItem)sender);
+        }
+
+        private void verdanaToolStrip_Click(object sender, EventArgs e)
+        {
+            ActiveFont = "Verdana";
+            UncheckAllFonts((ToolStripMenuItem)sender);
+        }
     }   
 }

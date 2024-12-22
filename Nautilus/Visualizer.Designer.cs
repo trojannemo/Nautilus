@@ -180,6 +180,8 @@ namespace Nautilus
             this.powerGigWorker = new System.ComponentModel.BackgroundWorker();
             this.bandFuseWorker = new System.ComponentModel.BackgroundWorker();
             this.lblLyrics = new System.Windows.Forms.Label();
+            this.segoeUIToolStrip = new System.Windows.Forms.ToolStripMenuItem();
+            this.verdanaToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreUp)).BeginInit();
@@ -1892,6 +1894,8 @@ namespace Nautilus
             this.calibriToolStrip,
             this.tahomaToolStrip,
             this.timesNewRomanToolStrip,
+            this.segoeUIToolStrip,
+            this.verdanaToolStrip,
             this.customFontToolStrip});
             this.fontsToolStripMenuItem.Name = "fontsToolStripMenuItem";
             this.fontsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
@@ -2055,6 +2059,24 @@ namespace Nautilus
             this.lblLyrics.TabIndex = 65;
             this.lblLyrics.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblLyrics.Paint += new System.Windows.Forms.PaintEventHandler(this.lblLyrics_Paint);
+            // 
+            // segoeUIToolStrip
+            // 
+            this.segoeUIToolStrip.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.segoeUIToolStrip.Enabled = false;
+            this.segoeUIToolStrip.Name = "segoeUIToolStrip";
+            this.segoeUIToolStrip.Size = new System.Drawing.Size(180, 22);
+            this.segoeUIToolStrip.Text = "Segoe UI";
+            this.segoeUIToolStrip.Click += new System.EventHandler(this.segoeUIToolStrip_Click);
+            // 
+            // verdanaToolStrip
+            // 
+            this.verdanaToolStrip.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.verdanaToolStrip.Enabled = false;
+            this.verdanaToolStrip.Name = "verdanaToolStrip";
+            this.verdanaToolStrip.Size = new System.Drawing.Size(180, 22);
+            this.verdanaToolStrip.Text = "Verdana";
+            this.verdanaToolStrip.Click += new System.EventHandler(this.verdanaToolStrip_Click);
             // 
             // Visualizer
             // 
@@ -2321,5 +2343,7 @@ namespace Nautilus
         private ToolStripMenuItem useWholeWords;
         private ToolStripMenuItem useSyllables;
         private ToolStripMenuItem exportFNFAudio;
+        private ToolStripMenuItem segoeUIToolStrip;
+        private ToolStripMenuItem verdanaToolStrip;
     }
 }

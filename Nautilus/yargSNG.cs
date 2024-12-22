@@ -1,15 +1,6 @@
-﻿using Nautilus.Extensions;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Collections;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.Windows.Documents;
 
 namespace Nautilus
 {
