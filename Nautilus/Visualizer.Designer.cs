@@ -32,6 +32,7 @@ namespace Nautilus
         {
             this.components = new System.ComponentModel.Container();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.yearJoystick = new System.Windows.Forms.PictureBox();
             this.label10 = new System.Windows.Forms.Label();
             this.txtTrack = new System.Windows.Forms.TextBox();
             this.chkRating = new System.Windows.Forms.CheckBox();
@@ -43,8 +44,6 @@ namespace Nautilus
             this.txtYear2 = new System.Windows.Forms.TextBox();
             this.chkSubGenre = new System.Windows.Forms.CheckBox();
             this.chkGenre = new System.Windows.Forms.CheckBox();
-            this.picYearDown = new System.Windows.Forms.PictureBox();
-            this.picYearUp = new System.Windows.Forms.PictureBox();
             this.SplitJoinArtist = new System.Windows.Forms.Label();
             this.SplitJoinSong = new System.Windows.Forms.Label();
             this.txtArtist2 = new System.Windows.Forms.TextBox();
@@ -166,6 +165,8 @@ namespace Nautilus
             this.calibriToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.tahomaToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.timesNewRomanToolStrip = new System.Windows.Forms.ToolStripMenuItem();
+            this.segoeUIToolStrip = new System.Windows.Forms.ToolStripMenuItem();
+            this.verdanaToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.customFontToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
@@ -180,13 +181,10 @@ namespace Nautilus
             this.powerGigWorker = new System.ComponentModel.BackgroundWorker();
             this.bandFuseWorker = new System.ComponentModel.BackgroundWorker();
             this.lblLyrics = new System.Windows.Forms.Label();
-            this.segoeUIToolStrip = new System.Windows.Forms.ToolStripMenuItem();
-            this.verdanaToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.yearJoystick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreUp)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picYearDown)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picYearUp)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.artistJoystick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.songJoystick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barGenre)).BeginInit();
@@ -252,6 +250,7 @@ namespace Nautilus
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.yearJoystick);
             this.panel1.Controls.Add(this.label10);
             this.panel1.Controls.Add(this.txtTrack);
             this.panel1.Controls.Add(this.chkRating);
@@ -263,8 +262,6 @@ namespace Nautilus
             this.panel1.Controls.Add(this.txtYear2);
             this.panel1.Controls.Add(this.chkSubGenre);
             this.panel1.Controls.Add(this.chkGenre);
-            this.panel1.Controls.Add(this.picYearDown);
-            this.panel1.Controls.Add(this.picYearUp);
             this.panel1.Controls.Add(this.SplitJoinArtist);
             this.panel1.Controls.Add(this.SplitJoinSong);
             this.panel1.Controls.Add(this.txtArtist2);
@@ -303,6 +300,20 @@ namespace Nautilus
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(552, 142);
             this.panel1.TabIndex = 2;
+            // 
+            // yearJoystick
+            // 
+            this.yearJoystick.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.yearJoystick.Image = global::Nautilus.Properties.Resources.moveall;
+            this.yearJoystick.Location = new System.Drawing.Point(403, 65);
+            this.yearJoystick.Name = "yearJoystick";
+            this.yearJoystick.Size = new System.Drawing.Size(26, 26);
+            this.yearJoystick.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.yearJoystick.TabIndex = 54;
+            this.yearJoystick.TabStop = false;
+            this.toolTip1.SetToolTip(this.yearJoystick, "Click here to adjust the position of the year");
+            this.yearJoystick.MouseClick += new System.Windows.Forms.MouseEventHandler(this.yearJoystick_MouseClick);
+            this.yearJoystick.MouseMove += new System.Windows.Forms.MouseEventHandler(this.yearJoystick_MouseMove);
             // 
             // label10
             // 
@@ -439,32 +450,6 @@ namespace Nautilus
             this.chkGenre.UseVisualStyleBackColor = true;
             this.chkGenre.CheckedChanged += new System.EventHandler(this.ControlChanged);
             this.chkGenre.TextChanged += new System.EventHandler(this.ControlChanged);
-            // 
-            // picYearDown
-            // 
-            this.picYearDown.BackColor = System.Drawing.Color.Transparent;
-            this.picYearDown.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picYearDown.Image = global::Nautilus.Properties.Resources.down1;
-            this.picYearDown.Location = new System.Drawing.Point(404, 71);
-            this.picYearDown.Name = "picYearDown";
-            this.picYearDown.Size = new System.Drawing.Size(26, 13);
-            this.picYearDown.TabIndex = 42;
-            this.picYearDown.TabStop = false;
-            this.toolTip1.SetToolTip(this.picYearDown, "Click here to move the Year down");
-            this.picYearDown.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picYearDown_MouseClick);
-            // 
-            // picYearUp
-            // 
-            this.picYearUp.BackColor = System.Drawing.Color.Transparent;
-            this.picYearUp.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picYearUp.Image = global::Nautilus.Properties.Resources.up1;
-            this.picYearUp.Location = new System.Drawing.Point(404, 58);
-            this.picYearUp.Name = "picYearUp";
-            this.picYearUp.Size = new System.Drawing.Size(26, 13);
-            this.picYearUp.TabIndex = 41;
-            this.picYearUp.TabStop = false;
-            this.toolTip1.SetToolTip(this.picYearUp, "Click here to move the Year up");
-            this.picYearUp.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picYearUp_MouseClick);
             // 
             // SplitJoinArtist
             // 
@@ -1936,6 +1921,24 @@ namespace Nautilus
             this.timesNewRomanToolStrip.Text = "Times New Roman";
             this.timesNewRomanToolStrip.Click += new System.EventHandler(this.timesNewRomanToolStrip_Click);
             // 
+            // segoeUIToolStrip
+            // 
+            this.segoeUIToolStrip.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.segoeUIToolStrip.Enabled = false;
+            this.segoeUIToolStrip.Name = "segoeUIToolStrip";
+            this.segoeUIToolStrip.Size = new System.Drawing.Size(180, 22);
+            this.segoeUIToolStrip.Text = "Segoe UI";
+            this.segoeUIToolStrip.Click += new System.EventHandler(this.segoeUIToolStrip_Click);
+            // 
+            // verdanaToolStrip
+            // 
+            this.verdanaToolStrip.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.verdanaToolStrip.Enabled = false;
+            this.verdanaToolStrip.Name = "verdanaToolStrip";
+            this.verdanaToolStrip.Size = new System.Drawing.Size(180, 22);
+            this.verdanaToolStrip.Text = "Verdana";
+            this.verdanaToolStrip.Click += new System.EventHandler(this.verdanaToolStrip_Click);
+            // 
             // customFontToolStrip
             // 
             this.customFontToolStrip.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
@@ -2060,24 +2063,6 @@ namespace Nautilus
             this.lblLyrics.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblLyrics.Paint += new System.Windows.Forms.PaintEventHandler(this.lblLyrics_Paint);
             // 
-            // segoeUIToolStrip
-            // 
-            this.segoeUIToolStrip.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.segoeUIToolStrip.Enabled = false;
-            this.segoeUIToolStrip.Name = "segoeUIToolStrip";
-            this.segoeUIToolStrip.Size = new System.Drawing.Size(180, 22);
-            this.segoeUIToolStrip.Text = "Segoe UI";
-            this.segoeUIToolStrip.Click += new System.EventHandler(this.segoeUIToolStrip_Click);
-            // 
-            // verdanaToolStrip
-            // 
-            this.verdanaToolStrip.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.verdanaToolStrip.Enabled = false;
-            this.verdanaToolStrip.Name = "verdanaToolStrip";
-            this.verdanaToolStrip.Size = new System.Drawing.Size(180, 22);
-            this.verdanaToolStrip.Text = "Verdana";
-            this.verdanaToolStrip.Click += new System.EventHandler(this.verdanaToolStrip_Click);
-            // 
             // Visualizer
             // 
             this.AllowDrop = true;
@@ -2121,10 +2106,9 @@ namespace Nautilus
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.yearJoystick)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreUp)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picYearDown)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picYearUp)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.artistJoystick)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.songJoystick)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.barGenre)).EndInit();
@@ -2262,8 +2246,6 @@ namespace Nautilus
         private TextBox txtArtist1;
         private Label SplitJoinSong;
         private Label SplitJoinArtist;
-        private PictureBox picYearDown;
-        private PictureBox picYearUp;
         private PictureBox picLogo;
         private ContextMenuStrip contextMenuStrip1;
         private ToolStripMenuItem clearLogoToolStripMenuItem;
@@ -2345,5 +2327,6 @@ namespace Nautilus
         private ToolStripMenuItem exportFNFAudio;
         private ToolStripMenuItem segoeUIToolStrip;
         private ToolStripMenuItem verdanaToolStrip;
+        private PictureBox yearJoystick;
     }
 }

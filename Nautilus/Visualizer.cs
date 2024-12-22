@@ -93,7 +93,7 @@ namespace Nautilus
         private float artistX = 272f;
         private float artistY = 75f;
         private float yearY = 112f;
-        private const float yearX = 518f;
+        private float yearX = 518f;
         private const float albumX = 277f;
         private const float albumY = 112f;
         private const float genreX = 278f;
@@ -3098,33 +3098,13 @@ namespace Nautilus
                 case 4:
                     Rating = "";
                     break;
-            }
-            if (cboRating.Enabled && Rating != "")
-            {
-                picYearDown.Visible = false;
-                picYearUp.Visible = false;
-            }
-            else
-            {
-                picYearDown.Visible = true;
-                picYearUp.Visible = true;
-            }
+            }            
             picVisualizer.Invalidate();
         }
 
         private void chkRating_CheckedChanged(object sender, EventArgs e)
         {
-            cboRating.Enabled = chkRating.Checked;
-            if (chkRating.Checked && Rating != "")
-            {
-                picYearDown.Visible = false;
-                picYearUp.Visible = false;
-            }
-            else
-            {
-                picYearDown.Visible = true;
-                picYearUp.Visible = true;
-            }
+            cboRating.Enabled = chkRating.Checked;            
             picVisualizer.Invalidate();
         }
         
@@ -3254,24 +3234,7 @@ namespace Nautilus
                 songJoystick.Cursor = Cursors.Hand;
                 songJoystick.Image = Resources.moveall;
             }
-        }
-
-        private void picYearUp_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left) return;
-            yearY = 112f;
-            picVisualizer.Invalidate();
-        }
-
-        private void picYearDown_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left) return;
-            if (string.IsNullOrWhiteSpace(Rating) || !cboRating.Enabled)
-            {
-                yearY = 130f;
-            }
-            picVisualizer.Invalidate();
-        }               
+        }             
         
         private void UncheckAllFonts(ToolStripMenuItem menu)
         {
@@ -4181,7 +4144,7 @@ namespace Nautilus
                 if (!string.IsNullOrWhiteSpace(txtAlbum.Text))
                 {
                     var track = "";
-                    if (txtTrack.Text.Trim().Length > 0)
+                    if (txtTrack.Text.Trim().Length > 0 && txtTrack.Text.Trim() != "0")
                     {
                         track = " (Track #" + txtTrack.Text.Trim() + ")";
                     }
@@ -5554,6 +5517,53 @@ namespace Nautilus
         {
             ActiveFont = "Verdana";
             UncheckAllFonts((ToolStripMenuItem)sender);
+        }
+
+        private void yearJoystick_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            if (string.IsNullOrWhiteSpace(txtYear.Text)) return;
+            mouseX = MousePosition.X;
+            mouseY = MousePosition.Y;
+            if (yearJoystick.Cursor == Cursors.Hand)
+            {
+                yearJoystick.Image = null;
+                yearJoystick.Cursor = Cursors.NoMove2D;
+            }
+            else if (yearJoystick.Cursor == Cursors.NoMove2D)
+            {
+                yearJoystick.Cursor = Cursors.Hand;
+                yearJoystick.Image = Resources.moveall;
+            }
+        }
+
+        private void yearJoystick_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (yearJoystick.Cursor != Cursors.NoMove2D) return;
+            if (MousePosition.X != mouseX)
+            {
+                if (MousePosition.X > mouseX)
+                {
+                    yearX = yearX + (MousePosition.X - mouseX);
+                }
+                else if (MousePosition.X < mouseX)
+                {
+                    yearX = yearX - (mouseX - MousePosition.X);
+                }
+                mouseX = MousePosition.X;
+            }
+            picVisualizer.Invalidate();
+            if (MousePosition.Y == mouseY) return;
+            if (MousePosition.Y > mouseY)
+            {
+                yearY = yearY + (MousePosition.Y - mouseY);
+            }
+            else if (MousePosition.Y < mouseY)
+            {
+                yearY = yearY - (mouseY - MousePosition.Y);
+            }
+            mouseY = MousePosition.Y;
+            picVisualizer.Invalidate();
         }
     }   
 }
