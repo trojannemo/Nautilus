@@ -25,6 +25,7 @@ using Un4seen.Bass.AddOn.EncFlac;
 using Nautilus.Texture;
 using NautilusFREE;
 using Nautilus.LibForge.SongData;
+using System.Linq.Expressions;
 
 namespace Nautilus
 {
@@ -429,6 +430,7 @@ namespace Nautilus
             lblTop.Text = "";
             lblBottom.Text = "";
             lblBottom.Cursor = Cursors.Default;
+            lblBottom.ForeColor = Color.Black;
             origAuthor = "";
             picWorking.Visible = false;
             song1 = 0;
@@ -1482,11 +1484,13 @@ namespace Nautilus
             lblTop.Text = "Author:";
             if (!string.IsNullOrWhiteSpace(origAuthor))
             {
-                lblBottom.Text = origAuthor;
+                lblBottom.Text = RemoveCloneHeroColor(origAuthor);
+                lblBottom.ForeColor = GetCloneHeroColor(origAuthor);
             }
             else if (!string.IsNullOrWhiteSpace(author))
             {
-                lblBottom.Text = author;
+                lblBottom.Text = RemoveCloneHeroColor(author);
+                lblBottom.ForeColor = GetCloneHeroColor(author);
             }
             else
             {
@@ -1494,6 +1498,41 @@ namespace Nautilus
             }
         }
         
+        private string RemoveCloneHeroColor(string author)
+        {
+            try
+            {
+                int startIndex = author.IndexOf('>') + 1;
+                int endIndex = author.LastIndexOf('<');
+                return author.Substring(startIndex, endIndex - startIndex);
+            }
+            catch
+            {
+                return author;
+            }            
+        }
+
+        private Color GetCloneHeroColor(string author)
+        {
+            try
+            {
+                int colorStartIndex = author.IndexOf('=') + 1;
+                int colorEndIndex = author.IndexOf('>');
+                string colorValue = author.Substring(colorStartIndex, colorEndIndex - colorStartIndex);
+
+                Color color = Color.FromName(colorValue);
+                if (!color.IsKnownColor)
+                {
+                    color = Color.Black;
+                }
+                return color;
+            }
+            catch
+            {
+                return Color.Black;
+            }
+        }
+
         private void btnSave_Click(object sender, EventArgs e)
         {
             //reset links in case this is a re-upload
