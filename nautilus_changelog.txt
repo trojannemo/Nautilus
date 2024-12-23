@@ -6,6 +6,25 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+v5.2.3
+
+VISUALIZER
+- Added two new fonts (Segoe UI and Verdana)
+- Fixed behavior where it wouldn't remember the last font used - thanks to SonicSBL for raising this issue on Github
+- Added control joystick so the release year can now be moved around to compensate for long album names + track numbers overlapping with the release year - thanks to SonicSBL for raising this issue on Github
+
+BATCH RENAMER
+- Added option to sort by author under Sorting Options - only works with individual/loose CONs, not packs
+
+BATCH EXTRACTOR
+- Addresses issue with extracting packs to YARG exCON format failing by telling you (in the log) if the file is a pack and skipping it, and going on to the next file... please use the Quick Pack Editor to dePACK the pack files or use Onyx to separate them, then run them through this tool
+- Now says "Extracting files for song #x of y" as requested by Nyxyxylyth
+
+PS3 CONVERTER
+- Fixed issue where One-Click Batch PS3 Fixer pops up with notice after each song, interrupting the batch process, plus additional improvements to logging during this process
+
+----------
+
 v5.2.2
 
 AUDIO CONVERTER
