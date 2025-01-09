@@ -181,6 +181,7 @@ namespace Nautilus
             this.powerGigWorker = new System.ComponentModel.BackgroundWorker();
             this.bandFuseWorker = new System.ComponentModel.BackgroundWorker();
             this.lblLyrics = new System.Windows.Forms.Label();
+            this.chkTrack = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.yearJoystick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
@@ -250,6 +251,7 @@ namespace Nautilus
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.chkTrack);
             this.panel1.Controls.Add(this.yearJoystick);
             this.panel1.Controls.Add(this.label10);
             this.panel1.Controls.Add(this.txtTrack);
@@ -320,9 +322,9 @@ namespace Nautilus
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(226, 99);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(45, 13);
+            this.label10.Size = new System.Drawing.Size(35, 13);
             this.label10.TabIndex = 53;
-            this.label10.Text = "Track #";
+            this.label10.Text = "Track";
             // 
             // txtTrack
             // 
@@ -2063,6 +2065,18 @@ namespace Nautilus
             this.lblLyrics.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblLyrics.Paint += new System.Windows.Forms.PaintEventHandler(this.lblLyrics_Paint);
             // 
+            // chkTrack
+            // 
+            this.chkTrack.AutoSize = true;
+            this.chkTrack.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkTrack.Location = new System.Drawing.Point(261, 98);
+            this.chkTrack.Name = "chkTrack";
+            this.chkTrack.Size = new System.Drawing.Size(15, 14);
+            this.chkTrack.TabIndex = 55;
+            this.toolTip1.SetToolTip(this.chkTrack, "Click here to display track number");
+            this.chkTrack.UseVisualStyleBackColor = true;
+            this.chkTrack.CheckedChanged += new System.EventHandler(this.ControlChanged);
+            // 
             // Visualizer
             // 
             this.AllowDrop = true;
@@ -2328,5 +2342,6 @@ namespace Nautilus
         private ToolStripMenuItem segoeUIToolStrip;
         private ToolStripMenuItem verdanaToolStrip;
         private PictureBox yearJoystick;
+        private CheckBox chkTrack;
     }
 }

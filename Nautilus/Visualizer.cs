@@ -25,7 +25,6 @@ using Un4seen.Bass.AddOn.EncFlac;
 using Nautilus.Texture;
 using NautilusFREE;
 using Nautilus.LibForge.SongData;
-using System.Linq.Expressions;
 
 namespace Nautilus
 {
@@ -2056,7 +2055,7 @@ namespace Nautilus
                 {
                     MessageBox.Show("There was an error:\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                author = Parser.Songs[0].ChartAuthor;
+                author = Parser.Songs[0].ChartAuthor.Replace("&", "&&"); //fix for Nunchuk & Sygenysis
                 /*if (string.IsNullOrWhiteSpace(author))
                 {
                     var HMX_Sources = new List<string>
@@ -4183,7 +4182,7 @@ namespace Nautilus
                 if (!string.IsNullOrWhiteSpace(txtAlbum.Text))
                 {
                     var track = "";
-                    if (txtTrack.Text.Trim().Length > 0 && txtTrack.Text.Trim() != "0")
+                    if (txtTrack.Text.Trim().Length > 0 && txtTrack.Text.Trim() != "0" && chkTrack.Checked)
                     {
                         track = " (Track #" + txtTrack.Text.Trim() + ")";
                     }
