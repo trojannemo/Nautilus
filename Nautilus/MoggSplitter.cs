@@ -848,13 +848,13 @@ namespace Nautilus
             string[] volumes = new string[song.ChannelsTotal];
             try
             {
-                song.OriginalAttenuationValues.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+                volumes = song.OriginalAttenuationValues.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
             }
             catch { }
             string[] pans = new string[song.ChannelsTotal];
             try
             {
-                song.PanningValues.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+                pans = song.PanningValues.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
             }
             catch { }
 
