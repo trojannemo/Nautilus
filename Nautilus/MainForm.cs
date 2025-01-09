@@ -288,7 +288,7 @@ namespace Nautilus
             Tools.DeleteFolder(Application.StartupPath + "\\wiiprep_input\\");
             Tools.DeleteFolder(Application.StartupPath + "\\visualizer\\", true);
             Tools.DeleteFolder(Application.StartupPath + "\\packex\\", true);
-            Tools.DeleteFolder(Application.StartupPath + "\\input\\", true);
+            //Tools.DeleteFolder(Application.StartupPath + "\\input\\", true);
             Tools.DeleteFolder(Application.StartupPath + "\\extracted\\", true);
             Tools.DeleteFolder(Application.StartupPath + "\\quickpackeditor\\", true);
             Tools.DeleteFolder(Application.StartupPath + "\\temp\\",true);
