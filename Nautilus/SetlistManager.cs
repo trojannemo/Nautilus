@@ -19,7 +19,6 @@ using Path = System.IO.Path;
 using Point = System.Drawing.Point;
 using Newtonsoft.Json;
 using Nautilus.LibForge.SongData;
-using System.Runtime.CompilerServices;
 
 namespace Nautilus
 {
@@ -233,7 +232,7 @@ namespace Nautilus
                         if (dta.EndsWith(".mogg.dta")) continue;//skip these PS4 specific DTA files that only have mogg values
                         if (PrepForNewSong() && Parser.ReadDTA((File.ReadAllBytes(dta))))
                         {
-                            FinalizeImport(Parser.Songs, silentMode.Checked);
+                            FinalizeImport(Parser.Songs, silentMode.Checked || DTAs.Count() > 1);
                             counter++;
                         }
                     }
@@ -241,7 +240,7 @@ namespace Nautilus
                     {
                         if (PrepForNewSong() && Parser.ReadINIFile(ini))
                         {
-                            FinalizeImport(Parser.Songs, silentMode.Checked);
+                            FinalizeImport(Parser.Songs, silentMode.Checked || INIs.Count() > 1);
                             counter++;
                         }
                     }
@@ -249,7 +248,7 @@ namespace Nautilus
                     {
                         if (PrepForNewSong() && ImportPS4DTA(ps4))
                         {                            
-                            FinalizeImport(Parser.Songs, silentMode.Checked);
+                            FinalizeImport(Parser.Songs, silentMode.Checked || PS4s.Count() > 1);
                             counter++;
                         }
                     }
@@ -318,6 +317,24 @@ namespace Nautilus
             var cache_out = setlist_folder + "songcache" + (files[0].ToLowerInvariant().Contains("blitz") ? "_blitz.cache" : "cache");
             ActiveCacheFile = "";
             importPath = "";
+            foreach (var yargSongFile in files.Where(file => Path.GetExtension(file) == ".yargsong"))
+            {
+                if (btnNew.Enabled)
+                {
+                    if (PrepForNewSong() && Parser.ReadINIFile(ExtractYargSongIni(yargSongFile)))
+                    {
+                        importPath = yargSongFile;
+                        FinalizeImport(Parser.Songs, silentMode.Checked || files.Count > 1);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("You must load an existing Setlist or create a blank Setlist before you can use the Autofill feature", AppName,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    break;
+                }
+            }
+            if (Path.GetExtension(files[0]) == ".yargsong") return;
             foreach (var xPackage in from file in files where VariousFunctions.ReadFileType(file) == XboxFileType.STFS select new STFSPackage(file))
             {
                 if (!xPackage.ParseSuccess)
@@ -491,7 +508,7 @@ namespace Nautilus
                         MessageBox.Show("You must load an existing Setlist or create a blank Setlist before you can use the Autofill feature", AppName,
                                         MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     }
-                    break;
+                    break;                
                 case ".songdta_ps4":
                     if (btnNew.Enabled)
                     {
@@ -1463,6 +1480,31 @@ namespace Nautilus
         private static string RemoveControlCharsFromString(string line)
         {
             return new string(line.Where(c => !char.IsControl(c)).ToArray());
+        }
+
+        private string ExtractYargSongIni(string file)
+        {
+            var outFolder = Application.StartupPath + "\\setlist\\yargsong";
+            if (Directory.Exists(outFolder))
+            {
+                Tools.DeleteFolder(outFolder, true);
+            }
+            Directory.CreateDirectory(outFolder);
+
+            if (!Tools.DecryptExtractYARGSONG(file, outFolder))
+            {
+                MessageBox.Show("Failed to process that YARGSONG file, can't add to setlist", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                var choice = MessageBox.Show("Setlist Manager requires .NET Desktop Runtime 7 in order to read YARGSONG files\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                if (choice == DialogResult.OK)
+                {
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                }
+                return "";
+            }
+
+            var ini = Directory.GetFiles(outFolder, "*.ini", SearchOption.AllDirectories);
+            if (!ini.Any()) return "";
+            return ini[0];
         }
 
         private List<SongData> GrabSongsFromSetlist(string file, bool isLoading)
@@ -3678,16 +3720,16 @@ namespace Nautilus
         private void rB3ToolStrip_Click(object sender, EventArgs e)
         {
             doBlitzImport = false;
-            CreateBlankSetlist("Xbox 360");
+            CreateBlankSetlist("Xbox 360", "rb3");
         }
 
         private void blitzToolStrip_Click(object sender, EventArgs e)
         {
             doBlitzImport = true;
-            CreateBlankSetlist("Xbox 360");
+            CreateBlankSetlist("Xbox 360", "blitz");
         }
 
-        private void CreateBlankSetlist(string console)
+        private void CreateBlankSetlist(string console, string cache)
         {
             if (isLocked)
             {
@@ -3701,7 +3743,7 @@ namespace Nautilus
             sw.WriteLine("Console=" + console);
             sw.WriteLine("SongCount=" + 0);
             sw.WriteLine("PackageCount=" + 0);
-            sw.WriteLine("CacheFormat=" + (doBlitzImport ? "Blitz_3" : "RB_3"));
+            sw.WriteLine("CacheFormat=" + (doBlitzImport ? "Blitz_5" : cache + "_5"));
             sw.Dispose();
             ValidateFile(new[] { file });
             SaveOptions();
@@ -3710,13 +3752,13 @@ namespace Nautilus
         private void rB3PS3_Click(object sender, EventArgs e)
         {
             doBlitzImport = false;
-            CreateBlankSetlist("PS3");
+            CreateBlankSetlist("PS3", "rb3");
         }
 
         private void rB3Wii_Click(object sender, EventArgs e)
         {
             doBlitzImport = false;
-            CreateBlankSetlist("Wii");
+            CreateBlankSetlist("Wii", "rb3");
         }
 
         private void scanPS3ToCreateSetlistToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3985,13 +4027,13 @@ namespace Nautilus
         private void rB4XOne_Click(object sender, EventArgs e)
         {
             doBlitzImport = false;
-            CreateBlankSetlist("Xbox One");
+            CreateBlankSetlist("Xbox One", "rbfour");
         }
 
         private void rB4PS4_Click(object sender, EventArgs e)
         {
             doBlitzImport = false;
-            CreateBlankSetlist("PS4");
+            CreateBlankSetlist("PS4", "rbfour");
         }
 
         private void deleteSelectedToolStrip_Click(object sender, EventArgs e)
@@ -4502,7 +4544,7 @@ namespace Nautilus
         private void blitzPS3_Click(object sender, EventArgs e)
         {
             doBlitzImport = true;
-            CreateBlankSetlist("PS3");
+            CreateBlankSetlist("PS3", "blitz");
         }
         
         private void radioArtist_CheckedChanged(object sender, EventArgs e)
@@ -4874,13 +4916,13 @@ namespace Nautilus
         private void yARGToolStripMenuItem_Click(object sender, EventArgs e)
         {
             doBlitzImport = false;
-            CreateBlankSetlist("YARG");
+            CreateBlankSetlist("YARG", "yarg");
         }
 
         private void cloneHeroToolStripMenuItem_Click(object sender, EventArgs e)
         {
             doBlitzImport = false;
-            CreateBlankSetlist("Clone Hero");
+            CreateBlankSetlist("Clone Hero", "clonehero");
         }
 
         private void addTBRBOndiscSongsToolStripMenuItem_Click(object sender, EventArgs e)
