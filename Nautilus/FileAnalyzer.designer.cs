@@ -65,6 +65,9 @@
             this.proDrumsAnalysis = new System.Windows.Forms.ToolStripMenuItem();
             this.batchAnalyzeForMissingProDrums = new System.Windows.Forms.ToolStripMenuItem();
             this.separateFilesThatAreMissingProDrums = new System.Windows.Forms.ToolStripMenuItem();
+            this.euroMixToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkForNoDrumFills = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkForNoOverdrive = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.exportToTextFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,6 +94,8 @@
             this.backgroundWorker3 = new System.ComponentModel.BackgroundWorker();
             this.backgroundWorker4 = new System.ComponentModel.BackgroundWorker();
             this.backgroundWorker5 = new System.ComponentModel.BackgroundWorker();
+            this.backgroundWorker6 = new System.ComponentModel.BackgroundWorker();
+            this.backgroundWorker7 = new System.ComponentModel.BackgroundWorker();
             this.menuStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picloading)).BeginInit();
@@ -106,6 +111,7 @@
             this.exportLyricsToolStrip,
             this.moggAnalysis,
             this.proDrumsAnalysis,
+            this.euroMixToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -422,6 +428,31 @@
             this.separateFilesThatAreMissingProDrums.Size = new System.Drawing.Size(289, 22);
             this.separateFilesThatAreMissingProDrums.Text = "Separate files that are missing Pro Drums";
             // 
+            // euroMixToolStripMenuItem
+            // 
+            this.euroMixToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.checkForNoDrumFills,
+            this.checkForNoOverdrive});
+            this.euroMixToolStripMenuItem.Name = "euroMixToolStripMenuItem";
+            this.euroMixToolStripMenuItem.Size = new System.Drawing.Size(104, 20);
+            this.euroMixToolStripMenuItem.Text = "EuroMIX Special";
+            // 
+            // checkForNoDrumFills
+            // 
+            this.checkForNoDrumFills.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.checkForNoDrumFills.Name = "checkForNoDrumFills";
+            this.checkForNoDrumFills.Size = new System.Drawing.Size(195, 22);
+            this.checkForNoDrumFills.Text = "Check for no drum fills";
+            this.checkForNoDrumFills.Click += new System.EventHandler(this.checkForNoDrumFills_Click);
+            // 
+            // checkForNoOverdrive
+            // 
+            this.checkForNoOverdrive.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.checkForNoOverdrive.Name = "checkForNoOverdrive";
+            this.checkForNoOverdrive.Size = new System.Drawing.Size(195, 22);
+            this.checkForNoOverdrive.Text = "Check for no overdrive";
+            this.checkForNoOverdrive.Click += new System.EventHandler(this.checkForNoOverdrive_Click);
+            // 
             // helpToolStripMenuItem
             // 
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
@@ -706,6 +737,20 @@
             this.backgroundWorker5.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker5_DoWork);
             this.backgroundWorker5.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker5_RunWorkerCompleted);
             // 
+            // backgroundWorker6
+            // 
+            this.backgroundWorker6.WorkerReportsProgress = true;
+            this.backgroundWorker6.WorkerSupportsCancellation = true;
+            this.backgroundWorker6.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker6_DoWork);
+            this.backgroundWorker6.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker6_RunWorkerCompleted);
+            // 
+            // backgroundWorker7
+            // 
+            this.backgroundWorker7.WorkerReportsProgress = true;
+            this.backgroundWorker7.WorkerSupportsCancellation = true;
+            this.backgroundWorker7.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker7_DoWork);
+            this.backgroundWorker7.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker7_RunWorkerCompleted);
+            // 
             // SongAnalyzer
             // 
             this.AllowDrop = true;
@@ -813,6 +858,11 @@
         private System.Windows.Forms.ToolStripMenuItem separateUnpitchedSongs;
         private System.Windows.Forms.CheckBox chkProBass;
         private System.Windows.Forms.CheckBox chkProGuitar;
+        private System.Windows.Forms.ToolStripMenuItem euroMixToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem checkForNoDrumFills;
+        private System.Windows.Forms.ToolStripMenuItem checkForNoOverdrive;
+        private System.ComponentModel.BackgroundWorker backgroundWorker6;
+        private System.ComponentModel.BackgroundWorker backgroundWorker7;
     }
 }
 

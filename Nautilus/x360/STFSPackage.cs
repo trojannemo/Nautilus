@@ -6,9 +6,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
 using System.Drawing;
-using Microsoft.VisualBasic.Logging;
 using System.Globalization;
-using System.Threading;
 
 namespace Nautilus.x360
 {
@@ -2493,11 +2491,22 @@ namespace Nautilus.x360
                     xFolderDirectory.Add(new FolderEntry(x.Name, 0, xCurID++, pointer, this));
                     xFolderDirectory[xFolderDirectory.Count - 1].xFixOffset();
                 }
+                //var debug = System.Windows.Forms.Application.StartupPath + "\\debug.txt";
                 foreach (var x in xSession.xFileDirectory)
                 {
                     ushort pointer = 0xFFFF;
                     if (x.xthispath.xPathCount() > 1)
-                        pointer = xGetParentFolder(x.Path).EntryID;
+                        try
+                        {
+                            pointer = xGetParentFolder(x.Path).EntryID;
+                        }
+                        catch (Exception)
+                        {
+                            /*var sw = new StreamWriter(debug, true);
+                            sw.WriteLine(x.xthispath);
+                            sw.Close();
+                            continue;*/
+                        }                        
                     xFileDirectory.Add(new FileEntry(x.Name, x.GetLength(), false, xCurID++, pointer, this));
                     var xAlloc = new List<BlockRecord>();
                     for (uint i = 0; i < x.BlockCount(); i++)
