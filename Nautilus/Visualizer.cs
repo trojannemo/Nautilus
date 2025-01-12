@@ -4731,45 +4731,39 @@ namespace Nautilus
         private void ExtractYARG(string file)
         {
             var outFolder = Application.StartupPath + "\\visualizer\\extracted";
-            if (Directory.Exists(outFolder))
-            {
-                Tools.DeleteFolder(outFolder, true);
-            }
+            Tools.DeleteFolder(outFolder, true);
             Directory.CreateDirectory(outFolder);
 
             if (!Tools.DecryptExtractYARGSONG(file, outFolder))
             {
                 MessageBox.Show("Failed to process that YARG file, can't Visualize", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 7 in order to Visualize YARG files\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 8 in order to Visualize YARG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                 if (choice == DialogResult.OK)
                 {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
                 }
                 return;
             }
-            PlayCHFolder(outFolder);
+            PlayCHFolder(outFolder + "\\" + Path.GetFileNameWithoutExtension(file) + "\\");
         }
 
         private void ExtractSNG(string file)
         {
             var outFolder = Application.StartupPath + "\\visualizer\\extracted";
-            if (Directory.Exists(outFolder))
-            {
-                Tools.DeleteFolder(outFolder, true);
-            }
+            Tools.DeleteFolder(outFolder, true);
             Directory.CreateDirectory(outFolder);                      
 
             if (!Tools.ExtractSNG(file, outFolder))
             {
                 MessageBox.Show("Failed to process that SNG file, can't Visualize", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 7 in order to Visualize Clone Hero SNG files\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 8 in order to Visualize Clone Hero SNG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                 if (choice == DialogResult.OK)
                 {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
                 }
                 return;
             }            
-            PlayCHFolder(outFolder);                       
+            PlayCHFolder(outFolder + "\\" + Path.GetFileNameWithoutExtension(file) + "\\");                       
         }
 
         private void PlayCHFolder(string outFolder)

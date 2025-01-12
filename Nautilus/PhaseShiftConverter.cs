@@ -757,11 +757,11 @@ namespace Nautilus
         private void decodeSNG_Click(object sender, EventArgs e)
         {
             var convert = opusToOgg.Checked ? "\n\nConvert .opus to .ogg enabled" : "";
-            MessageBox.Show("This will batch decode and extract Clone Hero SNG files" + convert, Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("This will batch extract Clone Hero \".sng\" files into song folders compatible with most PC rhythm games\n\nWILL NOT WORK WITH THE OFFICIAL CLONE HERO SETLIST SNG FILES, ONLY SNG FILES FROM ENCHOR.US OR THOSE MADE WITH CLONE HERO CONVERTER!" + convert, Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             var ofd = new FolderPicker
             {
                 InputPath = Environment.CurrentDirectory,
-                Title = "Select the folder where your SNG files are",
+                Title = "Select the folder where your Clone Hero \".sng\" files are",
             };
             if (ofd.ShowDialog(IntPtr.Zero) != true || string.IsNullOrEmpty(ofd.ResultPath)) return;
             var folder = ofd.ResultPath;
@@ -786,9 +786,9 @@ namespace Nautilus
 
             foreach (var sng in sngFiles)
             {
-                var outFolder = Path.GetDirectoryName(sng) + "\\" + Path.GetFileNameWithoutExtension(sng).Trim();
-                Tools.DeleteFolder(outFolder, true);
-                Log("Decoding SNG file '" + Path.GetFileName(sng) + "'");
+                var outFolder = Path.GetDirectoryName(sng);// + "\\" + Path.GetFileNameWithoutExtension(sng).Trim();
+                //Tools.DeleteFolder(outFolder, true);
+                Log("Extracting SNG file '" + Path.GetFileName(sng) + "'");
                 counter++;                
                 if (!Tools.ExtractSNG(sng, outFolder))
                 {
@@ -849,16 +849,16 @@ namespace Nautilus
                         }
                     }
                 }
-                Log("Decoded file successfully");
+                Log("Extracted file successfully");
                 success++;                
             }
-            Log("Decoded " + success + " SNG files out of " + counter + " files attempted");
+            Log("Extracted " + success + " SNG files out of " + counter + " files attempted");
             if (success == 0)
             {
-                var choice = MessageBox.Show("Decoding Clone Hero SNG files requires .NET Desktop Runtime 7\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                var choice = MessageBox.Show("Extracting Clone Hero SNG files requires .NET Desktop Runtime 8\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                 if (choice == DialogResult.OK)
                 {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
                 }
             }
         }
@@ -893,7 +893,7 @@ namespace Nautilus
 
         private void decodeYARG_Click(object sender, EventArgs e)
         {            
-            MessageBox.Show("This will batch decrypt and extract YARG \".yargsong\" game files", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("This will batch extract YARG \".yargsong\" game files into folders usable by Clone Hero and similar games", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             var ofd = new FolderPicker
             {
                 InputPath = Environment.CurrentDirectory,
@@ -922,28 +922,102 @@ namespace Nautilus
             foreach (var file in yargFiles)
             {
                 counter++;
-                Log("Decrypting file " + counter + " of " + yargFiles.Count());
-                var tempFile = file.Replace(".yargsong", ".sng");
-                var outFolder = Path.GetDirectoryName(tempFile) + "\\" + Path.GetFileNameWithoutExtension(tempFile).Trim();                
+                Log("Extracting file " + counter + " of " + yargFiles.Count());
+                var outFolder = Path.GetDirectoryName(file);// + "\\" + Path.GetFileNameWithoutExtension(tempFile).Trim();                
                 if (!Tools.DecryptExtractYARGSONG(file, outFolder))
                 {
                     Log("Failed");
                     continue;
                 }
                 success++;
-                Log("Decrypted file " + counter + " of " + yargFiles.Count() + " successfully");
-                Tools.DeleteFile(tempFile);
+                Log("Extracted file " + counter + " of " + yargFiles.Count() + " successfully");                
             }
-            Log("Decrypted " + success + " file(s) successfully");
+            Log("Extracted " + success + " file(s) successfully");
 
             if (success == 0)
             {
-                var choice = MessageBox.Show("Decrypting YARG .yargsong files requires .NET Desktop Runtime 7\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                var choice = MessageBox.Show("Extracting YARG .yargsong files requires .NET Desktop Runtime 8\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                 if (choice == DialogResult.OK)
                 {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
                 }
             }
+        }
+
+        private void packCloneHeroFoldersToSng_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("This will batch pack Clone Hero song folders into Clone Hero compatible \".sng\" files", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var ofd = new FolderPicker
+            {
+                InputPath = Environment.CurrentDirectory,
+                Title = "Select the folder where your Clone Hero song folders are",
+            };
+            if (ofd.ShowDialog(IntPtr.Zero) != true || string.IsNullOrEmpty(ofd.ResultPath)) return;
+            var folder = ofd.ResultPath;
+
+            var sngFolders = new List<string>();
+            var inFiles = Directory.GetDirectories(folder);
+            foreach (var file in inFiles.Where(sng => File.GetAttributes(sng).HasFlag(FileAttributes.Directory)))
+            {
+                sngFolders.Add(file);
+            }
+            PackSNGFiles(ofd.ResultPath, sngFolders);
+        }
+
+        private void PackSNGFiles(string mainFolder, List<string> sngFolders, bool isYARG = false)
+        {
+            Log("");
+            Log("Found " + sngFolders.Count + " potential song folders");            
+            var outFolder = mainFolder + (isYARG ? "\\_YARGSONG_FILES" : "\\_SNG_FILES");
+            if (!Directory.Exists(outFolder))
+            {
+                Directory.CreateDirectory(outFolder);
+            }            
+            Tools.PackSNG(mainFolder, outFolder, !isYARG && convertOggToOpus.Checked);
+            var sng = Directory.GetFiles(outFolder, "*.sng", SearchOption.TopDirectoryOnly);
+            var success = sng.Count();
+            if (!isYARG)
+            {
+                Log("Packed " + success + " song folders out of " + sngFolders.Count + " folders attempted");
+            }
+            if (success == 0)
+            {
+                var choice = MessageBox.Show("Packing song folders into Clone Hero sng files or YARG yargsong files requires .NET Desktop Runtime 8\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                if (choice == DialogResult.OK)
+                {
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
+                }
+            }
+            if (isYARG)
+            {
+                success = 0;
+                foreach (var file in sng)
+                {
+                    if (Tools.EncryptSNGtoYargSong(file)) success++;
+                    //Tools.DeleteFile(file);
+                }
+                Log("Packed " + success + " song folders out of " + sngFolders.Count + " folders attempted");
+            }
+        }
+
+        private void packToYargSong_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("This will batch pack Clone Hero song folders into YARG compatible \".yargsong\" files", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var ofd = new FolderPicker
+            {
+                InputPath = Environment.CurrentDirectory,
+                Title = "Select the folder where your Clone Hero song folders are",
+            };
+            if (ofd.ShowDialog(IntPtr.Zero) != true || string.IsNullOrEmpty(ofd.ResultPath)) return;
+            var folder = ofd.ResultPath;
+
+            var sngFolders = new List<string>();
+            var inFiles = Directory.GetDirectories(folder);
+            foreach (var file in inFiles.Where(sng => File.GetAttributes(sng).HasFlag(FileAttributes.Directory)))
+            {
+                sngFolders.Add(file);
+            }
+            PackSNGFiles(ofd.ResultPath, sngFolders, true);
         }
     }
 

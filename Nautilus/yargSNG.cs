@@ -91,6 +91,25 @@ namespace Nautilus
             return new YARGSongFileStream(filestream.Name, values);
         }
 
+        public void Encrypt(byte[] buffer, int offset, int count)
+        {
+            int pos = (int)Position;
+
+            unchecked
+            {
+                int a = _values[0];
+                int b = _values[1];
+                int c = _values[2];
+
+                for (int i = 0; i < count; i++)
+                {
+                    // Reverse the decryption steps for encryption
+                    buffer[offset + i] = (byte)(((buffer[offset + i] ^ a) + ((i + pos) * c) + b));
+                }
+            }
+        }
+
+
         public YARGSongFileStream(string filename, int[] values)
             : base(filename, FileMode.Open, FileAccess.Read, FileShare.Read, 1)
         {

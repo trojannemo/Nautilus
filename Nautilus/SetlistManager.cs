@@ -335,6 +335,24 @@ namespace Nautilus
                 }
             }
             if (Path.GetExtension(files[0]) == ".yargsong") return;
+            foreach (var sngFile in files.Where(file => Path.GetExtension(file) == ".sng"))
+            {
+                if (btnNew.Enabled)
+                {
+                    if (PrepForNewSong() && Parser.ReadINIFile(ExtractSNGIni(sngFile)))
+                    {
+                        importPath = sngFile;
+                        FinalizeImport(Parser.Songs, silentMode.Checked || files.Count > 1);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("You must load an existing Setlist or create a blank Setlist before you can use the Autofill feature", AppName,
+                                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    break;
+                }
+            }
+            if (Path.GetExtension(files[0]) == ".sng") return;
             foreach (var xPackage in from file in files where VariousFunctions.ReadFileType(file) == XboxFileType.STFS select new STFSPackage(file))
             {
                 if (!xPackage.ParseSuccess)
@@ -1485,19 +1503,38 @@ namespace Nautilus
         private string ExtractYargSongIni(string file)
         {
             var outFolder = Application.StartupPath + "\\setlist\\yargsong";
-            if (Directory.Exists(outFolder))
-            {
-                Tools.DeleteFolder(outFolder, true);
-            }
+            Tools.DeleteFolder(outFolder, true);
             Directory.CreateDirectory(outFolder);
 
             if (!Tools.DecryptExtractYARGSONG(file, outFolder))
             {
                 MessageBox.Show("Failed to process that YARGSONG file, can't add to setlist", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                var choice = MessageBox.Show("Setlist Manager requires .NET Desktop Runtime 7 in order to read YARGSONG files\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                var choice = MessageBox.Show("Setlist Manager requires .NET Desktop Runtime 8 in order to read YARGSONG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                 if (choice == DialogResult.OK)
                 {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
+                }
+                return "";
+            }
+
+            var ini = Directory.GetFiles(outFolder, "*.ini", SearchOption.AllDirectories);
+            if (!ini.Any()) return "";
+            return ini[0];
+        }
+
+        private string ExtractSNGIni(string file)
+        {
+            var outFolder = Application.StartupPath + "\\setlist\\sng";
+            Tools.DeleteFolder(outFolder, true);
+            Directory.CreateDirectory(outFolder);
+
+            if (!Tools.ExtractSNG(file, outFolder))
+            {
+                MessageBox.Show("Failed to process that YARGSONG file, can't add to setlist", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                var choice = MessageBox.Show("Setlist Manager requires .NET Desktop Runtime 8 in order to read YARGSONG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                if (choice == DialogResult.OK)
+                {
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
                 }
                 return "";
             }
