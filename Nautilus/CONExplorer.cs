@@ -251,9 +251,15 @@ namespace Nautilus
                 case 0x373307D9:
                     cboGameID.SelectedIndex = 13; //Dance Central 3
                     break;
+                case 0x41560844:
+                    cboGameID.SelectedIndex = 14; //DJ Hero
+                    break;
+                case 0x4156087F:
+                    cboGameID.SelectedIndex = 15; //DJ Hero 2
+                    break;
                 default:
                     cboGameID.Items.Add("Unknown - " + xPackage.Header.TitleID);
-                    cboGameID.SelectedIndex = 11;
+                    cboGameID.SelectedIndex = 16;
                     break;
             }
 
@@ -325,12 +331,8 @@ namespace Nautilus
                     Log("Error extracting " + xent.Name);
                     Enabled = true;
                     return;
-                }
+                }                
                 
-                if (Path.GetExtension(sfd.FileName) == ".mogg")
-                {
-                    //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(sfd.FileName)), sfd.FileName);
-                }
                 Log("File " + xent.Name + " extracted successfully");
             }
             Enabled = true;
@@ -733,12 +735,7 @@ namespace Nautilus
             try
             {
                 if (xPackage.ExtractPayload(outFolder, true, true))
-                {
-                    var moggs = Directory.GetFiles(outFolder, "*.mogg", SearchOption.AllDirectories);
-                    foreach (var mogg in moggs)
-                    {
-                        //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(mogg)), mogg);
-                    }
+                {                
                     Log("File extracted successfully to:");
                     Log(outFolder);
                 }
@@ -919,6 +916,16 @@ namespace Nautilus
                     picContent.Image = Resources.dc3;
                     title = "Dance Central 3";
                     break;
+                case 14:
+                    xPackage.Header.TitleID = 0x41560844;
+                    picContent.Image = Resources.djh1;
+                    title = "DJ Hero";
+                    break;
+                case 15:
+                    xPackage.Header.TitleID = 0x4156087F;
+                    picContent.Image = Resources.djh2;
+                    title = "DJ Hero 2";
+                    break;
             }
             xPackage.Header.Title_Package = title; 
             Log("Game changed to " + xPackage.Header.Title_Package);
@@ -954,10 +961,6 @@ namespace Nautilus
                     return;
                 }
                 files.Add(ext_file);
-                if (Path.GetExtension(ext_file) == ".mogg")
-                {
-                    //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(ext_file)), ext_file);
-                }
             }
             Enabled = true;
 
@@ -1257,11 +1260,7 @@ namespace Nautilus
                     ext_file.RemoveAt(1);
                 }
             }
-            
-            if (Path.GetExtension(ext_file[0]) == ".mogg")
-            {
-                //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(ext_file[0])), ext_file[0]);
-            }
+                       
             Enabled = true;
 
             if (File.Exists(ext_file[0]))

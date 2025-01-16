@@ -661,6 +661,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\settings.png" />
+    <None Include="Resources\djh1.png" />
+    <None Include="Resources\djh2.png" />
     <Content Include="submarine.ico" />
     <None Include="bin\Debug\res\thumbs\GH3.jpg" />
     <None Include="bin\Debug\res\thumbs\GH4WT.jpg" />
