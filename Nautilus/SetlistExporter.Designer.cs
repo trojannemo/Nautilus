@@ -43,9 +43,6 @@
             this.radioTierNamesExcel = new System.Windows.Forms.RadioButton();
             this.chkArtistOnce = new System.Windows.Forms.CheckBox();
             this.picThumbnail = new System.Windows.Forms.PictureBox();
-            this.chkCountHeader = new System.Windows.Forms.CheckBox();
-            this.chkCountFooter = new System.Windows.Forms.CheckBox();
-            this.chkPages = new System.Windows.Forms.CheckBox();
             this.cboColorsExcel = new System.Windows.Forms.ComboBox();
             this.cboFontsExcel = new System.Windows.Forms.ComboBox();
             this.radioTierNumbersCSV = new System.Windows.Forms.RadioButton();
@@ -59,6 +56,9 @@
             this.cboSortingJSON = new System.Windows.Forms.ComboBox();
             this.radioTierNumbersJSON = new System.Windows.Forms.RadioButton();
             this.radioTierNamesJSON = new System.Windows.Forms.RadioButton();
+            this.chkCountHeader = new System.Windows.Forms.CheckBox();
+            this.chkCountFooter = new System.Windows.Forms.CheckBox();
+            this.chkPages = new System.Windows.Forms.CheckBox();
             this.radioStylized = new System.Windows.Forms.RadioButton();
             this.radioPlain = new System.Windows.Forms.RadioButton();
             this.lblPresetExcel = new System.Windows.Forms.Label();
@@ -107,6 +107,7 @@
             this.lblSongCount = new System.Windows.Forms.Label();
             this.fileExporter = new System.ComponentModel.BackgroundWorker();
             this.picGame = new System.Windows.Forms.PictureBox();
+            this.radioEverythingJSON = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.picThumbnail)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
             this.tabControl1.SuspendLayout();
@@ -331,49 +332,6 @@
             this.picThumbnail.TabStop = false;
             this.toolTip1.SetToolTip(this.picThumbnail, "This is a rough idea of how the selected format will look like");
             // 
-            // chkCountHeader
-            // 
-            this.chkCountHeader.AutoSize = true;
-            this.chkCountHeader.BackColor = System.Drawing.Color.Transparent;
-            this.chkCountHeader.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkCountHeader.Location = new System.Drawing.Point(95, 19);
-            this.chkCountHeader.Name = "chkCountHeader";
-            this.chkCountHeader.Size = new System.Drawing.Size(81, 17);
-            this.chkCountHeader.TabIndex = 59;
-            this.chkCountHeader.Text = "Song count";
-            this.chkCountHeader.UseVisualStyleBackColor = false;
-            this.chkCountHeader.CheckedChanged += new System.EventHandler(this.chkBorder_CheckedChanged);
-            // 
-            // chkCountFooter
-            // 
-            this.chkCountFooter.AutoSize = true;
-            this.chkCountFooter.BackColor = System.Drawing.Color.Transparent;
-            this.chkCountFooter.Checked = true;
-            this.chkCountFooter.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkCountFooter.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkCountFooter.Location = new System.Drawing.Point(6, 19);
-            this.chkCountFooter.Name = "chkCountFooter";
-            this.chkCountFooter.Size = new System.Drawing.Size(81, 17);
-            this.chkCountFooter.TabIndex = 60;
-            this.chkCountFooter.Text = "Song count";
-            this.chkCountFooter.UseVisualStyleBackColor = false;
-            this.chkCountFooter.CheckedChanged += new System.EventHandler(this.chkBorder_CheckedChanged);
-            // 
-            // chkPages
-            // 
-            this.chkPages.AutoSize = true;
-            this.chkPages.BackColor = System.Drawing.Color.Transparent;
-            this.chkPages.Checked = true;
-            this.chkPages.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkPages.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkPages.Location = new System.Drawing.Point(93, 19);
-            this.chkPages.Name = "chkPages";
-            this.chkPages.Size = new System.Drawing.Size(94, 17);
-            this.chkPages.TabIndex = 61;
-            this.chkPages.Text = "Page numbers";
-            this.chkPages.UseVisualStyleBackColor = false;
-            this.chkPages.CheckedChanged += new System.EventHandler(this.chkBorder_CheckedChanged);
-            // 
             // cboColorsExcel
             // 
             this.cboColorsExcel.FormattingEnabled = true;
@@ -552,6 +510,49 @@
             this.radioTierNamesJSON.Text = "Use tier names";
             this.toolTip1.SetToolTip(this.radioTierNamesJSON, "No Part, Warmup, Apprentice, etc");
             this.radioTierNamesJSON.UseVisualStyleBackColor = true;
+            // 
+            // chkCountHeader
+            // 
+            this.chkCountHeader.AutoSize = true;
+            this.chkCountHeader.BackColor = System.Drawing.Color.Transparent;
+            this.chkCountHeader.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkCountHeader.Location = new System.Drawing.Point(95, 19);
+            this.chkCountHeader.Name = "chkCountHeader";
+            this.chkCountHeader.Size = new System.Drawing.Size(81, 17);
+            this.chkCountHeader.TabIndex = 59;
+            this.chkCountHeader.Text = "Song count";
+            this.chkCountHeader.UseVisualStyleBackColor = false;
+            this.chkCountHeader.CheckedChanged += new System.EventHandler(this.chkBorder_CheckedChanged);
+            // 
+            // chkCountFooter
+            // 
+            this.chkCountFooter.AutoSize = true;
+            this.chkCountFooter.BackColor = System.Drawing.Color.Transparent;
+            this.chkCountFooter.Checked = true;
+            this.chkCountFooter.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkCountFooter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkCountFooter.Location = new System.Drawing.Point(6, 19);
+            this.chkCountFooter.Name = "chkCountFooter";
+            this.chkCountFooter.Size = new System.Drawing.Size(81, 17);
+            this.chkCountFooter.TabIndex = 60;
+            this.chkCountFooter.Text = "Song count";
+            this.chkCountFooter.UseVisualStyleBackColor = false;
+            this.chkCountFooter.CheckedChanged += new System.EventHandler(this.chkBorder_CheckedChanged);
+            // 
+            // chkPages
+            // 
+            this.chkPages.AutoSize = true;
+            this.chkPages.BackColor = System.Drawing.Color.Transparent;
+            this.chkPages.Checked = true;
+            this.chkPages.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkPages.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkPages.Location = new System.Drawing.Point(93, 19);
+            this.chkPages.Name = "chkPages";
+            this.chkPages.Size = new System.Drawing.Size(94, 17);
+            this.chkPages.TabIndex = 61;
+            this.chkPages.Text = "Page numbers";
+            this.chkPages.UseVisualStyleBackColor = false;
+            this.chkPages.CheckedChanged += new System.EventHandler(this.chkBorder_CheckedChanged);
             // 
             // radioStylized
             // 
@@ -1041,6 +1042,7 @@
             // groupBox10
             // 
             this.groupBox10.BackColor = System.Drawing.Color.Transparent;
+            this.groupBox10.Controls.Add(this.radioEverythingJSON);
             this.groupBox10.Controls.Add(this.radioMinimalJSON);
             this.groupBox10.Controls.Add(this.radioDefaultJSON);
             this.groupBox10.Location = new System.Drawing.Point(6, 57);
@@ -1053,24 +1055,24 @@
             // radioMinimalJSON
             // 
             this.radioMinimalJSON.AutoSize = true;
-            this.radioMinimalJSON.Checked = true;
             this.radioMinimalJSON.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioMinimalJSON.Location = new System.Drawing.Point(103, 31);
+            this.radioMinimalJSON.Location = new System.Drawing.Point(40, 32);
             this.radioMinimalJSON.Name = "radioMinimalJSON";
-            this.radioMinimalJSON.Size = new System.Drawing.Size(59, 17);
+            this.radioMinimalJSON.Size = new System.Drawing.Size(68, 17);
             this.radioMinimalJSON.TabIndex = 7;
-            this.radioMinimalJSON.TabStop = true;
-            this.radioMinimalJSON.Text = "Default";
+            this.radioMinimalJSON.Text = "Less Info";
             this.radioMinimalJSON.UseVisualStyleBackColor = true;
             // 
             // radioDefaultJSON
             // 
             this.radioDefaultJSON.AutoSize = true;
+            this.radioDefaultJSON.Checked = true;
             this.radioDefaultJSON.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioDefaultJSON.Location = new System.Drawing.Point(194, 31);
+            this.radioDefaultJSON.Location = new System.Drawing.Point(131, 32);
             this.radioDefaultJSON.Name = "radioDefaultJSON";
             this.radioDefaultJSON.Size = new System.Drawing.Size(104, 17);
             this.radioDefaultJSON.TabIndex = 5;
+            this.radioDefaultJSON.TabStop = true;
             this.radioDefaultJSON.Text = "More Information";
             this.radioDefaultJSON.UseVisualStyleBackColor = true;
             // 
@@ -1109,6 +1111,17 @@
             this.picGame.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picGame.TabIndex = 62;
             this.picGame.TabStop = false;
+            // 
+            // radioEverythingJSON
+            // 
+            this.radioEverythingJSON.AutoSize = true;
+            this.radioEverythingJSON.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioEverythingJSON.Location = new System.Drawing.Point(253, 32);
+            this.radioEverythingJSON.Name = "radioEverythingJSON";
+            this.radioEverythingJSON.Size = new System.Drawing.Size(98, 17);
+            this.radioEverythingJSON.TabIndex = 8;
+            this.radioEverythingJSON.Text = "EVERYTHING!";
+            this.radioEverythingJSON.UseVisualStyleBackColor = true;
             // 
             // SetlistExporter
             // 
@@ -1263,5 +1276,6 @@
         private System.Windows.Forms.RadioButton radioMinimalJSON;
         private System.Windows.Forms.RadioButton radioDefaultJSON;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.RadioButton radioEverythingJSON;
     }
 }
