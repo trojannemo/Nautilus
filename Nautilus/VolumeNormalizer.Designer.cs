@@ -38,7 +38,12 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chkRestore = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.chkAnalyzerMode = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.chkBackupAudio = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.chkVerboseOutput = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnReset = new System.Windows.Forms.Button();
@@ -48,6 +53,8 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.picWorking = new System.Windows.Forms.PictureBox();
             this.grpMogg = new System.Windows.Forms.GroupBox();
+            this.numThresholdValue = new System.Windows.Forms.NumericUpDown();
+            this.lblThreshold = new System.Windows.Forms.Label();
             this.numTargetValue = new System.Windows.Forms.NumericUpDown();
             this.lblTargetVolume = new System.Windows.Forms.Label();
             this.radioDoNotRender = new System.Windows.Forms.RadioButton();
@@ -57,6 +64,7 @@
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
             this.grpMogg.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numThresholdValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numTargetValue)).BeginInit();
             this.SuspendLayout();
             // 
@@ -71,9 +79,9 @@
             this.lstLog.ContextMenuStrip = this.contextMenuStrip1;
             this.lstLog.FormattingEnabled = true;
             this.lstLog.HorizontalScrollbar = true;
-            this.lstLog.Location = new System.Drawing.Point(12, 174);
+            this.lstLog.Location = new System.Drawing.Point(12, 200);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(568, 171);
+            this.lstLog.Size = new System.Drawing.Size(568, 145);
             this.lstLog.TabIndex = 12;
             this.lstLog.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
             this.lstLog.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
@@ -103,7 +111,7 @@
             this.btnBegin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBegin.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnBegin.ForeColor = System.Drawing.Color.White;
-            this.btnBegin.Location = new System.Drawing.Point(516, 139);
+            this.btnBegin.Location = new System.Drawing.Point(516, 167);
             this.btnBegin.Name = "btnBegin";
             this.btnBegin.Size = new System.Drawing.Size(64, 29);
             this.btnBegin.TabIndex = 51;
@@ -145,7 +153,12 @@
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.chkRestore,
-            this.chkBackupAudio});
+            this.toolStripSeparator1,
+            this.chkAnalyzerMode,
+            this.toolStripSeparator2,
+            this.chkBackupAudio,
+            this.toolStripSeparator3,
+            this.chkVerboseOutput});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -154,16 +167,49 @@
             // 
             this.chkRestore.CheckOnClick = true;
             this.chkRestore.Name = "chkRestore";
-            this.chkRestore.Size = new System.Drawing.Size(285, 22);
+            this.chkRestore.Size = new System.Drawing.Size(234, 22);
             this.chkRestore.Text = "Restore Original Volumes";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(231, 6);
+            // 
+            // chkAnalyzerMode
+            // 
+            this.chkAnalyzerMode.AutoToolTip = true;
+            this.chkAnalyzerMode.CheckOnClick = true;
+            this.chkAnalyzerMode.Name = "chkAnalyzerMode";
+            this.chkAnalyzerMode.Size = new System.Drawing.Size(234, 22);
+            this.chkAnalyzerMode.Text = "Analyzer Mode";
+            this.chkAnalyzerMode.ToolTipText = "Only read audio levels of CONs in folder.";
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(231, 6);
             // 
             // chkBackupAudio
             // 
             this.chkBackupAudio.Checked = true;
+            this.chkBackupAudio.CheckOnClick = true;
             this.chkBackupAudio.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkBackupAudio.Name = "chkBackupAudio";
-            this.chkBackupAudio.Size = new System.Drawing.Size(285, 22);
-            this.chkBackupAudio.Text = "Back up CON file on audio modification";
+            this.chkBackupAudio.Size = new System.Drawing.Size(234, 22);
+            this.chkBackupAudio.Text = "Backup audio on modification";
+            this.chkBackupAudio.Click += new System.EventHandler(this.chkBackupAudio_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(231, 6);
+            // 
+            // chkVerboseOutput
+            // 
+            this.chkVerboseOutput.CheckOnClick = true;
+            this.chkVerboseOutput.Name = "chkVerboseOutput";
+            this.chkVerboseOutput.Size = new System.Drawing.Size(234, 22);
+            this.chkVerboseOutput.Text = "Verbose Output";
             // 
             // helpToolStripMenuItem1
             // 
@@ -184,7 +230,7 @@
             this.btnReset.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnReset.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnReset.ForeColor = System.Drawing.Color.White;
-            this.btnReset.Location = new System.Drawing.Point(12, 139);
+            this.btnReset.Location = new System.Drawing.Point(12, 167);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(100, 29);
             this.btnReset.TabIndex = 54;
@@ -250,7 +296,7 @@
             // picWorking
             // 
             this.picWorking.Image = global::Nautilus.Properties.Resources.working;
-            this.picWorking.Location = new System.Drawing.Point(239, 153);
+            this.picWorking.Location = new System.Drawing.Point(231, 179);
             this.picWorking.Name = "picWorking";
             this.picWorking.Size = new System.Drawing.Size(128, 15);
             this.picWorking.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -260,16 +306,51 @@
             // 
             // grpMogg
             // 
+            this.grpMogg.Controls.Add(this.numThresholdValue);
+            this.grpMogg.Controls.Add(this.lblThreshold);
             this.grpMogg.Controls.Add(this.numTargetValue);
             this.grpMogg.Controls.Add(this.lblTargetVolume);
             this.grpMogg.Controls.Add(this.radioDoNotRender);
             this.grpMogg.Controls.Add(this.radioAllowRender);
             this.grpMogg.Location = new System.Drawing.Point(12, 86);
             this.grpMogg.Name = "grpMogg";
-            this.grpMogg.Size = new System.Drawing.Size(568, 47);
+            this.grpMogg.Size = new System.Drawing.Size(568, 75);
             this.grpMogg.TabIndex = 72;
             this.grpMogg.TabStop = false;
             this.grpMogg.Text = "Audio (mogg) options:";
+            // 
+            // numThresholdValue
+            // 
+            this.numThresholdValue.DecimalPlaces = 1;
+            this.numThresholdValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.numThresholdValue.Location = new System.Drawing.Point(513, 45);
+            this.numThresholdValue.Maximum = new decimal(new int[] {
+            60,
+            0,
+            0,
+            65536});
+            this.numThresholdValue.Name = "numThresholdValue";
+            this.numThresholdValue.Size = new System.Drawing.Size(49, 20);
+            this.numThresholdValue.TabIndex = 73;
+            this.numThresholdValue.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numThresholdValue.Value = new decimal(new int[] {
+            4,
+            0,
+            0,
+            65536});
+            // 
+            // lblThreshold
+            // 
+            this.lblThreshold.AutoSize = true;
+            this.lblThreshold.Location = new System.Drawing.Point(378, 47);
+            this.lblThreshold.Name = "lblThreshold";
+            this.lblThreshold.Size = new System.Drawing.Size(129, 13);
+            this.lblThreshold.TabIndex = 72;
+            this.lblThreshold.Text = "Re-render Threshold (dB):";
             // 
             // numTargetValue
             // 
@@ -295,7 +376,7 @@
             this.numTargetValue.TabIndex = 71;
             this.numTargetValue.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numTargetValue.Value = new decimal(new int[] {
-            64,
+            20,
             0,
             0,
             -2147418112});
@@ -314,8 +395,7 @@
             this.radioDoNotRender.AutoSize = true;
             this.radioDoNotRender.Checked = true;
             this.radioDoNotRender.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioDoNotRender.Enabled = false;
-            this.radioDoNotRender.Location = new System.Drawing.Point(153, 20);
+            this.radioDoNotRender.Location = new System.Drawing.Point(10, 43);
             this.radioDoNotRender.Name = "radioDoNotRender";
             this.radioDoNotRender.Size = new System.Drawing.Size(124, 17);
             this.radioDoNotRender.TabIndex = 69;
@@ -327,7 +407,6 @@
             // 
             this.radioAllowRender.AutoSize = true;
             this.radioAllowRender.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioAllowRender.Enabled = false;
             this.radioAllowRender.Location = new System.Drawing.Point(9, 20);
             this.radioAllowRender.Name = "radioAllowRender";
             this.radioAllowRender.Size = new System.Drawing.Size(138, 17);
@@ -368,6 +447,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).EndInit();
             this.grpMogg.ResumeLayout(false);
             this.grpMogg.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numThresholdValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numTargetValue)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -375,8 +455,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.ListBox lstLog;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
@@ -399,5 +477,13 @@
         private System.Windows.Forms.NumericUpDown numTargetValue;
         private System.Windows.Forms.Label lblTargetVolume;
         private System.Windows.Forms.ToolStripMenuItem chkBackupAudio;
+        private System.Windows.Forms.ToolStripMenuItem chkAnalyzerMode;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.NumericUpDown numThresholdValue;
+        private System.Windows.Forms.Label lblThreshold;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripMenuItem chkVerboseOutput;
+        public System.Windows.Forms.ListBox lstLog;
     }
 }
