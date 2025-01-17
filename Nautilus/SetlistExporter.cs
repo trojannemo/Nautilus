@@ -1381,37 +1381,68 @@ namespace Nautilus
             try
             {
                 sw.WriteLine("{");
-                sw.WriteLine("\"data\":");
+                sw.WriteLine("\"setlist\":");
                 sw.WriteLine("[");
                 foreach (var song in Songs)
                 {
                     //minimal
-                    sw.WriteLine("[");
-                    sw.WriteLine("\"" + song.Artist.Replace("\"", "\\\"") + "\"" + del);
-                    sw.WriteLine("\"" + song.Name.Replace("\"", "\\\"") + "\"" + del);
-                    sw.WriteLine("\"" + song.VocalParts + "\"" + del);
-                    sw.WriteLine("\"" + Parser.GetSongDuration(song.Length.ToString(CultureInfo.InvariantCulture)) + "\"" + (radioDefaultJSON.Checked ? del : ""));
+                    sw.WriteLine("{");
+                    sw.WriteLine("\"artist\" : \"" + song.Artist.Replace("\"", "\\\"") + "\"" + del);
+                    sw.WriteLine("\"name\" : \"" + song.Name.Replace("\"", "\\\"") + "\"" + del);
+                    sw.WriteLine("\"vocal_parts\" : " + song.VocalParts + del);
+                    sw.WriteLine("\"duration\" : \"" + Parser.GetSongDuration(song.Length.ToString(CultureInfo.InvariantCulture)) + "\"" + (radioDefaultJSON.Checked || radioEverythingJSON.Checked ? del : ""));
                     
                     //default
-                    if (radioDefaultJSON.Checked)
+                    if (radioDefaultJSON.Checked || radioEverythingJSON.Checked)
                     {
-                        sw.WriteLine("\"" + FormatDiff(song.DrumsDiff, false, true) + "\"" + del);
-                        sw.WriteLine("\"" + FormatDiff(song.BassDiff, false, true) + "\"" + del);
-                        sw.WriteLine("\"" + FormatDiff(song.GuitarDiff, false, true) + "\"" + del);
-                        sw.WriteLine("\"" + (isRB4 ? FormatDiff(0, false, true) : FormatDiff(song.KeysDiff, false, true)) + "\"" + del);
-                        sw.WriteLine("\"" + FormatDiff(song.VocalsDiff, false, true) + "\"" + del);
-                        sw.WriteLine("\"" + song.GetRating() + "\"" + del);
-                        sw.WriteLine("\"" + song.Genre + "\"" + del);
-                        sw.WriteLine("\"" + song.Album.Replace("\"", "\\\"") + "\"" + "");
+                        sw.WriteLine("\"drums_diff\" : \"" + FormatDiff(song.DrumsDiff, false, true) + "\"" + del);
+                        sw.WriteLine("\"bass_diff\" : \"" + FormatDiff(song.BassDiff, false, true) + "\"" + del);
+                        sw.WriteLine("\"guitar_diff\" : \"" + FormatDiff(song.GuitarDiff, false, true) + "\"" + del);
+                        sw.WriteLine("\"keys_diff\" : \"" + (isRB4 ? FormatDiff(0, false, true) : FormatDiff(song.KeysDiff, false, true)) + "\"" + del);
+                        sw.WriteLine("\"vocal_diff\" : \"" + FormatDiff(song.VocalsDiff, false, true) + "\"" + del);
+                        sw.WriteLine("\"rating\" : \"" + song.GetRating() + "\"" + del);
+                        sw.WriteLine("\"genre\" : \"" + song.Genre + "\"" + del);
+                        sw.WriteLine("\"album\" : \"" + song.Album.Replace("\"", "\\\"") + "\"" + (radioEverythingJSON.Checked ? del : ""));
                     }             
+
+                    //everything
+                    if (radioEverythingJSON.Checked)
+                    {
+                        sw.WriteLine("\"track_number\" : " + song.TrackNumber + del);
+                        sw.WriteLine("\"master\" : " + song.Master  + del);
+                        sw.WriteLine("\"year_recorded\" : " + song.YearRecorded + del);
+                        sw.WriteLine("\"year_released\" : " + song.YearReleased + del);
+                        sw.WriteLine("\"subgenre\" : \"" + song.SubGenre + "\"" + del);
+                        sw.WriteLine("\"proguitar_diff\" : \"" + FormatDiff(song.ProGuitarDiff, false, true) + "\"" + del);
+                        sw.WriteLine("\"probass_diff\" : \"" + FormatDiff(song.ProBassDiff, false, true) + "\"" + del);
+                        sw.WriteLine("\"prokeys_diff\" : \"" + FormatDiff(song.ProKeysDiff, false, true) + "\"" + del);
+                        sw.WriteLine("\"band_diff\" : \"" + FormatDiff(song.BandDiff, false, true) + "\"" + del);
+                        sw.WriteLine("\"shortname\" : \"" + song.ShortName + "\"" + del);
+                        sw.WriteLine("\"songid\" : " + song.SongId + del);
+                        sw.WriteLine("\"songid_string\" : \"" + song.SongIdString + "\"" + del);
+                        sw.WriteLine("\"source\" : \"" + song.Source + "\"" + del);
+                        sw.WriteLine("\"filepath\" : \"" + song.FilePath + "\"" + del);
+                        sw.WriteLine("\"midifile\" : \"" + song.MIDIFile + "\"" + del);
+                        sw.WriteLine("\"preview_start\" : " + song.PreviewStart + del);
+                        sw.WriteLine("\"preview_end\" : " + song.PreviewEnd + del);
+                        sw.WriteLine("\"version\" : " + song.GameVersion + del);
+                        sw.WriteLine("\"scroll_speed\" : " + song.ScrollSpeed + del);
+                        sw.WriteLine("\"tonic_note\" : " + song.TonicNote + del);
+                        sw.WriteLine("\"tonality\" : " + song.Tonality + del);
+                        sw.WriteLine("\"percussion_bank\" : \"" + song.PercussionBank + "\"" + del);
+                        sw.WriteLine("\"drum_bank\" : \"" + song.DrumBank + "\"" + del);
+                        sw.WriteLine("\"bass_tuning\" : \"" + song.ProBassTuning + "\"" + del);
+                        sw.WriteLine("\"guitar_tuning\" : \"" + song.ProGuitarTuning + "\"" + "");
+                    }
+
                     i++;
                     if (i == Songs.Count)
                     {
-                        sw.WriteLine("]"); //last entry doesn't take a comma
+                        sw.WriteLine("}"); //last entry doesn't take a comma
                     }
                     else
                     {
-                        sw.WriteLine("]" + del);                         
+                        sw.WriteLine("}" + del);                         
                     }                    
                 }
                 sw.WriteLine("]");

@@ -50,6 +50,7 @@ namespace Nautilus
         private int BassStream;
         private int BassMixer;
         private int currentChannel;
+        private bool isLinosSpecial;
 
         public PS3Converter(MainForm xParent, Color ButtonBackColor, Color ButtonTextColor)
         {
@@ -748,9 +749,9 @@ namespace Nautilus
                 toolTip1.SetToolTip(btnBegin, "Click here to begin");
             }
         }
-
+                
         private void btnBegin_Click(object sender, EventArgs e)
-        {
+        {       
             if (btnBegin.Text == "Cancel")
             {
                 backgroundWorker1.CancelAsync();
@@ -838,6 +839,7 @@ namespace Nautilus
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
+            isLinosSpecial = false;
             if (ProcessFiles()) return;
             Log("There was an error processing the files ... stopping here");
         }
@@ -1110,7 +1112,7 @@ namespace Nautilus
             doBatchReplace(ofd.FileName);
         }
         
-        private void doBatchReplace(string dta, bool hide_message = false)
+        private bool doBatchReplace(string dta, bool hide_message = false, bool doLinos = false)
         {
             var counter = 0;
             try
@@ -1128,13 +1130,26 @@ namespace Nautilus
                     var newline = line;
                     if (line.Contains("song_id") && !line.Contains(";ORIG_ID="))
                     {
+                        var origID = Parser.GetSongID(line);
                         if (!Parser.IsNumericID(line)) //only if not already a numeric ID
-                        {
-                            newline = ";ORIG_ID=" + Parser.GetSongID(line);
+                        {                            
+                            newline = ";ORIG_ID=" + origID;
                             sw.WriteLine(newline);
                             var corrector = new SongIDCorrector();
-                            newline = "   ('song_id' " + corrector.ShortnameToSongID(Parser.GetSongID(line)) + ")";//GetNumericID() + ")";
-                            counter++;
+                            var newID = corrector.ShortnameToSongID(Parser.GetSongID(line));
+                            newline = "   ('song_id' " + newID + ")";//GetNumericID() + ")";
+                            Log("Song has alphanumeric ID: " + origID + " - replacing with numeric ID: " + newID);
+                            counter++;                            
+                        }
+                        else
+                        {
+                            Log("This song already has a numeric ID: " + origID + " ... leaving it alone");
+                            if (doLinos)
+                            {
+                                sw.Dispose();
+                                Tools.DeleteFile(dta);
+                                return false;
+                            }
                         }
                     }
                     if (newline.Trim() != "")
@@ -1157,10 +1172,12 @@ namespace Nautilus
             if (counter == 0)
             {
                 Log("No song IDs were replaced with unique numeric values");
+                return false;
             }
             else
             {
                 Log("Successfully replaced " + counter + " song IDs with unique numeric values");
+                return true;
             }
         }      
 
@@ -1256,11 +1273,13 @@ namespace Nautilus
             backgroundWorker3.RunWorkerAsync();             
         }
 
-        private bool FixCONForPS3(string folderPath, string conFilePath, bool isLinosSpecial)
+        private bool FixCONForPS3(string folderPath, string conFilePath)
         {
             this.internalName = "";
             SongName = "";
             SongArtist = "";
+            bool editedMogg = false;
+
             try
             {
                 if (VariousFunctions.ReadFileType(conFilePath) != XboxFileType.STFS) return false;
@@ -1354,25 +1373,25 @@ namespace Nautilus
             string dta = "";            
             string midi = "";
 
-            if (Parser.Songs[0].ChannelsTotal > 16 || !isLinosSpecial)
+            if (xDTA == null)
             {
-                if (xDTA == null)
-                {
-                    Log("Couldn't find songs.dta file inside " + Path.GetFileName(conFilePath) + " ... skipping");
-                    xCON.CloseIO();
-                    return false;
-                }
-                dta = folderPath + "\\songs.dta";
-                Tools.DeleteFile(dta);
-                xDTA.ExtractToFile(dta);
-                if (!File.Exists(dta))
-                {
-                    Log("Couldn't extract songs.dta file from " + Path.GetFileName(conFilePath) + " ... skipping");
-                    xCON.CloseIO();
-                    Tools.DeleteFile(mogg);
-                    return false;
-                }
-                                
+                Log("Couldn't find songs.dta file inside " + Path.GetFileName(conFilePath) + " ... skipping");
+                xCON.CloseIO();
+                return false;
+            }
+            dta = folderPath + "\\songs.dta";
+            Tools.DeleteFile(dta);
+            xDTA.ExtractToFile(dta);
+            if (!File.Exists(dta))
+            {
+                Log("Couldn't extract songs.dta file from " + Path.GetFileName(conFilePath) + " ... skipping");
+                xCON.CloseIO();
+                Tools.DeleteFile(mogg);
+                return false;
+            }
+
+            if (Parser.Songs[0].ChannelsTotal > 16 || !isLinosSpecial)
+            {               
                 if (xMIDI == null)
                 {
                     Log("Couldn't find MIDI file inside " + Path.GetFileName(conFilePath) + " ... skipping");
@@ -1482,6 +1501,7 @@ namespace Nautilus
                 }
                 Log("Downmixed mogg file from " + Parser.Songs[0].ChannelsTotal + " channels to " + channels + " channels");
                 Log("Encoded using ogg quality 3");
+                editedMogg = true;
 
                 Log("Editing DTA file to reflect changes to mogg file");
 
@@ -1564,7 +1584,7 @@ namespace Nautilus
                             sr.ReadLine();
                             sw.WriteLine("         (" + pans.TrimEnd() + ")");
                             continue;
-                        }
+                        }                        
                         if (line.Contains("vols") && !line.Contains("'vols'"))
                         {
                             line = "     (vols        (" + vols.TrimEnd() + "))";
@@ -1777,14 +1797,44 @@ namespace Nautilus
                     return false;
                 }
                 Log("Mogg file re-encoded successfully");
+                editedMogg = true;
             }
             else if (Parser.Songs[0].ChannelsTotal <= 12 && isLinosSpecial)
             {
                 if (!CheckApplyPS3MoggPatch(mogg, true))
                 {
-                    Log("Leaving original CON file alone...");
+                    Log("Not applying PS3 Mogg Patch...");
+                    editedMogg = false;
                     fixIgnore++;
-                    Tools.DeleteFile(backup);
+                }
+                else
+                {
+                    editedMogg = true;
+                }
+            }
+
+            if (!doBatchReplace(dta, true, true))
+            {
+                Tools.DeleteFile(backup);
+                Tools.DeleteFile(mogg);
+                Tools.DeleteFile(dta);
+                Tools.DeleteFile(midi);                
+                xCON.CloseIO();
+                return false;
+            }
+
+            if (editedMogg)
+            {
+                Log("Repackaging CON file...");
+
+                if (xMogg.Replace(mogg))
+                {
+                    Log("Repackaged mogg file successfully");
+                    Tools.DeleteFile(mogg);
+                }
+                else
+                {
+                    Log("Failed to repackage mogg file, skipping this file...");
                     Tools.DeleteFile(mogg);
                     Tools.DeleteFile(dta);
                     Tools.DeleteFile(midi);
@@ -1792,18 +1842,15 @@ namespace Nautilus
                     return false;
                 }
             }
-
-            Log("Repackaging CON file...");
-
-            if (xMogg.Replace(mogg))
+                        
+            if (xDTA.Replace(dta))
             {
-                Log("Repackaged mogg file successfully");
-                Tools.DeleteFile(mogg);
+                Log("Repackaged songs.dta file successfully");
+                Tools.DeleteFile(dta);
             }
             else
             {
-                Log("Failed to repackage mogg file, skipping this file...");
-                Tools.DeleteFile(mogg);
+                Log("Failed to repackage songs.dta file, skipping this file...");
                 Tools.DeleteFile(dta);
                 Tools.DeleteFile(midi);
                 xCON.CloseIO();
@@ -1811,21 +1858,7 @@ namespace Nautilus
             }
 
             if (Parser.Songs[0].ChannelsTotal > 16 || !isLinosSpecial)
-            {
-                if (xDTA.Replace(dta))
-                {
-                    Log("Repackaged songs.dta file successfully");
-                    Tools.DeleteFile(dta);
-                }
-                else
-                {
-                    Log("Failed to repackage songs.dta file, skipping this file...");
-                    Tools.DeleteFile(dta);
-                    Tools.DeleteFile(midi);
-                    xCON.CloseIO();
-                    return false;
-                }
-
+            {             
                 if (xMIDI.Replace(midi))
                 {
                     Log("Repackaged MIDI file successfully");
@@ -2189,7 +2222,7 @@ namespace Nautilus
                     MessageBox.Show("That mogg file is not encrypted, will encrypt (automatically applies PS3 patch)", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
                 nautilus3.EncM(File.ReadAllBytes(inMogg), inMogg);
-                encrypted = true;
+                return true;
             }
             var patched = nautilus3.MoggIsAlreadyPatched(File.ReadAllBytes(inMogg));
             if (patched)
@@ -2202,7 +2235,7 @@ namespace Nautilus
                 {
                     MessageBox.Show("That mogg file was already patched, no need to patch it again", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                return encrypted;
+                return true;
             }
             
             //only patch 0x0C and 0x0D moggs
@@ -2260,7 +2293,7 @@ namespace Nautilus
 
         private void pS3Fixer_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("\"The Linos Special\"\n\nThis tool will check for the total amount of channels and do the following:\n\nScenario 1: If equal to or less than 12 channels, will only apply the PS3 mogg patch (if necessary)\n\nScenario 2: If over 12 channels but less than or equal to 16 channels, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nScenario 3: If more than 16 channels will downmix the drums, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("\"The Linos Special\"\n\nThis tool will check for the total amount of audio channels and do the following:\n\nScenario 1: If equal to or less than 12 channels, will only apply the PS3 mogg patch (if necessary)\n\nScenario 2: If over 12 channels but less than or equal to 16 channels, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nScenario 3: If more than 16 channels will downmix the drums, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nAs requested, it will now also apply the alphanumeric song_id fix under all scenarios", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             var ofd = new FolderPicker
             {
                 Title = "Select the folder where your CON files are",
@@ -2292,10 +2325,11 @@ namespace Nautilus
 
         private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
+            isLinosSpecial = true;
             foreach (var CON in conFiles.Where(File.Exists).TakeWhile(file => !backgroundWorker2.CancellationPending))
             {
                 fixCounter++;
-                if (FixCONForPS3(fixFolder, CON, true))
+                if (FixCONForPS3(fixFolder, CON))
                 {
                     fixSuccess++;
                 }
@@ -2307,7 +2341,10 @@ namespace Nautilus
             endTime = DateTime.Now;
             EnableDisable(true);
             Log("Successfully processed " + fixSuccess + (fixSuccess == 1 ? " file" : " files") + " out of " + fixCounter + (fixCounter == 1 ? " file" : " files") + " attempted");
-            Log("Ignored " + fixIgnore + " CON " + (fixIgnore == 1 ? "file" : "files") + " that didn't need fixing");
+            if (!isLinosSpecial)
+            {
+                Log("Ignored " + fixIgnore + " CON " + (fixIgnore == 1 ? "file" : "files") + " that didn't need fixing");
+            }
             var timeDiff = endTime - startTime;
             Log("Process took " + timeDiff.Minutes + (timeDiff.Minutes == 1 ? " minute" : " minutes") + " and " + (timeDiff.Minutes == 0 && timeDiff.Seconds == 0 ? "1 second" : timeDiff.Seconds + " seconds"));
             Log("Done");
@@ -2315,10 +2352,11 @@ namespace Nautilus
 
         private void backgroundWorker3_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
+            isLinosSpecial = false;
             foreach (var CON in conFiles.Where(File.Exists).TakeWhile(file => !backgroundWorker3.CancellationPending))
             {
                 fixCounter++;
-                if (FixCONForPS3(fixFolder, CON, false))
+                if (FixCONForPS3(fixFolder, CON))
                 {
                     fixSuccess++;
                 }

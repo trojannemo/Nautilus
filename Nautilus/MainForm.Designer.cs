@@ -966,7 +966,7 @@
             this.btnPhaseShiftConverter.Name = "btnPhaseShiftConverter";
             this.btnPhaseShiftConverter.Size = new System.Drawing.Size(122, 43);
             this.btnPhaseShiftConverter.TabIndex = 24;
-            this.btnPhaseShiftConverter.Text = "YARG/CH/PS Converter\r\n";
+            this.btnPhaseShiftConverter.Text = "Clone Hero Converter\r\n";
             this.btnPhaseShiftConverter.UseVisualStyleBackColor = false;
             this.btnPhaseShiftConverter.Click += new System.EventHandler(this.btnPhaseShift_Click);
             this.btnPhaseShiftConverter.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseDown);
@@ -1301,7 +1301,6 @@
             this.btnScores.TabIndex = 12;
             this.btnScores.Text = "Save Scores Viewer";
             this.btnScores.UseVisualStyleBackColor = false;
-            this.btnScores.Visible = false;
             this.btnScores.Click += new System.EventHandler(this.btnScores_Click);
             // 
             // btnMiloMod
@@ -1319,7 +1318,6 @@
             this.btnMiloMod.TabIndex = 26;
             this.btnMiloMod.Text = "MiloMod";
             this.btnMiloMod.UseVisualStyleBackColor = false;
-            this.btnMiloMod.Visible = false;
             this.btnMiloMod.Click += new System.EventHandler(this.btnMiloMod_Click);
             // 
             // lblScore
@@ -1368,6 +1366,7 @@
             // btnCharEditor
             // 
             this.btnCharEditor.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnCharEditor.ContextMenuStrip = this.contextMenuStrip1;
             this.btnCharEditor.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCharEditor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCharEditor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1378,7 +1377,6 @@
             this.btnCharEditor.TabIndex = 19;
             this.btnCharEditor.Text = "Character Editor";
             this.btnCharEditor.UseVisualStyleBackColor = false;
-            this.btnCharEditor.Visible = false;
             this.btnCharEditor.Click += new System.EventHandler(this.btnCharEditor_Click);
             // 
             // btnMoggMaker

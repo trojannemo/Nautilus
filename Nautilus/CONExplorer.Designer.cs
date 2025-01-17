@@ -57,6 +57,8 @@
             this.picContent = new System.Windows.Forms.PictureBox();
             this.tabContents = new System.Windows.Forms.TabPage();
             this.folderTree = new DevComponents.AdvTree.AdvTree();
+            this.contextMenuStrip4 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.menuRenameFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.node1 = new DevComponents.AdvTree.Node();
             this.nodeConnector1 = new DevComponents.AdvTree.NodeConnector();
             this.elementStyle1 = new DevComponents.DotNetBar.ElementStyle();
@@ -72,6 +74,8 @@
             this.extractFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.replaceFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.injectSelectedFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuRenameFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuDeleteFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.addNewFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
@@ -83,7 +87,6 @@
             this.btnPNG = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.btnMILO = new System.Windows.Forms.Button();
-            this.menuDeleteFile = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip3.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabInformation.SuspendLayout();
@@ -94,6 +97,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.picContent)).BeginInit();
             this.tabContents.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.folderTree)).BeginInit();
+            this.contextMenuStrip4.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -303,7 +307,9 @@
             "Guitar Hero: Warriors of Rock",
             "Dance Central",
             "Dance Central 2",
-            "Dance Central 3"});
+            "Dance Central 3",
+            "DJ Hero",
+            "DJ Hero 2"});
             this.cboGameID.Location = new System.Drawing.Point(71, 21);
             this.cboGameID.Name = "cboGameID";
             this.cboGameID.Size = new System.Drawing.Size(160, 21);
@@ -473,6 +479,7 @@
             // 
             // 
             this.folderTree.BackgroundStyle.Class = "TreeBorderKey";
+            this.folderTree.ContextMenuStrip = this.contextMenuStrip4;
             this.folderTree.DragDropEnabled = false;
             this.folderTree.Location = new System.Drawing.Point(6, 6);
             this.folderTree.Name = "folderTree";
@@ -491,6 +498,22 @@
             this.folderTree.TabIndex = 47;
             this.folderTree.Text = "advTree1";
             this.folderTree.Click += new System.EventHandler(this.advTree1_Click);
+            // 
+            // contextMenuStrip4
+            // 
+            this.contextMenuStrip4.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuRenameFolder});
+            this.contextMenuStrip4.Name = "contextMenuStrip4";
+            this.contextMenuStrip4.Size = new System.Drawing.Size(152, 26);
+            this.contextMenuStrip4.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip4_Opening);
+            // 
+            // menuRenameFolder
+            // 
+            this.menuRenameFolder.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.menuRenameFolder.Name = "menuRenameFolder";
+            this.menuRenameFolder.Size = new System.Drawing.Size(151, 22);
+            this.menuRenameFolder.Text = "Rename folder";
+            this.menuRenameFolder.Click += new System.EventHandler(this.menuRenameFolder_Click);
             // 
             // node1
             // 
@@ -662,19 +685,20 @@
             this.extractFileToolStripMenuItem,
             this.replaceFileToolStripMenuItem,
             this.injectSelectedFileToolStripMenuItem,
+            this.menuRenameFile,
             this.menuDeleteFile,
             this.toolStripMenuItem1,
             this.addNewFilesToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.ShowImageMargin = false;
-            this.contextMenuStrip1.Size = new System.Drawing.Size(156, 142);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(158, 142);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // extractFileToolStripMenuItem
             // 
             this.extractFileToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.extractFileToolStripMenuItem.Name = "extractFileToolStripMenuItem";
-            this.extractFileToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.extractFileToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.extractFileToolStripMenuItem.Text = "Extract selected file";
             this.extractFileToolStripMenuItem.Click += new System.EventHandler(this.extractFileToolStripMenuItem_Click);
             // 
@@ -682,27 +706,41 @@
             // 
             this.replaceFileToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.replaceFileToolStripMenuItem.Name = "replaceFileToolStripMenuItem";
-            this.replaceFileToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.replaceFileToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.replaceFileToolStripMenuItem.Text = "Replace selected file";
             this.replaceFileToolStripMenuItem.Click += new System.EventHandler(this.replaceFileToolStripMenuItem_Click);
             // 
             // injectSelectedFileToolStripMenuItem
             // 
             this.injectSelectedFileToolStripMenuItem.Name = "injectSelectedFileToolStripMenuItem";
-            this.injectSelectedFileToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.injectSelectedFileToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.injectSelectedFileToolStripMenuItem.Text = "Inject selected file";
             this.injectSelectedFileToolStripMenuItem.Click += new System.EventHandler(this.injectSelectedFileToolStripMenuItem_Click);
+            // 
+            // menuRenameFile
+            // 
+            this.menuRenameFile.Name = "menuRenameFile";
+            this.menuRenameFile.Size = new System.Drawing.Size(157, 22);
+            this.menuRenameFile.Text = "Rename selected file";
+            this.menuRenameFile.Click += new System.EventHandler(this.menuRenameFile_Click);
+            // 
+            // menuDeleteFile
+            // 
+            this.menuDeleteFile.Name = "menuDeleteFile";
+            this.menuDeleteFile.Size = new System.Drawing.Size(157, 22);
+            this.menuDeleteFile.Text = "Delete selected file";
+            this.menuDeleteFile.Click += new System.EventHandler(this.menuDeleteFile_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(152, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(154, 6);
             // 
             // addNewFilesToolStripMenuItem
             // 
             this.addNewFilesToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.addNewFilesToolStripMenuItem.Name = "addNewFilesToolStripMenuItem";
-            this.addNewFilesToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.addNewFilesToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.addNewFilesToolStripMenuItem.Text = "Add new file(s)";
             this.addNewFilesToolStripMenuItem.Click += new System.EventHandler(this.addNewFilesToolStripMenuItem_Click);
             // 
@@ -809,13 +847,6 @@
             this.btnMILO.DragDrop += new System.Windows.Forms.DragEventHandler(this.btnMILO_DragDrop);
             this.btnMILO.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
             // 
-            // menuDeleteFile
-            // 
-            this.menuDeleteFile.Name = "menuDeleteFile";
-            this.menuDeleteFile.Size = new System.Drawing.Size(155, 22);
-            this.menuDeleteFile.Text = "Delete selected file";
-            this.menuDeleteFile.Click += new System.EventHandler(this.menuDeleteFile_Click);
-            // 
             // CONExplorer
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -849,6 +880,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.picContent)).EndInit();
             this.tabContents.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.folderTree)).EndInit();
+            this.contextMenuStrip4.ResumeLayout(false);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -912,5 +944,8 @@
         private System.Windows.Forms.ToolStripMenuItem injectSelectedFileToolStripMenuItem;
         private System.Windows.Forms.ComboBox cboFormat;
         private System.Windows.Forms.ToolStripMenuItem menuDeleteFile;
+        private System.Windows.Forms.ToolStripMenuItem menuRenameFile;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip4;
+        private System.Windows.Forms.ToolStripMenuItem menuRenameFolder;
     }
 }

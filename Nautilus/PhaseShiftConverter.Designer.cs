@@ -38,7 +38,11 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.decodeYARG = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.decodeSNG = new System.Windows.Forms.ToolStripMenuItem();
+            this.packCloneHeroFoldersToSng = new System.Windows.Forms.ToolStripMenuItem();
+            this.convertOggToOpus = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.opusToOgg = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.useguitaroggForNonmultitrackSongs = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,8 +59,6 @@
             this.picWorking = new System.Windows.Forms.PictureBox();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.radioSeparate = new System.Windows.Forms.RadioButton();
-            this.radioAudacity = new System.Windows.Forms.RadioButton();
-            this.radioLeaveMogg = new System.Windows.Forms.RadioButton();
             this.grpMogg = new System.Windows.Forms.GroupBox();
             this.domainQuality = new System.Windows.Forms.DomainUpDown();
             this.lblQuality = new System.Windows.Forms.Label();
@@ -65,11 +67,16 @@
             this.markAsRV = new System.Windows.Forms.CheckBox();
             this.markAsCustom = new System.Windows.Forms.CheckBox();
             this.txtCustomLabel = new System.Windows.Forms.TextBox();
+            this.grpFormat = new System.Windows.Forms.GroupBox();
+            this.radioOpus = new System.Windows.Forms.RadioButton();
+            this.radioOgg = new System.Windows.Forms.RadioButton();
+            this.packToYargSong = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
             this.grpMogg.SuspendLayout();
+            this.grpFormat.SuspendLayout();
             this.SuspendLayout();
             // 
             // lstLog
@@ -158,8 +165,13 @@
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.decodeYARG,
+            this.packToYargSong,
+            this.toolStripMenuItem2,
             this.decodeSNG,
-            this.opusToOgg});
+            this.opusToOgg,
+            this.toolStripMenuItem1,
+            this.packCloneHeroFoldersToSng,
+            this.convertOggToOpus});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -168,25 +180,51 @@
             // 
             this.decodeYARG.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.decodeYARG.Name = "decodeYARG";
-            this.decodeYARG.Size = new System.Drawing.Size(246, 22);
-            this.decodeYARG.Text = "Decrypt YARG yargsong files";
+            this.decodeYARG.Size = new System.Drawing.Size(326, 22);
+            this.decodeYARG.Text = "Extract YARG yargsong files to folders";
             this.decodeYARG.Click += new System.EventHandler(this.decodeYARG_Click);
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(323, 6);
             // 
             // decodeSNG
             // 
             this.decodeSNG.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.decodeSNG.Name = "decodeSNG";
-            this.decodeSNG.Size = new System.Drawing.Size(246, 22);
-            this.decodeSNG.Text = "Decode Clone Hero sng files";
+            this.decodeSNG.Size = new System.Drawing.Size(326, 22);
+            this.decodeSNG.Text = "Extract Clone Hero sng files to folders";
             this.decodeSNG.Click += new System.EventHandler(this.decodeSNG_Click);
+            // 
+            // packCloneHeroFoldersToSng
+            // 
+            this.packCloneHeroFoldersToSng.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.packCloneHeroFoldersToSng.Name = "packCloneHeroFoldersToSng";
+            this.packCloneHeroFoldersToSng.Size = new System.Drawing.Size(326, 22);
+            this.packCloneHeroFoldersToSng.Text = "Pack Clone Hero folders to sng files";
+            this.packCloneHeroFoldersToSng.Click += new System.EventHandler(this.packCloneHeroFoldersToSng_Click);
+            // 
+            // convertOggToOpus
+            // 
+            this.convertOggToOpus.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.convertOggToOpus.CheckOnClick = true;
+            this.convertOggToOpus.Name = "convertOggToOpus";
+            this.convertOggToOpus.Size = new System.Drawing.Size(326, 22);
+            this.convertOggToOpus.Text = "Convert ogg to opus when packing";
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(323, 6);
             // 
             // opusToOgg
             // 
             this.opusToOgg.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.opusToOgg.CheckOnClick = true;
             this.opusToOgg.Name = "opusToOgg";
-            this.opusToOgg.Size = new System.Drawing.Size(246, 22);
-            this.opusToOgg.Text = "Convert opus files to ogg format";
+            this.opusToOgg.Size = new System.Drawing.Size(326, 22);
+            this.opusToOgg.Text = "Convert opus to ogg when extracting";
             // 
             // optionsToolStripMenuItem
             // 
@@ -345,34 +383,12 @@
             this.radioSeparate.Cursor = System.Windows.Forms.Cursors.Hand;
             this.radioSeparate.Location = new System.Drawing.Point(9, 20);
             this.radioSeparate.Name = "radioSeparate";
-            this.radioSeparate.Size = new System.Drawing.Size(138, 17);
+            this.radioSeparate.Size = new System.Drawing.Size(110, 17);
             this.radioSeparate.TabIndex = 63;
             this.radioSeparate.TabStop = true;
-            this.radioSeparate.Text = "Try to separate to stems";
+            this.radioSeparate.Text = "Separate to stems";
             this.radioSeparate.UseVisualStyleBackColor = true;
             this.radioSeparate.CheckedChanged += new System.EventHandler(this.radioSeparate_CheckedChanged);
-            // 
-            // radioAudacity
-            // 
-            this.radioAudacity.AutoSize = true;
-            this.radioAudacity.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioAudacity.Location = new System.Drawing.Point(377, 20);
-            this.radioAudacity.Name = "radioAudacity";
-            this.radioAudacity.Size = new System.Drawing.Size(106, 17);
-            this.radioAudacity.TabIndex = 64;
-            this.radioAudacity.Text = "Send to Audacity";
-            this.radioAudacity.UseVisualStyleBackColor = true;
-            // 
-            // radioLeaveMogg
-            // 
-            this.radioLeaveMogg.AutoSize = true;
-            this.radioLeaveMogg.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioLeaveMogg.Location = new System.Drawing.Point(489, 20);
-            this.radioLeaveMogg.Name = "radioLeaveMogg";
-            this.radioLeaveMogg.Size = new System.Drawing.Size(77, 17);
-            this.radioLeaveMogg.TabIndex = 67;
-            this.radioLeaveMogg.Text = "Do nothing";
-            this.radioLeaveMogg.UseVisualStyleBackColor = true;
             // 
             // grpMogg
             // 
@@ -380,14 +396,12 @@
             this.grpMogg.Controls.Add(this.lblQuality);
             this.grpMogg.Controls.Add(this.radioDownmix);
             this.grpMogg.Controls.Add(this.radioSeparate);
-            this.grpMogg.Controls.Add(this.radioAudacity);
-            this.grpMogg.Controls.Add(this.radioLeaveMogg);
             this.grpMogg.Location = new System.Drawing.Point(12, 86);
             this.grpMogg.Name = "grpMogg";
-            this.grpMogg.Size = new System.Drawing.Size(568, 47);
+            this.grpMogg.Size = new System.Drawing.Size(243, 47);
             this.grpMogg.TabIndex = 69;
             this.grpMogg.TabStop = false;
-            this.grpMogg.Text = "Audio (mogg) options:";
+            this.grpMogg.Text = "Mogg options:";
             // 
             // domainQuality
             // 
@@ -423,7 +437,7 @@
             // 
             this.radioDownmix.AutoSize = true;
             this.radioDownmix.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.radioDownmix.Location = new System.Drawing.Point(153, 20);
+            this.radioDownmix.Location = new System.Drawing.Point(125, 20);
             this.radioDownmix.Name = "radioDownmix";
             this.radioDownmix.Size = new System.Drawing.Size(112, 17);
             this.radioDownmix.TabIndex = 69;
@@ -474,12 +488,56 @@
             this.txtCustomLabel.Size = new System.Drawing.Size(100, 20);
             this.txtCustomLabel.TabIndex = 75;
             // 
+            // grpFormat
+            // 
+            this.grpFormat.Controls.Add(this.radioOpus);
+            this.grpFormat.Controls.Add(this.radioOgg);
+            this.grpFormat.Location = new System.Drawing.Point(266, 86);
+            this.grpFormat.Name = "grpFormat";
+            this.grpFormat.Size = new System.Drawing.Size(116, 47);
+            this.grpFormat.TabIndex = 76;
+            this.grpFormat.TabStop = false;
+            this.grpFormat.Text = "Audio format:";
+            // 
+            // radioOpus
+            // 
+            this.radioOpus.AutoSize = true;
+            this.radioOpus.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioOpus.Location = new System.Drawing.Point(60, 20);
+            this.radioOpus.Name = "radioOpus";
+            this.radioOpus.Size = new System.Drawing.Size(50, 17);
+            this.radioOpus.TabIndex = 69;
+            this.radioOpus.Text = "Opus";
+            this.radioOpus.UseVisualStyleBackColor = true;
+            // 
+            // radioOgg
+            // 
+            this.radioOgg.AutoSize = true;
+            this.radioOgg.Checked = true;
+            this.radioOgg.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.radioOgg.Location = new System.Drawing.Point(9, 20);
+            this.radioOgg.Name = "radioOgg";
+            this.radioOgg.Size = new System.Drawing.Size(45, 17);
+            this.radioOgg.TabIndex = 63;
+            this.radioOgg.TabStop = true;
+            this.radioOgg.Text = "Ogg";
+            this.radioOgg.UseVisualStyleBackColor = true;
+            // 
+            // packToYargSong
+            // 
+            this.packToYargSong.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.packToYargSong.Name = "packToYargSong";
+            this.packToYargSong.Size = new System.Drawing.Size(326, 22);
+            this.packToYargSong.Text = "Pack Clone Hero folders to YARG yargsong files ";
+            this.packToYargSong.Click += new System.EventHandler(this.packToYargSong_Click);
+            // 
             // PhaseShiftConverter
             // 
             this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ClientSize = new System.Drawing.Size(592, 356);
+            this.Controls.Add(this.grpFormat);
             this.Controls.Add(this.txtCustomLabel);
             this.Controls.Add(this.markAsCustom);
             this.Controls.Add(this.markAsRV);
@@ -500,7 +558,7 @@
             this.Name = "PhaseShiftConverter";
             this.ShowIcon = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "YARG/CH/PS Converter";
+            this.Text = "Clone Hero Converter";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PhaseShiftPrep_FormClosing);
             this.Shown += new System.EventHandler(this.PhaseShiftPrep_Shown);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
@@ -513,6 +571,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).EndInit();
             this.grpMogg.ResumeLayout(false);
             this.grpMogg.PerformLayout();
+            this.grpFormat.ResumeLayout(false);
+            this.grpFormat.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -538,9 +598,7 @@
         private System.Windows.Forms.PictureBox picWorking;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.RadioButton radioSeparate;
-        private System.Windows.Forms.RadioButton radioAudacity;
         private System.Windows.Forms.ToolStripMenuItem useguitaroggForNonmultitrackSongs;
-        private System.Windows.Forms.RadioButton radioLeaveMogg;
         private System.Windows.Forms.GroupBox grpMogg;
         private System.Windows.Forms.RadioButton radioDownmix;
         private System.Windows.Forms.PictureBox picPin;
@@ -556,5 +614,13 @@
         private System.Windows.Forms.CheckBox markAsCustom;
         private System.Windows.Forms.TextBox txtCustomLabel;
         private System.Windows.Forms.ToolStripMenuItem decodeYARG;
+        private System.Windows.Forms.GroupBox grpFormat;
+        private System.Windows.Forms.RadioButton radioOpus;
+        private System.Windows.Forms.RadioButton radioOgg;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem packCloneHeroFoldersToSng;
+        private System.Windows.Forms.ToolStripMenuItem convertOggToOpus;
+        private System.Windows.Forms.ToolStripMenuItem packToYargSong;
     }
 }

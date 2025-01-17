@@ -16,7 +16,6 @@ using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.EncOgg;
 using Un4seen.Bass.AddOn.EncOpus;
 using Un4seen.Bass.AddOn.Fx;
-using DocumentFormat.OpenXml.EMMA;
 
 namespace Nautilus
 {

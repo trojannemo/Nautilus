@@ -30,7 +30,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>474</ApplicationRevision>
+    <ApplicationRevision>475</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -51,7 +51,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -661,6 +661,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\settings.png" />
+    <None Include="Resources\djh1.png" />
+    <None Include="Resources\djh2.png" />
     <Content Include="submarine.ico" />
     <None Include="bin\Debug\res\thumbs\GH3.jpg" />
     <None Include="bin\Debug\res\thumbs\GH4WT.jpg" />

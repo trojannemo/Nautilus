@@ -46,6 +46,8 @@
             this.renameArtistTheSong = new System.Windows.Forms.ToolStripMenuItem();
             this.renameSongTheArtist = new System.Windows.Forms.ToolStripMenuItem();
             this.renameSongArtistThe = new System.Windows.Forms.ToolStripMenuItem();
+            this.renameYearArtist = new System.Windows.Forms.ToolStripMenuItem();
+            this.renameYearSong = new System.Windows.Forms.ToolStripMenuItem();
             this.normalizeFeaturedArtists = new System.Windows.Forms.ToolStripMenuItem();
             this.removeSpacesFromFileName = new System.Windows.Forms.ToolStripMenuItem();
             this.replaceSpacesWithUnderscores = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,6 +65,7 @@
             this.picWorking = new System.Windows.Forms.PictureBox();
             this.folderScanner = new System.ComponentModel.BackgroundWorker();
             this.PhaseShiftRenamer = new System.ComponentModel.BackgroundWorker();
+            this.sortByAuthor = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -224,7 +227,9 @@
             this.renameTheArtistSong,
             this.renameArtistTheSong,
             this.renameSongTheArtist,
-            this.renameSongArtistThe});
+            this.renameSongArtistThe,
+            this.renameYearArtist,
+            this.renameYearSong});
             this.renameFiles.Name = "renameFiles";
             this.renameFiles.Size = new System.Drawing.Size(266, 22);
             this.renameFiles.Text = "Rename files";
@@ -234,7 +239,7 @@
             // 
             this.renameInternalName.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameInternalName.Name = "renameInternalName";
-            this.renameInternalName.Size = new System.Drawing.Size(165, 22);
+            this.renameInternalName.Size = new System.Drawing.Size(195, 22);
             this.renameInternalName.Text = "InternalName";
             this.renameInternalName.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -244,7 +249,7 @@
             this.renameTheArtistSong.Checked = true;
             this.renameTheArtistSong.CheckState = System.Windows.Forms.CheckState.Checked;
             this.renameTheArtistSong.Name = "renameTheArtistSong";
-            this.renameTheArtistSong.Size = new System.Drawing.Size(165, 22);
+            this.renameTheArtistSong.Size = new System.Drawing.Size(195, 22);
             this.renameTheArtistSong.Text = "The Artist - Song";
             this.renameTheArtistSong.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -252,7 +257,7 @@
             // 
             this.renameArtistTheSong.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameArtistTheSong.Name = "renameArtistTheSong";
-            this.renameArtistTheSong.Size = new System.Drawing.Size(165, 22);
+            this.renameArtistTheSong.Size = new System.Drawing.Size(195, 22);
             this.renameArtistTheSong.Text = "Artist, The - Song";
             this.renameArtistTheSong.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -260,7 +265,7 @@
             // 
             this.renameSongTheArtist.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameSongTheArtist.Name = "renameSongTheArtist";
-            this.renameSongTheArtist.Size = new System.Drawing.Size(165, 22);
+            this.renameSongTheArtist.Size = new System.Drawing.Size(195, 22);
             this.renameSongTheArtist.Text = "Song - The Artist";
             this.renameSongTheArtist.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -268,9 +273,25 @@
             // 
             this.renameSongArtistThe.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameSongArtistThe.Name = "renameSongArtistThe";
-            this.renameSongArtistThe.Size = new System.Drawing.Size(165, 22);
+            this.renameSongArtistThe.Size = new System.Drawing.Size(195, 22);
             this.renameSongArtistThe.Text = "Song - Artist, The";
             this.renameSongArtistThe.Click += new System.EventHandler(this.internalName_Click);
+            // 
+            // renameYearArtist
+            // 
+            this.renameYearArtist.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.renameYearArtist.Name = "renameYearArtist";
+            this.renameYearArtist.Size = new System.Drawing.Size(195, 22);
+            this.renameYearArtist.Text = "(Year) The Artist - Song";
+            this.renameYearArtist.Click += new System.EventHandler(this.internalName_Click);
+            // 
+            // renameYearSong
+            // 
+            this.renameYearSong.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.renameYearSong.Name = "renameYearSong";
+            this.renameYearSong.Size = new System.Drawing.Size(195, 22);
+            this.renameYearSong.Text = "(Year) Song - The Artist";
+            this.renameYearSong.Click += new System.EventHandler(this.internalName_Click);
             // 
             // normalizeFeaturedArtists
             // 
@@ -326,7 +347,8 @@
             // 
             this.sortingOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tryToSortFiles,
-            this.tryDetailedSubsorting});
+            this.tryDetailedSubsorting,
+            this.sortByAuthor});
             this.sortingOptionsToolStripMenuItem.Name = "sortingOptionsToolStripMenuItem";
             this.sortingOptionsToolStripMenuItem.Size = new System.Drawing.Size(102, 20);
             this.sortingOptionsToolStripMenuItem.Text = "&Sorting Options";
@@ -336,7 +358,7 @@
             this.tryToSortFiles.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.tryToSortFiles.CheckOnClick = true;
             this.tryToSortFiles.Name = "tryToSortFiles";
-            this.tryToSortFiles.Size = new System.Drawing.Size(204, 22);
+            this.tryToSortFiles.Size = new System.Drawing.Size(214, 22);
             this.tryToSortFiles.Text = "Try to sort files by source";
             this.tryToSortFiles.Click += new System.EventHandler(this.sortFilesToolStripMenuItem_Click);
             // 
@@ -348,7 +370,7 @@
             this.separateXonlySongs});
             this.tryDetailedSubsorting.Enabled = false;
             this.tryDetailedSubsorting.Name = "tryDetailedSubsorting";
-            this.tryDetailedSubsorting.Size = new System.Drawing.Size(204, 22);
+            this.tryDetailedSubsorting.Size = new System.Drawing.Size(214, 22);
             this.tryDetailedSubsorting.Text = "Try detailed sub-sorting";
             this.tryDetailedSubsorting.Click += new System.EventHandler(this.tryDetailedSubsortingToolStripMenuItem_Click);
             // 
@@ -422,6 +444,15 @@
             this.PhaseShiftRenamer.DoWork += new System.ComponentModel.DoWorkEventHandler(this.PhaseShiftRenamer_DoWork);
             this.PhaseShiftRenamer.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.PhaseShiftRenamer_RunWorkerCompleted);
             // 
+            // sortByAuthor
+            // 
+            this.sortByAuthor.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.sortByAuthor.CheckOnClick = true;
+            this.sortByAuthor.Name = "sortByAuthor";
+            this.sortByAuthor.Size = new System.Drawing.Size(214, 22);
+            this.sortByAuthor.Text = "Try to sort songs by author";
+            this.sortByAuthor.Click += new System.EventHandler(this.sortByAuthor_Click);
+            // 
             // BatchRenamer
             // 
             this.AllowDrop = true;
@@ -494,5 +525,8 @@
         private System.ComponentModel.BackgroundWorker PhaseShiftRenamer;
         private System.Windows.Forms.PictureBox picPin;
         private System.Windows.Forms.ToolStripMenuItem renameInternalName;
+        private System.Windows.Forms.ToolStripMenuItem renameYearArtist;
+        private System.Windows.Forms.ToolStripMenuItem renameYearSong;
+        private System.Windows.Forms.ToolStripMenuItem sortByAuthor;
     }
 }

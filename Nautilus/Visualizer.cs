@@ -93,7 +93,7 @@ namespace Nautilus
         private float artistX = 272f;
         private float artistY = 75f;
         private float yearY = 112f;
-        private const float yearX = 518f;
+        private float yearX = 518f;
         private const float albumX = 277f;
         private const float albumY = 112f;
         private const float genreX = 278f;
@@ -429,6 +429,7 @@ namespace Nautilus
             lblTop.Text = "";
             lblBottom.Text = "";
             lblBottom.Cursor = Cursors.Default;
+            lblBottom.ForeColor = Color.Black;
             origAuthor = "";
             picWorking.Visible = false;
             song1 = 0;
@@ -1482,11 +1483,13 @@ namespace Nautilus
             lblTop.Text = "Author:";
             if (!string.IsNullOrWhiteSpace(origAuthor))
             {
-                lblBottom.Text = origAuthor;
+                lblBottom.Text = RemoveCloneHeroColor(origAuthor);
+                lblBottom.ForeColor = GetCloneHeroColor(origAuthor);
             }
             else if (!string.IsNullOrWhiteSpace(author))
             {
-                lblBottom.Text = author;
+                lblBottom.Text = RemoveCloneHeroColor(author);
+                lblBottom.ForeColor = GetCloneHeroColor(author);
             }
             else
             {
@@ -1494,6 +1497,41 @@ namespace Nautilus
             }
         }
         
+        private string RemoveCloneHeroColor(string author)
+        {
+            try
+            {
+                int startIndex = author.IndexOf('>') + 1;
+                int endIndex = author.LastIndexOf('<');
+                return author.Substring(startIndex, endIndex - startIndex);
+            }
+            catch
+            {
+                return author;
+            }            
+        }
+
+        private Color GetCloneHeroColor(string author)
+        {
+            try
+            {
+                int colorStartIndex = author.IndexOf('=') + 1;
+                int colorEndIndex = author.IndexOf('>');
+                string colorValue = author.Substring(colorStartIndex, colorEndIndex - colorStartIndex);
+
+                Color color = Color.FromName(colorValue);
+                if (!color.IsKnownColor)
+                {
+                    color = Color.Black;
+                }
+                return color;
+            }
+            catch
+            {
+                return Color.Black;
+            }
+        }
+
         private void btnSave_Click(object sender, EventArgs e)
         {
             //reset links in case this is a re-upload
@@ -1610,6 +1648,7 @@ namespace Nautilus
                 //let's not leave over any files by mistake
                 Tools.DeleteFile(Path.GetTempPath() + "o");
                 Tools.DeleteFile(Path.GetTempPath() + "m");
+                Tools.DeleteFile(tempFile);
                 foreach (var file in FilesToDelete)
                 {
                     Tools.DeleteFile(file);
@@ -2016,7 +2055,7 @@ namespace Nautilus
                 {
                     MessageBox.Show("There was an error:\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                author = Parser.Songs[0].ChartAuthor;
+                author = Parser.Songs[0].ChartAuthor.Replace("&", "&&"); //fix for Nunchuk & Sygenysis
                 /*if (string.IsNullOrWhiteSpace(author))
                 {
                     var HMX_Sources = new List<string>
@@ -2716,7 +2755,9 @@ namespace Nautilus
             calibriToolStrip.Enabled = isFontAvailable("Calibri");
             tahomaToolStrip.Enabled = isFontAvailable("Tahoma");
             timesNewRomanToolStrip.Enabled = isFontAvailable("Times New Roman");
-            
+            verdanaToolStrip.Enabled = isFontAvailable("Verdana");
+            segoeUIToolStrip.Enabled = isFontAvailable("Segoe UI");
+
             if (File.Exists(Application.StartupPath + "\\res\\font.txt"))
             {
                 var sr = new StreamReader(Application.StartupPath + "\\res\\font.txt");
@@ -2728,7 +2769,7 @@ namespace Nautilus
                     customFontToolStrip.Text = "Custom Font: " + fontName;
                     customFontToolStrip.Visible = true;
                     customFontToolStrip.Checked = true;
-                    ActiveFont = fontName;
+                    //ActiveFont = fontName;
                     CustomFontName = fontName;
                 }
                 else
@@ -2739,36 +2780,30 @@ namespace Nautilus
                 }
             }
 
-            if (!customFontToolStrip.Checked)
+            switch (ActiveFont)
             {
-                myriadProToolStrip.Checked = isFontAvailable("Myriad Pro"); //use this as one default
-            }
-            if (myriadProToolStrip.Checked)
-            {
-                ActiveFont = "Myriad Pro";
-            }
-            else if (!customFontToolStrip.Checked)
-            {
-                if (calibriToolStrip.Enabled)
-                {
+                case "Myriad Pro":
+                    myriadProToolStrip.Checked = true;
+                    break;
+                case "Calibri":
                     calibriToolStrip.Checked = true;
-                    ActiveFont = "Calibri";
-                }
-                else if (tahomaToolStrip.Enabled)
-                {
+                    break;
+                case "Tahoma":
                     tahomaToolStrip.Checked = true;
-                    ActiveFont = "Tahoma";
-                }
-                else if (timesNewRomanToolStrip.Enabled)
-                {
+                    break;
+                case "Times New Roman":
                     timesNewRomanToolStrip.Checked = true;
-                    ActiveFont = "Times New Roman";
-                }
-                else
-                {
-                    ActiveFont = "Arial";
-                }
-            }
+                    break;
+                case "Verdana":
+                    verdanaToolStrip.Checked = true;
+                    break;
+                case "Segoe UI":
+                    segoeUIToolStrip.Checked = true;
+                    break;
+                default:
+                    calibriToolStrip.Checked = true;
+                    break;
+            }            
         }
 
         private void LoadConfig()
@@ -2789,6 +2824,7 @@ namespace Nautilus
                 sr.ReadLine();//no longer used
                 UserProfile = Tools.GetConfigString(sr.ReadLine());
                 autoloadLastProfile.Checked = sr.ReadLine().Contains("True");
+                ActiveFont = Tools.GetConfigString(sr.ReadLine());
             }
             catch (Exception)
             {}
@@ -2835,6 +2871,7 @@ namespace Nautilus
             sw.WriteLine("SpectrumID=0");
             sw.WriteLine("LastUsedProfile=" + (autoloadLastProfile.Checked ? UserProfile : ""));
             sw.WriteLine("AutoLoadProfile=" + autoloadLastProfile.Checked);
+            sw.WriteLine("ActiveFont=" + ActiveFont);
             sw.Dispose();
         }
 
@@ -3099,33 +3136,13 @@ namespace Nautilus
                 case 4:
                     Rating = "";
                     break;
-            }
-            if (cboRating.Enabled && Rating != "")
-            {
-                picYearDown.Visible = false;
-                picYearUp.Visible = false;
-            }
-            else
-            {
-                picYearDown.Visible = true;
-                picYearUp.Visible = true;
-            }
+            }            
             picVisualizer.Invalidate();
         }
 
         private void chkRating_CheckedChanged(object sender, EventArgs e)
         {
-            cboRating.Enabled = chkRating.Checked;
-            if (chkRating.Checked && Rating != "")
-            {
-                picYearDown.Visible = false;
-                picYearUp.Visible = false;
-            }
-            else
-            {
-                picYearDown.Visible = true;
-                picYearUp.Visible = true;
-            }
+            cboRating.Enabled = chkRating.Checked;            
             picVisualizer.Invalidate();
         }
         
@@ -3255,67 +3272,43 @@ namespace Nautilus
                 songJoystick.Cursor = Cursors.Hand;
                 songJoystick.Image = Resources.moveall;
             }
-        }
-
-        private void picYearUp_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left) return;
-            yearY = 112f;
-            picVisualizer.Invalidate();
-        }
-
-        private void picYearDown_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left) return;
-            if (string.IsNullOrWhiteSpace(Rating) || !cboRating.Enabled)
-            {
-                yearY = 130f;
-            }
-            picVisualizer.Invalidate();
-        }               
+        }             
         
-        private void calibriToolStrip_Click(object sender, EventArgs e)
+        private void UncheckAllFonts(ToolStripMenuItem menu)
         {
-            ActiveFont = "Calibri";
             myriadProToolStrip.Checked = false;
-            calibriToolStrip.Checked = true;
+            calibriToolStrip.Checked = false;
             tahomaToolStrip.Checked = false;
             timesNewRomanToolStrip.Checked = false;
             customFontToolStrip.Checked = false;
+            verdanaToolStrip.Checked = false;
+            segoeUIToolStrip.Checked = false;
+            menu.Checked = true;
             picVisualizer.Invalidate();
+        }
+
+        private void calibriToolStrip_Click(object sender, EventArgs e)
+        {
+            ActiveFont = "Calibri";
+            UncheckAllFonts((ToolStripMenuItem)sender);
         }
 
         private void tahomaToolStrip_Click(object sender, EventArgs e)
         {
             ActiveFont = "Tahoma";
-            myriadProToolStrip.Checked = false;
-            calibriToolStrip.Checked = false;
-            tahomaToolStrip.Checked = true;
-            timesNewRomanToolStrip.Checked = false;
-            customFontToolStrip.Checked = false;
-            picVisualizer.Invalidate();
+            UncheckAllFonts((ToolStripMenuItem)sender);
         }
 
         private void timesNewRomanToolStrip_Click(object sender, EventArgs e)
         {
             ActiveFont = "Times New Roman";
-            myriadProToolStrip.Checked = false;
-            calibriToolStrip.Checked = false;
-            tahomaToolStrip.Checked = false;
-            timesNewRomanToolStrip.Checked = true;
-            customFontToolStrip.Checked = false;
-            picVisualizer.Invalidate();
+            UncheckAllFonts((ToolStripMenuItem)sender);
         }
 
         private void customFontToolStrip_Click(object sender, EventArgs e)
         {
             ActiveFont = CustomFontName;
-            myriadProToolStrip.Checked = false;
-            calibriToolStrip.Checked = false;
-            tahomaToolStrip.Checked = false;
-            timesNewRomanToolStrip.Checked = false;
-            customFontToolStrip.Checked = true;
-            picVisualizer.Invalidate();
+            UncheckAllFonts((ToolStripMenuItem)sender);
         }
 
         private void myriadProToolStrip_Click(object sender, EventArgs e)
@@ -3323,11 +3316,7 @@ namespace Nautilus
             if (isFontAvailable("Myriad Pro"))
             {
                 ActiveFont = "Myriad Pro";
-                myriadProToolStrip.Checked = true;
-                calibriToolStrip.Checked = false;
-                tahomaToolStrip.Checked = false;
-                timesNewRomanToolStrip.Checked = false;
-                customFontToolStrip.Checked = false;
+                UncheckAllFonts((ToolStripMenuItem)sender);
             }
             else
             {
@@ -4193,7 +4182,7 @@ namespace Nautilus
                 if (!string.IsNullOrWhiteSpace(txtAlbum.Text))
                 {
                     var track = "";
-                    if (txtTrack.Text.Trim().Length > 0)
+                    if (txtTrack.Text.Trim().Length > 0 && txtTrack.Text.Trim() != "0" && chkTrack.Checked)
                     {
                         track = " (Track #" + txtTrack.Text.Trim() + ")";
                     }
@@ -4742,45 +4731,39 @@ namespace Nautilus
         private void ExtractYARG(string file)
         {
             var outFolder = Application.StartupPath + "\\visualizer\\extracted";
-            if (Directory.Exists(outFolder))
-            {
-                Tools.DeleteFolder(outFolder, true);
-            }
+            Tools.DeleteFolder(outFolder, true);
             Directory.CreateDirectory(outFolder);
 
             if (!Tools.DecryptExtractYARGSONG(file, outFolder))
             {
                 MessageBox.Show("Failed to process that YARG file, can't Visualize", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 7 in order to Visualize YARG files\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 8 in order to Visualize YARG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                 if (choice == DialogResult.OK)
                 {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
                 }
                 return;
             }
-            PlayCHFolder(outFolder);
+            PlayCHFolder(outFolder + "\\" + Path.GetFileNameWithoutExtension(file) + "\\");
         }
 
         private void ExtractSNG(string file)
         {
             var outFolder = Application.StartupPath + "\\visualizer\\extracted";
-            if (Directory.Exists(outFolder))
-            {
-                Tools.DeleteFolder(outFolder, true);
-            }
+            Tools.DeleteFolder(outFolder, true);
             Directory.CreateDirectory(outFolder);                      
 
             if (!Tools.ExtractSNG(file, outFolder))
             {
                 MessageBox.Show("Failed to process that SNG file, can't Visualize", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 7 in order to Visualize Clone Hero SNG files\n\nIf you already have .NET Desktop Runtime 7 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 7 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
+                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 8 in order to Visualize Clone Hero SNG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                 if (choice == DialogResult.OK)
                 {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/7.0");
+                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
                 }
                 return;
             }            
-            PlayCHFolder(outFolder);                       
+            PlayCHFolder(outFolder + "\\" + Path.GetFileNameWithoutExtension(file) + "\\");                       
         }
 
         private void PlayCHFolder(string outFolder)
@@ -5554,6 +5537,65 @@ namespace Nautilus
             PlaybackSeconds = picPreview.Tag.ToString() == "preview" ? 30.0 : 0.0;
             updatePlaybackInstruments();
             StartPlayback();
+        }
+
+        private void segoeUIToolStrip_Click(object sender, EventArgs e)
+        {
+            ActiveFont = "Segoe UI";
+            UncheckAllFonts((ToolStripMenuItem)sender);
+        }
+
+        private void verdanaToolStrip_Click(object sender, EventArgs e)
+        {
+            ActiveFont = "Verdana";
+            UncheckAllFonts((ToolStripMenuItem)sender);
+        }
+
+        private void yearJoystick_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            if (string.IsNullOrWhiteSpace(txtYear.Text)) return;
+            mouseX = MousePosition.X;
+            mouseY = MousePosition.Y;
+            if (yearJoystick.Cursor == Cursors.Hand)
+            {
+                yearJoystick.Image = null;
+                yearJoystick.Cursor = Cursors.NoMove2D;
+            }
+            else if (yearJoystick.Cursor == Cursors.NoMove2D)
+            {
+                yearJoystick.Cursor = Cursors.Hand;
+                yearJoystick.Image = Resources.moveall;
+            }
+        }
+
+        private void yearJoystick_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (yearJoystick.Cursor != Cursors.NoMove2D) return;
+            if (MousePosition.X != mouseX)
+            {
+                if (MousePosition.X > mouseX)
+                {
+                    yearX = yearX + (MousePosition.X - mouseX);
+                }
+                else if (MousePosition.X < mouseX)
+                {
+                    yearX = yearX - (mouseX - MousePosition.X);
+                }
+                mouseX = MousePosition.X;
+            }
+            picVisualizer.Invalidate();
+            if (MousePosition.Y == mouseY) return;
+            if (MousePosition.Y > mouseY)
+            {
+                yearY = yearY + (MousePosition.Y - mouseY);
+            }
+            else if (MousePosition.Y < mouseY)
+            {
+                yearY = yearY - (mouseY - MousePosition.Y);
+            }
+            mouseY = MousePosition.Y;
+            picVisualizer.Invalidate();
         }
     }   
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using Nautilus.Properties;
@@ -59,53 +60,57 @@ namespace Nautilus
             return true;
         }
 
-        private void SendToConverter(string file, string format, string argument)
+        private void SendToConverter(List<string> files, string format, string argument)
         {
             isCON = false;
-            if (!ValidateFile(file))
+            foreach (var file in files)
             {
-                return;
-            }
-            var path = Application.StartupPath + "\\bin\\";
-            if (!File.Exists(AudioConverterPath))
-            {
-                DoErrorMessage();
-                return;
-            }
-            lblWorking.Visible = true;
-            Application.DoEvents();
-            var arg = "-\"" + file + "\" -" + format + argument;
-            var app = new ProcessStartInfo
-            {
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                FileName = AudioConverterPath,
-                Arguments = arg,
-                WorkingDirectory = path
-            };
-            var process = Process.Start(app);
-            do
-            {
-                //
-            } while (!process.HasExited);
-            process.Dispose();
-            lblWorking.Visible = false;
-            Application.DoEvents();
+                if (!ValidateFile(file))
+                {
+                    continue;
+                }
+                var path = Application.StartupPath + "\\bin\\";
+                if (!File.Exists(AudioConverterPath))
+                {
+                    DoErrorMessage();
+                    continue;
+                }
+                lblWorking.Visible = true;
+                Application.DoEvents();
+                var arg = "-\"" + file + "\" -" + format + argument;
+                var app = new ProcessStartInfo
+                {
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    FileName = AudioConverterPath,
+                    Arguments = arg,
+                    WorkingDirectory = path
+                };
+                var process = Process.Start(app);
+                do
+                {
+                    //
+                } while (!process.HasExited);
+                process.Dispose();
+                lblWorking.Visible = false;
+                Application.DoEvents();
 
-            var folder = Application.StartupPath + "\\bin\\converted\\";
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-            var output = folder + (isCON ? Path.GetFileName(file) : Path.GetFileNameWithoutExtension(file)) + "." + format;
-            if (File.Exists(output))
-            {
-                lblSuccess.Visible = true;
-            }
-            else
-            {
-                lblFailed.Visible = true;
+                /*var folder = Application.StartupPath + "\\bin\\converted\\";
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }*/
+                var folder = Path.GetDirectoryName(file) + "\\";
+                var output = folder + (isCON ? Path.GetFileName(file) : Path.GetFileNameWithoutExtension(file)) + "." + format;
+                if (File.Exists(output))
+                {
+                    lblSuccess.Visible = true;
+                }
+                else
+                {
+                    lblFailed.Visible = true;
+                }
             }
             timer1.Enabled = true;
         }
@@ -113,31 +118,31 @@ namespace Nautilus
         private void btnOgg_DragDrop(object sender, DragEventArgs e)
         {
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            SendToConverter(files[0], "ogg", " -" + qualityOgg.Value.ToString());
+            SendToConverter(files.ToList(), "ogg", " -" + qualityOgg.Value.ToString());
         }
 
         private void btnOpus_DragDrop(object sender, DragEventArgs e)
         {
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            SendToConverter(files[0], "opus", " -" + qualityOpus.Value.ToString());
+            SendToConverter(files.ToList(), "opus", " -" + qualityOpus.Value.ToString());
         }
 
         private void btnMP3_DragDrop(object sender, DragEventArgs e)
         {
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            SendToConverter(files[0], "mp3", " -" + qualityMp3.Value.ToString());
+            SendToConverter(files.ToList(), "mp3", " -" + qualityMp3.Value.ToString());
         }
 
         private void btnFlac_DragDrop(object sender, DragEventArgs e)
         {
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            SendToConverter(files[0], "flac", " -" + qualityFlac.Value.ToString());
+            SendToConverter(files.ToList(), "flac", " -" + qualityFlac.Value.ToString());
         }
 
         private void btnWav_DragDrop(object sender, DragEventArgs e)
         {
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            SendToConverter(files[0], "wav", "");
+            SendToConverter(files.ToList(), "wav", "");
         }
 
         private void btnAbout_Click(object sender, System.EventArgs e)

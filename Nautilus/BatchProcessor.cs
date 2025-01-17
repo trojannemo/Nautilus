@@ -112,7 +112,7 @@ namespace Nautilus
                 btnBegin.Enabled = false;
                 return;
             }
-            if (!chkAuthor.Checked && !chkOrigin.Checked && !chkOverrideAuthor.Checked && !chkVocalGender.Checked && !chkSongID.Checked && !chkOverrideGameID.Checked)
+            if (!chkAuthor.Checked && !chkOrigin.Checked && !chkOverrideAuthor.Checked && !chkVocalGender.Checked && !chkSongID.Checked && !chkOverrideGameID.Checked && !chkAddYear.Checked)
             {
                 MessageBox.Show("No options selected, nothing to do", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 Log("No options selected, nothing to do");
@@ -208,7 +208,7 @@ namespace Nautilus
 
         private bool ModifyDTA()
         {
-            return chkAuthor.Checked || chkOrigin.Checked || chkOverrideAuthor.Checked || chkVocalGender.Checked || chkSongID.Checked;
+            return chkAuthor.Checked || chkOrigin.Checked || chkOverrideAuthor.Checked || chkVocalGender.Checked || chkSongID.Checked || chkAddYear.Checked;
         }
 
         private void FileProcessor_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -285,6 +285,8 @@ namespace Nautilus
                                             }
 
                                             var changedAuthor = false;
+                                            var songTitle = Parser.Songs[0].Name;
+                                            var yearReleased = Parser.Songs[0].YearReleased;
                                             var sr = new StreamReader(currDTA, true);
                                             var sw = new StreamWriter(newDTA);
                                             var line = "";
@@ -305,6 +307,10 @@ namespace Nautilus
                                                     line = "   ('game_origin' " + origin + ")";
                                                     sw.WriteLine(line);
                                                     line = sr.ReadLine();
+                                                }
+                                                else if (line.Contains(songTitle) && yearReleased > 0 && chkAddYear.Checked)
+                                                {
+                                                    line = line.Replace(songTitle, "(" + yearReleased + ") " + songTitle);
                                                 }
                                                 else if (line.Contains("song_id") && !line.Contains(";ORIG_ID=") && !line.Trim().StartsWith(";") && chkSongID.Checked)
                                                 {

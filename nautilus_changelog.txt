@@ -6,6 +6,142 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+v5.2.3
+
+VISUALIZER
+- Added two new fonts (Segoe UI and Verdana)
+- Fixed behavior where it wouldn't remember the last font used - thanks to SonicSBL for raising this issue on Github
+- Added control joystick so the release year can now be moved around to compensate for long album names + track numbers overlapping with the release year - thanks to SonicSBL for raising this issue on Github
+
+BATCH RENAMER
+- Added option to sort by author under Sorting Options - only works with individual/loose CONs, not packs
+
+BATCH EXTRACTOR
+- Addresses issue with extracting packs to YARG exCON format failing by telling you (in the log) if the file is a pack and skipping it, and going on to the next file... please use the Quick Pack Editor to dePACK the pack files or use Onyx to separate them, then run them through this tool
+- Now says "Extracting files for song #x of y" as requested by Nyxyxylyth
+
+PS3 CONVERTER
+- Fixed issue where One-Click Batch PS3 Fixer pops up with notice after each song, interrupting the batch process, plus additional improvements to logging during this process
+
+----------
+
+v5.2.2
+
+AUDIO CONVERTER
+- Can now drag/drop multiple source files to each convert button and it'll process them in batch
+- Changed behavior in the CLI version so converted files save to the original source folder rather than the fixed "Converted" folder in \bin- this makes more sense and allows additional features...
+- When using the CLI version using one of the provided batch scripts, now it can be used to recursively search directories and subdirectories and it will convert all supported files found to the script format (i.e. Clone Hero folders can be copy/pasted into the _source_audio folder in \bin then run the batch script and all .opus files will be converted to .ogg, for example)
+
+BATCH EXTRACTOR
+- Added new feature to Extract to YARG "exCON" format as requested by the great Nyxyxylyth
+
+PS3 CONVERTER
+- Implemented Linos' request to have the One-Click Batch PS3 Fixer apply the alphanumeric song_id fix at the same time
+- Fixed issue with "bad encryption masks" for certain old C3 customs - thanks to LocalH
+
+BATCH RENAMER
+- Added option to rename to (Year) The Artist - Song and (Year) Song - The Artist as requested by wkdbounce
+
+BATCH PROCESSOR
+- Added option to add (Year) to the song title in the DTA as requested by wkdbounce
+
+FILE ANALYZER
+- Fixed issue raised in Github by EafAtta where when batch analyzing files it would add on to the prior song's numbers so each song would have its numbers plus the prior song numbers, and so on and so forth
+
+VOLUME NORMALIZER
+- Merged pull request from SuperRiderTH with minor changes
+- Modified SuperRiderTH's code to hopefully avoid scientific notation in the DTA files - issue raised by RazQ
+
+CON EXPLORER
+- Fixed bug introduced in v5.2.1 where it would crash when loading certain packs
+
+MAIN FORM
+- Fixed button visibility not saving across uses for certain buttons
+- Fixed Character Editor button not having the correct context menu
+
+----------
+
+v5.2.1
+
+CLONE HERO CONVERTER
+- Removed YARG from the name since YARG can read CON files and converting is no longer necessary - removed PS from the name since virtually nobody is or should be using Phase Shift at this point
+- Removed the "Send to Audacity" and "Do Nothing" options as they were not being used now that Nautilus can decrypt all Rock Band files
+- Added option so when converting from Rock Band CON to Clone Hero folder it will convert the audio to .opus format for better quality and smaller file size than .ogg
+
+CON EXPLORER
+- Added ability to right click and rename a file within an existing CON file (experimental)
+- Added ability to right click and rename a folder within an existing CON file (experimental)
+
+CON CREATOR
+- Disabled drag/drop of folders feature for being problematic - you can right click and add your folders that way very quickly - if you're doing a pack use Pack Creator instead of CON Creator
+
+SAVE SCORES VIEWER
+- Updated to v2.3 (thanks to StackOverflow0x)
+
+MAIN FORM
+- Updated web path to update file based on new domain name
+- renamed YARG/CH/PS CONVERTER button to CLONE HERO CONVERTER
+
+----------
+
+v5.2.0
+
+AUDIO CONVERTER (NEW FEATURE!)
+- By popular request I have added the GUI component of Audio Converter to Nautilus - it will still depend on the CLI backend (comes included with Nautilus) but if I issue an update to the CLI app, all you have to do is drop it in the Nautilus /bin/ folder and you'll have an updated copy of Audio Converter, since it's likely that Nautilus and Audio Converter won't be synced at all times
+
+VISUALIZER
+- Added support for playing back Fortnite Festival folder structures using the custom .fnf or .ini metadata files and the original .m4a multitrack audio - either drag and drop the folder or the .m4a file (it's a little slow for now but it works)
+- Added support for exporting Fortnite Festival songs as stereo audio files
+- Added support for playing back PS3 folder structures so you can drag/drop a PS3 folder or you can send from File Indexer
+- Added support for displaying song lyrics when playing back PS3 songs, both in folder structure and in PKG files
+- Added support for displaying song lyrics when playing back Clone Hero and Fret Smasher songs that have a notes.mid file with PART VOCALS chart
+- Added support for displaying song lyrics when playing back PowerGig songs - a little wonky but mostly works
+- Added support for displaying song lyrics when playing back YARG songs
+- Removed need to select exporting audio format first - now you can do it directly on the save screen and it'll use the right encoder based on your selection
+- Removed old code that would assume the author was Harmonix based on the game source, since DX allows one to change that it's no longer semi-accurate like it was before
+- Some code cleanup
+
+STEMS ISOLATOR
+- Added ability to import Fortnite Festival .m4a files and export to a stereo file
+- Added ability to import Fortnite Festival .m4a files and isolate individual stems
+- Added ability to export to FLAC, MP3 and OPUS formats on top of the existing OGG and WAV options
+
+AUDIO ANALYZER
+- Added support for analyzing Fortnite Festival .m4a files
+
+CON EXPLORER
+- Added ability to remove a file from the CON file / pack directly by right clicking and selecting "Delete selected file"
+
+CON CREATOR
+- Fixed CON Creator not making CON files correctly and having folders at the top instead of properly nested folders, among other fixes and improvements
+
+FILE INDEXER
+- Added support for scanning PS3 folders for .dta files
+
+DTA PARSER
+- Improved how it handles pans/vols/cores values that have unexpected tab delimiters, which was causing issues with some "RB4 to RB2" songs
+
+WII CONVERTER
+- Fixed behavior that should have been in place - now it only enables removing crowd tracks if downmixing drums is checked (it's needed for the process to work)
+
+SETLIST EXPORTER (inside SETLIST MANAGER)
+- Fixed issue that would happen with some computers that would crash the program when trying to create the PDF thumbnail due to problems with PDFLibNet.dll and missing Visual C++ 2010 dependency
+
+BATCH PROCESSOR
+- Changed behavior so when processing files it only replaces the song ID with a unique numeric ID if the existing ID was not already a numeric value (i.e. won't overwrite prior numeric IDs)
+
+PS3 CONVERTER
+- Changed behavior so when processing files it only replaces the song ID with a unique numeric ID if the existing ID was not already a numeric value (i.e. won't overwrite prior numeric IDs)
+
+CHARACTER EDITOR
+- Localized the import and export of prefab characters so people in other countries should no longer experience issues due to unexpected non-American formatting in values
+
+MAIN FORM
+- Enabled resizing of the form so user can fix it when it shrinks to only one button (still need to figure out why that happens)
+- Rearranged some things to make space for Audio Converter
+
+----------
+
 v5.1.2
 
 VISUALIZER
@@ -207,7 +343,7 @@ VISUALIZER
 - Added ability to extract a downmixed stereo MP3 file out of the Power Gig XMA files -> Click on Tools and enable the right option, then drag and drop your XML file and follow the prompts
 - Added ability to let you access the extracted multitrack files out of the Power Gig XMA files -> Click on Tools and enable the right option, then drag and drop your XML file
 - Added ability to force Power Gig files to show an album art image - just drop either album.jpg or album.png in the same folder as the XML file and it will be displayed along with the song's metadata - this is useful if you are extracting the downmixed stereo .mp3 file as that is tagged with ID3v2 and album art is included in the tag
-- Added ability to Visualize Fornite Festival songs using the custom .fnf metadata file format and .opus audio - either one single song.opus multitrack file or individual drums/bass/guitar/vocals/song .opus tracks - original .m4a format is currently not supported so make sure the audio files are in .opus format
+- Added ability to Visualize Fortnite Festival songs using the custom .fnf metadata file format and .opus audio - either one single song.opus multitrack file or individual drums/bass/guitar/vocals/song .opus tracks - original .m4a format is currently not supported so make sure the audio files are in .opus format
 - Expanded INI compatibility so now it can properly Visualize Fret Smasher and Guitar Star songs - just drag and drop the song.ini file
 - Fixed bug where some song.ini based songs would not display a song length and would not allow you to skip through the song as a result
 

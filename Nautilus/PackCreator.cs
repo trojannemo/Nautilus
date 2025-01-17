@@ -1335,7 +1335,7 @@ namespace Nautilus
                 e.Cancel = true;
                 return;
             }
-            Tools.DeleteFolder(Application.StartupPath + "\\input\\");
+            //Tools.DeleteFolder(Application.StartupPath + "\\input\\");
             Tools.DeleteFolder(tempThumbs, true);
             Tools.DeleteFolder(tempFolder, !chkKeepFiles.Checked);
         }

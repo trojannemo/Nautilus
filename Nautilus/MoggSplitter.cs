@@ -14,6 +14,7 @@ using NautilusFREE;
 using Un4seen.Bass.AddOn.EncFlac;
 using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.EncOpus;
+using Un4seen.Bass.AddOn.Opus;
 
 namespace Nautilus
 {
@@ -335,8 +336,8 @@ namespace Nautilus
         }
 
         public int[] ArrangeStreamChannels(int totalChannels, bool isOgg)
-        {
-            var channels = new int[totalChannels];
+        {            
+            var channels = new int[totalChannels];            
             if (isOgg)
             {
                 switch (totalChannels)
@@ -365,19 +366,19 @@ namespace Nautilus
                         channels[0] = 0;
                         channels[1] = 2;
                         channels[2] = 1;
-                        channels[3] = 4;
-                        channels[4] = 5;
-                        channels[5] = 6;
+                        channels[3] = 5;
+                        channels[4] = 6;
+                        channels[5] = 4;
                         channels[6] = 3;
                         break;
                     case 8:
                         channels[0] = 0;
                         channels[1] = 2;
                         channels[2] = 1;
-                        channels[3] = 4;
-                        channels[4] = 5;
-                        channels[5] = 6;
-                        channels[6] = 7;
+                        channels[3] = 6;
+                        channels[4] = 4;
+                        channels[5] = 7;
+                        channels[6] = 5;
                         channels[7] = 3;
                         break;
                     default:
@@ -400,6 +401,10 @@ namespace Nautilus
             if (format == MoggSplitFormat.WAV)
             {
                 ext = "wav";
+            }
+            else if (format == MoggSplitFormat.OPUS)
+            {
+                ext = "opus";
             }
             if (!Directory.Exists(folder))
             {
@@ -426,7 +431,7 @@ namespace Nautilus
             try
             {
                 if (!InitBass()) return false;
-                SourceStream = Bass.BASS_StreamCreateFile(nautilus3.GetOggStreamIntPtr(), 0, nautilus3.PlayingSongOggData.Length, BASSFlag.BASS_STREAM_DECODE);
+                SourceStream = Bass.BASS_StreamCreateFile(nautilus3.GetOggStreamIntPtr(), 0, nautilus3.PlayingSongOggData.Length, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_MIXER_NOSPEAKER);
                 var info = Bass.BASS_ChannelGetInfo(SourceStream);
                 var ArrangedChannels = ArrangeStreamChannels(info.chans, true);
                 var isSlave = false;
@@ -546,15 +551,19 @@ namespace Nautilus
             {
                 channel_map[2] = -1;
             }
-            var flags = slave ? BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SPLIT_SLAVE : BASSFlag.BASS_STREAM_DECODE;
+            var flags = slave ? BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SPLIT_SLAVE | BASSFlag.BASS_MIXER_NOSPEAKER : BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_MIXER_NOSPEAKER;
             var out_stream = BassMix.BASS_Split_StreamCreate(SourceStream, flags, channel_map);
             var volumeFX = Bass.BASS_ChannelSetFX(out_stream, BASSFXType.BASS_FX_BFX_VOLUME, 0);
             var volume = new BASS_BFX_VOLUME {lChannel = 0, fVolume = vol};
             Bass.BASS_FXSetParameters(volumeFX, volume);
             Splits.Add(out_stream);
             if (format == MoggSplitFormat.OGG)
-            {                
-                BassEnc_Ogg.BASS_Encode_OGG_StartFile(out_stream, "-q " + quality, BASSEncode.BASS_ENCODE_AUTOFREE, file);
+            {
+                BassEnc_Ogg.BASS_Encode_OGG_StartFile(out_stream, "-q " + quality + " \" -c \"COMMENT=Made by Nemo\"", BASSEncode.BASS_ENCODE_AUTOFREE, file);
+            }
+            else if (format == MoggSplitFormat.OPUS)
+            {
+                BassEnc_Opus.BASS_Encode_OPUS_StartFile(out_stream, "--vbr --music --comment COMMENT=\"Made by Nemo\"", BASSEncode.BASS_ENCODE_DEFAULT | BASSEncode.BASS_ENCODE_AUTOFREE, file);
             }
             else
             {

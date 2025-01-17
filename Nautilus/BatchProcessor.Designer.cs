@@ -59,6 +59,7 @@
             this.gameRB1 = new System.Windows.Forms.RadioButton();
             this.gameRB2 = new System.Windows.Forms.RadioButton();
             this.gameRB3 = new System.Windows.Forms.RadioButton();
+            this.chkAddYear = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
@@ -396,12 +397,24 @@
             this.gameRB3.Text = "RB3";
             this.gameRB3.UseVisualStyleBackColor = true;
             // 
+            // chkAddYear
+            // 
+            this.chkAddYear.AutoSize = true;
+            this.chkAddYear.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkAddYear.Location = new System.Drawing.Point(396, 379);
+            this.chkAddYear.Name = "chkAddYear";
+            this.chkAddYear.Size = new System.Drawing.Size(135, 17);
+            this.chkAddYear.TabIndex = 81;
+            this.chkAddYear.Text = "Add year to song name";
+            this.chkAddYear.UseVisualStyleBackColor = true;
+            // 
             // BatchProcessor
             // 
             this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ClientSize = new System.Drawing.Size(614, 450);
+            this.Controls.Add(this.chkAddYear);
             this.Controls.Add(this.gameRB3);
             this.Controls.Add(this.gameRB2);
             this.Controls.Add(this.gameRB1);
@@ -478,5 +491,6 @@
         private System.Windows.Forms.RadioButton gameRB1;
         private System.Windows.Forms.RadioButton gameRB2;
         private System.Windows.Forms.RadioButton gameRB3;
+        private System.Windows.Forms.CheckBox chkAddYear;
     }
 }

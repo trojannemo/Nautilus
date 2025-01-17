@@ -364,7 +364,6 @@
             // folderTree
             // 
             this.folderTree.AccessibleRole = System.Windows.Forms.AccessibleRole.Outline;
-            this.folderTree.AllowDrop = true;
             this.folderTree.BackColor = System.Drawing.SystemColors.Window;
             // 
             // 
@@ -451,7 +450,7 @@
             this.deleteFolderToolStripMenuItem});
             this.contextMenuStrip3.Name = "contextMenuStrip3";
             this.contextMenuStrip3.ShowImageMargin = false;
-            this.contextMenuStrip3.Size = new System.Drawing.Size(163, 70);
+            this.contextMenuStrip3.Size = new System.Drawing.Size(163, 48);
             // 
             // addFolderToolStripMenuItem1
             // 

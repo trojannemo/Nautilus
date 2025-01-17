@@ -162,7 +162,11 @@ namespace Nautilus
                 for (var i = 0; i < xfolders.Count; i++)
                 {
                     if (xFolders[i].Name != f) continue;
-                    xsender.Nodes.Add(GetNode(xFolders[i]));
+                    var node = GetNode(xFolders[i]);
+                    node.Tag = xFolders[i];
+                    xsender.Nodes.Add(node);
+                    //xsender.Nodes.Add(GetNode(xFolders[i]));
+                    //xsender.Nodes[i].Tag = xFolders[i];
                 }
             }
         }
@@ -247,9 +251,15 @@ namespace Nautilus
                 case 0x373307D9:
                     cboGameID.SelectedIndex = 13; //Dance Central 3
                     break;
+                case 0x41560844:
+                    cboGameID.SelectedIndex = 14; //DJ Hero
+                    break;
+                case 0x4156087F:
+                    cboGameID.SelectedIndex = 15; //DJ Hero 2
+                    break;
                 default:
                     cboGameID.Items.Add("Unknown - " + xPackage.Header.TitleID);
-                    cboGameID.SelectedIndex = 11;
+                    cboGameID.SelectedIndex = 16;
                     break;
             }
 
@@ -321,12 +331,8 @@ namespace Nautilus
                     Log("Error extracting " + xent.Name);
                     Enabled = true;
                     return;
-                }
+                }                
                 
-                if (Path.GetExtension(sfd.FileName) == ".mogg")
-                {
-                    //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(sfd.FileName)), sfd.FileName);
-                }
                 Log("File " + xent.Name + " extracted successfully");
             }
             Enabled = true;
@@ -340,21 +346,25 @@ namespace Nautilus
             {
                 extractFileToolStripMenuItem.Enabled = false;
                 replaceFileToolStripMenuItem.Enabled = false;
+                menuRenameFile.Enabled = false;
                 return;
             }
 
             extractFileToolStripMenuItem.Enabled = true;
             replaceFileToolStripMenuItem.Enabled = true;
+            menuRenameFile.Enabled = true;
 
             if (fileList.SelectedIndices.Count == 1)
             {
                 replaceFileToolStripMenuItem.Visible = true;
+                menuRenameFile.Visible = true;
             }
             else if (fileList.SelectedIndices.Count > 1)
             {
                 extractFileToolStripMenuItem.Text = "Extract selected files";
                 replaceFileToolStripMenuItem.Visible = false;
                 menuDeleteFile.Visible = false;
+                menuRenameFile.Visible = false;
             }
         }
 
@@ -725,12 +735,7 @@ namespace Nautilus
             try
             {
                 if (xPackage.ExtractPayload(outFolder, true, true))
-                {
-                    var moggs = Directory.GetFiles(outFolder, "*.mogg", SearchOption.AllDirectories);
-                    foreach (var mogg in moggs)
-                    {
-                        //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(mogg)), mogg);
-                    }
+                {                
                     Log("File extracted successfully to:");
                     Log(outFolder);
                 }
@@ -911,6 +916,16 @@ namespace Nautilus
                     picContent.Image = Resources.dc3;
                     title = "Dance Central 3";
                     break;
+                case 14:
+                    xPackage.Header.TitleID = 0x41560844;
+                    picContent.Image = Resources.djh1;
+                    title = "DJ Hero";
+                    break;
+                case 15:
+                    xPackage.Header.TitleID = 0x4156087F;
+                    picContent.Image = Resources.djh2;
+                    title = "DJ Hero 2";
+                    break;
             }
             xPackage.Header.Title_Package = title; 
             Log("Game changed to " + xPackage.Header.Title_Package);
@@ -946,10 +961,6 @@ namespace Nautilus
                     return;
                 }
                 files.Add(ext_file);
-                if (Path.GetExtension(ext_file) == ".mogg")
-                {
-                    //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(ext_file)), ext_file);
-                }
             }
             Enabled = true;
 
@@ -1249,11 +1260,7 @@ namespace Nautilus
                     ext_file.RemoveAt(1);
                 }
             }
-            
-            if (Path.GetExtension(ext_file[0]) == ".mogg")
-            {
-                //nautilus3.WriteOutData(nautilus3.ObfM(File.ReadAllBytes(ext_file[0])), ext_file[0]);
-            }
+                       
             Enabled = true;
 
             if (File.Exists(ext_file[0]))
@@ -1481,6 +1488,77 @@ namespace Nautilus
         private void menuDeleteFile_Click(object sender, EventArgs e)
         {
             DeleteFile();
+        }
+
+        private void menuRenameFile_Click(object sender, EventArgs e)
+        {
+            RenameFile(); 
+        }
+
+        private void RenameFile()
+        {
+            try
+            {
+                var x = (FileEntry)fileList.SelectedItems[0].Tag;
+                var currentName = x.Name;
+                var popup = new PasswordUnlocker(currentName);
+                popup.Renamer();
+                popup.ShowDialog();
+                var newName = popup.EnteredText;
+                popup.Dispose();
+                if (currentName == newName) return;
+                if (string.IsNullOrEmpty(newName))
+                {
+                    MessageBox.Show("New name can't be blank", "CON Explorer", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                x.Name = newName;
+                fileList.SelectedItems[0].Text = newName;
+                Log("Renamed file '" + currentName + "' to '" + newName + "' successfully");
+                Log("Don't forget to save your changes");
+                ShowChanges(true);
+            }
+            catch
+            {
+                Log("Error renaming that file");
+            }
+        }
+
+        private void contextMenuStrip4_Opening(object sender, CancelEventArgs e)
+        {
+            menuRenameFolder.Visible = folderTree.SelectedNode != null;        
+        }
+
+        private void menuRenameFolder_Click(object sender, EventArgs e)
+        {
+            if (folderTree.SelectedNode == null) return;
+            try
+            {
+                var f = (FolderEntry)folderTree.SelectedNode.Tag;
+                var folder = folderTree.SelectedNode;
+                var currentName = f.Name;
+                var popup = new PasswordUnlocker(currentName);
+                popup.Renamer();
+                popup.ShowDialog();
+                var newName = popup.EnteredText;
+                popup.Dispose();
+                if (currentName == newName) return;
+                if (string.IsNullOrEmpty(newName))
+                {
+                    MessageBox.Show("New name can't be blank", "CON Explorer", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                folder.Text = newName;
+                folder.Name = newName;
+                f.Name = newName;               
+                Log("Renamed folder '" + currentName + "' to '" + newName + "' successfully");
+                Log("Don't forget to save your changes");
+                ShowChanges(true);
+            }
+            catch
+            {
+                Log("Error renaming that folder");
+            }
         }
     }
 }

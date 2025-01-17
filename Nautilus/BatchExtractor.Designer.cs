@@ -65,6 +65,8 @@
             this.chkPNG = new System.Windows.Forms.CheckBox();
             this.chkThumbs = new System.Windows.Forms.CheckBox();
             this.folderScanner = new System.ComponentModel.BackgroundWorker();
+            this.yARGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.extractToYARG = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
@@ -260,7 +262,8 @@
             // 
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.renamingOptionsToolStripMenuItem});
+            this.renamingOptionsToolStripMenuItem,
+            this.yARGToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(614, 24);
@@ -492,6 +495,23 @@
             this.folderScanner.DoWork += new System.ComponentModel.DoWorkEventHandler(this.folderScanner_DoWork);
             this.folderScanner.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.folderScanner_RunWorkerCompleted);
             // 
+            // yARGToolStripMenuItem
+            // 
+            this.yARGToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.extractToYARG});
+            this.yARGToolStripMenuItem.Name = "yARGToolStripMenuItem";
+            this.yARGToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
+            this.yARGToolStripMenuItem.Text = "YARG";
+            // 
+            // extractToYARG
+            // 
+            this.extractToYARG.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.extractToYARG.CheckOnClick = true;
+            this.extractToYARG.Name = "extractToYARG";
+            this.extractToYARG.Size = new System.Drawing.Size(236, 22);
+            this.extractToYARG.Text = "Extract to YARG exCON format";
+            this.extractToYARG.Click += new System.EventHandler(this.extractToYARG_Click);
+            // 
             // BatchExtractor
             // 
             this.AllowDrop = true;
@@ -574,5 +594,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
         private System.Windows.Forms.PictureBox picPin;
+        private System.Windows.Forms.ToolStripMenuItem yARGToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem extractToYARG;
     }
 }

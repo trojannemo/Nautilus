@@ -510,6 +510,10 @@ namespace Nautilus
                         else if (line.Contains("track=") || line.Contains("track ="))
                         {
                             song.TrackNumber = Convert.ToInt16(Tools.GetConfigString(line));
+                            if (song.TrackNumber > 100)
+                            {
+                                song.TrackNumber = 1; //for stupid values like 16,000
+                            }
                         }
                         else if (line.Contains("delay =") || line.Contains("delay="))
                         {
@@ -537,7 +541,7 @@ namespace Nautilus
                         }
                         else if (line.Contains("diff_vocals_harm"))
                         {
-                            song.VocalParts = Convert.ToInt16(Tools.GetConfigString(line));
+                            //song.VocalParts = Convert.ToInt16(Tools.GetConfigString(line)); THIS IS WRONG
                         }
                     }
                     catch (Exception)

@@ -22,6 +22,7 @@ namespace Nautilus
         private int ExpertCount;
         private List<string> PhaseShiftSongs;
         private static Color mMenuBackground;
+        private string songAuthor;
 
         public BatchRenamer(Color ButtonBackColor, Color ButtonTextColor)
         {
@@ -203,13 +204,13 @@ namespace Nautilus
             return sort;
         }
 
-        private string SortFiles(string display, string description, uint ID, string songname)
+        private string SortFiles(string display, string description, uint ID, string songName)
         {
             var sort = "";
             var song = "";
             var disp = display.ToLowerInvariant();
             var desc = description.ToLowerInvariant();
-            var name = songname.ToLowerInvariant();
+            var name = songName.ToLowerInvariant();
 
             if (!tryToSortFiles.Checked || (string.IsNullOrWhiteSpace(display) && string.IsNullOrWhiteSpace(name)))
             {
@@ -280,53 +281,64 @@ namespace Nautilus
             return sort;
         }
 
-        private string arrangeName(string song, string artist)
+        private string arrangeName(string song, string artist, int year)
         {
             var arranged = "";
-            if (renameTheArtistSong.Checked)
+            if (renameYearArtist.Checked && year > 0)
             {
-                arranged = artist + " - " + song;
+                arranged = "(" + year + ") " + artist + " - " + song;
             }
-            else if (renameArtistTheSong.Checked)
+            else if (renameYearSong.Checked && year > 0)
             {
-                if (artist.Length > 6)
+                arranged = "(" + year + ") " + song + " - " + artist;
+            }
+            else
+            {
+                if (renameTheArtistSong.Checked)
                 {
-                    if (artist.Substring(0, 4) == "The ")
+                    arranged = artist + " - " + song;
+                }
+                else if (renameArtistTheSong.Checked)
+                {
+                    if (artist.Length > 6)
                     {
-                        arranged = artist.Substring(4, artist.Length - 4) + ", The - " + song;
+                        if (artist.Substring(0, 4) == "The ")
+                        {
+                            arranged = artist.Substring(4, artist.Length - 4) + ", The - " + song;
+                        }
+                        else
+                        {
+                            arranged = artist + " - " + song;
+                        }
                     }
                     else
                     {
                         arranged = artist + " - " + song;
                     }
                 }
-                else
+                else if (renameSongTheArtist.Checked)
                 {
-                    arranged = artist + " - " + song;
+                    arranged = song + " - " + artist;
                 }
-            }
-            else if (renameSongTheArtist.Checked)
-            {
-                arranged = song + " - " + artist;
-            }
-            else if (renameSongArtistThe.Checked)
-            {
-                if (artist.Length > 6)
+                else if (renameSongArtistThe.Checked)
                 {
-                    if (artist.Substring(0, 4) == "The ")
+                    if (artist.Length > 6)
                     {
-                        arranged = song + " - " + artist.Substring(4, artist.Length - 4) + ", The";
+                        if (artist.Substring(0, 4) == "The ")
+                        {
+                            arranged = song + " - " + artist.Substring(4, artist.Length - 4) + ", The";
+                        }
+                        else
+                        {
+                            arranged = song + " - " + artist;
+                        }
                     }
                     else
                     {
                         arranged = song + " - " + artist;
                     }
                 }
-                else
-                {
-                    arranged = song + " - " + artist;
-                }
-            }
+            }            
             return arranged;
         }
 
@@ -445,7 +457,7 @@ namespace Nautilus
                         {
                             artist = Tools.CleanString(artist, true);
 
-                            rename = arrangeName(song, artist);
+                            rename = arrangeName(song, artist, 0);
                         }
                         else
                         {
@@ -476,7 +488,7 @@ namespace Nautilus
             }
             if (megasusMod)
             {
-                rename = arrangeName(song, song);
+                rename = arrangeName(song, song, 0);
             }
             rename = rename.Replace(".", "").Trim();
             if (string.IsNullOrWhiteSpace(rename))
@@ -524,6 +536,7 @@ namespace Nautilus
             if (!Parser.ReadDTA(xDTA) || !Parser.Songs.Any()) return "";
             var name = Tools.CleanString(Parser.Songs[0].Name, false, ignoreXboxFilesystemLimitations.Checked);
             var artist = Tools.CleanString(Parser.Songs[0].Artist, false, ignoreXboxFilesystemLimitations.Checked);
+            var year = Parser.Songs[0].YearReleased;
             var internalName = Parser.Songs[0].InternalName;
             if (renameInternalName.Checked) return internalName;
             if (!string.IsNullOrWhiteSpace(internalName) && !XOnly && xPackage.ParseSuccess)
@@ -548,7 +561,7 @@ namespace Nautilus
             string rename;
             if (Parser.Songs.Count == 1) //if single song, packs will have values > 1
             {
-                rename = arrangeName(name, artist);
+                rename = arrangeName(name, artist, year);
                 if (replaceSpacesWithUnderscores.Checked)
                 {
                     rename = rename.Replace(" ", "_");
@@ -662,6 +675,8 @@ namespace Nautilus
             renameArtistTheSong.Enabled = renameFiles.Checked;
             renameSongTheArtist.Enabled = renameFiles.Checked;
             renameSongArtistThe.Enabled = renameFiles.Checked;
+            renameYearSong.Enabled = renameFiles.Checked;
+            renameYearArtist.Enabled = renameFiles.Checked;
         }
 
         private void replaceSpacesWithUnderscoresToolStripMenuItem_Click(object sender, EventArgs e)
@@ -680,6 +695,10 @@ namespace Nautilus
             }
             tryDetailedSubsorting.Enabled = tryToSortFiles.Checked;
             btnBegin.Enabled = renameFiles.Checked || tryToSortFiles.Checked;
+            if (tryToSortFiles.Checked)
+            {
+                sortByAuthor.Checked = false;
+            }
         }
 
         private void deleteOlderCopiesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -753,28 +772,28 @@ namespace Nautilus
             ExpertCount = 0;
             var skipped = 0;
 
-            foreach (var file in inputFiles.Where(File.Exists).TakeWhile(file => !FileRenamer.CancellationPending))
+            foreach (var sourceFile in inputFiles.Where(File.Exists).TakeWhile(file => !FileRenamer.CancellationPending))
             {
                 newName = "";
                 XOnly = false;
                 try
                 {
-                    switch (Path.GetExtension(file).ToLowerInvariant())
+                    switch (Path.GetExtension(sourceFile).ToLowerInvariant())
                     {                        
                         default:
-                            if (VariousFunctions.ReadFileType(file) == XboxFileType.STFS)
+                            if (VariousFunctions.ReadFileType(sourceFile) == XboxFileType.STFS)
                             {
                                 try
                                 {
-                                    xPackage = new STFSPackage(file);
+                                    xPackage = new STFSPackage(sourceFile);
                                     if (!xPackage.ParseSuccess)
                                     {
-                                        Log("Error opening file '" + Path.GetFileName(file) + "' for renaming. Skipping");
+                                        Log("Error opening file '" + Path.GetFileName(sourceFile) + "' for renaming/sorting. Skipping...");
                                         xPackage.CloseIO();
                                     }
                                     else
                                     {
-                                        var origFile = new FileInfo(file);
+                                        var origFile = new FileInfo(sourceFile);
                                         var disp = Tools.FixBadChars(xPackage.Header.Title_Display.Replace("\"", ""));
                                         var desc = Tools.FixBadChars(xPackage.Header.Description.Replace("\"", ""));
                                         var ID = xPackage.Header.TitleID;
@@ -783,28 +802,60 @@ namespace Nautilus
                                         {
                                             if (Tools.DescribesPack(desc, disp))
                                             {
-                                                newName = renameBasic(disp, desc, file);
+                                                newName = renameBasic(disp, desc, sourceFile);
                                             }
                                             else
                                             {
                                                 var xFile = xPackage.GetFile("songs/songs.dta");
                                                 var xDTA = xFile.Extract();
-                                                newName = xDTA != null && xDTA.Length > 0 ? renameAdvanced(xDTA) : renameBasic(disp, desc, file);
+                                                if (sortByAuthor.Checked)
+                                                {
+                                                    Parser.ReadDTA(xDTA);
+                                                    if (Parser.Songs.Count == 0)
+                                                    {
+                                                        Log("Error reading songs.dta file for '" + Path.GetFileName(sourceFile) + "'");
+                                                        xPackage.CloseIO();
+                                                        skipped++;
+                                                        continue;
+                                                    }
+                                                    xPackage.CloseIO();
+                                                    songAuthor = Tools.CleanString(Parser.Songs[0].ChartAuthor, false, true);
+                                                    if (string.IsNullOrEmpty(songAuthor))
+                                                    {
+                                                        songAuthor = "Unknown";
+                                                    }
+                                                    var folder = txtFolder.Text + "\\_Sorted\\" + songAuthor + "\\";
+                                                    if (!Directory.Exists(folder))
+                                                    {
+                                                        Directory.CreateDirectory(folder);
+                                                    }
+                                                    var targetFile = folder + Tools.CleanString(Path.GetFileName(sourceFile), false, true);
+                                                    if (File.Exists(targetFile))
+                                                    {
+                                                        targetFile = targetFile + "(2)";//for duplicates
+                                                        duplicates++;
+                                                    }
+                                                    Tools.MoveFile(sourceFile, targetFile);
+                                                    Log("Sorted file '" + Path.GetFileName(sourceFile) + "' to folder '" + songAuthor + "'");
+                                                    sorted++;
+                                                    continue;
+                                                }
+                                                newName = xDTA != null && xDTA.Length > 0 ? renameAdvanced(xDTA) : renameBasic(disp, desc, sourceFile);
                                                 if (string.IsNullOrWhiteSpace(newName))
                                                 {
-                                                    newName = renameBasic(disp, desc, file);
+                                                    newName = renameBasic(disp, desc, sourceFile);
                                                 }
                                             }
                                         }
                                         else
                                         {
-                                            newName = Path.GetFileName(file);
+                                            newName = Path.GetFileName(sourceFile);
                                         }
                                         xPackage.CloseIO();
 
                                         if (string.IsNullOrWhiteSpace(newName))
                                         {
-                                            Log("Couldn't get a better name for '" + Path.GetFileName(file) + "'! Skipping");
+                                            Log("Couldn't get a better name for '" + Path.GetFileName(sourceFile) + "'! Skipping");
                                         }
                                         else
                                         {
@@ -820,11 +871,11 @@ namespace Nautilus
                                             if (!ignoreXboxFilesystemLimitations.Checked)
                                             {
                                                 newName = CleanForXbox(newName);
-                                                newfile = Path.GetDirectoryName(file) + "\\" + sort + newName;
+                                                newfile = Path.GetDirectoryName(sourceFile) + "\\" + sort + newName;
                                             }
                                             else
                                             {
-                                                newfile = Path.GetDirectoryName(file) + "\\" + sort + newName;
+                                                newfile = Path.GetDirectoryName(sourceFile) + "\\" + sort + newName;
                                             }
 
                                             if (tryDetailedSubsorting.Checked && separateXonlySongs.Checked && XOnly)
@@ -841,11 +892,11 @@ namespace Nautilus
                                                 ExpertCount++;
                                             }
 
-                                            if (!String.Equals(file, newfile, StringComparison.InvariantCultureIgnoreCase))
+                                            if (!String.Equals(sourceFile, newfile, StringComparison.InvariantCultureIgnoreCase))
                                                 //only if the old file isn't the same as the new file
                                             {
                                                 //if the file names are the same, only sorting is being done, mark as not renamed
-                                                if (Path.GetFileName(file) == Path.GetFileName(newfile))
+                                                if (Path.GetFileName(sourceFile) == Path.GetFileName(newfile))
                                                 {
                                                     skipped++;
                                                 }
@@ -854,7 +905,7 @@ namespace Nautilus
                                                 {
                                                     if (Directory.Exists(newfile))
                                                     {
-                                                        MessageBox.Show("The internal name for file '" + Path.GetFileName(file) + "' is '" + newName +
+                                                        MessageBox.Show("The internal name for file '" + Path.GetFileName(sourceFile) + "' is '" + newName +
                                                                         "'\nIn a moment of comic-book coincidence, there is also a folder with that same name in that same directory!\nSince these are extensionless files, Windows won't allow me to name your file the same name as the folder...\nTo work around this, I added '_rb3con' to your file, so now it is\n'" +
                                                                         newName + "_rb3con'\n\nCrazy Windows huh", Text,
                                                             MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -892,9 +943,9 @@ namespace Nautilus
                                                             }
                                                             else
                                                             {
-                                                                Tools.SendtoTrash(file);
+                                                                Tools.SendtoTrash(sourceFile);
                                                                 deleted++;
-                                                                Tools.MoveFile(newfile, file);
+                                                                Tools.MoveFile(newfile, sourceFile);
                                                             }
                                                         }
                                                         else
@@ -903,32 +954,32 @@ namespace Nautilus
                                                         }
                                                     }
 
-                                                    if (Tools.MoveFile(file, newfile))
+                                                    if (Tools.MoveFile(sourceFile, newfile))
                                                     {
-                                                        if (Path.GetFileName(file) != newName)
+                                                        if (Path.GetFileName(sourceFile) != newName)
                                                         {
-                                                            Log("File '" + Path.GetFileName(file) + "' was successfully renamed to '" + newName + "'");
+                                                            Log("File '" + Path.GetFileName(sourceFile) + "' was successfully renamed to '" + newName + "'");
                                                             renamed++;
                                                         }
                                                         if (sort != "")
                                                         {
-                                                            Log("File '" + Path.GetFileName(file) + "' was sorted to folder '" + sort.Substring(0, sort.Length - 1) + "'");
+                                                            Log("File '" + Path.GetFileName(sourceFile) + "' was sorted to folder '" + sort.Substring(0, sort.Length - 1) + "'");
                                                             sorted++;
                                                         }
                                                         if (XOnly && tryDetailedSubsorting.Checked && separateXonlySongs.Checked)
                                                         {
-                                                            Log("File '" + Path.GetFileName(file) + "' was Expert-Only and was sorted to folder '" +
-                                                                (Path.GetDirectoryName(newfile).Replace(Path.GetDirectoryName(file) + "\\", "")) + "'");
+                                                            Log("File '" + Path.GetFileName(sourceFile) + "' was Expert-Only and was sorted to folder '" +
+                                                                (Path.GetDirectoryName(newfile).Replace(Path.GetDirectoryName(sourceFile) + "\\", "")) + "'");
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        Log("Looks like renaming file '" + Path.GetFileName(file) + "' failed. Sorry");
+                                                        Log("Looks like renaming file '" + Path.GetFileName(sourceFile) + "' failed. Sorry");
                                                     }
                                                 }
                                                 catch (Exception ex)
                                                 {
-                                                    Log("There was an error renaming file '" + Path.GetFileName(file));
+                                                    Log("There was an error renaming file '" + Path.GetFileName(sourceFile));
                                                     Log("The error says: " + ex.Message);
                                                 }
                                             }
@@ -941,25 +992,25 @@ namespace Nautilus
                                 }
                                 catch (Exception ex)
                                 {
-                                    Log("There was an error processing file '" + Path.GetFileName(file) + "'. Skipping");
+                                    Log("There was an error processing file '" + Path.GetFileName(sourceFile) + "'. Skipping");
                                     Log("The error says: " + ex.Message);
                                 }
                             }
                             break;
                         case ".mid":
-                            if (!Directory.Exists(Path.GetDirectoryName(file) + "\\midi"))
+                            if (!Directory.Exists(Path.GetDirectoryName(sourceFile) + "\\midi"))
                             {
-                                Directory.CreateDirectory(Path.GetDirectoryName(file) + "\\midi");
+                                Directory.CreateDirectory(Path.GetDirectoryName(sourceFile) + "\\midi");
                             }
-                            Tools.MoveFile(file, Path.GetDirectoryName(file) + "\\midi\\" + Path.GetFileName(file));
+                            Tools.MoveFile(sourceFile, Path.GetDirectoryName(sourceFile) + "\\midi\\" + Path.GetFileName(sourceFile));
                             midifiles++;
                             break;
                         case ".rba":
-                            if (!Directory.Exists(Path.GetDirectoryName(file) + "\\rba"))
+                            if (!Directory.Exists(Path.GetDirectoryName(sourceFile) + "\\rba"))
                             {
-                                Directory.CreateDirectory(Path.GetDirectoryName(file) + "\\rba");
+                                Directory.CreateDirectory(Path.GetDirectoryName(sourceFile) + "\\rba");
                             }
-                            Tools.MoveFile(file, Path.GetDirectoryName(file) + "\\rba\\" + Path.GetFileName(file));
+                            Tools.MoveFile(sourceFile, Path.GetDirectoryName(sourceFile) + "\\rba\\" + Path.GetFileName(sourceFile));
                             rbafiles++;
                             break;
                     }
@@ -971,7 +1022,19 @@ namespace Nautilus
                 }
             }
 
-            if (renamed > 0)
+            if (sortByAuthor.Checked)
+            {
+                if (sorted > 0)
+                {
+                    Log("Successfully sorted " + sorted + (sorted > 1 ? " files" : " file"));
+
+                    if (skipped > 0)
+                    {
+                        Log("Skipped sorting " + skipped + (skipped > 1 ? " files" : " file"));
+                    }
+                }
+            }
+            else if (renamed > 0)
             {
                 Log("Successfully renamed " + renamed + (renamed > 1 ? " files" : " file"));
 
@@ -1006,7 +1069,7 @@ namespace Nautilus
                 }
             }
 
-            if (sorted > 0)
+            if (!sortByAuthor.Checked && sorted > 0)
             {
                 Log("Successfully sorted " + sorted + (sorted > 1 ? " files" : "file"));
             }
@@ -1156,7 +1219,7 @@ namespace Nautilus
                 sr.Dispose();
                 if (string.IsNullOrWhiteSpace(Artist) || string.IsNullOrWhiteSpace(Song)) continue;
                 Log("Song #" + (i + 1) + " is '" + Artist + " - " + Song + "'");
-                var new_name = arrangeName(Song, Artist);
+                var new_name = arrangeName(Song, Artist, 0);
                 if (normalizeFeaturedArtists.Checked)
                 {
                     new_name = Tools.FixFeaturedArtist(new_name);
@@ -1260,7 +1323,18 @@ namespace Nautilus
             renameArtistTheSong.Checked = false;
             renameSongTheArtist.Checked = false;
             renameSongArtistThe.Checked = false;
+            renameYearArtist.Checked = false;
+            renameYearSong.Checked = false;
             ((ToolStripMenuItem) sender).Checked = true;
+        }
+
+        private void sortByAuthor_Click(object sender, EventArgs e)
+        {
+            if (sortByAuthor.Checked) 
+            {
+                tryToSortFiles.Checked = false;
+                tryDetailedSubsorting.Enabled = false;
+            }
         }
     }
 }

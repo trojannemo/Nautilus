@@ -17,6 +17,7 @@ using Encoder = System.Drawing.Imaging.Encoder;
 using Path = System.IO.Path;
 using NautilusFREE;
 using static Nautilus.YARGSongFileStream;
+using Nautilus.zlib;
 
 
 namespace Nautilus
@@ -2981,10 +2982,111 @@ namespace Nautilus
             return Directory.Exists(rsFolder);
         }
 
+        private (byte[] header, int[] values) CreateYARGHeader()
+        {
+            byte[] header = new byte[24];
+
+            // Add the YARGSONG signature
+            Array.Copy(new byte[] { (byte)'Y', (byte)'A', (byte)'R', (byte)'G', (byte)'S', (byte)'O', (byte)'N', (byte)'G' }, header, 8);
+
+            // Generate a random 'z' value as an int
+            Random random = new Random();
+            int z = random.Next(0, 256); // Start with a byte-sized value for the header
+
+            // Write only the lower byte of z to the header
+            header[8] = (byte)z;
+
+            // Generate a random 15-byte cipher set
+            byte[] set = new byte[15];
+            random.NextBytes(set);
+            Array.Copy(set, 0, header, 9, 15);
+
+            // Calculate _values
+            int[] values = CalculateYARGValues(z, set);
+
+            return (header, values);
+        }
+
+        private int[] CalculateYARGValues(int z, byte[] set)
+        {
+            if (set.Length != 15)
+                throw new ArgumentException("Set must be exactly 15 bytes long.");
+
+            // Process z as an integer
+            z += 1679; // Large prime number
+            int w = (z ^ 4) - z * 2;
+            int n = 25 * w - 5;
+            int x = (w + (z << 1)) ^ 4;
+
+            // Add the missing "infinite summation" logic
+            int l = (n + 73) * (n + 23);
+            l -= n * n + 96 * n;
+            x = -l + n + x - w * (5 * 5);
+
+            x = (x + 5) % 255; // Ensure x fits in a byte range
+
+            // Calculate values array
+            int[] values = new int[4];
+            unchecked
+            {
+                for (int i = 0, j = 0; i < 24; i++, j += x)
+                {
+                    values[0] += (byte)(set[j % 15] + i * 3298 + 88903);
+                    values[1] -= set[(j + 7001) % 15];
+                    values[2] += set[j % 15];
+                    values[3] += j << 2;
+                }
+            }
+
+            return values;
+        }
+
+        public void EncryptYARG(byte[] buffer, int offset, int count, int[] values)
+        {
+            int pos = 0;
+            unchecked
+            {
+                int a = values[0];
+                int b = values[1];
+                int c = values[2];
+
+                for (int i = 0; i < count; i++)
+                {
+                    buffer[offset + i] = (byte)(((buffer[offset + i] ^ a) + ((i + pos) * c) + b));
+                }
+            }
+        }
+
+        public bool EncryptSNGtoYargSong(string sngFile)
+        {
+            var outFile = sngFile.Replace(".sng", ".yargsong");
+            using (var outputStream = new FileStream(outFile, FileMode.Create))
+            {
+                // Generate the header and values
+                var (header, values) = CreateYARGHeader();
+                outputStream.Write(header, 0, header.Length);
+
+                // Encrypt and write the file data
+                byte[] buffer = new byte[4096];
+                int bytesRead;
+
+                using (var inputStream = new FileStream(sngFile, FileMode.Open))
+                {
+                    while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        EncryptYARG(buffer, 0, bytesRead, values);
+                        outputStream.Write(buffer, 0, bytesRead);
+                    }
+                }
+            }
+            File.Delete(sngFile);
+            return File.Exists(outFile);
+        }
+
         public bool DecryptExtractYARGSONG(string inFile, string outFolder)
         {
             byte[] SNGPKG = { (byte)'S', (byte)'N', (byte)'G', (byte)'P', (byte)'K', (byte)'G' };
-            var tempFile = inFile.Replace(".yargsong", ".sng");
+            var tempFile = Path.GetTempPath() + Path.GetFileNameWithoutExtension(inFile) + ".sng";
             DeleteFile(tempFile);
             using (FileStream fileStream = File.OpenRead(inFile))
             {                
@@ -3009,7 +3111,7 @@ namespace Nautilus
             return success;
         }
 
-        public bool ExtractSNG(string inFile, string outFolder)
+        public bool PackSNG(string inFolder, string outFolder, bool doOpus)
         {
             var path = Application.StartupPath + "\\bin\\";
             if (!File.Exists(path + "SngCli.exe"))
@@ -3019,7 +3121,8 @@ namespace Nautilus
             }
             try
             {
-                var arg = " decode -i \"" + inFile + "\" -o \"" + outFolder + "\"";
+                var opus = doOpus ? " --opusEncode" : "";
+                var arg = " encode -i \"" + inFolder + "\" -o \"" + outFolder + "\" --noStatusBar" + opus;
                 var app = new ProcessStartInfo
                 {
                     CreateNoWindow = true,
@@ -3040,10 +3143,55 @@ namespace Nautilus
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error extracting package:\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error creating SNG package:\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
-            return Directory.Exists(outFolder) && File.Exists(outFolder + "\\song.ini");
+            return File.Exists(outFolder);
+        }
+
+        public bool ExtractSNG(string inFile, string outFolder)
+        {       
+            var path = Application.StartupPath + "\\bin\\";
+            if (!File.Exists(path + "SngCli.exe"))
+            {
+                MessageBox.Show("SngCli.exe is missing from the bin directory and I can't continue without it", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            //updated version of SNGCLI now won't accept individual sng files only folders...ridiculous
+            var tempFolder = Path.GetTempPath() + "sng";
+            DeleteFolder(tempFolder, true);
+            Directory.CreateDirectory(tempFolder);
+            File.Copy(inFile, tempFolder + "\\" + Path.GetFileName(inFile), true);
+
+            try
+            {
+                var arg = " decode -i \"" + tempFolder + "\" -o \"" + outFolder + "\" --noStatusBar";
+                var app = new ProcessStartInfo
+                {
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = false,
+                    RedirectStandardError = false,
+                    RedirectStandardInput = false,
+                    UseShellExecute = false,
+                    FileName = path + "SngCli.exe",
+                    Arguments = arg,
+                    WorkingDirectory = path
+                };
+                var process = Process.Start(app);
+                do
+                {
+                    //
+                } while (!process.HasExited);
+                process.Dispose();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error extracting SNG package:\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            DeleteFolder(tempFolder, true);
+            return Directory.Exists(outFolder) && File.Exists(outFolder + "\\" + Path.GetFileNameWithoutExtension(inFile) + "\\song.ini");
         }
 
         public bool ExtractPKG(string pkg, string folder, out string klic)

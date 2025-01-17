@@ -293,6 +293,8 @@ namespace Nautilus
         private bool isSearchingForUnpitchedVocals;
         private List<string[,]> HasUnpitchedVocals;
         private List<string[,]> HasNoVocals;
+        private List<string[,]> MissingFills;
+        private List<string[,]> MissingOverdrive;
         private nTools nautilus3;
         private bool doMoggBatch;
 
@@ -306,6 +308,8 @@ namespace Nautilus
             NeedProDrums = new List<string[,]>();
             HasUnpitchedVocals = new List<string[,]>();
             HasNoVocals = new List<string[,]>();
+            MissingFills = new List<string[,]>();
+            MissingOverdrive = new List<string[,]>();
             SongsToSearch = new List<string>();
             MoggFiles = new List<string>();
             filesToProcess = new List<string>();
@@ -1760,6 +1764,7 @@ namespace Nautilus
 
         private void AnalyzeMIDI(string midi, bool DoNotDisplay = false, bool clearItems = false)
         {
+            ResetAll(!clearItems);
             HaveFile = true;
             lstStats.Invoke(new MethodInvoker(() => lstStats.BackgroundImage = null));
             if (clearItems)
@@ -3147,9 +3152,12 @@ namespace Nautilus
             return totalmeasures;
         }
 
-        private void ResetAll()
+        private void ResetAll(bool batch = false)
         {
-            HaveFile = false;
+            if (!batch)
+            {
+                HaveFile = false;
+            }            
             TotalMIDINotes = 0;
             TotalPlayableNotes = 0;
             TicksPerQuarter = 0;
@@ -3375,6 +3383,8 @@ namespace Nautilus
             NeedProDrums = new List<string[,]>();
             HasUnpitchedVocals = new List<string[,]>();
             HasNoVocals = new List<string[,]>();
+            MissingFills = new List<string[,]>();
+            MissingOverdrive = new List<string[,]>();
             TotalMIDIs = 0;
             TotalCONs = 0;
             ProBass17X = 0;
@@ -4592,6 +4602,402 @@ namespace Nautilus
             AnalyzeMIDI(MIDI);
             AnalyzeMoggFiles(new List<string> { MOGG[0] });
             AnalyzeAlbumArt(PNG_PS3[0]);
-        }              
+        }
+
+        private void checkForNoDrumFills_Click(object sender, EventArgs e)
+        {
+            var ofd = new FolderPicker
+            {
+                Title = "Select folder containing CON/MIDI files",
+                InputPath = Environment.CurrentDirectory,
+            };
+            if (ofd.ShowDialog(IntPtr.Zero) != true) return;
+            Environment.CurrentDirectory = ofd.ResultPath;
+
+            ResetAll();
+            ShowWait(true);
+            HaveFile = true;
+            proDrumsFolder = ofd.ResultPath;
+            lstStats.BackgroundImage = null;
+            lstStats.Items.Clear();
+            Log("Beginning batch analysis...");
+            btnCancel.Visible = true;
+            backgroundWorker6.RunWorkerAsync();
+        }
+
+        private void backgroundWorker6_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var files = Directory.GetFiles(proDrumsFolder, "*.*").ToList();
+            var CONs = new List<string>();
+            foreach (var file in files.Where(file => !Path.GetExtension(file).ToLowerInvariant().Contains("ex")))//avoid EXEcutables
+            {
+                if (Path.GetExtension(file).ToLowerInvariant() == ".mid")
+                {
+                    CONs.Add(file);
+                }
+                else if (VariousFunctions.ReadFileType(file) == XboxFileType.STFS)
+                {
+                    CONs.Add(file);
+                }
+            }
+
+            if (!CONs.Any())
+            {
+                Log("No CON or MIDI files found in that directory");
+                return;
+            }
+
+            foreach (var con in CONs.TakeWhile(con => !CancelWorkers))
+            {
+                if (Path.GetExtension(con).ToLowerInvariant() == ".mid")
+                {
+                    CheckForMissingFills(con, "", Path.GetFileName(con));
+                    TotalMIDIs++;
+                }
+                else if (VariousFunctions.ReadFileType(con) == XboxFileType.STFS)
+                {
+                    TotalCONs++;
+
+                    var dta = Application.StartupPath + "\\bin\\temp.dta";
+                    Tools.DeleteFile(dta);
+
+                    var xPackage = new STFSPackage(con);
+                    if (!xPackage.ParseSuccess) continue;
+
+                    var xent = xPackage.GetFolder("songs");
+                    if (xent == null)
+                    {
+                        xPackage.CloseIO();
+                        continue;
+                    }
+
+                    var xfile = xPackage.GetFile("songs/songs.dta");
+                    if (xfile == null)
+                    {
+                        xPackage.CloseIO();
+                        continue;
+                    }
+
+                    var xDTA = xfile.Extract();
+                    if (xDTA == null || xDTA.Length == 0)
+                    {
+                        xPackage.CloseIO();
+                        continue;
+                    }
+                    var sr = new StreamReader(new MemoryStream(xDTA));
+                    var name = "";
+
+                    while (sr.Peek() >= 0)
+                    {
+                        var line = sr.ReadLine();
+
+                        if (string.IsNullOrWhiteSpace(line)) continue;
+
+                        if (line.ToLowerInvariant().Contains("songs/") && !line.Contains("midi_file") && !line.Contains(".mid"))
+                        {
+                            name = Parser.GetInternalName(line);
+                        }
+
+                        if (string.IsNullOrWhiteSpace(name)) continue;
+                        xfile = xPackage.GetFile("songs/" + name + "/" + name + ".mid");
+                        if (xfile == null) continue;
+
+                        var midi = Application.StartupPath + "\\bin\\analyze.mid";
+                        Tools.DeleteFile(midi);
+                        if (!xfile.ExtractToFile(midi)) continue;
+
+                        TotalMIDIs++;
+                        CheckForMissingFills(midi, con, name);
+                        name = "";
+                    }
+                    sr.Dispose();
+                    xPackage.CloseIO();
+                }
+            }            
+
+            if (!MissingFills.Any()) return;
+
+            var folder = proDrumsFolder + "\\_MISSING_FILLS\\";
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            foreach (var missing in MissingFills)
+            {
+                if (!File.Exists(missing[0, 1])) continue; //if already moved, ignore
+                var newfile = folder + Path.GetFileName(missing[0, 1]);
+                Tools.DeleteFile(newfile);
+                Tools.MoveFile(missing[0, 1], newfile);
+            }
+        }
+
+        private void CheckForMissingFills(string midi, string con, string name)
+        {
+            MIDIFile = Tools.NemoLoadMIDI(midi);
+            if (MIDIFile == null)
+            {
+                Log("Unable to load MIDI file '" + Path.GetFileName(midi) + "' to analyze it");
+                return;
+            }
+
+            var hasDrums = false;
+            DrumsFills = 0;//reset for every song
+            DrumsX = 0;//reset for every song
+            for (var i = 0; i < MIDIFile.Events.Tracks; i++)
+            {
+                var trackname = MIDIFile.Events[i][0].ToString();
+                if (!trackname.Contains("DRUMS")) continue;
+                hasDrums = true;
+                AnalyzeDrums(MIDIFile.Events[i]);
+                break;
+            }
+
+            if (!hasDrums || DrumsX == 0) return; //avoid false positives like Song of the Century with a blank PART DRUMS chart
+            var hasFills = DrumsFills > 0;
+
+            if (hasFills) return;
+            MissingFills.Add(new[,] { { name, string.IsNullOrWhiteSpace(con) ? midi : con } });
+            
+            if (string.IsNullOrWhiteSpace(con)) return;
+            Tools.DeleteFile(midi);
+        }
+
+        private void backgroundWorker6_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {            
+            Log("Analyzed " + TotalMIDIs + " MIDI " + (TotalMIDIs == 1 ? "file" : "files") + (TotalCONs == 0 ? "" : (" in " + TotalCONs + " CON " + (TotalCONs == 1 ? "file" : "files"))));
+
+            if (MissingFills.Any())
+            {
+                Log(MissingFills.Count + (MissingFills.Count == 1 ? " song is" : " songs are") + " missing drums fills:");
+                Log("MIDI Files:", "CON Files:");
+                foreach (var missing in MissingFills)
+                {
+                    var con = Path.GetFileName(missing[0, 1]);
+                    Log(missing[0, 0] + ".mid", string.IsNullOrWhiteSpace(con) || con.ToLowerInvariant().EndsWith(".mid", StringComparison.Ordinal) ? "N/A" : con);
+                }
+            }
+            else
+            {
+                Log((TotalMIDIs == 1 ? "The file isn't" : "None of the files are") + " missing drum fills!");
+            }
+            Log("");
+
+            Log("Right-click to export this information");
+            ShowWait(false);
+            btnCancel.Visible = false;
+            CancelWorkers = false;
+        }
+
+        private void checkForNoOverdrive_Click(object sender, EventArgs e)
+        {
+            var ofd = new FolderPicker
+            {
+                Title = "Select folder containing CON/MIDI files",
+                InputPath = Environment.CurrentDirectory,
+            };
+            if (ofd.ShowDialog(IntPtr.Zero) != true) return;
+            Environment.CurrentDirectory = ofd.ResultPath;
+
+            ResetAll();
+            ShowWait(true);
+            HaveFile = true;
+            proDrumsFolder = ofd.ResultPath;
+            lstStats.BackgroundImage = null;
+            lstStats.Items.Clear();
+            Log("Beginning batch analysis...");
+            btnCancel.Visible = true;
+            backgroundWorker7.RunWorkerAsync();
+        }
+
+        private void backgroundWorker7_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var files = Directory.GetFiles(proDrumsFolder, "*.*").ToList();
+            var CONs = new List<string>();
+            foreach (var file in files.Where(file => !Path.GetExtension(file).ToLowerInvariant().Contains("ex")))//avoid EXEcutables
+            {
+                if (Path.GetExtension(file).ToLowerInvariant() == ".mid")
+                {
+                    CONs.Add(file);
+                }
+                else if (VariousFunctions.ReadFileType(file) == XboxFileType.STFS)
+                {
+                    CONs.Add(file);
+                }
+            }
+
+            if (!CONs.Any())
+            {
+                Log("No CON or MIDI files found in that directory");
+                return;
+            }
+
+            foreach (var con in CONs.TakeWhile(con => !CancelWorkers))
+            {
+                if (Path.GetExtension(con).ToLowerInvariant() == ".mid")
+                {
+                    CheckForMissingOverdrive(con, "", Path.GetFileName(con));
+                    TotalMIDIs++;
+                }
+                else if (VariousFunctions.ReadFileType(con) == XboxFileType.STFS)
+                {
+                    TotalCONs++;
+
+                    var dta = Application.StartupPath + "\\bin\\temp.dta";
+                    Tools.DeleteFile(dta);
+
+                    var xPackage = new STFSPackage(con);
+                    if (!xPackage.ParseSuccess) continue;
+
+                    var xent = xPackage.GetFolder("songs");
+                    if (xent == null)
+                    {
+                        xPackage.CloseIO();
+                        continue;
+                    }
+
+                    var xfile = xPackage.GetFile("songs/songs.dta");
+                    if (xfile == null)
+                    {
+                        xPackage.CloseIO();
+                        continue;
+                    }
+
+                    var xDTA = xfile.Extract();
+                    if (xDTA == null || xDTA.Length == 0)
+                    {
+                        xPackage.CloseIO();
+                        continue;
+                    }
+                    var sr = new StreamReader(new MemoryStream(xDTA));
+                    var name = "";
+
+                    while (sr.Peek() >= 0)
+                    {
+                        var line = sr.ReadLine();
+
+                        if (string.IsNullOrWhiteSpace(line)) continue;
+
+                        if (line.ToLowerInvariant().Contains("songs/") && !line.Contains("midi_file") && !line.Contains(".mid"))
+                        {
+                            name = Parser.GetInternalName(line);
+                        }
+
+                        if (string.IsNullOrWhiteSpace(name)) continue;
+                        xfile = xPackage.GetFile("songs/" + name + "/" + name + ".mid");
+                        if (xfile == null) continue;
+
+                        var midi = Application.StartupPath + "\\bin\\analyze.mid";
+                        Tools.DeleteFile(midi);
+                        if (!xfile.ExtractToFile(midi)) continue;
+
+                        TotalMIDIs++;
+                        CheckForMissingOverdrive(midi, con, name);
+                        name = "";
+                    }
+                    sr.Dispose();
+                    xPackage.CloseIO();
+                }
+            }
+
+            if (!MissingOverdrive.Any()) return;
+
+            var folder = proDrumsFolder + "\\_MISSING_OVERDRIVE\\";
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            foreach (var missing in MissingOverdrive)
+            {
+                if (!File.Exists(missing[0, 1])) continue; //if already moved, ignore
+                var newfile = folder + Path.GetFileName(missing[0, 1]);
+                Tools.DeleteFile(newfile);
+                Tools.MoveFile(missing[0, 1], newfile);
+            }
+        }
+
+        private void backgroundWorker7_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            Log("Analyzed " + TotalMIDIs + " MIDI " + (TotalMIDIs == 1 ? "file" : "files") + (TotalCONs == 0 ? "" : (" in " + TotalCONs + " CON " + (TotalCONs == 1 ? "file" : "files"))));
+
+            if (MissingOverdrive.Any())
+            {
+                Log(MissingOverdrive.Count + (MissingOverdrive.Count == 1 ? " song is" : " songs are") + " missing overdrive markers:");
+                Log("MIDI Files:", "CON Files:");
+                foreach (var missing in MissingOverdrive)
+                {
+                    var con = Path.GetFileName(missing[0, 1]);
+                    Log(missing[0, 0] + ".mid", string.IsNullOrWhiteSpace(con) || con.ToLowerInvariant().EndsWith(".mid", StringComparison.Ordinal) ? "N/A" : con);
+                }
+            }
+            else
+            {
+                Log((TotalMIDIs == 1 ? "The file isn't" : "None of the files are") + " missing overdrive markers!");
+            }
+            Log("");
+
+            Log("Right-click to export this information");
+            ShowWait(false);
+            btnCancel.Visible = false;
+            CancelWorkers = false;
+        }
+
+        private void CheckForMissingOverdrive(string midi, string con, string name)
+        {
+            MIDIFile = Tools.NemoLoadMIDI(midi);
+            if (MIDIFile == null)
+            {
+                Log("Unable to load MIDI file '" + Path.GetFileName(midi) + "' to analyze it");
+                return;
+            }
+
+            var hasDrums = false;
+            var hasBass = false;
+            var hasKeys = false;
+            var hasGuitar = false;
+            DrumsOD = 0;//reset for every song
+            DrumsX = 0;
+            BassOD = 0;
+            BassX = 0;
+            KeysOD = 0;
+            KeysX = 0;
+            GuitarOD = 0;
+            GuitarX = 0;
+            for (var i = 0; i < MIDIFile.Events.Tracks; i++)
+            {
+                var trackname = MIDIFile.Events[i][0].ToString();
+                if (trackname.Contains("DRUMS"))
+                {
+                    hasDrums = true;
+                    AnalyzeDrums(MIDIFile.Events[i]);
+                }
+                else if (trackname.Contains("BASS"))
+                {
+                    hasBass = true;
+                    AnalyzeBass(MIDIFile.Events[i]);
+                }
+                else if (trackname.Contains("KEYS"))
+                {
+                    hasKeys = true;
+                    AnalyzeKeys(MIDIFile.Events[i]);
+                }
+                else if (trackname.Contains("GUITAR"))
+                {
+                    hasGuitar = true;
+                    AnalyzeGuitar(MIDIFile.Events[i]);
+                }
+            }
+
+            var hasOverdrive = true; //let's default to having overdrive
+            if (hasDrums && DrumsX > 0 && DrumsOD == 0) hasOverdrive = false;
+            if (hasBass && BassX > 0 &&  BassOD == 0) hasOverdrive = false;
+            if (hasKeys && KeysX > 0 && KeysOD == 0) hasOverdrive = false;
+            if (hasGuitar && GuitarX > 0 && GuitarOD == 0) hasOverdrive = false;
+
+            if (hasOverdrive) return;
+            MissingOverdrive.Add(new[,] { { name, string.IsNullOrWhiteSpace(con) ? midi : con } });
+
+            if (string.IsNullOrWhiteSpace(con)) return;
+            Tools.DeleteFile(midi);
+        }
     }    
 }

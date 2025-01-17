@@ -421,7 +421,14 @@ namespace Nautilus
             graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighSpeed;
             graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighSpeed;
 
-            lblFileName.Invoke(new MethodInvoker(() => lblFileName.Text = "Analysis of audio file: " + (Parser.Songs.Count == 0 || Parser.Songs == null ? Path.GetFileName(InputFile) : Parser.Songs[0].InternalName + ".mogg")));
+            try
+            {
+                lblFileName.Invoke(new MethodInvoker(() => lblFileName.Text = "Analysis of audio file: " + (Parser.Songs.Count == 0 || Parser.Songs == null ? Path.GetFileNameWithoutExtension(InputFile) : Parser.Songs[0].InternalName + ".mogg")));
+            }
+            catch 
+            {
+                lblFileName.Invoke(new MethodInvoker(() => lblFileName.Text = "Analysis of audio file: " + Path.GetFileNameWithoutExtension(InputFile) + ".mogg"));
+            }
             if (BassStream == 0) //always except for Fortnite Festival .m4a files
             {
                 BassStream = Bass.BASS_StreamCreateFile(nautilus3.GetOggStreamIntPtr(), 0L, nautilus3.PlayingSongOggData.Length, BASSFlag.BASS_STREAM_DECODE);
@@ -487,7 +494,12 @@ namespace Nautilus
                         List<string> TrackNames;
                         List<bool> TrackIsStereo;
                         var splitter = new MoggSplitter();
-                        var ArrangedChannels = splitter.ArrangeStreamChannels(audio_info.chans, Path.GetExtension(InputFile).ToLowerInvariant() == ".ogg");
+                        var isOgg = false;
+                        if (Path.GetExtension(InputFile).ToLowerInvariant() == ".ogg" || Path.GetExtension(InputFile).ToLowerInvariant() == ".mogg" || VariousFunctions.ReadFileType(InputFile) == XboxFileType.STFS)
+                        {
+                            isOgg = true;
+                        }
+                        var ArrangedChannels = splitter.ArrangeStreamChannels(audio_info.chans, isOgg);
                         GetTrackNames(out TrackNames, out TrackIsStereo);
                         var height = WaveHeight / audio_info.chans;
                         var top = 0;
