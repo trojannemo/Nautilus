@@ -863,8 +863,13 @@ namespace Nautilus
                             {
                                 z++;
                                 line = entry[z];
-                                song.AttenuationValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("vols", "").Replace("\t", " ").Trim();
-                                song.OriginalAttenuationValues = song.AttenuationValues;
+
+                                line = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("vols", "").Replace("\t", " ").Trim();
+                                line = RemoveDTAComments(line);
+
+                                song.AttenuationValues = line;
+                                song.OriginalAttenuationValues = line;
+
                                 didVols = true;
                             }
                             else if (line.Contains("(vols") && !didVols)
@@ -874,8 +879,13 @@ namespace Nautilus
                                     z++;
                                     line = entry[z];
                                 }
-                                song.AttenuationValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("vols", "").Replace("\t", " ").Trim();
-                                song.OriginalAttenuationValues = song.AttenuationValues;
+
+                                line = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("vols", "").Replace("\t", " ").Trim();
+                                line = RemoveDTAComments(line);
+
+                                song.AttenuationValues = line;
+                                song.OriginalAttenuationValues = line;
+
                                 didVols = true;
                             }
                             else if (line.Contains("'pans'") && !didPans)
@@ -1192,6 +1202,10 @@ namespace Nautilus
                             else if (line.Contains(";OriginalAttenuationValues="))
                             {
                                 song.OriginalAttenuationValues = line.Replace(";OriginalAttenuationValues=", "");
+                            }
+                            else if (line.Contains(";VolumeNormalizerAudioHash="))
+                            {
+                                song.VNAudioHash = line.Replace(";VolumeNormalizerAudioHash=", "").Trim();
                             }
                         }
                         catch (Exception ex)
@@ -2722,6 +2736,7 @@ namespace Nautilus
         public bool DisableProKeys { get; set; }
         public bool CATemh { get; set; }
         public bool HasSongIDError { get; set; }
+        public string VNAudioHash { get; set; }
 
         public void Initialize()
         {
@@ -2799,6 +2814,7 @@ namespace Nautilus
             DoubleBass = false;
             DisableProKeys = false;
             HasSongIDError = false;
+            VNAudioHash = "";
             CATemh = false;
             DTAIndex = 0;
             PSDelay = 0;
