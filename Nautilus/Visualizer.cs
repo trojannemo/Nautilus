@@ -25,6 +25,13 @@ using Un4seen.Bass.AddOn.EncFlac;
 using Nautilus.Texture;
 using NautilusFREE;
 using Nautilus.LibForge.SongData;
+using Newtonsoft.Json.Linq;
+using System.Net.Http;
+using System.Net;
+using System.Xml.Linq;
+using System.Text.RegularExpressions;
+using SharpMp4Parser.IsoParser.Boxes.ISO14496.Part12;
+using System.Runtime.Remoting.Metadata;
 
 namespace Nautilus
 {
@@ -149,12 +156,16 @@ namespace Nautilus
         private bool isYARG;
         private bool isGHWTDE;
         private bool isPowerGig;
+        private bool isDJHero;
         private readonly MIDIStuff MIDITools;
         private double songLength;
         private readonly string tempFile;
         private readonly NemoFnFParser fnfParser;
         private string m4aFilePath;
         private bool volSlide;
+        private static readonly HttpClient httpClient = new HttpClient();
+        private string songArtist;
+        private string songAlbum;
 
         public Visualizer(Color ButtonBackColor, Color ButtonTextColor, string con)
         {
@@ -324,6 +335,7 @@ namespace Nautilus
             isGDRBDLC = false;
             isBandFuse = false;
             isPowerGig = false;
+            isDJHero = false;
             isGHWTDE = false;
             isRS2014 = false;
             MIDITools.Initialize(false);
@@ -432,6 +444,8 @@ namespace Nautilus
             lblBottom.ForeColor = Color.Black;
             origAuthor = "";
             picWorking.Visible = false;
+            songArtist = "";
+            songAlbum = "";
             song1 = 0;
             song2 = 0;
             artist1 = 0;
@@ -782,6 +796,18 @@ namespace Nautilus
                             ExtractBandFuse(files[0]);
                             return;
                         }
+                        else if (package.Header.TitleID == 0x41560844)
+                        {
+                            package.CloseIO();
+                            ExtractPlayDJHero(files[0], false);
+                            return;
+                        }
+                        else if (package.Header.TitleID == 0x4156087F)
+                        {
+                            package.CloseIO();
+                            ExtractPlayDJHero(files[0], true);
+                            return;
+                        }
                         else //assume Harmonix game
                         {
                             package.CloseIO();
@@ -860,6 +886,573 @@ namespace Nautilus
                     MessageBox.Show("There was an error accessing that file\nThe error says:\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void ExtractPlayDJHero(string file, bool doDJHero2)
+        {
+            loadDefaults();
+            picWorking.Visible = true;
+
+            var path = Application.StartupPath + "\\visualizer\\djhero\\";
+            Tools.DeleteFolder(path, true);
+            Directory.CreateDirectory(path);
+
+            var xPackage = new STFSPackage(file);
+            if (!xPackage.ParseSuccess)
+            {
+                MessageBox.Show("There was an error parsing that file\nTry again", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                picWorking.Visible = false;
+                return;
+            }
+
+            var trackListing = path + "tracklisting.xml";
+            var setListing = path + "setlisting.xml";
+            var manifest = path + "manifest.xml";
+            var img = path + "albumart.img";
+            var far = path + "albumart.far";
+            var fsb = path + "audio.fsb";
+            var xmaPath = path + "\\audio\\";
+            string artPath = "";
+            string dlcFolder = "";
+            List<DJHeroTrack> tracks = new List<DJHeroTrack>();
+            var album = xPackage.Header.Title_Display;
+
+            try
+            {
+                //extract manifest file first
+                var xFile = xPackage.GetFile("DLC.MANIFEST");
+                if (xFile != null)
+                {
+                    if (!xFile.ExtractToFile(manifest))
+                    {
+                        MessageBox.Show("Error extracting the Manifest file\nCan't play that file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        xPackage.CloseIO();
+                        picWorking.Visible = false;
+                        return;
+                    }
+                }
+
+                using (StreamReader reader = new StreamReader(manifest))
+                {
+                    string pattern = @"<FolderLocation>DLC/([^/]+)/";
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        // Check if the line contains <FolderLocation>
+                        if (line.Contains("<FolderLocation>"))
+                        {
+                            // Match the line with the regex pattern
+                            Match match = Regex.Match(line, pattern);
+                            if (match.Success)
+                            {
+                                dlcFolder = match.Groups[1].Value; // Group 1 contains the "e000002" part
+                                break; // Exit the loop as we've found the value
+                            }
+                        }
+                    }
+                }
+
+                //extract set listing XML file (DJ Hero 1)
+                if (!doDJHero2)
+                {
+                    xFile = xPackage.GetFile("DLC/" + dlcFolder + "/SetListing.xml");
+                    if (xFile != null)
+                    {
+                        if (!xFile.ExtractToFile(setListing))
+                        {
+                            MessageBox.Show("Error extracting the SetListing.xml file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            using (var reader = new StreamReader(setListing, Encoding.GetEncoding("iso-8859-1")))
+                            {
+                                XDocument doc = XDocument.Load(reader);
+
+                                // Extract the value of <ArtName> which is the path to the album art file
+                                artPath = doc.Descendants("ArtName").FirstOrDefault()?.Value;
+                            }
+                        }
+                    }
+                }
+
+                //extract track listing XML file
+                xFile = xPackage.GetFile("DLC/" + dlcFolder + "/TrackListing.xml");
+                if (xFile != null)
+                {
+                    if (!xFile.ExtractToFile(trackListing))
+                    {
+                        MessageBox.Show("Error extracting the TrackListing.xml file\nCan't play that file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        xPackage.CloseIO();
+                        picWorking.Visible = false;
+                        return;
+                    }
+                }
+                                
+                using (var reader = new StreamReader(trackListing, Encoding.GetEncoding("iso-8859-1")))
+                {
+                    XDocument doc = XDocument.Load(reader);
+                    
+                    tracks = doc.Descendants("Track").Select(track => new DJHeroTrack
+                    {
+                        IDTag = track.Element("IDTag")?.Value,
+                        FolderLocation = track.Element("FolderLocation")?.Value,
+                        MixArtists = track.Elements("MixArtist")
+                                              .Select(artist => artist.Value.Replace("STR_DLC_", "").Replace("STR_", "").Replace("ARTIST_", "").Replace("Artist_", ""))
+                                              .ToList(),
+                        MixNames = track.Elements("MixName")
+                                             .Select(name => name.Value.Replace("STR_DLC_", "").Replace("STR_", "").Replace("TRACK_", "").Replace("Track_", ""))
+                                             .ToList()
+                    })
+                        .Where(item => item.IDTag != null && item.FolderLocation != null)
+                        .ToList();
+                }
+
+                if (!string.IsNullOrEmpty(artPath) && !doDJHero2)
+                {
+                    //extract album art IMG file
+                    xFile = xPackage.GetFile(artPath + ".img");
+                    if (xFile != null)
+                    {
+                        if (!xFile.ExtractToFile(img))
+                        {
+                            MessageBox.Show("Error extracting the album art file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            var djherotools = new DJHeroIMGTools();
+                            if (!djherotools.ImgToDDS(img))
+                            {
+                                MessageBox.Show("Error converting the album art file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            else
+                            {
+                                getImage(img.Replace(".img", ".dds"));
+                            }
+                        }
+                    }
+                }                
+
+                var selector = new DJHeroTrackSelector(tracks);
+                selector.ShowDialog();
+                var trackIndex = selector.SelectedIndex;
+
+                if (trackIndex == -1)
+                {
+                    MessageBox.Show("Error selecting track to play, can't continue", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    xPackage.CloseIO();
+                    picWorking.Visible = false;
+                    return;
+                }
+
+                /*if (doDJHero2) //apparently this all works, but there's no IMG files in the DLC FAR files, so ignore for now.
+                {
+                    //extract album art FAR file
+                    var x = tracks[trackIndex].FolderLocation.Replace(dlcFolder, dlcFolder + "/TrackPacks") + "/Male.FAR";
+                    xFile = xPackage.GetFile(x);
+                    if (xFile != null)
+                    {
+                        if (!xFile.ExtractToFile(far))
+                        {
+                            MessageBox.Show("Error extracting the album art file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            // Create an IFile instance from the input file
+                            IFile farFile = new LocalFile(null, far);
+                            // Check if it's a valid FSAR archive
+                            if (FSARPackage.IsFSAR(farFile) != PackageTestResult.YES)
+                            {
+                                MessageBox.Show("Error extracting the album art file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            else
+                            {
+                                // Load the archive
+                                using (FSARPackage fsarPackage = FSARPackage.FromFile(farFile))
+                                {
+                                    // Retrieve all files from the archive
+                                    var allFiles = fsarPackage.GetAllFiles<FSARFile>();
+
+                                    foreach (var f in allFiles)
+                                    {
+                                        // Get file data
+                                        byte[] fileData = f.GetBytes();
+
+                                        // Construct output path
+                                        string relativePath = f.Name.Replace('/', Path.DirectorySeparatorChar);
+                                        string outputPath = Path.Combine(path, relativePath);
+
+                                        // Ensure the directory exists
+                                        string directory = Path.GetDirectoryName(outputPath);
+                                        if (!Directory.Exists(directory))
+                                        {
+                                            Directory.CreateDirectory(directory);
+                                        }
+
+                                        // Write the file
+                                        File.WriteAllBytes(outputPath, fileData);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }*/
+
+                //extract audio file
+                var audioPath = doDJHero2 ? tracks[trackIndex].FolderLocation + "/DJ.fsb" : tracks[trackIndex].FolderLocation + "/SinglePlayer/Medium/AudioTrack_Main.fsb";
+                xFile = xPackage.GetFile(audioPath);
+                if (xFile != null)
+                {
+                    if (!xFile.ExtractToFile(fsb))
+                    {
+                        MessageBox.Show("Error extracting the audio file, can't continue", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        xPackage.CloseIO();
+                        picWorking.Visible = false;
+                        return;
+                    }
+                }
+                xPackage.CloseIO();
+
+                if (!Tools.XMASH(fsb))
+                {
+                    MessageBox.Show("Error extracting XMA files from the FSB container, can't continue", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    picWorking.Visible = false;
+                    return;
+                }
+
+                var XMAs = Directory.GetFiles(path, "*.xma", SearchOption.TopDirectoryOnly);
+                if (XMAs.Count() == 0)
+                {
+                    MessageBox.Show("Error extracting XMA files from the FSB container, can't continue", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    picWorking.Visible = false;
+                    return;
+                }
+
+                foreach (var xma in XMAs)
+                {
+                    if (!Tools.toWAV(xma))
+                    {
+                        MessageBox.Show("Failed to convert XMA file to WAV - can't play this song", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        Tools.DeleteFile(path + "\\towav.exe");
+                        picWorking.Visible = false;
+                        return;
+                    }
+                }
+                Tools.DeleteFile(path + "\\xmash.exe");
+                Tools.DeleteFile(path + "\\towav.exe");
+
+                foreach (var xma in XMAs)
+                {
+                    Tools.DeleteFile(xma);
+                }
+
+                var WAVs = Directory.GetFiles(path, "*.wav", SearchOption.TopDirectoryOnly);
+                foreach (var wav in WAVs)
+                {
+                    if (wav.Contains("1_1.wav"))
+                    {
+                        File.Move(wav, path + "vocals.wav");
+                    }
+                    else if (wav.Contains("1_2.wav"))
+                    {
+                        File.Move(wav, path + "backing.wav");
+                    }
+                    else if (wav.Contains("1_3.wav"))
+                    {
+                        File.Move(wav, path + "crowd.wav");
+                    }
+                }                               
+
+                wavFiles = Directory.GetFiles(path, "*.wav");
+                if (wavFiles.Any())
+                {
+                    isWAV = true;
+                    isMP3 = false;
+                    isOgg = false;
+                    isOpus = false;
+                    isM4A = false;
+
+                    //the metadata doesn't contain song data, let's get it from the mp3 files
+                    InitBass();
+                    var stream = Bass.BASS_StreamCreateFile(wavFiles[0], 0L, File.ReadAllBytes(wavFiles[0]).Length, BASSFlag.BASS_SAMPLE_FLOAT);
+                    var len = Bass.BASS_ChannelGetLength(stream);
+                    var totaltime = Bass.BASS_ChannelBytes2Seconds(stream, len); // the total time length
+                    Parser.Songs = new List<SongData>
+                    {
+                        new SongData()
+                    };
+                    Parser.Songs[0].Album = album;
+                    Parser.Songs[0].Artist = string.Join(", ", tracks[trackIndex].MixArtists);
+                    Parser.Songs[0].Name = string.Join(", ", tracks[trackIndex].MixNames);
+                    Parser.Songs[0].Length = (int)(totaltime * 1000);
+                    lblSongLength.Text = Parser.GetSongDuration(Parser.Songs[0].Length.ToString(CultureInfo.InvariantCulture));
+                    txtTime.Text = lblSongLength.Text;
+                    txtAlbum.Text = Parser.Songs[0].Album;
+                    txtArtist.Text = Parser.Songs[0].Artist;
+                    txtSong.Text = Parser.Songs[0].Name;
+
+
+                    Height = maxHeight;
+                    picPlayPause.Cursor = Cursors.Hand;
+                    picStop.Cursor = Cursors.Hand;
+                    isDJHero = true;
+                    StartPlayback();
+                }
+                else
+                {
+                    MessageBox.Show("Failed to extract audio files from the XMA file, can't play this song", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    picWorking.Visible = false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("There was an unexpected error\nThe error says: " + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            xPackage.CloseIO();
+            picWorking.Visible = false;
+        }
+
+        private void ExtractPlayDJHero2(string file)
+        {
+            loadDefaults();
+            picWorking.Visible = true;
+
+            var path = Application.StartupPath + "\\visualizer\\djhero\\";
+            Tools.DeleteFolder(path, true);
+            Directory.CreateDirectory(path);
+
+            var xPackage = new STFSPackage(file);
+            if (!xPackage.ParseSuccess)
+            {
+                MessageBox.Show("There was an error parsing that file\nTry again", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                picWorking.Visible = false;
+                return;
+            }
+
+            var xml = path + "setlisting.xml";
+            var manifest = path + "manifest.xml";
+            var img = path + "albumart.img";
+            var fsb = path + "audio.fsb";
+            var xmaPath = path + "\\audio\\";
+            string artPath;
+            string dlcFolder = "";
+            List<DJHeroTrack> tracks = new List<DJHeroTrack>();
+            var album = xPackage.Header.Title_Display;
+
+            try
+            {
+                //extract manifest file first
+                var xFile = xPackage.GetFile("DLC.MANIFEST");
+                if (xFile != null)
+                {
+                    if (!xFile.ExtractToFile(manifest))
+                    {
+                        MessageBox.Show("Error extracting the Manifest file\nCan't play that file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        xPackage.CloseIO();
+                        picWorking.Visible = false;
+                        return;
+                    }
+                }
+
+                using (StreamReader reader = new StreamReader(manifest))
+                {
+                    string pattern = @"<FolderLocation>DLC/([^/]+)/";
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        // Check if the line contains <FolderLocation>
+                        if (line.Contains("<FolderLocation>"))
+                        {
+                            // Match the line with the regex pattern
+                            Match match = Regex.Match(line, pattern);
+                            if (match.Success)
+                            {
+                                dlcFolder = match.Groups[1].Value; // Group 1 contains the "e000002" part
+                                break; // Exit the loop as we've found the value
+                            }
+                        }
+                    }
+                }
+
+                //extract set listing XML file
+                xFile = xPackage.GetFile("DLC/" + dlcFolder + "/TrackListing.xml");
+                if (xFile != null)
+                {
+                    if (!xFile.ExtractToFile(xml))
+                    {
+                        MessageBox.Show("Error extracting the TrackListing.xml file\nCan't play that file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        xPackage.CloseIO();
+                        picWorking.Visible = false;
+                        return;
+                    }
+                }
+
+                using (var reader = new StreamReader(xml, Encoding.GetEncoding("iso-8859-1")))
+                {
+                    // Load the XML file
+                    XDocument xmlDoc = XDocument.Load(reader);
+
+                    // Parse and extract data
+                    tracks = xmlDoc.Descendants("Track").Select(track => new DJHeroTrack
+                    {
+                        IDTag = track.Element("IDTag")?.Value,
+                        FolderLocation = track.Element("FolderLocation")?.Value,
+                        MixArtists = track.Elements("MixArtist")
+                                              .Select(artist => artist.Value.Replace("STR_DLC_", string.Empty))
+                                              .ToList(),
+                        MixNames = track.Elements("MixName")
+                                             .Select(name => name.Value.Replace("STR_DLC_", string.Empty))
+                                             .ToList()
+                    })
+                        .Where(item => item.IDTag != null && item.FolderLocation != null)
+                        .ToList();
+                }
+
+                /*//extract album art IMG file
+                xFile = xPackage.GetFile(artPath + ".img");
+                if (xFile != null)
+                {
+                    if (!xFile.ExtractToFile(img))
+                    {
+                        MessageBox.Show("Error extracting the album art file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    else
+                    {
+                        var djherotools = new DJHeroIMGTools();
+                        if (!djherotools.ImgToDDS(img))
+                        {
+                            MessageBox.Show("Error converting the album art file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            getImage(img.Replace(".img", ".dds"));
+                        }
+                    }
+                }*/
+
+                var selector = new DJHeroTrackSelector(tracks);
+                selector.ShowDialog();
+                var trackIndex = selector.SelectedIndex;
+
+                if (trackIndex == -1)
+                {
+                    MessageBox.Show("Error selecting track to play, can't continue", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    xPackage.CloseIO();
+                    picWorking.Visible = false;
+                    return;
+                }
+
+                //extract audio file
+                xFile = xPackage.GetFile(tracks[trackIndex].FolderLocation + "/DJ.fsb");
+                if (xFile != null)
+                {
+                    if (!xFile.ExtractToFile(fsb))
+                    {
+                        MessageBox.Show("Error extracting the audio file, can't continue", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        xPackage.CloseIO();
+                        picWorking.Visible = false;
+                        return;
+                    }
+                }
+                xPackage.CloseIO();
+
+                if (!Tools.XMASH(fsb))
+                {
+                    MessageBox.Show("Error extracting XMA files from the FSB container, can't continue", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    picWorking.Visible = false;
+                    return;
+                }
+
+                var XMAs = Directory.GetFiles(path, "*.xma", SearchOption.TopDirectoryOnly);
+                if (XMAs.Count() == 0)
+                {
+                    MessageBox.Show("Error extracting XMA files from the FSB container, can't continue", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    picWorking.Visible = false;
+                    return;
+                }
+
+                foreach (var xma in XMAs)
+                {
+                    if (!Tools.toWAV(xma))
+                    {
+                        MessageBox.Show("Failed to convert XMA file to WAV - can't play this song", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        Tools.DeleteFile(path + "\\towav.exe");
+                        picWorking.Visible = false;
+                        return;
+                    }
+                }
+                Tools.DeleteFile(path + "\\xmash.exe");
+
+                foreach (var xma in XMAs)
+                {
+                    Tools.DeleteFile(xma);
+                }
+
+                var WAVs = Directory.GetFiles(path, "*.wav", SearchOption.TopDirectoryOnly);
+                foreach (var wav in WAVs)
+                {
+                    if (wav.Contains("1_1.wav"))
+                    {
+                        File.Move(wav, path + "vocals.wav");
+                    }
+                    else if (wav.Contains("1_2.wav"))
+                    {
+                        File.Move(wav, path + "backing.wav");
+                    }
+                    else if (wav.Contains("1_3.wav"))
+                    {
+                        File.Move(wav, path + "crowd.wav");
+                    }
+                }
+
+                wavFiles = Directory.GetFiles(path, "*.wav");
+                if (wavFiles.Any())
+                {
+                    isWAV = true;
+                    isMP3 = false;
+                    isOgg = false;
+                    isOpus = false;
+                    isM4A = false;
+
+                    //the metadata doesn't contain song data, let's get it from the mp3 files
+                    InitBass();
+                    var stream = Bass.BASS_StreamCreateFile(wavFiles[0], 0L, File.ReadAllBytes(wavFiles[0]).Length, BASSFlag.BASS_SAMPLE_FLOAT);
+                    var len = Bass.BASS_ChannelGetLength(stream);
+                    var totaltime = Bass.BASS_ChannelBytes2Seconds(stream, len); // the total time length
+                    Parser.Songs = new List<SongData>
+                    {
+                        new SongData()
+                    };
+                    Parser.Songs[0].Album = album;
+                    Parser.Songs[0].Artist = string.Join(", ", tracks[trackIndex].MixArtists);
+                    Parser.Songs[0].Name = string.Join(", ", tracks[trackIndex].MixNames);
+                    Parser.Songs[0].Length = (int)(totaltime * 1000);
+                    lblSongLength.Text = Parser.GetSongDuration(Parser.Songs[0].Length.ToString(CultureInfo.InvariantCulture));
+                    txtTime.Text = lblSongLength.Text;
+                    txtAlbum.Text = Parser.Songs[0].Album;
+                    txtArtist.Text = Parser.Songs[0].Artist;
+                    txtSong.Text = Parser.Songs[0].Name;
+
+                    Height = maxHeight;
+                    picPlayPause.Cursor = Cursors.Hand;
+                    picStop.Cursor = Cursors.Hand;
+                    isDJHero = true;
+                    StartPlayback();
+                }
+                else
+                {
+                    MessageBox.Show("Failed to extract audio files from the XMA file, can't play this song", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    picWorking.Visible = false;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("There was an unexpected error\nThe error says: " + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            xPackage.CloseIO();
+            picWorking.Visible = false;
+
         }
 
         private void loadPS4Files(string file)
@@ -1057,10 +1650,7 @@ namespace Nautilus
 
             var visualizer = Application.StartupPath + "\\visualizer\\";
             Tools.DeleteFolder(visualizer, true);//clean up before starting with new song
-            if (!Directory.Exists(visualizer))
-            {
-                Directory.CreateDirectory(visualizer);
-            }
+            Directory.CreateDirectory(visualizer);
             var extracted_path = visualizer + "temp\\";
             if (!Directory.Exists(extracted_path))
             {
@@ -1093,6 +1683,7 @@ namespace Nautilus
             song.Artist = header.Substring(index + 3, header.Length - (index + 3)).Trim();
             song.ChartAuthor = "BandFuse";
             txtArtist.Text = song.Artist;
+            songArtist = song.Artist;
             txtSong.Text = song.Name;
             Parser.Songs = new List<SongData> { song };
             
@@ -1386,10 +1977,12 @@ namespace Nautilus
                 if (isTBRBDLC && string.IsNullOrEmpty(Parser.Songs[0].Artist.Trim()))
                 {
                     txtArtist.Text = "The Beatles";
+                    songArtist = "The Beatles";
                 }
                 if (isGDRBDLC && string.IsNullOrEmpty(Parser.Songs[0].Artist.Trim()))
                 {
                     txtArtist.Text = "Green Day";
+                    songArtist = "Green Day";
                 }
                 var songname = Parser.Songs[0].InternalName;
                 //set file path for later use in saving image
@@ -1542,6 +2135,7 @@ namespace Nautilus
             {
                 picLogo.BorderStyle = BorderStyle.None;
             }
+            picLastFM.Visible = false;
             Application.DoEvents();
             
             //capture image
@@ -1551,6 +2145,8 @@ namespace Nautilus
                                
                 //NEW METHOD - seems to scale well
                 picVisualizer.DrawToBitmap(bitmap, picVisualizer.ClientRectangle);
+
+                picLastFM.Visible = true;//restore after grabbing screenshot
 
                 if (radioLocal.Checked)
                 {
@@ -1688,7 +2284,7 @@ namespace Nautilus
 
         private void MeasureAlbum()
         {
-            //create font variable for measuring string size
+            /*//create font variable for measuring string size
             var f = new Font(ActiveFont, 11, FontStyle.Bold);
             SizeF name = TextRenderer.MeasureText(txtAlbum.Text.Trim(), f);
             var maxSize = txtYear2.Text.Trim().Length > 0 ? 160 : 200;
@@ -1698,6 +2294,8 @@ namespace Nautilus
             txtAlbum.Text = txtAlbum.Text.Trim().Substring(0, maxLength) + "...";
             txtAlbum.SelectionStart = txtAlbum.Text.Length;
             picVisualizer.Invalidate();
+            */
+            //disable this, let the user arrange the size or not
         }
 
         private void MeasureSong(Control tb)
@@ -1914,6 +2512,7 @@ namespace Nautilus
             }
             else
             {
+                genreY = 130f;
                 picGenreDown.Visible = false;
                 picGenreUp.Visible = false;
             }
@@ -1985,6 +2584,8 @@ namespace Nautilus
                     artist = "Green Day";
                 }
                 txtArtist.Text = artist;
+                songArtist = artist;
+                songAlbum = Parser.Songs[0].Album;
                 txtAlbum.Text = Parser.Songs[0].Album;
                 txtTrack.Text = Parser.Songs[0].TrackNumber <= 0 ? "" : Parser.Songs[0].TrackNumber.ToString(CultureInfo.InvariantCulture);
                 txtYear.Text = Parser.Songs[0].YearReleased == 0 ? "" : Parser.Songs[0].YearReleased.ToString(CultureInfo.InvariantCulture);
@@ -5046,6 +5647,69 @@ namespace Nautilus
             }
         }
 
+        private async void DownloadAlbumArt()
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            string apiKey = "6b579e4522f9846c88cf88b6a44564f5";
+            string url = $"http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key={apiKey}&artist={Uri.EscapeDataString(songArtist)}&album={Uri.EscapeDataString(songAlbum)}&format=json";
+
+            try
+            {
+                HttpResponseMessage response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+                JObject albumInfo = JObject.Parse(jsonResponse);
+
+                // Extract the album art URL (e.g., the largest image)
+                var images = albumInfo["album"]?["image"];
+                string albumArtUrl = null;
+
+                if (images != null)
+                {
+                    // Choose the largest image
+                    foreach (var image in images)
+                    {
+                        if (image?["size"]?.ToString() == "mega")
+                        {
+                            albumArtUrl = image?["#text"]?.ToString();
+                            break;
+                        }
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(albumArtUrl))
+                {
+                    try
+                    {
+                        using (HttpClient client = new HttpClient())
+                        using (response = await client.GetAsync(albumArtUrl))
+                        {
+                            response.EnsureSuccessStatusCode();
+                            using (var stream = await response.Content.ReadAsStreamAsync())
+                            {
+                                picAlbumArt.Image = Image.FromStream(stream);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error loading image: {ex.Message}");
+                    }
+
+                }
+                else
+                {
+                    MessageBox.Show("No album art found on last.fm");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error downloading album art: {ex.Message}");
+            }
+        }
+
         private void powerGigWorker_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             if (!Tools.XMASH(XMA_PATH))
@@ -5597,5 +6261,58 @@ namespace Nautilus
             mouseY = MousePosition.Y;
             picVisualizer.Invalidate();
         }
+
+        private void picLastFM_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            if ((string.IsNullOrEmpty(songArtist) && string.IsNullOrEmpty(txtArtist.Text)) || (string.IsNullOrEmpty(songAlbum) && string.IsNullOrEmpty(txtAlbum.Text)))
+            {
+                MessageBox.Show("Last.fm requires Artist and Album name", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (string.IsNullOrEmpty(songArtist) && !string.IsNullOrEmpty(txtArtist.Text))
+            {
+                songArtist = txtArtist.Text;
+            }
+            if (string.IsNullOrEmpty(songAlbum) && !string.IsNullOrEmpty(txtAlbum.Text))
+            {
+                songAlbum = txtAlbum.Text;
+            }
+            DownloadAlbumArt();
+        }
+
+        private void exportAlbumArtFile_Click(object sender, EventArgs e)
+        {
+            if (picAlbumArt.Image == null)
+            {
+                MessageBox.Show("There is no image to export", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            var sfd = new SaveFileDialog
+            {
+                InitialDirectory = Tools.CurrentFolder,
+                Filter = "PNG Image|*.png",
+                Title = "Export album art file...",
+            };
+            sfd.ShowDialog();
+            if (string.IsNullOrWhiteSpace(sfd.FileName)) return;
+            using (var memoryStream = new MemoryStream())
+            {
+                // Save the image to the memory stream as PNG (no GDI+ Save called explicitly)
+                Bitmap bitmap = new Bitmap(picAlbumArt.Image);
+                bitmap.Save(memoryStream, ImageFormat.Png);
+
+                // Write the memory stream to a file
+                File.WriteAllBytes(sfd.FileName, memoryStream.ToArray());
+            }
+        }
     }   
+}
+
+public class DJHeroTrack
+{
+    public string IDTag { get; set; }
+    public string FolderLocation { get; set; }
+    public List<string> MixArtists { get; set; }
+    public List<string> MixNames { get; set; }
 }

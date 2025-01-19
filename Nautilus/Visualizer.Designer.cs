@@ -32,6 +32,7 @@ namespace Nautilus
         {
             this.components = new System.ComponentModel.Container();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.chkTrack = new System.Windows.Forms.CheckBox();
             this.yearJoystick = new System.Windows.Forms.PictureBox();
             this.label10 = new System.Windows.Forms.Label();
             this.txtTrack = new System.Windows.Forms.TextBox();
@@ -100,6 +101,12 @@ namespace Nautilus
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.lblSongLength = new System.Windows.Forms.Label();
             this.lblTime = new System.Windows.Forms.Label();
+            this.picLastFM = new System.Windows.Forms.PictureBox();
+            this.picLogo = new System.Windows.Forms.PictureBox();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.clearLogoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.picPin = new System.Windows.Forms.PictureBox();
+            this.picVolume = new System.Windows.Forms.PictureBox();
             this.picSlider = new System.Windows.Forms.PictureBox();
             this.picLine = new System.Windows.Forms.PictureBox();
             this.picPreview = new System.Windows.Forms.PictureBox();
@@ -114,9 +121,6 @@ namespace Nautilus
             this.picPlayGuitar = new System.Windows.Forms.PictureBox();
             this.picPlayBass = new System.Windows.Forms.PictureBox();
             this.picPlayDrums = new System.Windows.Forms.PictureBox();
-            this.picLogo = new System.Windows.Forms.PictureBox();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.clearLogoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pic2x = new System.Windows.Forms.PictureBox();
             this.picHarm = new System.Windows.Forms.PictureBox();
             this.diffKeys = new System.Windows.Forms.PictureBox();
@@ -128,13 +132,8 @@ namespace Nautilus
             this.proBass = new System.Windows.Forms.PictureBox();
             this.proGuitar = new System.Windows.Forms.PictureBox();
             this.picAlbumArt = new System.Windows.Forms.PictureBox();
-            this.picVolume = new System.Windows.Forms.PictureBox();
-            this.picPin = new System.Windows.Forms.PictureBox();
-            this.picIcon2 = new System.Windows.Forms.PictureBox();
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripClearIcons = new System.Windows.Forms.ToolStripMenuItem();
-            this.picIcon1 = new System.Windows.Forms.PictureBox();
-            this.picSpect = new System.Windows.Forms.PictureBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportGHWTDEAudio = new System.Windows.Forms.ToolStripMenuItem();
@@ -172,16 +171,20 @@ namespace Nautilus
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.PlaybackTimer = new System.Windows.Forms.Timer(this.components);
             this.panelPlay = new System.Windows.Forms.Panel();
+            this.picSpect = new System.Windows.Forms.PictureBox();
             this.audioProcessor = new System.ComponentModel.BackgroundWorker();
             this.uploader = new System.ComponentModel.BackgroundWorker();
-            this.picWorking = new System.Windows.Forms.PictureBox();
-            this.picVisualizer = new System.Windows.Forms.PictureBox();
             this.ghwtdeWorker = new System.ComponentModel.BackgroundWorker();
             this.fnfWorker = new System.ComponentModel.BackgroundWorker();
             this.powerGigWorker = new System.ComponentModel.BackgroundWorker();
             this.bandFuseWorker = new System.ComponentModel.BackgroundWorker();
             this.lblLyrics = new System.Windows.Forms.Label();
-            this.chkTrack = new System.Windows.Forms.CheckBox();
+            this.picWorking = new System.Windows.Forms.PictureBox();
+            this.picIcon2 = new System.Windows.Forms.PictureBox();
+            this.picIcon1 = new System.Windows.Forms.PictureBox();
+            this.picVisualizer = new System.Windows.Forms.PictureBox();
+            this.contextMenuStrip3 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.exportAlbumArtFile = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.yearJoystick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
@@ -209,6 +212,11 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picConvert1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picKaraoke)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picMulti)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLastFM)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picVolume)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picSlider)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLine)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPreview)).BeginInit();
@@ -223,8 +231,6 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picPlayGuitar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlayBass)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlayDrums)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).BeginInit();
-            this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pic2x)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picHarm)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffKeys)).BeginInit();
@@ -236,16 +242,15 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.proBass)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.proGuitar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picAlbumArt)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picVolume)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picIcon2)).BeginInit();
             this.contextMenuStrip2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picIcon1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picSpect)).BeginInit();
             this.menuStrip1.SuspendLayout();
             this.panelPlay.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picSpect)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picIcon2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picIcon1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picVisualizer)).BeginInit();
+            this.contextMenuStrip3.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -302,6 +307,18 @@ namespace Nautilus
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(552, 142);
             this.panel1.TabIndex = 2;
+            // 
+            // chkTrack
+            // 
+            this.chkTrack.AutoSize = true;
+            this.chkTrack.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkTrack.Location = new System.Drawing.Point(261, 98);
+            this.chkTrack.Name = "chkTrack";
+            this.chkTrack.Size = new System.Drawing.Size(15, 14);
+            this.chkTrack.TabIndex = 55;
+            this.toolTip1.SetToolTip(this.chkTrack, "Click here to display track number");
+            this.chkTrack.UseVisualStyleBackColor = true;
+            this.chkTrack.CheckedChanged += new System.EventHandler(this.ControlChanged);
             // 
             // yearJoystick
             // 
@@ -1182,6 +1199,83 @@ namespace Nautilus
             this.lblTime.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.toolTip1.SetToolTip(this.lblTime, "Current position");
             // 
+            // picLastFM
+            // 
+            this.picLastFM.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picLastFM.Image = global::Nautilus.Properties.Resources.lastfm;
+            this.picLastFM.Location = new System.Drawing.Point(17, 480);
+            this.picLastFM.Name = "picLastFM";
+            this.picLastFM.Size = new System.Drawing.Size(35, 35);
+            this.picLastFM.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picLastFM.TabIndex = 66;
+            this.picLastFM.TabStop = false;
+            this.toolTip1.SetToolTip(this.picLastFM, "Download album art from last.fm");
+            this.picLastFM.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picLastFM_MouseClick);
+            // 
+            // picLogo
+            // 
+            this.picLogo.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.picLogo.ContextMenuStrip = this.contextMenuStrip1;
+            this.picLogo.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picLogo.Location = new System.Drawing.Point(52, 488);
+            this.picLogo.Name = "picLogo";
+            this.picLogo.Size = new System.Drawing.Size(224, 33);
+            this.picLogo.TabIndex = 27;
+            this.picLogo.TabStop = false;
+            this.toolTip1.SetToolTip(this.picLogo, "Click here to enable/disable your user logo");
+            this.picLogo.DragDrop += new System.Windows.Forms.DragEventHandler(this.picLogo_DragDrop);
+            this.picLogo.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
+            this.picLogo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picLogo_MouseDown);
+            this.picLogo.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picLogo_MouseMove);
+            this.picLogo.MouseUp += new System.Windows.Forms.MouseEventHandler(this.picLogo_MouseUp);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.clearLogoToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.ShowImageMargin = false;
+            this.contextMenuStrip1.Size = new System.Drawing.Size(104, 26);
+            // 
+            // clearLogoToolStripMenuItem
+            // 
+            this.clearLogoToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.clearLogoToolStripMenuItem.Name = "clearLogoToolStripMenuItem";
+            this.clearLogoToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
+            this.clearLogoToolStripMenuItem.Text = "Clear logo";
+            this.clearLogoToolStripMenuItem.Click += new System.EventHandler(this.clearLogoToolStripMenuItem_Click);
+            // 
+            // picPin
+            // 
+            this.picPin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.picPin.BackColor = System.Drawing.Color.Transparent;
+            this.picPin.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picPin.Image = global::Nautilus.Properties.Resources.unpinned;
+            this.picPin.Location = new System.Drawing.Point(543, 3);
+            this.picPin.Name = "picPin";
+            this.picPin.Size = new System.Drawing.Size(20, 20);
+            this.picPin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picPin.TabIndex = 64;
+            this.picPin.TabStop = false;
+            this.picPin.Tag = "unpinned";
+            this.toolTip1.SetToolTip(this.picPin, "Click to pin on top");
+            this.picPin.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picPin_MouseClick);
+            // 
+            // picVolume
+            // 
+            this.picVolume.BackColor = System.Drawing.Color.Transparent;
+            this.picVolume.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picVolume.Location = new System.Drawing.Point(480, 41);
+            this.picVolume.Name = "picVolume";
+            this.picVolume.Size = new System.Drawing.Size(40, 40);
+            this.picVolume.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picVolume.TabIndex = 42;
+            this.picVolume.TabStop = false;
+            this.picVolume.Tag = "volume";
+            this.toolTip1.SetToolTip(this.picVolume, "Change playback volume");
+            this.picVolume.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picVolume_MouseClick);
+            // 
             // picSlider
             // 
             this.picSlider.BackColor = System.Drawing.Color.Transparent;
@@ -1378,40 +1472,6 @@ namespace Nautilus
             this.toolTip1.SetToolTip(this.picPlayDrums, "Disable drums track");
             this.picPlayDrums.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangePlaybackInstruments);
             // 
-            // picLogo
-            // 
-            this.picLogo.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.picLogo.ContextMenuStrip = this.contextMenuStrip1;
-            this.picLogo.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picLogo.Location = new System.Drawing.Point(52, 488);
-            this.picLogo.Name = "picLogo";
-            this.picLogo.Size = new System.Drawing.Size(224, 33);
-            this.picLogo.TabIndex = 27;
-            this.picLogo.TabStop = false;
-            this.toolTip1.SetToolTip(this.picLogo, "Click here to enable/disable your user logo");
-            this.picLogo.DragDrop += new System.Windows.Forms.DragEventHandler(this.picLogo_DragDrop);
-            this.picLogo.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
-            this.picLogo.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picLogo_MouseDown);
-            this.picLogo.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picLogo_MouseMove);
-            this.picLogo.MouseUp += new System.Windows.Forms.MouseEventHandler(this.picLogo_MouseUp);
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.clearLogoToolStripMenuItem});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.ShowImageMargin = false;
-            this.contextMenuStrip1.Size = new System.Drawing.Size(104, 26);
-            // 
-            // clearLogoToolStripMenuItem
-            // 
-            this.clearLogoToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.clearLogoToolStripMenuItem.Name = "clearLogoToolStripMenuItem";
-            this.clearLogoToolStripMenuItem.Size = new System.Drawing.Size(103, 22);
-            this.clearLogoToolStripMenuItem.Text = "Clear logo";
-            this.clearLogoToolStripMenuItem.Click += new System.EventHandler(this.clearLogoToolStripMenuItem_Click);
-            // 
             // pic2x
             // 
             this.pic2x.BackColor = System.Drawing.Color.Transparent;
@@ -1551,6 +1611,7 @@ namespace Nautilus
             // picAlbumArt
             // 
             this.picAlbumArt.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.picAlbumArt.ContextMenuStrip = this.contextMenuStrip3;
             this.picAlbumArt.Cursor = System.Windows.Forms.Cursors.Hand;
             this.picAlbumArt.Location = new System.Drawing.Point(18, 259);
             this.picAlbumArt.Name = "picAlbumArt";
@@ -1560,52 +1621,6 @@ namespace Nautilus
             this.picAlbumArt.TabStop = false;
             this.toolTip1.SetToolTip(this.picAlbumArt, "Click here to select the album art image (or just drag and drop it here)");
             this.picAlbumArt.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picImage_MouseClick);
-            // 
-            // picVolume
-            // 
-            this.picVolume.BackColor = System.Drawing.Color.Transparent;
-            this.picVolume.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picVolume.Location = new System.Drawing.Point(480, 41);
-            this.picVolume.Name = "picVolume";
-            this.picVolume.Size = new System.Drawing.Size(40, 40);
-            this.picVolume.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.picVolume.TabIndex = 42;
-            this.picVolume.TabStop = false;
-            this.picVolume.Tag = "volume";
-            this.toolTip1.SetToolTip(this.picVolume, "Change playback volume");
-            this.picVolume.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picVolume_MouseClick);
-            // 
-            // picPin
-            // 
-            this.picPin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.picPin.BackColor = System.Drawing.Color.Transparent;
-            this.picPin.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picPin.Image = global::Nautilus.Properties.Resources.unpinned;
-            this.picPin.Location = new System.Drawing.Point(543, 3);
-            this.picPin.Name = "picPin";
-            this.picPin.Size = new System.Drawing.Size(20, 20);
-            this.picPin.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.picPin.TabIndex = 64;
-            this.picPin.TabStop = false;
-            this.picPin.Tag = "unpinned";
-            this.toolTip1.SetToolTip(this.picPin, "Click to pin on top");
-            this.picPin.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picPin_MouseClick);
-            // 
-            // picIcon2
-            // 
-            this.picIcon2.AllowDrop = true;
-            this.picIcon2.BackColor = System.Drawing.Color.Transparent;
-            this.picIcon2.ContextMenuStrip = this.contextMenuStrip2;
-            this.picIcon2.Cursor = System.Windows.Forms.Cursors.Default;
-            this.picIcon2.Location = new System.Drawing.Point(352, 463);
-            this.picIcon2.Name = "picIcon2";
-            this.picIcon2.Size = new System.Drawing.Size(64, 54);
-            this.picIcon2.TabIndex = 12;
-            this.picIcon2.TabStop = false;
-            this.picIcon2.DragDrop += new System.Windows.Forms.DragEventHandler(this.receiveImage);
-            this.picIcon2.DragEnter += new System.Windows.Forms.DragEventHandler(this.picIcon2_DragEnter);
-            this.picIcon2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
-            this.picIcon2.MouseEnter += new System.EventHandler(this.picIcon1_MouseEnter);
             // 
             // contextMenuStrip2
             // 
@@ -1623,30 +1638,6 @@ namespace Nautilus
             this.toolStripClearIcons.Size = new System.Drawing.Size(107, 22);
             this.toolStripClearIcons.Text = "Clear Icons";
             this.toolStripClearIcons.Click += new System.EventHandler(this.toolStripClearIcon_Click);
-            // 
-            // picIcon1
-            // 
-            this.picIcon1.AllowDrop = true;
-            this.picIcon1.BackColor = System.Drawing.Color.Transparent;
-            this.picIcon1.ContextMenuStrip = this.contextMenuStrip2;
-            this.picIcon1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.picIcon1.Location = new System.Drawing.Point(288, 463);
-            this.picIcon1.Name = "picIcon1";
-            this.picIcon1.Size = new System.Drawing.Size(64, 54);
-            this.picIcon1.TabIndex = 11;
-            this.picIcon1.TabStop = false;
-            this.picIcon1.DragDrop += new System.Windows.Forms.DragEventHandler(this.receiveImage);
-            this.picIcon1.DragEnter += new System.Windows.Forms.DragEventHandler(this.picIcon1_DragEnter);
-            this.picIcon1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
-            this.picIcon1.MouseEnter += new System.EventHandler(this.picIcon1_MouseEnter);
-            // 
-            // picSpect
-            // 
-            this.picSpect.Location = new System.Drawing.Point(8, 7);
-            this.picSpect.Name = "picSpect";
-            this.picSpect.Size = new System.Drawing.Size(78, 36);
-            this.picSpect.TabIndex = 43;
-            this.picSpect.TabStop = false;
             // 
             // menuStrip1
             // 
@@ -1988,6 +1979,14 @@ namespace Nautilus
             this.panelPlay.Size = new System.Drawing.Size(552, 88);
             this.panelPlay.TabIndex = 31;
             // 
+            // picSpect
+            // 
+            this.picSpect.Location = new System.Drawing.Point(8, 7);
+            this.picSpect.Name = "picSpect";
+            this.picSpect.Size = new System.Drawing.Size(78, 36);
+            this.picSpect.TabIndex = 43;
+            this.picSpect.TabStop = false;
+            // 
             // audioProcessor
             // 
             this.audioProcessor.WorkerReportsProgress = true;
@@ -2001,29 +2000,6 @@ namespace Nautilus
             this.uploader.WorkerSupportsCancellation = true;
             this.uploader.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
             this.uploader.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
-            // 
-            // picWorking
-            // 
-            this.picWorking.BackColor = System.Drawing.Color.Transparent;
-            this.picWorking.Image = global::Nautilus.Properties.Resources.loadingcircle;
-            this.picWorking.Location = new System.Drawing.Point(95, 312);
-            this.picWorking.Name = "picWorking";
-            this.picWorking.Size = new System.Drawing.Size(100, 100);
-            this.picWorking.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.picWorking.TabIndex = 30;
-            this.picWorking.TabStop = false;
-            this.picWorking.UseWaitCursor = true;
-            this.picWorking.Visible = false;
-            // 
-            // picVisualizer
-            // 
-            this.picVisualizer.BackColor = System.Drawing.Color.Transparent;
-            this.picVisualizer.Location = new System.Drawing.Point(8, 250);
-            this.picVisualizer.Name = "picVisualizer";
-            this.picVisualizer.Size = new System.Drawing.Size(553, 274);
-            this.picVisualizer.TabIndex = 4;
-            this.picVisualizer.TabStop = false;
-            this.picVisualizer.Paint += new System.Windows.Forms.PaintEventHandler(this.picVisualizer_Paint);
             // 
             // ghwtdeWorker
             // 
@@ -2065,17 +2041,75 @@ namespace Nautilus
             this.lblLyrics.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblLyrics.Paint += new System.Windows.Forms.PaintEventHandler(this.lblLyrics_Paint);
             // 
-            // chkTrack
+            // picWorking
             // 
-            this.chkTrack.AutoSize = true;
-            this.chkTrack.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkTrack.Location = new System.Drawing.Point(261, 98);
-            this.chkTrack.Name = "chkTrack";
-            this.chkTrack.Size = new System.Drawing.Size(15, 14);
-            this.chkTrack.TabIndex = 55;
-            this.toolTip1.SetToolTip(this.chkTrack, "Click here to display track number");
-            this.chkTrack.UseVisualStyleBackColor = true;
-            this.chkTrack.CheckedChanged += new System.EventHandler(this.ControlChanged);
+            this.picWorking.BackColor = System.Drawing.Color.Transparent;
+            this.picWorking.Image = global::Nautilus.Properties.Resources.loadingcircle;
+            this.picWorking.Location = new System.Drawing.Point(95, 312);
+            this.picWorking.Name = "picWorking";
+            this.picWorking.Size = new System.Drawing.Size(100, 100);
+            this.picWorking.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picWorking.TabIndex = 30;
+            this.picWorking.TabStop = false;
+            this.picWorking.UseWaitCursor = true;
+            this.picWorking.Visible = false;
+            // 
+            // picIcon2
+            // 
+            this.picIcon2.AllowDrop = true;
+            this.picIcon2.BackColor = System.Drawing.Color.Transparent;
+            this.picIcon2.ContextMenuStrip = this.contextMenuStrip2;
+            this.picIcon2.Cursor = System.Windows.Forms.Cursors.Default;
+            this.picIcon2.Location = new System.Drawing.Point(352, 463);
+            this.picIcon2.Name = "picIcon2";
+            this.picIcon2.Size = new System.Drawing.Size(64, 54);
+            this.picIcon2.TabIndex = 12;
+            this.picIcon2.TabStop = false;
+            this.picIcon2.DragDrop += new System.Windows.Forms.DragEventHandler(this.receiveImage);
+            this.picIcon2.DragEnter += new System.Windows.Forms.DragEventHandler(this.picIcon2_DragEnter);
+            this.picIcon2.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
+            this.picIcon2.MouseEnter += new System.EventHandler(this.picIcon1_MouseEnter);
+            // 
+            // picIcon1
+            // 
+            this.picIcon1.AllowDrop = true;
+            this.picIcon1.BackColor = System.Drawing.Color.Transparent;
+            this.picIcon1.ContextMenuStrip = this.contextMenuStrip2;
+            this.picIcon1.Cursor = System.Windows.Forms.Cursors.Default;
+            this.picIcon1.Location = new System.Drawing.Point(288, 463);
+            this.picIcon1.Name = "picIcon1";
+            this.picIcon1.Size = new System.Drawing.Size(64, 54);
+            this.picIcon1.TabIndex = 11;
+            this.picIcon1.TabStop = false;
+            this.picIcon1.DragDrop += new System.Windows.Forms.DragEventHandler(this.receiveImage);
+            this.picIcon1.DragEnter += new System.Windows.Forms.DragEventHandler(this.picIcon1_DragEnter);
+            this.picIcon1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
+            this.picIcon1.MouseEnter += new System.EventHandler(this.picIcon1_MouseEnter);
+            // 
+            // picVisualizer
+            // 
+            this.picVisualizer.BackColor = System.Drawing.Color.Transparent;
+            this.picVisualizer.Location = new System.Drawing.Point(8, 250);
+            this.picVisualizer.Name = "picVisualizer";
+            this.picVisualizer.Size = new System.Drawing.Size(553, 274);
+            this.picVisualizer.TabIndex = 4;
+            this.picVisualizer.TabStop = false;
+            this.picVisualizer.Paint += new System.Windows.Forms.PaintEventHandler(this.picVisualizer_Paint);
+            // 
+            // contextMenuStrip3
+            // 
+            this.contextMenuStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportAlbumArtFile});
+            this.contextMenuStrip3.Name = "contextMenuStrip3";
+            this.contextMenuStrip3.Size = new System.Drawing.Size(191, 48);
+            // 
+            // exportAlbumArtFile
+            // 
+            this.exportAlbumArtFile.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.exportAlbumArtFile.Name = "exportAlbumArtFile";
+            this.exportAlbumArtFile.Size = new System.Drawing.Size(190, 22);
+            this.exportAlbumArtFile.Text = "Export album art file...";
+            this.exportAlbumArtFile.Click += new System.EventHandler(this.exportAlbumArtFile_Click);
             // 
             // Visualizer
             // 
@@ -2083,6 +2117,7 @@ namespace Nautilus
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ClientSize = new System.Drawing.Size(568, 739);
+            this.Controls.Add(this.picLastFM);
             this.Controls.Add(this.lblLyrics);
             this.Controls.Add(this.picLogo);
             this.Controls.Add(this.picPin);
@@ -2147,6 +2182,11 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picConvert1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picKaraoke)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picMulti)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLastFM)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picPin)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picVolume)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picSlider)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLine)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPreview)).EndInit();
@@ -2161,8 +2201,6 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picPlayGuitar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlayBass)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPlayDrums)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picLogo)).EndInit();
-            this.contextMenuStrip1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pic2x)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picHarm)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffKeys)).EndInit();
@@ -2174,17 +2212,16 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.proBass)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.proGuitar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picAlbumArt)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picVolume)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picPin)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picIcon2)).EndInit();
             this.contextMenuStrip2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.picIcon1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picSpect)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.panelPlay.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picSpect)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picIcon2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picIcon1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picVisualizer)).EndInit();
+            this.contextMenuStrip3.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2343,5 +2380,8 @@ namespace Nautilus
         private ToolStripMenuItem verdanaToolStrip;
         private PictureBox yearJoystick;
         private CheckBox chkTrack;
+        private PictureBox picLastFM;
+        private ContextMenuStrip contextMenuStrip3;
+        private ToolStripMenuItem exportAlbumArtFile;
     }
 }

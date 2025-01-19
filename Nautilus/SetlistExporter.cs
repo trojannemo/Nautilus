@@ -1409,7 +1409,7 @@ namespace Nautilus
                     if (radioEverythingJSON.Checked)
                     {
                         sw.WriteLine("\"track_number\" : " + song.TrackNumber + del);
-                        sw.WriteLine("\"master\" : " + song.Master  + del);
+                        sw.WriteLine("\"master\" : " + (song.Master ? "true" : "false") + del);
                         sw.WriteLine("\"year_recorded\" : " + song.YearRecorded + del);
                         sw.WriteLine("\"year_released\" : " + song.YearReleased + del);
                         sw.WriteLine("\"subgenre\" : \"" + song.SubGenre + "\"" + del);
@@ -1421,7 +1421,7 @@ namespace Nautilus
                         sw.WriteLine("\"songid\" : " + song.SongId + del);
                         sw.WriteLine("\"songid_string\" : \"" + song.SongIdString + "\"" + del);
                         sw.WriteLine("\"source\" : \"" + song.Source + "\"" + del);
-                        sw.WriteLine("\"filepath\" : \"" + song.FilePath + "\"" + del);
+                        sw.WriteLine("\"filepath\" : \"" + song.FilePath.Replace("'", "").Trim() + "\"" + del);
                         sw.WriteLine("\"midifile\" : \"" + song.MIDIFile + "\"" + del);
                         sw.WriteLine("\"preview_start\" : " + song.PreviewStart + del);
                         sw.WriteLine("\"preview_end\" : " + song.PreviewEnd + del);
