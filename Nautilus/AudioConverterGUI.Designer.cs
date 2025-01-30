@@ -42,6 +42,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.qualityOpus = new System.Windows.Forms.NumericUpDown();
             this.qualityMp3 = new System.Windows.Forms.NumericUpDown();
+            this.qualityBink = new System.Windows.Forms.NumericUpDown();
             this.picPin = new System.Windows.Forms.PictureBox();
             this.qualityWav = new System.Windows.Forms.DomainUpDown();
             this.btnAbout = new System.Windows.Forms.Button();
@@ -49,10 +50,12 @@
             this.lblFailed = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.lblWorking = new System.Windows.Forms.Label();
+            this.btnBink = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.qualityOgg)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.qualityFlac)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.qualityOpus)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.qualityMp3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.qualityBink)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             this.SuspendLayout();
             // 
@@ -62,14 +65,14 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(420, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Drag && drop the file to be converted onto the correct button";
+            this.label1.Text = "Drag && drop the file(s) to be converted onto the correct button";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnOgg
             // 
             this.btnOgg.AllowDrop = true;
             this.btnOgg.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.btnOgg.Location = new System.Drawing.Point(73, 68);
+            this.btnOgg.Location = new System.Drawing.Point(15, 72);
             this.btnOgg.Name = "btnOgg";
             this.btnOgg.Size = new System.Drawing.Size(50, 50);
             this.btnOgg.TabIndex = 1;
@@ -83,7 +86,7 @@
             // 
             this.btnOpus.AllowDrop = true;
             this.btnOpus.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.btnOpus.Location = new System.Drawing.Point(129, 68);
+            this.btnOpus.Location = new System.Drawing.Point(71, 72);
             this.btnOpus.Name = "btnOpus";
             this.btnOpus.Size = new System.Drawing.Size(61, 50);
             this.btnOpus.TabIndex = 2;
@@ -97,7 +100,7 @@
             // 
             this.btnMP3.AllowDrop = true;
             this.btnMP3.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.btnMP3.Location = new System.Drawing.Point(196, 68);
+            this.btnMP3.Location = new System.Drawing.Point(138, 72);
             this.btnMP3.Name = "btnMP3";
             this.btnMP3.Size = new System.Drawing.Size(50, 50);
             this.btnMP3.TabIndex = 3;
@@ -111,7 +114,7 @@
             // 
             this.btnFlac.AllowDrop = true;
             this.btnFlac.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.btnFlac.Location = new System.Drawing.Point(252, 68);
+            this.btnFlac.Location = new System.Drawing.Point(194, 72);
             this.btnFlac.Name = "btnFlac";
             this.btnFlac.Size = new System.Drawing.Size(50, 50);
             this.btnFlac.TabIndex = 4;
@@ -125,7 +128,7 @@
             // 
             this.btnWav.AllowDrop = true;
             this.btnWav.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.btnWav.Location = new System.Drawing.Point(308, 68);
+            this.btnWav.Location = new System.Drawing.Point(250, 72);
             this.btnWav.Name = "btnWav";
             this.btnWav.Size = new System.Drawing.Size(50, 50);
             this.btnWav.TabIndex = 5;
@@ -149,7 +152,7 @@
             // qualityOgg
             // 
             this.qualityOgg.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.qualityOgg.Location = new System.Drawing.Point(73, 124);
+            this.qualityOgg.Location = new System.Drawing.Point(15, 128);
             this.qualityOgg.Maximum = new decimal(new int[] {
             10,
             0,
@@ -175,7 +178,7 @@
             // qualityFlac
             // 
             this.qualityFlac.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.qualityFlac.Location = new System.Drawing.Point(252, 124);
+            this.qualityFlac.Location = new System.Drawing.Point(194, 128);
             this.qualityFlac.Maximum = new decimal(new int[] {
             8,
             0,
@@ -201,7 +204,7 @@
             0,
             0,
             0});
-            this.qualityOpus.Location = new System.Drawing.Point(129, 124);
+            this.qualityOpus.Location = new System.Drawing.Point(71, 128);
             this.qualityOpus.Maximum = new decimal(new int[] {
             448,
             0,
@@ -232,7 +235,7 @@
             0,
             0,
             0});
-            this.qualityMp3.Location = new System.Drawing.Point(196, 124);
+            this.qualityMp3.Location = new System.Drawing.Point(138, 128);
             this.qualityMp3.Maximum = new decimal(new int[] {
             320,
             0,
@@ -255,6 +258,32 @@
             0,
             0});
             // 
+            // qualityBink
+            // 
+            this.qualityBink.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.qualityBink.Location = new System.Drawing.Point(306, 129);
+            this.qualityBink.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.qualityBink.Minimum = new decimal(new int[] {
+            2,
+            0,
+            0,
+            -2147483648});
+            this.qualityBink.Name = "qualityBink";
+            this.qualityBink.ReadOnly = true;
+            this.qualityBink.Size = new System.Drawing.Size(50, 20);
+            this.qualityBink.TabIndex = 67;
+            this.qualityBink.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.toolTip1.SetToolTip(this.qualityBink, "Higher quality value = better audio quality");
+            this.qualityBink.Value = new decimal(new int[] {
+            5,
+            0,
+            0,
+            0});
+            // 
             // picPin
             // 
             this.picPin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -273,7 +302,7 @@
             // qualityWav
             // 
             this.qualityWav.Enabled = false;
-            this.qualityWav.Location = new System.Drawing.Point(309, 124);
+            this.qualityWav.Location = new System.Drawing.Point(251, 128);
             this.qualityWav.Name = "qualityWav";
             this.qualityWav.Size = new System.Drawing.Size(49, 20);
             this.qualityWav.TabIndex = 7;
@@ -298,7 +327,7 @@
             this.lblSuccess.AutoSize = true;
             this.lblSuccess.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblSuccess.ForeColor = System.Drawing.Color.LimeGreen;
-            this.lblSuccess.Location = new System.Drawing.Point(376, 128);
+            this.lblSuccess.Location = new System.Drawing.Point(372, 132);
             this.lblSuccess.Name = "lblSuccess";
             this.lblSuccess.Size = new System.Drawing.Size(66, 16);
             this.lblSuccess.TabIndex = 9;
@@ -310,7 +339,7 @@
             this.lblFailed.AutoSize = true;
             this.lblFailed.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblFailed.ForeColor = System.Drawing.Color.Red;
-            this.lblFailed.Location = new System.Drawing.Point(391, 128);
+            this.lblFailed.Location = new System.Drawing.Point(387, 132);
             this.lblFailed.Name = "lblFailed";
             this.lblFailed.Size = new System.Drawing.Size(51, 16);
             this.lblFailed.TabIndex = 10;
@@ -327,19 +356,35 @@
             this.lblWorking.AutoSize = true;
             this.lblWorking.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblWorking.ForeColor = System.Drawing.Color.DarkOrange;
-            this.lblWorking.Location = new System.Drawing.Point(366, 128);
+            this.lblWorking.Location = new System.Drawing.Point(362, 132);
             this.lblWorking.Name = "lblWorking";
             this.lblWorking.Size = new System.Drawing.Size(76, 16);
             this.lblWorking.TabIndex = 11;
             this.lblWorking.Text = "Working...";
             this.lblWorking.Visible = false;
             // 
+            // btnBink
+            // 
+            this.btnBink.AllowDrop = true;
+            this.btnBink.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.btnBink.Location = new System.Drawing.Point(306, 72);
+            this.btnBink.Name = "btnBink";
+            this.btnBink.Size = new System.Drawing.Size(50, 50);
+            this.btnBink.TabIndex = 66;
+            this.btnBink.TabStop = false;
+            this.btnBink.Text = "(Bink)\r\nto\r\nMOGG";
+            this.btnBink.UseVisualStyleBackColor = false;
+            this.btnBink.DragDrop += new System.Windows.Forms.DragEventHandler(this.btnBink_DragDrop);
+            this.btnBink.DragEnter += new System.Windows.Forms.DragEventHandler(this.btnOgg_DragEnter);
+            // 
             // AudioConverter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.ClientSize = new System.Drawing.Size(444, 154);
+            this.ClientSize = new System.Drawing.Size(444, 159);
+            this.Controls.Add(this.qualityBink);
+            this.Controls.Add(this.btnBink);
             this.Controls.Add(this.picPin);
             this.Controls.Add(this.lblWorking);
             this.Controls.Add(this.lblFailed);
@@ -370,6 +415,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.qualityFlac)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.qualityOpus)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.qualityMp3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.qualityBink)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -397,6 +443,8 @@
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Label lblWorking;
         private System.Windows.Forms.PictureBox picPin;
+        private System.Windows.Forms.Button btnBink;
+        private System.Windows.Forms.NumericUpDown qualityBink;
     }
 }
 

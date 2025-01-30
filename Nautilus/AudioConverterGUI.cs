@@ -39,7 +39,7 @@ namespace Nautilus
 
         private bool ValidateFile(string file)
         {
-            var valid_input = new List<string>() { ".aac", ".flac", ".m4a", ".mogg", ".mp3", ".ogg", ".opus", ".wav", ".wma", ".yarg_mogg" };
+            var valid_input = new List<string>() { ".aac", ".bik", ".flac", ".m4a", ".mogg", ".mp3", ".ogg", ".opus", ".wav", ".wma", ".yarg_mogg" };
             var input_ext = Path.GetExtension(file).ToLowerInvariant();
 
             if (!valid_input.Contains(input_ext))
@@ -48,7 +48,7 @@ namespace Nautilus
                 {
                     var top = TopMost;
                     TopMost = false;
-                    MessageBox.Show("That's not a valid input file, try again.\n\nValid input files are:\n.aac | .flac | .m4a | .mogg | .mp3 | .ogg | .opus | .wav |  .wma | .yarg_mogg\nCON files are also supported", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show("That's not a valid input file, try again.\n\nValid input files are:\n.aac | .bik | .flac | .m4a | .mogg | .mp3 | .ogg | .opus | .wav |  .wma | .yarg_mogg\nCON files are also supported", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     TopMost = top;
                     return false;
                 }
@@ -77,7 +77,7 @@ namespace Nautilus
                 }
                 lblWorking.Visible = true;
                 Application.DoEvents();
-                var arg = "-\"" + file + "\" -" + format + argument;
+                var arg = "-\"" + file + "\" -" + format + argument;                
                 var app = new ProcessStartInfo
                 {
                     CreateNoWindow = true,
@@ -95,12 +95,7 @@ namespace Nautilus
                 process.Dispose();
                 lblWorking.Visible = false;
                 Application.DoEvents();
-
-                /*var folder = Application.StartupPath + "\\bin\\converted\\";
-                if (!Directory.Exists(folder))
-                {
-                    Directory.CreateDirectory(folder);
-                }*/
+                                
                 var folder = Path.GetDirectoryName(file) + "\\";
                 var output = folder + (isCON ? Path.GetFileName(file) : Path.GetFileNameWithoutExtension(file)) + "." + format;
                 if (File.Exists(output))
@@ -147,13 +142,7 @@ namespace Nautilus
 
         private void btnAbout_Click(object sender, System.EventArgs e)
         {
-            MessageBox.Show("Audio Converter " + GetAppVersion() + " by TrojanNemo, 2024", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private static string GetAppVersion()
-        {
-            var vers = Assembly.GetExecutingAssembly().GetName().Version;
-            return "v" + String.Format("{0}.{1}.{2}", vers.Major, vers.Minor, vers.Build);
+            MessageBox.Show("Audio Converter by TrojanNemo, 2024-25", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void timer1_Tick(object sender, System.EventArgs e)
@@ -178,6 +167,12 @@ namespace Nautilus
                     break;
             }
             TopMost = picPin.Tag.ToString() == "pinned";
+        }
+
+        private void btnBink_DragDrop(object sender, DragEventArgs e)
+        {
+            var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            SendToConverter(files.ToList(), "mogg", " -" + qualityBink.Value.ToString());
         }
     }
 }
