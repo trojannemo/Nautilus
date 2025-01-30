@@ -1,10 +1,73 @@
 Nautilus
 Developed by TrojanNemo
-© 2013-2024
+© 2013-2025
 (with contributions from many!)
 -------------------
 
 FEATURES / CHANGE LOG:
+
+v5.3.0
+
+VISUALIZER
+- Improved handling of audio files with 8 or less channels, should no longer have incorrect audio playback
+- Added basic support for playback of DJ Hero and DJ Hero 2 Xbox 360 DLC files - this is experimental, please report issues so I can improve on it
+- Added ability to download album art from last.fm by clicking on the last.fm logo - requires Artist and Album for it to work as per the last.fm API
+- Added ability to right-click and export album art image to file (useful if download album art from last.fm)
+- Added support for Clone Hero <color> tag for the author/charter in the song.ini file
+- Added hotfix for displaying author names with ampersand in the name, like Nunchuk & Sygenysis
+- Disabled auto shortening of album name as it was not working well with the track # and would break downloading album art from last.fm if the full album name was too long
+- Added checkbox (disabled by default) to enable/disable displaying Track # next to Album Name
+- Modified as needed to work with new and different SngCli dependency (this is used for Clone Hero .sng and YARG .yargsong files)
+
+SETLIST MANAGER
+- Added ability to drag/drop to import YARG .yargsong files so you can keep your YARG setlists complete (requires .NET 8 to be installed - follow prompts if you don't already have it)
+- Added ability to drag/drop to import Clone Hero .sng files so you can keep your Clone Hero setlists complete (requires .NET 8 to be installed - follow prompts if you don't already have it) - WILL NOT WORK WITH THE OFFICIAL CLONE HERO SETLIST SNG FILES, ONLY SNG FILES FROM ENCHOR.US OR THOSE MADE WITH CLONE HERO CONVERTER!
+- Reworked JSON export so it properly exports into object arrays instead of whatever the heck I was doing before - thanks to Readek for pointing it out
+- Added ability to export EVERYTHING when doing a JSON export
+- Changed behavior so now when drag/dropping folders from YARG/CH/PS/FS songs it will add all songs inside without popping up a notification for each song
+- Fixed bug where YARG and Clone Hero setlists would load but revert to RB3 Mode instead of retaining the correct mode
+- Fixed bug in the INI parser that would incorrectly assign the harmony difficulty to vocal parts - as far I can tell there's no vocal parts indicator on the YARG song.ini files so all songs will default to 0 vocal parts - but you can manually change the value
+- Fixed bug that would allow silly values like 16,000 as track number
+- Modified as needed to work with new and different SngCli dependency (this is used for Clone Hero .sng and YARG .yargsong files)
+
+CLONE HERO CONVERTER
+- Added ability to convert song folders into Clone Hero compatible SNG files (CON to SNG is as simple as CON to CH and CH to SNG)
+- Added option to encode audio to Opus format when packing into SNG files - this will significantly increase processing time, I don't recommend it unless you really need to save space
+- Added ability to convert song folders into YARG compatible YARGSONG files (CON to YARGSONG is as simple as CON to CH and CH to YARGSONG)
+
+VOLUME NORMALIZER (thanks to Sean/SuperRiderTH!)
+- Rewrote a majority of the code.
+- Added support for in memory streaming of audio. This vastly increases speed of the loudness analysis, as it no longer needs to be downmixed first.
+- Audio re-rendering support has been added. Now if audio needs to be louder, this can now be accomplished along with sanity checks to prevent you from ruining your files.
+- Audio backup support. If audio needs to be re-rendered, the original .mogg file will be saved alongside the CON files.
+- Fixed (hopefully) erroneous output in .dta files in European regions. Thanks to RazQ for finding this, and TheNathannator and AddyMills for just knowing how to deal with it.
+- Added a Verbose Output option in case you want some extra details on what is going on. You probably don't care for this, and it is just there for some extra debugging info.
+- Added a new Analyzer Mode. This doesn't do any processing on files, and just gets the average loudness of a set of CON files.
+- Fixed a couple fields from not being disabled while the process is running.
+- Fixed some parsing issues with attenuation values.
+- Audio is no longer clipped at 0 dB in processing.
+
+AUDIO ANALYZER
+- Improved handling of audio files with 8 or less channels, should now display them correctly
+
+STEMS ISOLATOR
+- Improved handling of audio files with 8 or less channels, should no longer butcher the stems when extracting in those cases
+
+FILE ANALYZER
+- Added option to batch analyze and separate into a folder songs that are missing drum fills (EuroMIX Special)
+- Added option to batch analyze and separate into folder songs that are missing overdrive markers on instruments charted (EuroMIX Special)
+
+PACK CREATOR
+- Fixed behavior where it would delete the contents of the 'input' folder when exiting
+
+CON EXPLORER
+- Added support for DJ Hero and DJ Hero 2 Xbox 360 files
+
+GENERAL
+- Updated SngCli to latest version, which in turn requires you to install .NET 8 Runtime if you don't already have it (you'll get a popup with a link to Microsoft's website if that's the case)
+- Code changes as needed to accomodate new and different SngCli dependency
+
+----------
 
 v5.2.3
 
