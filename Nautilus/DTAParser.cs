@@ -1062,6 +1062,10 @@ namespace Nautilus
                             {
                                 song.YearRecorded = GetYear(line);
                             }
+                            else if (line.Contains("(author") || line.Contains("'author"))
+                            {
+                                song.ChartAuthor = line.Replace("(author", "").Replace("'author", "").Replace("\"", "").Replace("'", "").Replace("(", "").Replace(")", "").Trim();
+                            }
                             else if (line.Contains("(album_name"))
                             {
                                 if (!line.Contains(")"))
@@ -1186,6 +1190,18 @@ namespace Nautilus
                             else if (line.Contains(";Multitrack=1"))
                             {
                                 song.Multitrack = true;
+                            }
+                            else if (line.Contains(";DIYStems=1"))
+                            {
+                                song.DIYStems = true;
+                            }
+                            else if (line.Contains(";PartialMultitrack=1"))
+                            {
+                                song.PartialMultitrack = true;
+                            }
+                            else if (line.Contains(";UnpitchedVocals=1"))
+                            {
+                                song.UnpitchedVocals = true;
                             }
                             else if (line.Contains(";Convert=1"))
                             {
@@ -2732,6 +2748,9 @@ namespace Nautilus
         public bool RB3Version { get; set; }
         public bool Karaoke { get; set; }
         public bool Multitrack { get; set; }
+        public bool DIYStems { get; set; }
+        public bool PartialMultitrack { get; set; }
+        public bool UnpitchedVocals { get; set; }
         public bool Convert { get; set; }
         public bool ExpertOnly { get; set; }
         public bool RhythmKeys { get; set; }
@@ -2811,6 +2830,9 @@ namespace Nautilus
             RB3Version = false;
             Karaoke = false;
             Multitrack = false;
+            PartialMultitrack = false;
+            DIYStems = false;
+            UnpitchedVocals = false;
             Convert = false;
             ExpertOnly = false;
             RhythmBass = false;

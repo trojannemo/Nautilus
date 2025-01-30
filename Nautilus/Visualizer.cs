@@ -30,8 +30,6 @@ using System.Net.Http;
 using System.Net;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
-using SharpMp4Parser.IsoParser.Boxes.ISO14496.Part12;
-using System.Runtime.Remoting.Metadata;
 
 namespace Nautilus
 {
@@ -166,6 +164,9 @@ namespace Nautilus
         private static readonly HttpClient httpClient = new HttpClient();
         private string songArtist;
         private string songAlbum;
+        private Image rb3Version;
+        private Image expertOnly;
+        private Image catEMH;
 
         public Visualizer(Color ButtonBackColor, Color ButtonTextColor, string con)
         {
@@ -224,11 +225,14 @@ namespace Nautilus
                 picMulti.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\multi.png");
                 picKaraoke.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\karaoke.png");
                 picConvert1.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\convert.png");
-                picCAT.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\cat.png");
-                picXOnly.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\xonly.png");
-                picRB3Ver.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\rb3.png");
+                catEMH = Tools.NemoLoadImage(Application.StartupPath + "\\res\\cat.png");
+                expertOnly = Tools.NemoLoadImage(Application.StartupPath + "\\res\\xonly.png");
+                rb3Version = Tools.NemoLoadImage(Application.StartupPath + "\\res\\rb3.png");
                 picRBass.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\rbass.png");
                 picRKeys.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\rkeys.png");
+                picDIYStems.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\diy_multitrack.png");
+                picPartial.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\partial_multitrack.png");
+                picUnpitched.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\unpitched_vocals.png");
             }
             catch (Exception ex)
             {
@@ -279,7 +283,7 @@ namespace Nautilus
             if (isXOnly) return;
             if (Tools.DoesMidiHaveEMH(midiFile, ProKeysEnabled)) return;
             if ((picIcon1.Image != null && picIcon2.Image != null) || isXOnly || Tools.MIDI_ERROR_MESSAGE.ToLowerInvariant().Contains("could not load midi file")) return;
-            sendIcon(picXOnly);
+            sendIcon(expertOnly);
             if (MessageBox.Show("Marked as expert only based on MIDI file\n\nClick OK to see more details, click Cancel to go back",
                     Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
             {
@@ -2414,7 +2418,7 @@ namespace Nautilus
                     case 1:
                         if (!bRhythm)
                         {
-                            sendIcon(picRKeys);
+                            sendIcon(picRKeys.Image);
                             bRhythm = true;
                         }
                         break;
@@ -2425,7 +2429,7 @@ namespace Nautilus
                         break;
                     case 9:
                     case 8:
-                        sendIcon(picRB3Ver);
+                        sendIcon(rb3Version);
                         break;
                     default:
                         return;
@@ -2657,18 +2661,7 @@ namespace Nautilus
                     MessageBox.Show("There was an error:\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 author = Parser.Songs[0].ChartAuthor.Replace("&", "&&"); //fix for Nunchuk & Sygenysis
-                /*if (string.IsNullOrWhiteSpace(author))
-                {
-                    var HMX_Sources = new List<string>
-                    {
-                        "rb1","acdc","rb2","rb3","rb1_dlc","rb2_dlc","rb3_dlc","rb4","rb4_dlc",
-                        "greenday","gdrb","lego","beatles","tbrb"
-                    };
-                    if (HMX_Sources.Contains(Parser.Songs[0].Source))
-                    {
-                        author = "Harmonix";
-                    }
-                }*/
+
                 if (Parser.Songs[0].DisableProKeys)
                 {
                     proKeys.Image = null;
@@ -2676,45 +2669,57 @@ namespace Nautilus
                 if (Parser.Songs[0].RhythmBass)
                 {
                     bRhythm = true;
-                    sendIcon(picRBass);
+                    sendIcon(picRBass.Image);
                 }
                 if (Parser.Songs[0].RhythmKeys && !bRhythm)
                 {
                     bRhythm = true;
-                    sendIcon(picRKeys);
+                    sendIcon(picRKeys.Image);
                 }
                 pic2x.Tag = Parser.Songs[0].DoubleBass ? 1 : 0;
                 if (Parser.Songs[0].Karaoke)
                 {
-                    sendIcon(picKaraoke);
+                    sendIcon(picKaraoke.Image);
                 }
                 if (Parser.Songs[0].Multitrack)
                 {
-                    sendIcon(picMulti);
+                    sendIcon(picMulti.Image);
                 }
                 if (Parser.Songs[0].Convert)
                 {
                     if (picIcon1.Image == null || picIcon2.Image == null)
                     {
-                        sendIcon(picConvert1);
+                        sendIcon(picConvert1.Image);
                     }
+                }
+                if (Parser.Songs[0].DIYStems)
+                {
+                    sendIcon(picDIYStems.Image);
+                }
+                if (Parser.Songs[0].PartialMultitrack)
+                {
+                    sendIcon(picPartial.Image);
+                }
+                if (Parser.Songs[0].UnpitchedVocals)
+                {
+                    sendIcon(picUnpitched.Image);
                 }
                 if (Parser.Songs[0].RB3Version)
                 {
-                    sendIcon(picRB3Ver);
+                    sendIcon(rb3Version);
                 }
                 if (Parser.Songs[0].CATemh)
                 {
                     if ((picIcon1.Image == null || picIcon2.Image == null) && !isXOnly)
                     {
-                        sendIcon(picCAT);
+                        sendIcon(catEMH);
                     }
                 }
                 if (Parser.Songs[0].ExpertOnly)
                 {
                     if ((picIcon1.Image == null || picIcon2.Image == null) && !isXOnly)
                     {
-                        sendIcon(picXOnly);
+                        sendIcon(expertOnly);
                     }
                     isXOnly = true;
                 }
@@ -2856,7 +2861,7 @@ namespace Nautilus
                 clicks = 0;
                 if (pictureFrom == sender)
                 {
-                    sendIcon(sender);
+                    sendIcon(((PictureBox)sender).Image);
                     return;
                 }
             }
@@ -2909,9 +2914,9 @@ namespace Nautilus
             picVisualizer.Invalidate();
         }
 
-        private void sendIcon(object sender)
+        private void sendIcon(Image icon)
         {
-            var bmp = ((PictureBox) (sender)).Image;
+            var bmp = icon;
             if (bmp == null) return;
             if (RESOURCE_ICON1 == null)
             {

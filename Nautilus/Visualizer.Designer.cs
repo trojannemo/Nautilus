@@ -90,11 +90,9 @@ namespace Nautilus
             this.btnSave = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.picCAT = new System.Windows.Forms.PictureBox();
-            this.picXOnly = new System.Windows.Forms.PictureBox();
+            this.picDIYStems = new System.Windows.Forms.PictureBox();
             this.picRBass = new System.Windows.Forms.PictureBox();
             this.picRKeys = new System.Windows.Forms.PictureBox();
-            this.picRB3Ver = new System.Windows.Forms.PictureBox();
             this.picConvert1 = new System.Windows.Forms.PictureBox();
             this.picKaraoke = new System.Windows.Forms.PictureBox();
             this.picMulti = new System.Windows.Forms.PictureBox();
@@ -132,6 +130,8 @@ namespace Nautilus
             this.proBass = new System.Windows.Forms.PictureBox();
             this.proGuitar = new System.Windows.Forms.PictureBox();
             this.picAlbumArt = new System.Windows.Forms.PictureBox();
+            this.contextMenuStrip3 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.exportAlbumArtFile = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.toolStripClearIcons = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -183,8 +183,8 @@ namespace Nautilus
             this.picIcon2 = new System.Windows.Forms.PictureBox();
             this.picIcon1 = new System.Windows.Forms.PictureBox();
             this.picVisualizer = new System.Windows.Forms.PictureBox();
-            this.contextMenuStrip3 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.exportAlbumArtFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.picPartial = new System.Windows.Forms.PictureBox();
+            this.picUnpitched = new System.Windows.Forms.PictureBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.yearJoystick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
@@ -204,11 +204,9 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picThemes)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picShowTheme)).BeginInit();
             this.panel3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picCAT)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picXOnly)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picDIYStems)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picRBass)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picRKeys)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picRB3Ver)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picConvert1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picKaraoke)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picMulti)).BeginInit();
@@ -242,6 +240,7 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.proBass)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.proGuitar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picAlbumArt)).BeginInit();
+            this.contextMenuStrip3.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panelPlay.SuspendLayout();
@@ -250,7 +249,8 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picIcon2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picIcon1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picVisualizer)).BeginInit();
-            this.contextMenuStrip3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picPartial)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picUnpitched)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
@@ -1070,11 +1070,11 @@ namespace Nautilus
             // panel3
             // 
             this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel3.Controls.Add(this.picCAT);
-            this.panel3.Controls.Add(this.picXOnly);
+            this.panel3.Controls.Add(this.picUnpitched);
+            this.panel3.Controls.Add(this.picPartial);
+            this.panel3.Controls.Add(this.picDIYStems);
             this.panel3.Controls.Add(this.picRBass);
             this.panel3.Controls.Add(this.picRKeys);
-            this.panel3.Controls.Add(this.picRB3Ver);
             this.panel3.Controls.Add(this.picConvert1);
             this.panel3.Controls.Add(this.picKaraoke);
             this.panel3.Controls.Add(this.picMulti);
@@ -1083,35 +1083,24 @@ namespace Nautilus
             this.panel3.Size = new System.Drawing.Size(552, 68);
             this.panel3.TabIndex = 19;
             // 
-            // picCAT
+            // picDIYStems
             // 
-            this.picCAT.BackColor = System.Drawing.Color.Transparent;
-            this.picCAT.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picCAT.Location = new System.Drawing.Point(408, 6);
-            this.picCAT.Name = "picCAT";
-            this.picCAT.Size = new System.Drawing.Size(64, 54);
-            this.picCAT.TabIndex = 19;
-            this.picCAT.TabStop = false;
-            this.toolTip1.SetToolTip(this.picCAT, "Click here if the song has EMH autogenerated by CAT");
-            this.picCAT.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
-            // 
-            // picXOnly
-            // 
-            this.picXOnly.BackColor = System.Drawing.Color.Transparent;
-            this.picXOnly.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picXOnly.Location = new System.Drawing.Point(474, 6);
-            this.picXOnly.Name = "picXOnly";
-            this.picXOnly.Size = new System.Drawing.Size(64, 54);
-            this.picXOnly.TabIndex = 18;
-            this.picXOnly.TabStop = false;
-            this.toolTip1.SetToolTip(this.picXOnly, "Click here if the song only has Expert difficulty charted");
-            this.picXOnly.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
+            this.picDIYStems.BackColor = System.Drawing.Color.Transparent;
+            this.picDIYStems.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picDIYStems.Location = new System.Drawing.Point(211, 6);
+            this.picDIYStems.Name = "picDIYStems";
+            this.picDIYStems.Size = new System.Drawing.Size(64, 54);
+            this.picDIYStems.TabIndex = 20;
+            this.picDIYStems.TabStop = false;
+            this.toolTip1.SetToolTip(this.picDIYStems, "Click here if the song has stems created manually or by an AI program such as Dem" +
+        "ucs");
+            this.picDIYStems.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
             // 
             // picRBass
             // 
             this.picRBass.BackColor = System.Drawing.Color.Transparent;
             this.picRBass.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picRBass.Location = new System.Drawing.Point(342, 6);
+            this.picRBass.Location = new System.Drawing.Point(475, 6);
             this.picRBass.Name = "picRBass";
             this.picRBass.Size = new System.Drawing.Size(64, 54);
             this.picRBass.TabIndex = 17;
@@ -1123,7 +1112,7 @@ namespace Nautilus
             // 
             this.picRKeys.BackColor = System.Drawing.Color.Transparent;
             this.picRKeys.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picRKeys.Location = new System.Drawing.Point(276, 6);
+            this.picRKeys.Location = new System.Drawing.Point(409, 6);
             this.picRKeys.Name = "picRKeys";
             this.picRKeys.Size = new System.Drawing.Size(64, 54);
             this.picRKeys.TabIndex = 16;
@@ -1131,23 +1120,11 @@ namespace Nautilus
             this.toolTip1.SetToolTip(this.picRKeys, "Click here if the song has rhythm guitar charted on the Keys track");
             this.picRKeys.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
             // 
-            // picRB3Ver
-            // 
-            this.picRB3Ver.BackColor = System.Drawing.Color.Transparent;
-            this.picRB3Ver.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picRB3Ver.Location = new System.Drawing.Point(210, 6);
-            this.picRB3Ver.Name = "picRB3Ver";
-            this.picRB3Ver.Size = new System.Drawing.Size(64, 54);
-            this.picRB3Ver.TabIndex = 15;
-            this.picRB3Ver.TabStop = false;
-            this.toolTip1.SetToolTip(this.picRB3Ver, "Click here if this song is the RB3 version to an existing song");
-            this.picRB3Ver.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
-            // 
             // picConvert1
             // 
             this.picConvert1.BackColor = System.Drawing.Color.Transparent;
             this.picConvert1.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picConvert1.Location = new System.Drawing.Point(144, 6);
+            this.picConvert1.Location = new System.Drawing.Point(343, 6);
             this.picConvert1.Name = "picConvert1";
             this.picConvert1.Size = new System.Drawing.Size(64, 54);
             this.picConvert1.TabIndex = 14;
@@ -1159,7 +1136,7 @@ namespace Nautilus
             // 
             this.picKaraoke.BackColor = System.Drawing.Color.Transparent;
             this.picKaraoke.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picKaraoke.Location = new System.Drawing.Point(78, 6);
+            this.picKaraoke.Location = new System.Drawing.Point(13, 6);
             this.picKaraoke.Name = "picKaraoke";
             this.picKaraoke.Size = new System.Drawing.Size(64, 54);
             this.picKaraoke.TabIndex = 13;
@@ -1171,7 +1148,7 @@ namespace Nautilus
             // 
             this.picMulti.BackColor = System.Drawing.Color.Transparent;
             this.picMulti.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picMulti.Location = new System.Drawing.Point(12, 6);
+            this.picMulti.Location = new System.Drawing.Point(79, 6);
             this.picMulti.Name = "picMulti";
             this.picMulti.Size = new System.Drawing.Size(64, 54);
             this.picMulti.TabIndex = 12;
@@ -1621,6 +1598,21 @@ namespace Nautilus
             this.picAlbumArt.TabStop = false;
             this.toolTip1.SetToolTip(this.picAlbumArt, "Click here to select the album art image (or just drag and drop it here)");
             this.picAlbumArt.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picImage_MouseClick);
+            // 
+            // contextMenuStrip3
+            // 
+            this.contextMenuStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportAlbumArtFile});
+            this.contextMenuStrip3.Name = "contextMenuStrip3";
+            this.contextMenuStrip3.Size = new System.Drawing.Size(191, 26);
+            // 
+            // exportAlbumArtFile
+            // 
+            this.exportAlbumArtFile.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.exportAlbumArtFile.Name = "exportAlbumArtFile";
+            this.exportAlbumArtFile.Size = new System.Drawing.Size(190, 22);
+            this.exportAlbumArtFile.Text = "Export album art file...";
+            this.exportAlbumArtFile.Click += new System.EventHandler(this.exportAlbumArtFile_Click);
             // 
             // contextMenuStrip2
             // 
@@ -2096,20 +2088,29 @@ namespace Nautilus
             this.picVisualizer.TabStop = false;
             this.picVisualizer.Paint += new System.Windows.Forms.PaintEventHandler(this.picVisualizer_Paint);
             // 
-            // contextMenuStrip3
+            // picPartial
             // 
-            this.contextMenuStrip3.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.exportAlbumArtFile});
-            this.contextMenuStrip3.Name = "contextMenuStrip3";
-            this.contextMenuStrip3.Size = new System.Drawing.Size(191, 48);
+            this.picPartial.BackColor = System.Drawing.Color.Transparent;
+            this.picPartial.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picPartial.Location = new System.Drawing.Point(145, 6);
+            this.picPartial.Name = "picPartial";
+            this.picPartial.Size = new System.Drawing.Size(64, 54);
+            this.picPartial.TabIndex = 21;
+            this.picPartial.TabStop = false;
+            this.toolTip1.SetToolTip(this.picPartial, "Click here if the song has partial multitrack audio\r\n");
+            this.picPartial.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
             // 
-            // exportAlbumArtFile
+            // picUnpitched
             // 
-            this.exportAlbumArtFile.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.exportAlbumArtFile.Name = "exportAlbumArtFile";
-            this.exportAlbumArtFile.Size = new System.Drawing.Size(190, 22);
-            this.exportAlbumArtFile.Text = "Export album art file...";
-            this.exportAlbumArtFile.Click += new System.EventHandler(this.exportAlbumArtFile_Click);
+            this.picUnpitched.BackColor = System.Drawing.Color.Transparent;
+            this.picUnpitched.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picUnpitched.Location = new System.Drawing.Point(277, 6);
+            this.picUnpitched.Name = "picUnpitched";
+            this.picUnpitched.Size = new System.Drawing.Size(64, 54);
+            this.picUnpitched.TabIndex = 22;
+            this.picUnpitched.TabStop = false;
+            this.toolTip1.SetToolTip(this.picUnpitched, "Click here if the song only has unpitched vocals charted");
+            this.picUnpitched.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
             // 
             // Visualizer
             // 
@@ -2174,11 +2175,9 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picThemes)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picShowTheme)).EndInit();
             this.panel3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.picCAT)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picXOnly)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picDIYStems)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picRBass)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picRKeys)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picRB3Ver)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picConvert1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picKaraoke)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picMulti)).EndInit();
@@ -2212,6 +2211,7 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.proBass)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.proGuitar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picAlbumArt)).EndInit();
+            this.contextMenuStrip3.ResumeLayout(false);
             this.contextMenuStrip2.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -2221,7 +2221,8 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picIcon2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picIcon1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picVisualizer)).EndInit();
-            this.contextMenuStrip3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picPartial)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picUnpitched)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2268,7 +2269,6 @@ namespace Nautilus
         private ToolStripMenuItem helpToolStripMenuItem;
         private PictureBox picRBass;
         private PictureBox picRKeys;
-        private PictureBox picRB3Ver;
         private PictureBox pic2x;
         private Label lblSubGenre;
         private TextBox txtSubGenre;
@@ -2290,7 +2290,6 @@ namespace Nautilus
         private ToolStripMenuItem fileToolStripMenuItem;
         private ToolStripMenuItem saveProfileToolStripMenuItem;
         private ToolStripMenuItem loadProfileToolStripMenuItem;
-        private PictureBox picXOnly;
         private TextBox txtSong2;
         private TextBox txtSong1;
         private TextBox txtArtist2;
@@ -2318,7 +2317,6 @@ namespace Nautilus
         private ToolStripMenuItem tahomaToolStrip;
         private ToolStripMenuItem timesNewRomanToolStrip;
         private ToolStripMenuItem customFontToolStrip;
-        private PictureBox picCAT;
         private Timer PlaybackTimer;
         private Panel panelPlay;
         private System.ComponentModel.BackgroundWorker audioProcessor;
@@ -2383,5 +2381,8 @@ namespace Nautilus
         private PictureBox picLastFM;
         private ContextMenuStrip contextMenuStrip3;
         private ToolStripMenuItem exportAlbumArtFile;
+        private PictureBox picDIYStems;
+        private PictureBox picUnpitched;
+        private PictureBox picPartial;
     }
 }
