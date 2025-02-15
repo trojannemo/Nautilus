@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using System.Drawing;
 using Nautilus.Properties;
 using Nautilus.x360;
+using System.Windows.Markup.Localizer;
+using DocumentFormat.OpenXml.Math;
 
 namespace Nautilus
 {
@@ -284,6 +286,7 @@ namespace Nautilus
                                                 Tools.DeleteFile(newDTA);
                                             }
 
+                                            var didStems = false;
                                             var changedAuthor = false;
                                             var songTitle = Parser.Songs[0].Name;
                                             var yearReleased = Parser.Songs[0].YearReleased;
@@ -307,6 +310,10 @@ namespace Nautilus
                                                     line = "   ('game_origin' " + origin + ")";
                                                     sw.WriteLine(line);
                                                     line = sr.ReadLine();
+                                                }
+                                                if ((line.Contains("subgenre") || line.Contains("sub_genre")) && chkSubgenre.Checked)
+                                                {
+                                                    line = sr.ReadLine(); //skip it
                                                 }
                                                 else if (line.Contains(songTitle) && yearReleased > 0 && chkAddYear.Checked)
                                                 {
@@ -365,6 +372,22 @@ namespace Nautilus
                                                     {
                                                         goto vocal_gender;
                                                     }
+                                                }
+                                                else if (line.Contains(";Karaoke=1") && chkDIYStems.Checked && !didStems)
+                                                {
+                                                    sw.WriteLine(";DIYStems=1");
+                                                    line = ";Karaoke=0";
+                                                    didStems = true;
+                                                }
+                                                else if (line.Contains(";Multitrack=1") && chkDIYStems.Checked && !didStems)
+                                                {
+                                                    sw.WriteLine(";DIYStems=1");
+                                                    line = ";Multitrack=0";
+                                                    didStems = true;
+                                                }
+                                                else if (line.Contains(";DIYStems") && chkDIYStems.Checked && didStems)
+                                                {
+                                                    line = ""; //avoid a duplicate entry
                                                 }
                                                 else if (line.ToLowerInvariant().Contains("'author'") && !line.Contains(")"))
                                                 {

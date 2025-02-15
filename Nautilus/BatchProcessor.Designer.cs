@@ -60,6 +60,8 @@
             this.gameRB2 = new System.Windows.Forms.RadioButton();
             this.gameRB3 = new System.Windows.Forms.RadioButton();
             this.chkAddYear = new System.Windows.Forms.CheckBox();
+            this.chkDIYStems = new System.Windows.Forms.CheckBox();
+            this.chkSubgenre = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
@@ -155,7 +157,7 @@
             this.btnBegin.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBegin.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnBegin.ForeColor = System.Drawing.Color.Black;
-            this.btnBegin.Location = new System.Drawing.Point(543, 412);
+            this.btnBegin.Location = new System.Drawing.Point(543, 458);
             this.btnBegin.Name = "btnBegin";
             this.btnBegin.Size = new System.Drawing.Size(59, 30);
             this.btnBegin.TabIndex = 20;
@@ -408,12 +410,36 @@
             this.chkAddYear.Text = "Add year to song name";
             this.chkAddYear.UseVisualStyleBackColor = true;
             // 
+            // chkDIYStems
+            // 
+            this.chkDIYStems.AutoSize = true;
+            this.chkDIYStems.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkDIYStems.Location = new System.Drawing.Point(12, 448);
+            this.chkDIYStems.Name = "chkDIYStems";
+            this.chkDIYStems.Size = new System.Drawing.Size(331, 17);
+            this.chkDIYStems.TabIndex = 82;
+            this.chkDIYStems.Text = "Override Magma\'s Karaoke or Multitrack tags with DIY Stems tag";
+            this.chkDIYStems.UseVisualStyleBackColor = true;
+            // 
+            // chkSubgenre
+            // 
+            this.chkSubgenre.AutoSize = true;
+            this.chkSubgenre.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkSubgenre.Location = new System.Drawing.Point(12, 471);
+            this.chkSubgenre.Name = "chkSubgenre";
+            this.chkSubgenre.Size = new System.Drawing.Size(177, 17);
+            this.chkSubgenre.TabIndex = 83;
+            this.chkSubgenre.Text = "Remove subgenre from DTA file";
+            this.chkSubgenre.UseVisualStyleBackColor = true;
+            // 
             // BatchProcessor
             // 
             this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.ClientSize = new System.Drawing.Size(614, 450);
+            this.ClientSize = new System.Drawing.Size(614, 495);
+            this.Controls.Add(this.chkSubgenre);
+            this.Controls.Add(this.chkDIYStems);
             this.Controls.Add(this.chkAddYear);
             this.Controls.Add(this.gameRB3);
             this.Controls.Add(this.gameRB2);
@@ -492,5 +518,7 @@
         private System.Windows.Forms.RadioButton gameRB2;
         private System.Windows.Forms.RadioButton gameRB3;
         private System.Windows.Forms.CheckBox chkAddYear;
+        private System.Windows.Forms.CheckBox chkDIYStems;
+        private System.Windows.Forms.CheckBox chkSubgenre;
     }
 }

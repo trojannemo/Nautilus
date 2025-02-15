@@ -142,7 +142,7 @@ namespace Nautilus
 
         private void btnAbout_Click(object sender, System.EventArgs e)
         {
-            MessageBox.Show("Audio Converter by TrojanNemo, 2024-25", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Audio Converter by TrojanNemo, 2024-2025", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void timer1_Tick(object sender, System.EventArgs e)
