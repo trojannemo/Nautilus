@@ -17,18 +17,30 @@ using Encoder = System.Drawing.Imaging.Encoder;
 using Path = System.IO.Path;
 using NautilusFREE;
 using static Nautilus.YARGSongFileStream;
-using Nautilus.zlib;
 
 
 namespace Nautilus
 {
     public static unsafe partial class TheMethod3
     {
-        const string __DllName = "themethod3";
+        private const string __DllName = "themethod3.dll";
+
+        static TheMethod3()
+        {
+            // Get the full path of the /bin/ directory
+            string binPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
+
+            // Add the /bin/ directory to the DLL search path
+            SetDllDirectory(binPath);
+        }
 
         [DllImport(__DllName, EntryPoint = "decrypt_mogg", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         [return: MarshalAs(UnmanagedType.U1)]
         public static extern bool decrypt_mogg(byte* data, uint len);
+
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetDllDirectory(string lpPathName);
     }
 
     public class NemoTools
