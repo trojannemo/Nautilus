@@ -676,6 +676,9 @@
     <None Include="Resources\djh2.png" />
     <None Include="Resources\lastfm1.png" />
     <None Include="Resources\lastfm.png" />
+    <None Include="Resources\youtube.png" />
+    <None Include="Resources\lyrics.png" />
+    <None Include="Resources\lyrics1.png" />
     <Content Include="submarine.ico" />
     <None Include="bin\Debug\res\thumbs\GH3.jpg" />
     <None Include="bin\Debug\res\thumbs\GH4WT.jpg" />

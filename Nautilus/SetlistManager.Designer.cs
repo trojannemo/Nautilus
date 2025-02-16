@@ -63,7 +63,6 @@
             this.chkColArtist = new System.Windows.Forms.CheckBox();
             this.lineBottom = new System.Windows.Forms.Panel();
             this.lineTop = new System.Windows.Forms.Panel();
-            this.picWorking = new System.Windows.Forms.PictureBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnNew = new System.Windows.Forms.Button();
             this.btnDeleteSong = new System.Windows.Forms.Button();
@@ -169,15 +168,6 @@
             this.txtDuration = new System.Windows.Forms.TextBox();
             this.ActiveMarker = new System.Windows.Forms.Panel();
             this.chkMaster = new System.Windows.Forms.CheckBox();
-            this.diffBand = new System.Windows.Forms.PictureBox();
-            this.diffVocals = new System.Windows.Forms.PictureBox();
-            this.diffProKeys = new System.Windows.Forms.PictureBox();
-            this.diffKeys = new System.Windows.Forms.PictureBox();
-            this.diffDrums = new System.Windows.Forms.PictureBox();
-            this.diffProBass = new System.Windows.Forms.PictureBox();
-            this.diffBass = new System.Windows.Forms.PictureBox();
-            this.diffProGuitar = new System.Windows.Forms.PictureBox();
-            this.diffGuitar = new System.Windows.Forms.PictureBox();
             this.label36 = new System.Windows.Forms.Label();
             this.label35 = new System.Windows.Forms.Label();
             this.numTrack = new System.Windows.Forms.NumericUpDown();
@@ -343,16 +333,30 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lockToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.picPin = new System.Windows.Forms.PictureBox();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.tmrHighlight = new System.Windows.Forms.Timer(this.components);
-            this.picGame = new System.Windows.Forms.PictureBox();
             this.tmrSelected = new System.Windows.Forms.Timer(this.components);
+            this.youtubeTmr = new System.Windows.Forms.Timer(this.components);
+            this.lyricsTmr = new System.Windows.Forms.Timer(this.components);
+            this.picPin = new System.Windows.Forms.PictureBox();
+            this.picGame = new System.Windows.Forms.PictureBox();
+            this.picLyrics = new System.Windows.Forms.PictureBox();
+            this.picYouTube = new System.Windows.Forms.PictureBox();
+            this.picWorking = new System.Windows.Forms.PictureBox();
+            this.diffBand = new System.Windows.Forms.PictureBox();
+            this.diffVocals = new System.Windows.Forms.PictureBox();
+            this.diffProKeys = new System.Windows.Forms.PictureBox();
+            this.diffKeys = new System.Windows.Forms.PictureBox();
+            this.diffDrums = new System.Windows.Forms.PictureBox();
+            this.diffProBass = new System.Windows.Forms.PictureBox();
+            this.diffBass = new System.Windows.Forms.PictureBox();
+            this.diffProGuitar = new System.Windows.Forms.PictureBox();
+            this.diffGuitar = new System.Windows.Forms.PictureBox();
+            this.chkYear20 = new System.Windows.Forms.CheckBox();
             this.tabHolder.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             this.tabSetlist.SuspendLayout();
             this.grpColumns.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
             this.PanelSearch.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.PanelInstruments.SuspendLayout();
@@ -366,6 +370,15 @@
             this.PanelRating.SuspendLayout();
             this.PanelMaster.SuspendLayout();
             this.PanelInfo.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numTrack)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numRecorded)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numReleased)).BeginInit();
+            this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picGame)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLyrics)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picYouTube)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffBand)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffVocals)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffProKeys)).BeginInit();
@@ -375,12 +388,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.diffBass)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffProGuitar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffGuitar)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numTrack)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numRecorded)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numReleased)).BeginInit();
-            this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picGame)).BeginInit();
             this.SuspendLayout();
             // 
             // tabHolder
@@ -420,6 +427,8 @@
             // 
             this.tabSetlist.AllowDrop = true;
             this.tabSetlist.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.tabSetlist.Controls.Add(this.picLyrics);
+            this.tabSetlist.Controls.Add(this.picYouTube);
             this.tabSetlist.Controls.Add(this.grpColumns);
             this.tabSetlist.Controls.Add(this.picWorking);
             this.tabSetlist.Controls.Add(this.btnSave);
@@ -853,19 +862,6 @@
             this.lineTop.TabIndex = 14;
             this.lineTop.Visible = false;
             // 
-            // picWorking
-            // 
-            this.picWorking.BackColor = System.Drawing.Color.Transparent;
-            this.picWorking.Image = global::Nautilus.Properties.Resources.loadingcircle;
-            this.picWorking.Location = new System.Drawing.Point(340, 283);
-            this.picWorking.Name = "picWorking";
-            this.picWorking.Size = new System.Drawing.Size(100, 100);
-            this.picWorking.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.picWorking.TabIndex = 30;
-            this.picWorking.TabStop = false;
-            this.picWorking.UseWaitCursor = true;
-            this.picWorking.Visible = false;
-            // 
             // btnSave
             // 
             this.btnSave.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
@@ -874,7 +870,7 @@
             this.btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSave.ForeColor = System.Drawing.Color.Black;
-            this.btnSave.Location = new System.Drawing.Point(353, 632);
+            this.btnSave.Location = new System.Drawing.Point(580, 632);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(87, 28);
             this.btnSave.TabIndex = 24;
@@ -1643,6 +1639,7 @@
             this.PanelDecades.BackColor = System.Drawing.Color.Transparent;
             this.PanelDecades.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PanelDecades.ContextMenuStrip = this.contextMenuStrip1;
+            this.PanelDecades.Controls.Add(this.chkYear20);
             this.PanelDecades.Controls.Add(this.btnYearNone);
             this.PanelDecades.Controls.Add(this.btnYearAll);
             this.PanelDecades.Controls.Add(this.chkYear90);
@@ -1703,11 +1700,11 @@
             this.chkYear90.Checked = true;
             this.chkYear90.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkYear90.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkYear90.Location = new System.Drawing.Point(65, 46);
+            this.chkYear90.Location = new System.Drawing.Point(8, 46);
             this.chkYear90.Name = "chkYear90";
-            this.chkYear90.Size = new System.Drawing.Size(55, 17);
+            this.chkYear90.Size = new System.Drawing.Size(43, 17);
             this.chkYear90.TabIndex = 12;
-            this.chkYear90.Text = "1990s";
+            this.chkYear90.Text = "90s";
             this.toolTip1.SetToolTip(this.chkYear90, "Songs from the 1990s");
             this.chkYear90.UseVisualStyleBackColor = false;
             this.chkYear90.CheckedChanged += new System.EventHandler(this.FiltersChanged);
@@ -1719,11 +1716,11 @@
             this.chkYear80.Checked = true;
             this.chkYear80.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkYear80.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkYear80.Location = new System.Drawing.Point(8, 46);
+            this.chkYear80.Location = new System.Drawing.Point(197, 23);
             this.chkYear80.Name = "chkYear80";
-            this.chkYear80.Size = new System.Drawing.Size(55, 17);
+            this.chkYear80.Size = new System.Drawing.Size(43, 17);
             this.chkYear80.TabIndex = 11;
-            this.chkYear80.Text = "1980s";
+            this.chkYear80.Text = "80s";
             this.toolTip1.SetToolTip(this.chkYear80, "Songs from the 1980s");
             this.chkYear80.UseVisualStyleBackColor = false;
             this.chkYear80.CheckedChanged += new System.EventHandler(this.FiltersChanged);
@@ -1735,12 +1732,12 @@
             this.chkYear10.Checked = true;
             this.chkYear10.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkYear10.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkYear10.Location = new System.Drawing.Point(179, 46);
+            this.chkYear10.Location = new System.Drawing.Point(107, 46);
             this.chkYear10.Name = "chkYear10";
-            this.chkYear10.Size = new System.Drawing.Size(61, 17);
+            this.chkYear10.Size = new System.Drawing.Size(43, 17);
             this.chkYear10.TabIndex = 14;
-            this.chkYear10.Text = "2010s+";
-            this.toolTip1.SetToolTip(this.chkYear10, "Songs from the 2010s and on");
+            this.chkYear10.Text = "10s";
+            this.toolTip1.SetToolTip(this.chkYear10, "Songs from the 2010s");
             this.chkYear10.UseVisualStyleBackColor = false;
             this.chkYear10.CheckedChanged += new System.EventHandler(this.FiltersChanged);
             // 
@@ -1751,11 +1748,11 @@
             this.chkYear70.Checked = true;
             this.chkYear70.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkYear70.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkYear70.Location = new System.Drawing.Point(179, 23);
+            this.chkYear70.Location = new System.Drawing.Point(152, 23);
             this.chkYear70.Name = "chkYear70";
-            this.chkYear70.Size = new System.Drawing.Size(55, 17);
+            this.chkYear70.Size = new System.Drawing.Size(43, 17);
             this.chkYear70.TabIndex = 10;
-            this.chkYear70.Text = "1970s";
+            this.chkYear70.Text = "70s";
             this.toolTip1.SetToolTip(this.chkYear70, "Songs from the 1970s");
             this.chkYear70.UseVisualStyleBackColor = false;
             this.chkYear70.CheckedChanged += new System.EventHandler(this.FiltersChanged);
@@ -1767,11 +1764,11 @@
             this.chkYear00.Checked = true;
             this.chkYear00.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkYear00.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkYear00.Location = new System.Drawing.Point(122, 46);
+            this.chkYear00.Location = new System.Drawing.Point(62, 46);
             this.chkYear00.Name = "chkYear00";
-            this.chkYear00.Size = new System.Drawing.Size(55, 17);
+            this.chkYear00.Size = new System.Drawing.Size(43, 17);
             this.chkYear00.TabIndex = 13;
-            this.chkYear00.Text = "2000s";
+            this.chkYear00.Text = "00s";
             this.toolTip1.SetToolTip(this.chkYear00, "Songs from the 2000s");
             this.chkYear00.UseVisualStyleBackColor = false;
             this.chkYear00.CheckedChanged += new System.EventHandler(this.FiltersChanged);
@@ -1783,11 +1780,11 @@
             this.chkYear60.Checked = true;
             this.chkYear60.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkYear60.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkYear60.Location = new System.Drawing.Point(122, 23);
+            this.chkYear60.Location = new System.Drawing.Point(107, 23);
             this.chkYear60.Name = "chkYear60";
-            this.chkYear60.Size = new System.Drawing.Size(55, 17);
+            this.chkYear60.Size = new System.Drawing.Size(43, 17);
             this.chkYear60.TabIndex = 7;
-            this.chkYear60.Text = "1960s";
+            this.chkYear60.Text = "60s";
             this.toolTip1.SetToolTip(this.chkYear60, "Songs from the 1960s");
             this.chkYear60.UseVisualStyleBackColor = false;
             this.chkYear60.CheckedChanged += new System.EventHandler(this.FiltersChanged);
@@ -1810,11 +1807,11 @@
             this.chkYear50.Checked = true;
             this.chkYear50.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkYear50.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkYear50.Location = new System.Drawing.Point(65, 23);
+            this.chkYear50.Location = new System.Drawing.Point(62, 23);
             this.chkYear50.Name = "chkYear50";
-            this.chkYear50.Size = new System.Drawing.Size(55, 17);
+            this.chkYear50.Size = new System.Drawing.Size(43, 17);
             this.chkYear50.TabIndex = 3;
-            this.chkYear50.Text = "1950s";
+            this.chkYear50.Text = "50s";
             this.toolTip1.SetToolTip(this.chkYear50, "Songs from the 1950s");
             this.chkYear50.UseVisualStyleBackColor = false;
             this.chkYear50.CheckedChanged += new System.EventHandler(this.FiltersChanged);
@@ -2439,132 +2436,6 @@
             this.chkMaster.CheckedChanged += new System.EventHandler(this.InfoChanged);
             this.chkMaster.MouseClick += new System.Windows.Forms.MouseEventHandler(this.txtInfoArtist_MouseClick);
             // 
-            // diffBand
-            // 
-            this.diffBand.BackColor = System.Drawing.Color.Transparent;
-            this.diffBand.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.diffBand.Location = new System.Drawing.Point(437, 120);
-            this.diffBand.Name = "diffBand";
-            this.diffBand.Size = new System.Drawing.Size(88, 26);
-            this.diffBand.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.diffBand.TabIndex = 73;
-            this.diffBand.TabStop = false;
-            this.diffBand.Tag = "0";
-            this.toolTip1.SetToolTip(this.diffBand, "No Part");
-            this.diffBand.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
-            // 
-            // diffVocals
-            // 
-            this.diffVocals.BackColor = System.Drawing.Color.Transparent;
-            this.diffVocals.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.diffVocals.Location = new System.Drawing.Point(263, 120);
-            this.diffVocals.Name = "diffVocals";
-            this.diffVocals.Size = new System.Drawing.Size(88, 26);
-            this.diffVocals.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.diffVocals.TabIndex = 72;
-            this.diffVocals.TabStop = false;
-            this.diffVocals.Tag = "0";
-            this.toolTip1.SetToolTip(this.diffVocals, "No Part");
-            this.diffVocals.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
-            // 
-            // diffProKeys
-            // 
-            this.diffProKeys.BackColor = System.Drawing.Color.Transparent;
-            this.diffProKeys.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.diffProKeys.Location = new System.Drawing.Point(698, 120);
-            this.diffProKeys.Name = "diffProKeys";
-            this.diffProKeys.Size = new System.Drawing.Size(88, 26);
-            this.diffProKeys.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.diffProKeys.TabIndex = 71;
-            this.diffProKeys.TabStop = false;
-            this.diffProKeys.Tag = "0";
-            this.toolTip1.SetToolTip(this.diffProKeys, "No Part");
-            this.diffProKeys.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
-            // 
-            // diffKeys
-            // 
-            this.diffKeys.BackColor = System.Drawing.Color.Transparent;
-            this.diffKeys.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.diffKeys.Location = new System.Drawing.Point(350, 120);
-            this.diffKeys.Name = "diffKeys";
-            this.diffKeys.Size = new System.Drawing.Size(88, 26);
-            this.diffKeys.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.diffKeys.TabIndex = 70;
-            this.diffKeys.TabStop = false;
-            this.diffKeys.Tag = "0";
-            this.toolTip1.SetToolTip(this.diffKeys, "No Part");
-            this.diffKeys.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
-            // 
-            // diffDrums
-            // 
-            this.diffDrums.BackColor = System.Drawing.Color.Transparent;
-            this.diffDrums.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.diffDrums.Location = new System.Drawing.Point(176, 120);
-            this.diffDrums.Name = "diffDrums";
-            this.diffDrums.Size = new System.Drawing.Size(88, 26);
-            this.diffDrums.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.diffDrums.TabIndex = 69;
-            this.diffDrums.TabStop = false;
-            this.diffDrums.Tag = "0";
-            this.toolTip1.SetToolTip(this.diffDrums, "No Part");
-            this.diffDrums.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
-            // 
-            // diffProBass
-            // 
-            this.diffProBass.BackColor = System.Drawing.Color.Transparent;
-            this.diffProBass.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.diffProBass.Location = new System.Drawing.Point(611, 120);
-            this.diffProBass.Name = "diffProBass";
-            this.diffProBass.Size = new System.Drawing.Size(88, 26);
-            this.diffProBass.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.diffProBass.TabIndex = 68;
-            this.diffProBass.TabStop = false;
-            this.diffProBass.Tag = "0";
-            this.toolTip1.SetToolTip(this.diffProBass, "No Part");
-            this.diffProBass.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
-            // 
-            // diffBass
-            // 
-            this.diffBass.BackColor = System.Drawing.Color.Transparent;
-            this.diffBass.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.diffBass.Location = new System.Drawing.Point(89, 120);
-            this.diffBass.Name = "diffBass";
-            this.diffBass.Size = new System.Drawing.Size(88, 26);
-            this.diffBass.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.diffBass.TabIndex = 67;
-            this.diffBass.TabStop = false;
-            this.diffBass.Tag = "0";
-            this.toolTip1.SetToolTip(this.diffBass, "No Part");
-            this.diffBass.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
-            // 
-            // diffProGuitar
-            // 
-            this.diffProGuitar.BackColor = System.Drawing.Color.Transparent;
-            this.diffProGuitar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.diffProGuitar.Location = new System.Drawing.Point(524, 120);
-            this.diffProGuitar.Name = "diffProGuitar";
-            this.diffProGuitar.Size = new System.Drawing.Size(88, 26);
-            this.diffProGuitar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.diffProGuitar.TabIndex = 66;
-            this.diffProGuitar.TabStop = false;
-            this.diffProGuitar.Tag = "0";
-            this.toolTip1.SetToolTip(this.diffProGuitar, "No Part");
-            this.diffProGuitar.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
-            // 
-            // diffGuitar
-            // 
-            this.diffGuitar.BackColor = System.Drawing.Color.Transparent;
-            this.diffGuitar.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.diffGuitar.Location = new System.Drawing.Point(2, 120);
-            this.diffGuitar.Name = "diffGuitar";
-            this.diffGuitar.Size = new System.Drawing.Size(88, 26);
-            this.diffGuitar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.diffGuitar.TabIndex = 65;
-            this.diffGuitar.TabStop = false;
-            this.diffGuitar.Tag = "0";
-            this.toolTip1.SetToolTip(this.diffGuitar, "No Part");
-            this.diffGuitar.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
-            // 
             // label36
             // 
             this.label36.BackColor = System.Drawing.Color.Transparent;
@@ -3049,7 +2920,9 @@
             this.lstSongs.TabIndex = 1;
             this.lstSongs.UseCompatibleStateImageBehavior = false;
             this.lstSongs.View = System.Windows.Forms.View.Details;
+            this.lstSongs.VirtualMode = true;
             this.lstSongs.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.lstSongs_ColumnClick);
+            this.lstSongs.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.lstSongs_RetrieveVirtualItem);
             this.lstSongs.SelectedIndexChanged += new System.EventHandler(this.lstSongs_SelectedIndexChanged);
             this.lstSongs.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
             this.lstSongs.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
@@ -3692,6 +3565,7 @@
             this.alternateColorsForArtists.Name = "alternateColorsForArtists";
             this.alternateColorsForArtists.Size = new System.Drawing.Size(287, 22);
             this.alternateColorsForArtists.Text = "Group by color when sorting by Artist";
+            this.alternateColorsForArtists.Visible = false;
             this.alternateColorsForArtists.Click += new System.EventHandler(this.alternateColorsForArtists_Click);
             // 
             // alternateColorsForAlbums
@@ -3703,6 +3577,7 @@
             this.alternateColorsForAlbums.Name = "alternateColorsForAlbums";
             this.alternateColorsForAlbums.Size = new System.Drawing.Size(287, 22);
             this.alternateColorsForAlbums.Text = "Group by color when sorting by Album";
+            this.alternateColorsForAlbums.Visible = false;
             this.alternateColorsForAlbums.Click += new System.EventHandler(this.alternateColorsForArtists_Click);
             // 
             // toolStripMenuItem6
@@ -4173,6 +4048,25 @@
             this.lockToolStrip.Text = "Lock";
             this.lockToolStrip.Click += new System.EventHandler(this.lockToolStrip_Click);
             // 
+            // tmrHighlight
+            // 
+            this.tmrHighlight.Interval = 3000;
+            this.tmrHighlight.Tick += new System.EventHandler(this.tmrHighlight_Tick);
+            // 
+            // tmrSelected
+            // 
+            this.tmrSelected.Enabled = true;
+            this.tmrSelected.Interval = 250;
+            this.tmrSelected.Tick += new System.EventHandler(this.tmrSelected_Tick);
+            // 
+            // youtubeTmr
+            // 
+            this.youtubeTmr.Tick += new System.EventHandler(this.youtubeTmr_Tick);
+            // 
+            // lyricsTmr
+            // 
+            this.lyricsTmr.Tick += new System.EventHandler(this.lyricsTmr_Tick);
+            // 
             // picPin
             // 
             this.picPin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -4189,11 +4083,6 @@
             this.toolTip1.SetToolTip(this.picPin, "Click to pin on top");
             this.picPin.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picPin_MouseClick);
             // 
-            // tmrHighlight
-            // 
-            this.tmrHighlight.Interval = 3000;
-            this.tmrHighlight.Tick += new System.EventHandler(this.tmrHighlight_Tick);
-            // 
             // picGame
             // 
             this.picGame.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -4204,11 +4093,188 @@
             this.picGame.TabIndex = 65;
             this.picGame.TabStop = false;
             // 
-            // tmrSelected
+            // picLyrics
             // 
-            this.tmrSelected.Enabled = true;
-            this.tmrSelected.Interval = 250;
-            this.tmrSelected.Tick += new System.EventHandler(this.tmrSelected_Tick);
+            this.picLyrics.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picLyrics.Image = global::Nautilus.Properties.Resources.lyrics1;
+            this.picLyrics.Location = new System.Drawing.Point(323, 632);
+            this.picLyrics.Name = "picLyrics";
+            this.picLyrics.Size = new System.Drawing.Size(46, 28);
+            this.picLyrics.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picLyrics.TabIndex = 34;
+            this.picLyrics.TabStop = false;
+            this.toolTip1.SetToolTip(this.picLyrics, "Click to view song lyrics");
+            this.picLyrics.Visible = false;
+            this.picLyrics.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picLyrics_MouseClick);
+            // 
+            // picYouTube
+            // 
+            this.picYouTube.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picYouTube.Image = global::Nautilus.Properties.Resources.youtube;
+            this.picYouTube.Location = new System.Drawing.Point(374, 632);
+            this.picYouTube.Name = "picYouTube";
+            this.picYouTube.Size = new System.Drawing.Size(46, 28);
+            this.picYouTube.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picYouTube.TabIndex = 33;
+            this.picYouTube.TabStop = false;
+            this.toolTip1.SetToolTip(this.picYouTube, "Click to open music video on YouTube");
+            this.picYouTube.Visible = false;
+            this.picYouTube.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picYouTube_MouseClick);
+            // 
+            // picWorking
+            // 
+            this.picWorking.BackColor = System.Drawing.Color.Transparent;
+            this.picWorking.Image = global::Nautilus.Properties.Resources.loadingcircle;
+            this.picWorking.Location = new System.Drawing.Point(340, 283);
+            this.picWorking.Name = "picWorking";
+            this.picWorking.Size = new System.Drawing.Size(100, 100);
+            this.picWorking.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picWorking.TabIndex = 30;
+            this.picWorking.TabStop = false;
+            this.picWorking.UseWaitCursor = true;
+            this.picWorking.Visible = false;
+            // 
+            // diffBand
+            // 
+            this.diffBand.BackColor = System.Drawing.Color.Transparent;
+            this.diffBand.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.diffBand.Location = new System.Drawing.Point(437, 120);
+            this.diffBand.Name = "diffBand";
+            this.diffBand.Size = new System.Drawing.Size(88, 26);
+            this.diffBand.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.diffBand.TabIndex = 73;
+            this.diffBand.TabStop = false;
+            this.diffBand.Tag = "0";
+            this.toolTip1.SetToolTip(this.diffBand, "No Part");
+            this.diffBand.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
+            // 
+            // diffVocals
+            // 
+            this.diffVocals.BackColor = System.Drawing.Color.Transparent;
+            this.diffVocals.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.diffVocals.Location = new System.Drawing.Point(263, 120);
+            this.diffVocals.Name = "diffVocals";
+            this.diffVocals.Size = new System.Drawing.Size(88, 26);
+            this.diffVocals.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.diffVocals.TabIndex = 72;
+            this.diffVocals.TabStop = false;
+            this.diffVocals.Tag = "0";
+            this.toolTip1.SetToolTip(this.diffVocals, "No Part");
+            this.diffVocals.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
+            // 
+            // diffProKeys
+            // 
+            this.diffProKeys.BackColor = System.Drawing.Color.Transparent;
+            this.diffProKeys.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.diffProKeys.Location = new System.Drawing.Point(698, 120);
+            this.diffProKeys.Name = "diffProKeys";
+            this.diffProKeys.Size = new System.Drawing.Size(88, 26);
+            this.diffProKeys.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.diffProKeys.TabIndex = 71;
+            this.diffProKeys.TabStop = false;
+            this.diffProKeys.Tag = "0";
+            this.toolTip1.SetToolTip(this.diffProKeys, "No Part");
+            this.diffProKeys.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
+            // 
+            // diffKeys
+            // 
+            this.diffKeys.BackColor = System.Drawing.Color.Transparent;
+            this.diffKeys.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.diffKeys.Location = new System.Drawing.Point(350, 120);
+            this.diffKeys.Name = "diffKeys";
+            this.diffKeys.Size = new System.Drawing.Size(88, 26);
+            this.diffKeys.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.diffKeys.TabIndex = 70;
+            this.diffKeys.TabStop = false;
+            this.diffKeys.Tag = "0";
+            this.toolTip1.SetToolTip(this.diffKeys, "No Part");
+            this.diffKeys.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
+            // 
+            // diffDrums
+            // 
+            this.diffDrums.BackColor = System.Drawing.Color.Transparent;
+            this.diffDrums.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.diffDrums.Location = new System.Drawing.Point(176, 120);
+            this.diffDrums.Name = "diffDrums";
+            this.diffDrums.Size = new System.Drawing.Size(88, 26);
+            this.diffDrums.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.diffDrums.TabIndex = 69;
+            this.diffDrums.TabStop = false;
+            this.diffDrums.Tag = "0";
+            this.toolTip1.SetToolTip(this.diffDrums, "No Part");
+            this.diffDrums.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
+            // 
+            // diffProBass
+            // 
+            this.diffProBass.BackColor = System.Drawing.Color.Transparent;
+            this.diffProBass.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.diffProBass.Location = new System.Drawing.Point(611, 120);
+            this.diffProBass.Name = "diffProBass";
+            this.diffProBass.Size = new System.Drawing.Size(88, 26);
+            this.diffProBass.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.diffProBass.TabIndex = 68;
+            this.diffProBass.TabStop = false;
+            this.diffProBass.Tag = "0";
+            this.toolTip1.SetToolTip(this.diffProBass, "No Part");
+            this.diffProBass.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
+            // 
+            // diffBass
+            // 
+            this.diffBass.BackColor = System.Drawing.Color.Transparent;
+            this.diffBass.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.diffBass.Location = new System.Drawing.Point(89, 120);
+            this.diffBass.Name = "diffBass";
+            this.diffBass.Size = new System.Drawing.Size(88, 26);
+            this.diffBass.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.diffBass.TabIndex = 67;
+            this.diffBass.TabStop = false;
+            this.diffBass.Tag = "0";
+            this.toolTip1.SetToolTip(this.diffBass, "No Part");
+            this.diffBass.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
+            // 
+            // diffProGuitar
+            // 
+            this.diffProGuitar.BackColor = System.Drawing.Color.Transparent;
+            this.diffProGuitar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.diffProGuitar.Location = new System.Drawing.Point(524, 120);
+            this.diffProGuitar.Name = "diffProGuitar";
+            this.diffProGuitar.Size = new System.Drawing.Size(88, 26);
+            this.diffProGuitar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.diffProGuitar.TabIndex = 66;
+            this.diffProGuitar.TabStop = false;
+            this.diffProGuitar.Tag = "0";
+            this.toolTip1.SetToolTip(this.diffProGuitar, "No Part");
+            this.diffProGuitar.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
+            // 
+            // diffGuitar
+            // 
+            this.diffGuitar.BackColor = System.Drawing.Color.Transparent;
+            this.diffGuitar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.diffGuitar.Location = new System.Drawing.Point(2, 120);
+            this.diffGuitar.Name = "diffGuitar";
+            this.diffGuitar.Size = new System.Drawing.Size(88, 26);
+            this.diffGuitar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.diffGuitar.TabIndex = 65;
+            this.diffGuitar.TabStop = false;
+            this.diffGuitar.Tag = "0";
+            this.toolTip1.SetToolTip(this.diffGuitar, "No Part");
+            this.diffGuitar.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ChangeDifficulty_MouseClick);
+            // 
+            // chkYear20
+            // 
+            this.chkYear20.AutoSize = true;
+            this.chkYear20.BackColor = System.Drawing.Color.Transparent;
+            this.chkYear20.Checked = true;
+            this.chkYear20.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkYear20.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkYear20.Location = new System.Drawing.Point(152, 46);
+            this.chkYear20.Name = "chkYear20";
+            this.chkYear20.Size = new System.Drawing.Size(49, 17);
+            this.chkYear20.TabIndex = 23;
+            this.chkYear20.Text = "20s+";
+            this.toolTip1.SetToolTip(this.chkYear20, "Songs from the 2020s and on");
+            this.chkYear20.UseVisualStyleBackColor = false;
+            this.chkYear20.CheckedChanged += new System.EventHandler(this.FiltersChanged);
             // 
             // SetlistManager
             // 
@@ -4237,7 +4303,6 @@
             this.tabSetlist.PerformLayout();
             this.grpColumns.ResumeLayout(false);
             this.grpColumns.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).EndInit();
             this.PanelSearch.ResumeLayout(false);
             this.PanelSearch.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
@@ -4262,6 +4327,16 @@
             this.PanelMaster.PerformLayout();
             this.PanelInfo.ResumeLayout(false);
             this.PanelInfo.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numTrack)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numRecorded)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numReleased)).EndInit();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picPin)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picGame)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLyrics)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picYouTube)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffBand)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffVocals)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffProKeys)).EndInit();
@@ -4271,13 +4346,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.diffBass)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffProGuitar)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.diffGuitar)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numTrack)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numRecorded)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numReleased)).EndInit();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picPin)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picGame)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -4604,5 +4672,10 @@
         private System.Windows.Forms.ToolStripMenuItem modeCH;
         private System.Windows.Forms.ToolStripMenuItem addTBRBOndiscSongsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem addTBRBDLCSongsToolStripMenuItem;
+        private System.Windows.Forms.PictureBox picYouTube;
+        private System.Windows.Forms.Timer youtubeTmr;
+        private System.Windows.Forms.Timer lyricsTmr;
+        private System.Windows.Forms.PictureBox picLyrics;
+        private System.Windows.Forms.CheckBox chkYear20;
     }
 }

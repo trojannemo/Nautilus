@@ -333,6 +333,16 @@ namespace Nautilus.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap lyrics1 {
+            get {
+                object obj = ResourceManager.GetObject("lyrics1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap moveall {
             get {
                 object obj = ResourceManager.GetObject("moveall", resourceCulture);
@@ -537,6 +547,16 @@ namespace Nautilus.Properties {
             get {
                 object obj = ResourceManager.GetObject("XK6", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap youtube {
+            get {
+                object obj = ResourceManager.GetObject("youtube", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }

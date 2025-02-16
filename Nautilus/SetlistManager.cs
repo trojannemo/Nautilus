@@ -19,6 +19,8 @@ using Path = System.IO.Path;
 using Point = System.Drawing.Point;
 using Newtonsoft.Json;
 using Nautilus.LibForge.SongData;
+using System.Net.Http;
+using Newtonsoft.Json.Linq;
 
 namespace Nautilus
 {
@@ -29,6 +31,7 @@ namespace Nautilus
         private string ActiveCacheFile;
         private readonly string setlist_folder;
         public List<SongData> Songs;
+        public List<SongData> AllSongs;
         private readonly List<int> duplicates;
         private int TotalSongs;
         private int ActiveSortColumn;
@@ -76,6 +79,10 @@ namespace Nautilus
         private readonly List<CheckBox> ColumnBoxes;
         private string importPath;
         private bool isImportingCache = false;
+        private int lastSortedColumn = 0;
+        private bool lastSortAscending = false;
+        private string YouTubeLink = "";
+        private LyricsResponse LyricsData = null;
 
         public SetlistManager(Color ButtonBackColor, Color ButtonTextColor, string args = "", MainForm xParent = null)
         {
@@ -560,7 +567,7 @@ namespace Nautilus
             if (!LoadSetlist(files[0])) return;
             if (LoadSongs())
             {
-                SortSongs();
+                SortSongs(lastSortedColumn);
             }
         }
 
@@ -604,7 +611,7 @@ namespace Nautilus
             if (!LoadSetlist(setlist_file)) return;
             if (LoadSongs())
             {
-                SortSongs();
+                SortSongs(lastSortedColumn);
             }
             doBlitzImport = false;
         }
@@ -649,7 +656,7 @@ namespace Nautilus
             if (!LoadSetlist(setlist_file)) return;
             if (LoadSongs())
             {
-                SortSongs();
+                SortSongs(lastSortedColumn);
             }
             doBlitzImport = false;
         }
@@ -1017,7 +1024,7 @@ namespace Nautilus
                 if (!LoadSetlist(setlist_file)) return;
                 if (LoadSongs())
                 {
-                    SortSongs();
+                    SortSongs(lastSortedColumn);
                 }
                 doBlitzImport = false;
             }
@@ -1032,7 +1039,7 @@ namespace Nautilus
         private bool SaveSetlist(string file)
         {
             if (isImportingCache) return false;
-            return SaveSetlist(file, Songs);
+            return SaveSetlist(file, AllSongs);
         }
 
         private bool SaveSetlist(string file, List<SongData> SongsToSave)
@@ -1425,7 +1432,7 @@ namespace Nautilus
                 return;
             }
             if (!LoadSetlist(ActiveSetlistPath)) return;
-            LoadSongs();
+            //LoadSongs();
         }
 
         private void importRB3SongCacheToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1489,10 +1496,7 @@ namespace Nautilus
             var file = GetFileToLoad();
             if (string.IsNullOrWhiteSpace(file)) return;
             if (!LoadSetlist(file)) return;
-            if (LoadSongs())
-            {
-                SortSongs();
-            }
+            LoadSongs();
         }
 
         private static string RemoveControlCharsFromString(string line)
@@ -1835,6 +1839,8 @@ namespace Nautilus
             ActiveSetlistPath = file;
 
             Songs = GrabSongsFromSetlist(file, true);
+            AllSongs = Songs;
+            SortSongs(lastSortedColumn);
 
             btnNew.Enabled = true;
             viewSetlistDetails.Enabled = true;
@@ -1851,9 +1857,12 @@ namespace Nautilus
         
         private bool PassDecadeFilter(int year)
         {
-            var passes = true;
-            
-            if (year > 2009 && !chkYear10.Checked)
+            var passes = true;            
+            if (year > 2019 && !chkYear20.Checked)
+            {
+                passes = false;
+            }
+            else if (year > 2009 && year < 2020 && !chkYear10.Checked)
             {
                 passes = false;
             }
@@ -1884,8 +1893,7 @@ namespace Nautilus
             else if (year < 1950 && !chkYearEarlier.Checked)
             {
                 passes = false;
-            }
-            
+            }            
             return passes;
         }
 
@@ -2191,9 +2199,7 @@ namespace Nautilus
         {
             picWorking.Visible = true;
             picWorking.Refresh();
-            lstSongs.ListViewItemSorter = null; //necessary to prevent auto-sorting as items are added
-            lstSongs.Sorting = SortOrder.None;
-            lstSongs.Items.Clear();
+            lstSongs.SelectedIndices.Clear();
             ClearDetailedInfo();
             EnableDisableInfo(false);
             btnSave.Visible = false;
@@ -2202,81 +2208,22 @@ namespace Nautilus
             if (findFileConflict || findIDConflict || findShortnameConflict)
             {
                 FindConflicts();
-                duplicates.Clear();
-                picWorking.Visible = false;
                 return true;
             }
             if (findExactDup || findPossDup)
             {
                 FindDuplicates();
-                duplicates.Clear();
-                picWorking.Visible = false;
                 return true;
             }
-            for (var i = 0; i < Songs.Count; i++)
-            {
-                var song = Songs[i];
-                counter++;
-                if (isSearchingForDups)
-                {
-                    if (!duplicates.Contains(i)) continue;
-                }
-                else if (findUnsupported)
-                {
-                    var specials = new List<string> { "�", "ï¿½", "*", "Ã", "E½" }; //add any others here
-                    var isSpecial = false;
-                    foreach (var weirdo in specials.Where(weirdo => song.Artist.Contains(weirdo) || song.Name.Contains(weirdo) || song.Album.Contains(weirdo)))
-                    {
-                        isSpecial = true;
-                    }
-                    if (!isSpecial) continue;
-                }
-                else if (findDoNotExport)
-                {
-                    if (!song.DoNotExport) continue;
-                }
-                else
-                {
-                    if (!PassesFilters(song)) continue;
-                }
-                var artist = CleanName(song.Artist);
-                var name = CleanName(song.Name);
-                if (moveFeaturedArtistsToSongName.Checked)
-                {
-                    var featured = MoveFeatArtist(artist, name);
-                    if (featured.Count > 0)
-                    {
-                        artist = featured[0];
-                        name = featured[1];
-                    }
-                }
-                var entry = new ListViewItem(artist);
-                entry.SubItems.Add(name);
-                entry.SubItems.Add(song.Master ? "✔" : "X");
-                entry.SubItems.Add(song.Album);
-                entry.SubItems.Add(song.YearReleased > 0 ? song.YearReleased.ToString(CultureInfo.InvariantCulture) : "");
-                entry.SubItems.Add(song.TrackNumber > 0 ? song.TrackNumber.ToString(CultureInfo.InvariantCulture) : "");
-                entry.SubItems.Add(song.Genre);
-                entry.SubItems.Add(song.VocalsDiff == 0 ? "0" : song.VocalParts.ToString(CultureInfo.InvariantCulture));
-                entry.SubItems.Add(song.GetGender(true).Replace("Masc.","M").Replace("Fem.", "F"));
-                entry.SubItems.Add(song.Length == 0 ? (song.PreviewEnd == 0 ? "0:00" : Parser.GetSongDuration((song.PreviewEnd).ToString(CultureInfo.InvariantCulture))) : Parser.GetSongDuration(song.Length.ToString(CultureInfo.InvariantCulture)));
-                entry.SubItems.Add(song.GetRating());
-                entry.SubItems.Add(song.GetSource());
-                entry.Tag = counter;
-                entry.SubItems.Add(DoDifficulty(song.GuitarDiff));
-                entry.SubItems.Add(DoDifficulty(song.BassDiff));
-                entry.SubItems.Add(DoDifficulty(song.DrumsDiff));
-                entry.SubItems.Add(DoDifficulty(song.VocalsDiff));
-                entry.SubItems.Add(!modeRB4.Checked ? DoDifficulty(song.KeysDiff) : "N/A");
-                entry.SubItems.Add(DoDifficulty(song.BandDiff));
-                entry.SubItems.Add(modeRB3.Checked ? DoDifficulty(song.ProGuitarDiff) : "N/A");
-                entry.SubItems.Add(modeRB3.Checked ? DoDifficulty(song.ProBassDiff) : "N/A");
-                entry.SubItems.Add(modeRB3.Checked ? DoDifficulty(song.ProKeysDiff) : "N/A");
-                entry.SubItems.Add(song.SongLink);
-                lstSongs.Items.Add(entry);
-            }
+
+            ApplyFilters();
+
+            lstSongs.BeginUpdate();            
+            lstSongs.VirtualListSize = Songs.Count;
+            lstSongs.EndUpdate();                      
+
             UpdateSongCounter();
-            SortSongs();
+            SortSongs(-1);
             duplicates.Clear();
             isSearchingForDups = false;
             picWorking.Visible = false;
@@ -2315,10 +2262,10 @@ namespace Nautilus
         }
 
         private void UpdateSongCounter()
-        {            
-            var count = lstSongs.Items.Count;
+        {
+            var count = Songs.Count();//lstSongs.Items.Count;
             lblCount.Text = count.ToString(CultureInfo.InvariantCulture);
-            viewSetlistDetails.Enabled = lstSongs.Items.Count > 0;
+            viewSetlistDetails.Enabled = count > 0;// lstSongs.Items.Count > 0;
 
             //With YARG/CH and RB3DX and RB3E, song count limits are a thing of the past.
             /*
@@ -2357,23 +2304,130 @@ namespace Nautilus
 
         private void lstSongs_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            if (e.Column != ActiveSortColumn)
+            SortSongs(e.Column);
+        }
+
+        private void ApplyFilters()
+        {
+            List<SongData> filteredSongs = new List<SongData>();
+
+            foreach (var song in AllSongs) // Use original unfiltered list
             {
-                ListSorting = SortOrder.Ascending;
+                if (isSearchingForDups && !duplicates.Contains(AllSongs.IndexOf(song))) continue;
+
+                if (findUnsupported)
+                {
+                    var specials = new List<string> { "�", "ï¿½", "*", "Ã", "E½" };
+                    if (!specials.Any(weirdo => song.Artist.Contains(weirdo) || song.Name.Contains(weirdo) || song.Album.Contains(weirdo)))
+                        continue;
+                }
+
+                if (findDoNotExport && !song.DoNotExport) continue;
+                if (!PassesFilters(song)) continue;
+
+                filteredSongs.Add(song);
+            }
+
+            Songs = filteredSongs; // Update the list with only filtered results            
+        }
+
+        private void SortSongs(int columnIndex)
+        {      
+            if (columnIndex != -1)
+            {
+                bool ascending = lastSortedColumn == columnIndex ? !lastSortAscending : true;
+                lastSortedColumn = columnIndex;
+                lastSortAscending = ascending;
+            }
+
+            // Get column text dynamically
+            if (columnIndex < -1 || columnIndex >= lstSongs.Columns.Count) return;
+
+            SongData selectedSong = null;
+            if (lstSongs.SelectedIndices.Count > 0)
+            {
+                int selectedIndex = lstSongs.SelectedIndices[0];
+                if (selectedIndex >= 0 && selectedIndex < Songs.Count)
+                {
+                    selectedSong = Songs[selectedIndex]; // Store reference to selected song
+                }
+                lstSongs.SelectedIndices.Clear();
+            }
+
+            if (columnIndex == -1) //loading songs, default to Artist sorting
+            {
+                Songs = Songs.OrderBy(song => song.Artist ?? "").ToList(); // Default: Sort by Artist
             }
             else
             {
-                ListSorting = ListSorting == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
-            }
-            ActiveSortColumn = e.Column;
-            SortSongs();
-        }
+                string columnText = lstSongs.Columns[columnIndex].Text;
 
-        private void SortSongs()
-        {
-            lstSongs.ListViewItemSorter = new ListViewItemComparer(lstSongs, ActiveSortColumn, ListSorting);
-            lstSongs.Sort();
-            GroupByColors();
+                // Sort dynamically based on column text
+                switch (columnText)
+                {
+                    case "Song":
+                        Songs = Songs.OrderBy(song => song.Name ?? "").ToList();
+                        break;
+                    case "Master":
+                        Songs = Songs.OrderBy(song => song.Master ? 1 : 0).ToList();
+                        break;
+                    case "Album":
+                        Songs = Songs.OrderBy(song => song.Album ?? "").ToList();
+                        break;
+                    case "Year":
+                        Songs = Songs.OrderBy(song => song.YearReleased).ToList();
+                        break;
+                    case "T. #":
+                        Songs = Songs.OrderBy(song => song.TrackNumber).ToList();
+                        break;
+                    case "Genre":
+                        Songs = Songs.OrderBy(song => song.Genre ?? "").ToList();
+                        break;
+                    case "V. #":
+                        Songs = Songs.OrderBy(song => song.VocalParts).ToList();
+                        break;
+                    case "Singer":
+                        Songs = Songs.OrderBy(song => song.Gender ?? "").ToList();
+                        break;
+                    case "Duration":
+                        Songs = Songs.OrderBy(song => song.Length).ToList();
+                        break;
+                    case "Length":
+                        Songs = Songs.OrderBy(song => song.Length).ToList();
+                        break;
+                    case "Rating":
+                        Songs = Songs.OrderBy(song => song.GetRating() ?? "").ToList();
+                        break;
+                    case "Source":
+                        Songs = Songs.OrderBy(song => song.GetSource() ?? "").ToList();
+                        break;
+                    case "Artist":
+                    default:
+                        Songs = Songs.OrderBy(song => song.Artist ?? "").ToList(); // Default: Sort by Artist
+                        break;
+                }
+            }
+
+            // Apply descending order if needed
+            if (!lastSortAscending) Songs.Reverse();
+
+            // Find the new index of the previously selected song
+            int newSelectedIndex = -1;
+            if (selectedSong != null)
+            {
+                newSelectedIndex = Songs.IndexOf(selectedSong); // Get new position in sorted list
+            }
+
+            // Update VirtualMode ListView
+            lstSongs.VirtualListSize = Songs.Count;
+            lstSongs.Invalidate();
+
+            // Restore selection
+            if (newSelectedIndex >= 0)
+            {
+                lstSongs.SelectedIndices.Add(newSelectedIndex); // Select the song in its new position
+                lstSongs.EnsureVisible(newSelectedIndex); // Scroll to ensure it's visible
+            }
         }
 
         private void GroupByColors()
@@ -2425,7 +2479,7 @@ namespace Nautilus
 
         private void FiltersChanged(object sender, EventArgs e)
         {
-            if (wait || reset || Songs.Count == 0) return;
+            if (wait || reset || AllSongs.Count == 0) return;
             if (unSaved)
             {
                 if (MessageBox.Show("You have unsaved changes to the song currently selected\nAre you sure you want to do that?\n\nClick NO to cancel and save the changes",
@@ -2492,6 +2546,7 @@ namespace Nautilus
             chkYear90.Checked = enabled;
             chkYear00.Checked = enabled;
             chkYear10.Checked = enabled;
+            chkYear20.Checked = enabled;
             wait = false;
             FiltersChanged(null, null);
         }
@@ -2782,6 +2837,7 @@ namespace Nautilus
         private void resetAllFiltersToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DoFilterReset();
+            Songs = AllSongs;
             FiltersChanged(sender, e);
         }
 
@@ -2958,7 +3014,12 @@ namespace Nautilus
 
         private void lstSongs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lstSongs.SelectedItems.Count == 0)
+            picYouTube.Visible = false;
+            YouTubeLink = "";
+            picLyrics.Visible = false;
+            LyricsData = null;
+
+            if (lstSongs.SelectedIndices.Count == 0)
             {
                 btnDeleteSong.Enabled = false;
                 return;
@@ -2980,8 +3041,10 @@ namespace Nautilus
             }
             IsUnSaved(false);
             
-            if (lstSongs.SelectedItems.Count > 1)
+            if (lstSongs.SelectedIndices.Count > 1)
             {
+                youtubeTmr.Enabled = false;
+                lyricsTmr.Enabled = false;
                 EnableDisableInfo(false);
                 ClearDetailedInfo();
                 ClearDiffBoxes(false);
@@ -2991,7 +3054,9 @@ namespace Nautilus
             {
                 try
                 {
-                    var index = Convert.ToInt16(lstSongs.SelectedItems[0].Tag);
+                    youtubeTmr.Enabled = true;
+                    lyricsTmr.Enabled = true;
+                    var index = lstSongs.SelectedIndices[0];
                     if (index <= -1) return;
                     EnableDisableInfo(true);
                     ClearDetailedInfo();
@@ -3320,16 +3385,16 @@ namespace Nautilus
             editColumnsToolStrip.Visible = panel == lstSongs;
             resizeToolStripMenuItem.Visible = panel == lstSongs;
             resizeToolStripMenuItem.Enabled = userCanMovePanels.Checked;
-            var visible = panel == lstSongs && lstSongs.SelectedItems.Count > 0;
+            var visible = panel == lstSongs && lstSongs.SelectedIndices.Count > 0;
             dONOTPRINT.Visible = visible;
             deleteSelectedToolStrip.Visible = visible;
             contextSeparator1.Visible = visible;
-            visible = panel == lstSongs && lstSongs.SelectedItems.Count == 1;
+            visible = panel == lstSongs && lstSongs.SelectedIndices.Count == 1;
             openLinkInBrowser.Visible = visible;
             editLinkToSong.Visible = visible;
             contextSeparator0.Visible = visible;
-            if (panel != lstSongs || lstSongs.SelectedItems.Count != 1) return;
-            var index = Convert.ToInt16(lstSongs.SelectedItems[0].Tag);
+            if (panel != lstSongs || lstSongs.SelectedIndices.Count != 1) return;
+            var index = Convert.ToInt16(lstSongs.SelectedIndices[0]);
             if (index == -1) return;
             dONOTPRINT.Checked = Songs[index].DoNotExport;
             openLinkInBrowser.Enabled = !string.IsNullOrWhiteSpace(Songs[index].SongLink);
@@ -3357,24 +3422,41 @@ namespace Nautilus
                 DoUnlockWarning();
                 return;
             }
-            if (lstSongs.SelectedItems.Count == 0) return;
-            var indices = (from object item in lstSongs.SelectedItems select Convert.ToInt16(((ListViewItem)item).Tag)).Select(dummy => (int)dummy).ToList();
+            if (lstSongs.SelectedIndices.Count == 0) return;
+
+            // Get selected indices (reverse sorting ensures correct removal)
+            var indices = lstSongs.SelectedIndices.Cast<int>().OrderByDescending(i => i).ToList();
+
+            // Create confirmation message
             var to_delete = indices.Aggregate("", (current, index) => current + Songs[index].Artist + " - " + Songs[index].Name + "\n");
+
             if (confirmBeforeDeleting.Checked)
             {
-                if (MessageBox.Show("Are you sure you want to delete " + (indices.Count() > 1 ? "these " + indices.Count() + " songs" : "this song") + "?\n\n" +
-                    (indices.Count > 20 ? "(too many songs selected to display)\n" : to_delete) + "\nTHIS CANNOT BE UNDONE", AppName,
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                if (MessageBox.Show("Are you sure you want to delete " +
+                    (indices.Count > 1 ? "these " + indices.Count + " songs" : "this song") + "?\n\n" +
+                    (indices.Count > 20 ? "(too many songs selected to display)\n" : to_delete) + "\nTHIS CANNOT BE UNDONE",
+                    AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
                 {
                     return;
                 }
             }
+
+            // Clear UI details before deleting
             ClearDetailedInfo();
-            indices.Sort();
-            for (var i = indices.Count - 1; i >= 0; i--)
+
+            // Remove songs from the list in reverse order (prevents index shifting issues)
+            foreach (var index in indices)
             {
-                Songs.RemoveAt(indices[i]);
+                if (index >= 0 && index < Songs.Count)
+                    Songs.RemoveAt(index);
             }
+
+            // Update ListView
+            lstSongs.BeginUpdate();
+            lstSongs.VirtualListSize = Songs.Count;
+            lstSongs.EndUpdate();
+            lstSongs.Invalidate();
+
             SaveSetlist(ActiveSetlistPath);
             LoadSongs();
         }
@@ -3470,15 +3552,14 @@ namespace Nautilus
 
         private List<SongData> GetSongsToExport()
         {
-            var songs = new List<SongData>();
-            for (var i = 0; i < lstSongs.Items.Count; i++)
+            var songsToExport = new List<SongData>();
+            for (var i = 0; i < Songs.Count; i++)
             {
-                var id = Convert.ToInt16(lstSongs.Items[i].Tag);
-                if (Songs[id].DoNotExport) continue; //skip songs marked DoNotExport
-                songs.Add(Songs[id]);
-                var index = songs.Count - 1;
-                var artist = CleanName(songs[index].Artist);
-                var name = CleanName(songs[index].Name);
+                var song = Songs[i];
+                if (song.DoNotExport) continue;
+                
+                var artist = CleanName(song.Artist);
+                var name = CleanName(song.Name);
                 if (moveFeaturedArtistsToSongName.Checked)
                 {
                     var featured = MoveFeatArtist(artist, name);
@@ -3488,10 +3569,11 @@ namespace Nautilus
                         name = featured[1];
                     }
                 }
-                songs[index].Artist = artist;
-                songs[index].Name = name;
+                song.Artist = artist;
+                song.Name = name;
+                songsToExport.Add(song);
             }
-            return songs;
+            return songsToExport;
         }
 
         private void exportSetlist_Click(object sender, EventArgs e)
@@ -3546,46 +3628,57 @@ namespace Nautilus
         }
 
         private void FindDuplicates()
-        {
+        {    
             var poss = findPossDup;
             var exact = findExactDup;
             isSearchingForDups = true;
-            var songs = Songs.Select(t => CleanName(t.Name, true).ToLowerInvariant()).ToList();
-            var artists = Songs.Select(t => CleanName(t.Artist, true).ToLowerInvariant()).ToList();
-            for (var i = 0; i < Songs.Count; i++)
-            {
-                var name = CleanName(Songs[i].Name, true).ToLowerInvariant();
-                var artist = CleanName(Songs[i].Artist, true).ToLowerInvariant();
-                if (!songs.Contains(name)) continue;
-                if (findExactDup && artists[songs.IndexOf(name)] != artist) continue;
-                if (songs.IndexOf(name) == i) continue;
-                if (!duplicates.Contains(i))
-                {
-                    duplicates.Add(i);
-                }
-                if (!duplicates.Contains(songs.IndexOf(name)))
-                {
-                    duplicates.Add(songs.IndexOf(name));
-                }
-            }
-            doSortingForDups();
-            //these get turned off by resetAllFilters, return value until manually turned off
-            findExactDup = exact;
-            findPossDup = poss;
-        }
 
-        private void doSortingForDups()
-        {
-            resetAllFilters.PerformClick();
-            ListSorting = SortOrder.Ascending;
+            // Dictionary to track occurrences of each song name (or name + artist for exact duplicates)
+            Dictionary<string, List<SongData>> songGroups = new Dictionary<string, List<SongData>>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var song in AllSongs)
+            {
+                var name = CleanName(song.Name, true).ToLowerInvariant();
+                var artist = CleanName(song.Artist, true).ToLowerInvariant();
+
+                string key = findExactDup ? $"{name}|{artist}" : name;
+
+                if (!songGroups.ContainsKey(key))
+                {
+                    songGroups[key] = new List<SongData>();
+                }
+                songGroups[key].Add(song);
+            }
+
+            // Collect all duplicates (including first occurrences)
+            List<SongData> duplicates = songGroups.Values
+                .Where(group => group.Count > 1) // Keep only groups with actual duplicates
+                .SelectMany(group => group) // Flatten the list
+                .ToList();
+
+            // Update Songs list with all duplicate instances
+            Songs = duplicates;
+
+
+            lstSongs.BeginUpdate();
+            lstSongs.VirtualListSize = Songs.Count;
+            lstSongs.EndUpdate();
+            lstSongs.Invalidate(); // Refresh the ListView                      
+
+            UpdateSongCounter();
+            isSearchingForDups = false;
+
+            ListSorting = SortOrder.Descending;
             //find "Song" column (since user can move it around)
             for (var i = lstSongs.Columns.Count - 1; i > 0; i--)
             {
                 if (lstSongs.Columns[i].Text != "Song") continue;
-                ActiveSortColumn = i;
+                lastSortedColumn = i;
                 break;
             }
-            SortSongs();
+            SortSongs(lastSortedColumn);
+
+            picWorking.Visible = false;
         }
 
         private void findExactDuplicatesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -3731,7 +3824,7 @@ namespace Nautilus
                 DoUnlockWarning();
                 return;
             }
-            foreach (var index in lstSongs.SelectedItems.Cast<ListViewItem>().Select(item => Convert.ToInt16(item.Tag)).Where(index => index != -1))
+            foreach (int index in lstSongs.SelectedIndices.Cast<int>().Where(index => index != -1))
             {
                 Songs[index].DoNotExport = dONOTPRINT.Checked;
             }
@@ -3882,7 +3975,7 @@ namespace Nautilus
                 1010541, 1010526, 1010551, 1010553, 1010493,
                 1010552, 1010492, 1010437, 1010517, 1010378
             };
-            foreach (var song in Songs.Where(song => blitzIDs.Contains(song.SongId)))
+            foreach (var song in AllSongs.Where(song => blitzIDs.Contains(song.SongId)))
             {
                 song.Source = "blitz";
             }
@@ -4522,17 +4615,17 @@ namespace Nautilus
         {
             var doExport = false;
             List<SongData> uniqueSongs = new List<SongData>();
-            var initialCount = Songs.Count;
+            var initialCount = AllSongs.Count;
             
-            foreach (var song in from song in newSongs let exists = Songs.Any(s => s.Name == song.Name && s.Artist == song.Artist) where (!exists || song.ShortName == "giveitaway2" || song.ShortName == "spoonman2") select song)
+            foreach (var song in from song in newSongs let exists = AllSongs.Any(s => s.Name == song.Name && s.Artist == song.Artist) where (!exists || song.ShortName == "giveitaway2" || song.ShortName == "spoonman2") select song)
             {
-                Songs.Add(song);
+                AllSongs.Add(song);
                 uniqueSongs.Add(song);
             }
             if (!quiet)
             {
                 string message;
-                var diff = Songs.Count - initialCount;
+                var diff = AllSongs.Count - initialCount;
                 if (diff == newSongs.Count)
                 {
                     message = "Added " + diff + " of " + newSongs.Count + " songs to your Setlist";
@@ -4725,7 +4818,7 @@ namespace Nautilus
             string link;
             try
             {
-                var index = Convert.ToInt16(lstSongs.SelectedItems[0].Tag);
+                var index = lstSongs.SelectedIndices[0];
                 link = Songs[index].SongLink;
             }
             catch (Exception ex)
@@ -4754,7 +4847,7 @@ namespace Nautilus
             int index;
             try
             {
-                index = Convert.ToInt16(lstSongs.SelectedItems[0].Tag);
+                index = Convert.ToInt16(lstSongs.SelectedIndices[0]);
             }
             catch (Exception ex)
             {
@@ -4768,7 +4861,22 @@ namespace Nautilus
                 openLinkInBrowser.Enabled = false;
             }
             Songs[index].SongLink = link;
-            lstSongs.SelectedItems[0].SubItems[lstSongs.Columns.IndexOf(colLink)].Text = link;
+            if (lstSongs.SelectedIndices.Count > 0)
+            {
+                int selectedIndex = lstSongs.SelectedIndices[0]; // Get selected index
+
+                if (selectedIndex >= 0 && selectedIndex < Songs.Count)
+                {
+                    Songs[selectedIndex].SongLink = link; // Update the underlying data
+
+                    int colIndex = lstSongs.Columns.IndexOf(colLink); // Get the column index for SongLink
+                    if (colIndex != -1)
+                    {
+                        // Force only the specific row to update
+                        lstSongs.RedrawItems(selectedIndex, selectedIndex, true);
+                    }
+                }
+            }
             SaveSetlist(ActiveSetlistPath);
         }
 
@@ -4868,8 +4976,8 @@ namespace Nautilus
 
         private void tmrSelected_Tick(object sender, EventArgs e)
         {
-            lblSelected.Visible = lstSongs.SelectedItems.Count > 0;
-            lblSelected.Text = "Selected: " + lstSongs.SelectedItems.Count;
+            lblSelected.Visible = lstSongs.SelectedIndices.Count > 0;
+            lblSelected.Text = "Selected: " + lstSongs.SelectedIndices.Count;
         }
 
         private void lstSongs_Leave(object sender, EventArgs e)
@@ -4903,39 +5011,68 @@ namespace Nautilus
         }
 
         private void FindConflicts()
-        {
-            //just to avoid potential issues, already addressed in DTAParser but old files might not have this done
-            foreach (var song in Songs.Where(song => string.IsNullOrWhiteSpace(song.SongIdString)))
+        {                        
+            // Ensure all SongIdStrings are set
+            foreach (var song in AllSongs.Where(song => string.IsNullOrWhiteSpace(song.SongIdString)))
             {
                 song.SongIdString = song.SongId.ToString(CultureInfo.InvariantCulture);
             }
-            var files = findIDConflict ? Songs.Select(t => t.SongIdString.ToLowerInvariant()).ToList() : 
-                (findShortnameConflict ? Songs.Select(t => t.ShortName.ToLowerInvariant()).ToList() : 
-                Songs.Select(t => t.FilePath.ToLowerInvariant()).ToList());
-            for (var i = 0; i < Songs.Count; i++)
+
+            // Define the key selection logic separately
+            Func<SongData, string> keySelector;
+            if (findIDConflict)
+                keySelector = song => song.SongIdString.ToLowerInvariant();
+            else if (findShortnameConflict)
+                keySelector = song => song.ShortName.ToLowerInvariant();
+            else
+                keySelector = song => song.FilePath.ToLowerInvariant();
+
+            // Dictionary to track first occurrences
+            Dictionary<string, int> fileIndex = new Dictionary<string, int>();
+            List<SongData> conflicts = new List<SongData>();
+
+            for (var i = 0; i < AllSongs.Count; i++)
             {
-                var file = findIDConflict ? Songs[i].SongIdString.ToLowerInvariant() : (findShortnameConflict ? Songs[i].ShortName.ToLowerInvariant() : 
-                    Songs[i].FilePath.ToLowerInvariant());
-                if (!files.Contains(file)) continue;
-                if (files.IndexOf(file) == i) continue;
-                if (!duplicates.Contains(i))
+                string fileKey = keySelector(AllSongs[i]);
+
+                if (fileIndex.ContainsKey(fileKey) && fileIndex[fileKey] != i)
                 {
-                    duplicates.Add(i);
+                    conflicts.Add(AllSongs[i]);
                 }
-                if (!duplicates.Contains(files.IndexOf(file)))
+                else if (!fileIndex.ContainsKey(fileKey))
                 {
-                    duplicates.Add(files.IndexOf(file));
+                    fileIndex[fileKey] = i; // Store first occurrence
                 }
             }
-            if (duplicates.Count < 2)
+
+            // Replace current Songs list with detected conflicts
+            Songs = conflicts;
+
+            if (Songs.Count > 0)
             {
-                MessageBox.Show("Nothing potentially conflicting found, awesome!", AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
+                MessageBox.Show("Found " + Songs.Count + " potentially conflicting songs, will load now.\n\nExport this list as Excel or CSV using " +
+                                "the 'Everything' export option so you can narrow down the problematic song(s).", AppName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
-            MessageBox.Show("Found " + duplicates.Count + " potentially conflicting songs, will load now.\n\nExport this list as Excel or CSV using " +
-                            "the 'Everything' export option so you can narrow down the problematic song(s).", AppName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            isSearchingForDups = true;
-            doSortingForDups();
+
+            lstSongs.BeginUpdate();
+            lstSongs.VirtualListSize = Songs.Count;
+            lstSongs.EndUpdate();
+            lstSongs.Invalidate(); // Refresh the ListView                      
+
+            UpdateSongCounter();
+            isSearchingForDups = false;
+
+            ListSorting = SortOrder.Descending;
+            //find "Song" column (since user can move it around)
+            for (var i = lstSongs.Columns.Count - 1; i > 0; i--)
+            {
+                if (lstSongs.Columns[i].Text != "Song") continue;
+                lastSortedColumn = i;
+                break;
+            }
+            SortSongs(lastSortedColumn);
+
+            picWorking.Visible = false;
         }
         
         private void findPossibleDuplicates_EnabledChanged(object sender, EventArgs e)
@@ -4970,6 +5107,161 @@ namespace Nautilus
         private void addTBRBDLCSongsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AddPreloadedSetlist("songs_tbrb_dlc");
+        }
+
+        private void lstSongs_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
+        {
+            if (e.ItemIndex < 0 || e.ItemIndex >= Songs.Count)
+            {
+                e.Item = new ListViewItem(); // Prevent out-of-range errors
+                return;
+            }
+
+            var song = Songs[e.ItemIndex];
+
+            var artist = CleanName(song.Artist);
+            var name = CleanName(song.Name);
+
+            if (moveFeaturedArtistsToSongName.Checked)
+            {
+                var featured = MoveFeatArtist(artist, name);
+                if (featured.Count > 0)
+                {
+                    artist = featured[0];
+                    name = featured[1];
+                }
+            }
+
+            e.Item = new ListViewItem(new[]
+            {
+                artist,
+                name,
+                song.Master ? "✔" : "X",
+                song.Album,
+                song.YearReleased > 0 ? song.YearReleased.ToString(CultureInfo.InvariantCulture) : "",
+                song.TrackNumber > 0 ? song.TrackNumber.ToString(CultureInfo.InvariantCulture) : "",
+                song.Genre,
+                song.VocalsDiff == 0 ? "0" : song.VocalParts.ToString(CultureInfo.InvariantCulture),
+                song.GetGender(true).Replace("Masc.","M").Replace("Fem.", "F"),
+                song.Length == 0
+                    ? (song.PreviewEnd == 0 ? "0:00" : Parser.GetSongDuration(song.PreviewEnd.ToString(CultureInfo.InvariantCulture)))
+                    : Parser.GetSongDuration(song.Length.ToString(CultureInfo.InvariantCulture)),
+                song.GetRating(),
+                song.GetSource(),
+                DoDifficulty(song.GuitarDiff),
+                DoDifficulty(song.BassDiff),
+                DoDifficulty(song.DrumsDiff),
+                DoDifficulty(song.VocalsDiff),
+                !modeRB4.Checked ? DoDifficulty(song.KeysDiff) : "N/A",
+                DoDifficulty(song.BandDiff),
+                modeRB3.Checked ? DoDifficulty(song.ProGuitarDiff) : "N/A",
+                modeRB3.Checked ? DoDifficulty(song.ProBassDiff) : "N/A",
+                modeRB3.Checked ? DoDifficulty(song.ProKeysDiff) : "N/A",
+                song.SongLink
+            });
+        }
+
+        private void youtubeTmr_Tick(object sender, EventArgs e)
+        {
+            if (lstSongs.SelectedIndices.Count > 1) return;
+
+            youtubeTmr.Enabled = false;
+
+            var artist = Songs[lstSongs.SelectedIndices[0]].Artist;
+            var title = Songs[lstSongs.SelectedIndices[0]].Name;
+
+            try
+            {
+                string apiKey = "AIzaSyCGeH3j0am3-rFCZ8egCcNOldXJZ53tjQ0"; // Replace with your API key
+                string query = Uri.EscapeDataString($"{artist} {title} music");
+                string url = $"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q={query}&key={apiKey}";
+
+                using (HttpClient client = new HttpClient())
+                {
+                    string response = client.GetStringAsync(url).Result; // Synchronous call
+
+                    JObject json = JObject.Parse(response);
+
+                    // Get first video ID
+                    string videoId = json["items"]?[0]?["id"]?["videoId"]?.ToString();
+                    
+                    if (string.IsNullOrEmpty(videoId))
+                    {
+                        YouTubeLink = "";
+                        picYouTube.Visible = false;
+                    }
+                    else
+                    {
+                        YouTubeLink = $"https://www.youtube.com/watch?v={videoId}&autoplay=1";
+                        picYouTube.Visible = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                YouTubeLink = "";
+                picYouTube.Visible = false;
+            }
+        }
+
+        private void picYouTube_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            if (string.IsNullOrEmpty(YouTubeLink) || lstSongs.SelectedIndices.Count == 0)
+            {
+                MessageBox.Show("Invalid YouTube link, can't open music video", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                picYouTube.Visible = false;
+                return;
+            }
+            Process.Start(YouTubeLink);
+        }
+
+        private void lyricsTmr_Tick(object sender, EventArgs e)
+        {
+            if (lstSongs.SelectedIndices.Count > 1) return;
+
+            lyricsTmr.Enabled = false;
+
+            var artist = Songs[lstSongs.SelectedIndices[0]].Artist;
+            var title = Songs[lstSongs.SelectedIndices[0]].Name;
+
+            try
+            {
+                string apiUrl = $"https://api.lyrics.ovh/v1/{Uri.EscapeDataString(artist)}/{Uri.EscapeDataString(title)}";
+
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage response = client.GetAsync(apiUrl).Result; // Synchronous call
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string json = response.Content.ReadAsStringAsync().Result;
+                        LyricsData = JsonConvert.DeserializeObject<LyricsResponse>(json);
+
+                        picLyrics.Visible = LyricsData != null;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                picLyrics.Visible = false;
+            }
+        }
+
+        private void picLyrics_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            if (LyricsData == null || lstSongs.SelectedIndices.Count == 0)
+            {
+                MessageBox.Show("Lyrics data is null", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                picLyrics.Visible = false;
+                return;
+            }
+            var artist = Songs[lstSongs.SelectedIndices[0]].Artist;
+            var title = Songs[lstSongs.SelectedIndices[0]].Name;            
+            var help = new HelpForm(artist + " - " + title + " Song Lyrics", 
+                LyricsData.Lyrics.Replace("\n\n", "\n").Replace("\n", Environment.NewLine), false);
+            help.ShowDialog();
         }
     }
 
@@ -5186,7 +5478,13 @@ namespace Nautilus
             }
             return returnVal;
         }
-    }        
+    }
+
+    public class LyricsResponse
+    {
+        [JsonProperty("lyrics")]
+        public string Lyrics { get; set; }
+    }
 
     public class YARGSong
     {
