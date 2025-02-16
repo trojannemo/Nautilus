@@ -79,6 +79,7 @@
             this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             this.backgroundWorker3 = new System.ComponentModel.BackgroundWorker();
             this.backgroundWorker4 = new System.ComponentModel.BackgroundWorker();
+            this.useArtistSongShortName = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PackageImage)).BeginInit();
@@ -480,7 +481,7 @@
             this.rockBand2ToolStripMenuItem,
             this.rockBand3ToolStripMenuItem});
             this.setGameIDToolStripMenuItem.Name = "setGameIDToolStripMenuItem";
-            this.setGameIDToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.setGameIDToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.setGameIDToolStripMenuItem.Text = "Change game ID";
             // 
             // rockBandToolStripMenuItem
@@ -515,9 +516,10 @@
             this.dePACKOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.usePackThumbnail,
             this.useSongAlbumArt,
-            this.openFolderAfterDePACK});
+            this.openFolderAfterDePACK,
+            this.useArtistSongShortName});
             this.dePACKOptionsToolStripMenuItem.Name = "dePACKOptionsToolStripMenuItem";
-            this.dePACKOptionsToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.dePACKOptionsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.dePACKOptionsToolStripMenuItem.Text = "dePACK options";
             // 
             // usePackThumbnail
@@ -557,7 +559,7 @@
             this.signAsCON,
             this.signAsLIVE});
             this.signingOptionsToolStripMenuItem.Name = "signingOptionsToolStripMenuItem";
-            this.signingOptionsToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.signingOptionsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.signingOptionsToolStripMenuItem.Text = "Signing options";
             // 
             // signAsCON
@@ -566,7 +568,7 @@
             this.signAsCON.Checked = true;
             this.signAsCON.CheckState = System.Windows.Forms.CheckState.Checked;
             this.signAsCON.Name = "signAsCON";
-            this.signAsCON.Size = new System.Drawing.Size(140, 22);
+            this.signAsCON.Size = new System.Drawing.Size(180, 22);
             this.signAsCON.Text = "Sign as CON";
             this.signAsCON.Click += new System.EventHandler(this.signAsCON_Click);
             // 
@@ -574,7 +576,7 @@
             // 
             this.signAsLIVE.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.signAsLIVE.Name = "signAsLIVE";
-            this.signAsLIVE.Size = new System.Drawing.Size(140, 22);
+            this.signAsLIVE.Size = new System.Drawing.Size(180, 22);
             this.signAsLIVE.Text = "Sign as LIVE";
             this.signAsLIVE.Click += new System.EventHandler(this.signAsLIVE_Click);
             // 
@@ -640,6 +642,14 @@
             // backgroundWorker4
             // 
             this.backgroundWorker4.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker4_DoWork);
+            // 
+            // useArtistSongShortName
+            // 
+            this.useArtistSongShortName.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.useArtistSongShortName.CheckOnClick = true;
+            this.useArtistSongShortName.Name = "useArtistSongShortName";
+            this.useArtistSongShortName.Size = new System.Drawing.Size(226, 22);
+            this.useArtistSongShortName.Text = "Use ArtistSongShortName";
             // 
             // QuickPackEditor
             // 
@@ -745,5 +755,6 @@
         private System.Windows.Forms.ToolStripMenuItem signingOptionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem signAsCON;
         private System.Windows.Forms.ToolStripMenuItem signAsLIVE;
+        private System.Windows.Forms.ToolStripMenuItem useArtistSongShortName;
     }
 }

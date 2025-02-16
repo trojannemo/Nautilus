@@ -991,8 +991,6 @@ namespace Nautilus
                 {
                     xPackage.CloseIO();
                     Log("Error parsing pack '" + Path.GetFileName(file) + "' to extract the files");
-                    //Tools.DeleteFolder(tempfolder, true);
-                    //Directory.CreateDirectory(tempfolder);
                     continue;
                 }
 
@@ -1003,8 +1001,6 @@ namespace Nautilus
                 {
                     xPackage.CloseIO();
                     Log("Error extracting files from pack '" + Path.GetFileName(file) + "'");
-                    //Tools.DeleteFolder(tempfolder, true);
-                    //Directory.CreateDirectory(tempfolder);
                     continue;
                 }
                 var title = xPackage.Header.Title_Display;
@@ -1020,13 +1016,15 @@ namespace Nautilus
                     foreach (var song in Songs.TakeWhile(song => !backgroundWorker1.CancellationPending))
                     {
                         var songname = Tools.CleanString(song.Artist + " - " + song.Name, false);
+                        var filename = songname;
 
-                        if (File.Exists(outputfolder + songname))
+                        if (useArtistSongShortName.Checked)
                         {
-                            Log("File '" + songname + "' already exists, skipping");
-                            //Tools.DeleteFolder(tempfolder, true);
-                            //Directory.CreateDirectory(tempfolder);
-                            continue;
+                            filename = Tools.CleanString(song.Artist, false) + Tools.CleanString(song.Name, false) + song.InternalName;                            
+                        }
+                        if (File.Exists(outputfolder + filename))
+                        {
+                            filename += "(1)";
                         }
 
                         Log("Creating CON file for '" + songname + "'");
@@ -1055,8 +1053,6 @@ namespace Nautilus
                             Log("Can't find the folder of files for " + song.Artist + " - " + song.Name);
                             Log("Can't find " + path);
                             Log("This is likely to a problem with the songs.dta file, skipping this song...");
-                            //Tools.DeleteFolder(tempfolder, true);
-                            //Directory.CreateDirectory(tempfolder);
                             continue;
                         }
                         repackaged.AddFolder("songs/" + song.InternalName);
@@ -1098,7 +1094,7 @@ namespace Nautilus
                             thumbnail = Tools.ResizeImage(thumbnail, 64, "png") ? thumbnail : "";
                         }
 
-                        if (FinishRepackage(song.Artist + " - " + song.Name, "dePACKed with Nautilus from pack '" + title + "'", true, thumbnail, outputfolder + songname))
+                        if (FinishRepackage(song.Artist + " - " + song.Name, "dePACKed with Nautilus from pack '" + title + "'", true, thumbnail, outputfolder + filename))
                         {
                             Log("Created CON file successfully for '" + songname + "'");
                             counter++;
@@ -1113,8 +1109,6 @@ namespace Nautilus
                 {
                     Log("There was an error dePACKing the files");
                     Log("Error says: " + ex.Message); 
-                    //Tools.DeleteFolder(tempfolder, true);
-                    //Directory.CreateDirectory(tempfolder);
                 }
             }
 
