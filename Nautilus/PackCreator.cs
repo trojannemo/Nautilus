@@ -34,6 +34,7 @@ namespace Nautilus
         private int CurrentThumbs;
         private static string[] Thumbnails;
         private Encoding fileEncoding;
+        private string fileEncodingString;
         private static Color mMenuBackground;
         private nTools nautilus3;
         private bool doRecursiveSearching;
@@ -68,7 +69,9 @@ namespace Nautilus
             Tools = new NemoTools();
             inputDir = Application.StartupPath + "\\input\\";
             CurrentThumbs = 10;
-            fileEncoding = Encoding.Default;
+
+            fileEncoding = new UTF8Encoding(false);
+            fileEncodingString = "utf8";
 
             intFiles = 0;
             toolTip1.SetToolTip(btnBegin, "Click to begin process");
@@ -573,6 +576,10 @@ namespace Nautilus
                                 if (string.IsNullOrWhiteSpace(line)) continue;
                                 if (line.Trim().StartsWith(";;", StringComparison.Ordinal)) continue;
                                 line = Tools.FixBadChars(line);
+                                if (line.Contains("(encoding") || line.Contains("'encoding"))
+                                {
+                                    line = "   ('encoding' '" + fileEncodingString + "')";
+                                }
                                 dtaOut.WriteLine(line);
                             }
                             dtaIn.Dispose();
@@ -1594,7 +1601,6 @@ namespace Nautilus
             Log("Or click 'Change Input Folder' to select the files");
             Log("Ready to begin");
             
-
             txtFolder.Text = inputDir;
         }
 
@@ -1614,31 +1620,22 @@ namespace Nautilus
             }
         }
 
-        private void autorecommendedToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            autorecommendedToolStripMenuItem.Checked = true;
-            aNSIToolStripMenuItem.Checked = false;
-            uTF8ToolStripMenuItem.Checked = false;
-
-            fileEncoding = Encoding.Default;
-        }
-
         private void aNSIToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            autorecommendedToolStripMenuItem.Checked = false;
             aNSIToolStripMenuItem.Checked = true;
             uTF8ToolStripMenuItem.Checked = false;
 
-            fileEncoding = Encoding.Default;
+            fileEncoding = Encoding.GetEncoding(28591);
+            fileEncodingString = "latin1";
         }
 
         private void uTF8ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            autorecommendedToolStripMenuItem.Checked = false;
             aNSIToolStripMenuItem.Checked = false;
             uTF8ToolStripMenuItem.Checked = true;
 
-            fileEncoding = Encoding.UTF8;
+            fileEncoding = new UTF8Encoding(false);
+            fileEncodingString = "utf8";
         }
 
         private sealed class DarkRenderer : ToolStripProfessionalRenderer

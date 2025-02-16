@@ -68,7 +68,6 @@
             this.rockBand2ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rockBand3ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.setDTAEncodingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.autorecommendedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aNSIToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.uTF8ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -571,7 +570,7 @@
             // 
             this.rockBandToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.rockBandToolStripMenuItem.Name = "rockBandToolStripMenuItem";
-            this.rockBandToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.rockBandToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.rockBandToolStripMenuItem.Text = "Rock Band";
             this.rockBandToolStripMenuItem.Click += new System.EventHandler(this.rockBandToolStripMenuItem_Click);
             // 
@@ -579,7 +578,7 @@
             // 
             this.rockBand2ToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.rockBand2ToolStripMenuItem.Name = "rockBand2ToolStripMenuItem";
-            this.rockBand2ToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.rockBand2ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.rockBand2ToolStripMenuItem.Text = "Rock Band 2";
             this.rockBand2ToolStripMenuItem.Click += new System.EventHandler(this.rockBand2ToolStripMenuItem_Click);
             // 
@@ -589,7 +588,7 @@
             this.rockBand3ToolStripMenuItem.Checked = true;
             this.rockBand3ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.rockBand3ToolStripMenuItem.Name = "rockBand3ToolStripMenuItem";
-            this.rockBand3ToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.rockBand3ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.rockBand3ToolStripMenuItem.Text = "Rock Band 3";
             this.rockBand3ToolStripMenuItem.Click += new System.EventHandler(this.rockBand3ToolStripMenuItem_Click);
             // 
@@ -597,36 +596,27 @@
             // 
             this.setDTAEncodingToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.setDTAEncodingToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.autorecommendedToolStripMenuItem,
             this.aNSIToolStripMenuItem,
             this.uTF8ToolStripMenuItem});
             this.setDTAEncodingToolStripMenuItem.Name = "setDTAEncodingToolStripMenuItem";
             this.setDTAEncodingToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
             this.setDTAEncodingToolStripMenuItem.Text = "Set DTA encoding";
             // 
-            // autorecommendedToolStripMenuItem
-            // 
-            this.autorecommendedToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.autorecommendedToolStripMenuItem.Checked = true;
-            this.autorecommendedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.autorecommendedToolStripMenuItem.Name = "autorecommendedToolStripMenuItem";
-            this.autorecommendedToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
-            this.autorecommendedToolStripMenuItem.Text = "Auto (recommended)";
-            this.autorecommendedToolStripMenuItem.Click += new System.EventHandler(this.autorecommendedToolStripMenuItem_Click);
-            // 
             // aNSIToolStripMenuItem
             // 
             this.aNSIToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.aNSIToolStripMenuItem.Name = "aNSIToolStripMenuItem";
-            this.aNSIToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.aNSIToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.aNSIToolStripMenuItem.Text = "ANSI";
             this.aNSIToolStripMenuItem.Click += new System.EventHandler(this.aNSIToolStripMenuItem_Click);
             // 
             // uTF8ToolStripMenuItem
             // 
             this.uTF8ToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.uTF8ToolStripMenuItem.Checked = true;
+            this.uTF8ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.uTF8ToolStripMenuItem.Name = "uTF8ToolStripMenuItem";
-            this.uTF8ToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
+            this.uTF8ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.uTF8ToolStripMenuItem.Text = "UTF8";
             this.uTF8ToolStripMenuItem.Click += new System.EventHandler(this.uTF8ToolStripMenuItem_Click);
             // 
@@ -937,7 +927,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.PictureBox picWorking;
         private System.Windows.Forms.ToolStripMenuItem setDTAEncodingToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem autorecommendedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aNSIToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem uTF8ToolStripMenuItem;
         private System.Windows.Forms.PictureBox picPin;
