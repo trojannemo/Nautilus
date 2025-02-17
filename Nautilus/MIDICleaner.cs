@@ -54,6 +54,7 @@ namespace Nautilus
         private bool isCON;
         private bool isRBN2;
         private static Color mMenuBackground;
+        private string activeFile;
 
         public MIDICleaner(string args, Color ButtonBackColor, Color ButtonTextColor)
         {
@@ -344,7 +345,7 @@ namespace Nautilus
                 BuildTempoList();
                 BuildTimeSignatureList();
                 var HasBEAT = false;
-                var cleanMIDI = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(file) + "_clean.mid";
+                var cleanMIDI = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(file) + "_clean.mid";                              
 
                 //let's clean all the sequencer specific and other misc shit that was causing issues
                 //this is when they occur before the trackname, which throws off the code below
@@ -655,6 +656,12 @@ namespace Nautilus
                         var camera_number = -1;
                         var old_postproc = "";
                         var new_postproc = "";
+                        var directedCuts = new List<string>() { "[directed_all_lt]", "[directed_drums_lt]", "[directed_bass_cls]",
+                            "[directed_guitar_cls]", "[directed_drums_kd]", "[directed_crowd]", "[directed_bass_cls]", "[directed_guitar_cls]",
+                            "[directed_drums_kd]", "[directed_crowd]" };
+                        var directedCutString = "";
+                        long directedCutAbsTime = 0;
+                        bool addedDirectedCut = true;
 
                         for (var z = 0; z < dirtyMIDI.Events[i].Count; z++)
                         {
@@ -670,6 +677,16 @@ namespace Nautilus
                                         {
                                             continue;
                                         }
+                                        if (venue_event.ToString().Contains("[lighting ()]") && removeLighting.Checked)
+                                        {
+                                            LogDetails("VENUE: Found disallowed [lighting ()] event and removed it");
+                                            var log_path = Path.Combine(Path.GetDirectoryName(activeFile), "jphn.log");
+                                            using (var sw = new StreamWriter(log_path, true))
+                                            {
+                                                sw.WriteLine($"{Path.GetFileName(activeFile)} - found disallowed [lighting ()] event and cleaned it");
+                                            }
+                                            toRemove.Add(notes);
+                                        }
                                         var index = venue_event.ToString().IndexOf("[", StringComparison.Ordinal);
                                         var old_event = venue_event.ToString().Substring(index, venue_event.ToString().Length - index);
                                         var new_event = old_event.ToLowerInvariant().Trim();
@@ -678,6 +695,18 @@ namespace Nautilus
                                         {
                                             LogDetails("VENUE: Stage Kit instruction" + FormattedTime(notes.AbsoluteTime) + " is not allowed and was removed");
                                             toRemove.Add(notes);
+                                        }
+                                        else if (directedCuts.Contains(new_event))
+                                        {
+                                            directedCutString = new_event;
+                                            directedCutAbsTime = venue_event.AbsoluteTime;
+                                            addedDirectedCut = false;
+                                        }
+                                        else if (isCameraEvent(new_event) && !addedDirectedCut)
+                                        {
+                                            toAdd.Add(new TextEvent(directedCutString, MetaEventType.TextEvent, directedCutAbsTime - 50));
+                                            addedDirectedCut = true;
+                                            LogDetails($"VENUE: Added directed cut '{directedCutString}'");
                                         }
                                         else if (new_event.Contains("[do_directed_cut "))
                                         {
@@ -691,6 +720,23 @@ namespace Nautilus
                                             dirtyMIDI.Events[i][z] = new TextEvent(new_event, MetaEventType.TextEvent, venue_event.AbsoluteTime);
                                             LogDetails("VENUE: cut " + old_event + FormattedTime(venue_event.AbsoluteTime) +
                                                        " is not supported and was changed to " + new_event);
+                                            if (directedCuts.Contains(new_event) && addedDirectedCut)
+                                            {
+                                                directedCutString = new_event;
+                                                directedCutAbsTime = venue_event.AbsoluteTime;
+                                                addedDirectedCut = false;
+                                            }
+                                            else if (isCameraEvent(new_event) && !addedDirectedCut)
+                                            {
+                                                toAdd.Add(new TextEvent(directedCutString, MetaEventType.TextEvent, directedCutAbsTime - 50));
+                                                addedDirectedCut = true;
+                                                if (directedCuts.Contains(new_event))
+                                                {
+                                                    directedCutString = new_event;
+                                                    directedCutAbsTime = venue_event.AbsoluteTime;
+                                                    addedDirectedCut = false;
+                                                }
+                                            }
                                         }
                                         else if (new_event.Contains("[verse]"))
                                         {
@@ -706,13 +752,13 @@ namespace Nautilus
                                             LogDetails("VENUE: lighting call " + old_event + FormattedTime(venue_event.AbsoluteTime) +
                                                        " is not supported and was changed to " + new_event);
                                         }
-                                        else if (new_event.Contains("[lighting ()]"))
+                                        /*else if (new_event.Contains("[lighting ()]") && !removeLighting.Checked)
                                         {
                                             new_event = "[lighting (harmony)]";
                                             dirtyMIDI.Events[i][z] = new TextEvent(new_event, MetaEventType.TextEvent, venue_event.AbsoluteTime);
                                             LogDetails("VENUE: lighting call " + old_event + FormattedTime(venue_event.AbsoluteTime) +
                                                        " is not supported and was changed to " + new_event);
-                                        }
+                                        }*/
                                         else if (new_event.Contains(".pp"))
                                         {
                                             old_postproc = new_event;
@@ -754,6 +800,7 @@ namespace Nautilus
                                     break;
                                 case MidiCommandCode.NoteOn:
                                     var note = (NoteOnEvent)notes;
+                                    var doDirectedCut = false;
 
                                     if (note.NoteNumber == 48)
                                     {
@@ -786,6 +833,7 @@ namespace Nautilus
                                                 }
                                                 cameracuts[camera_number].TimeStamp = note.AbsoluteTime;
                                                 cameracuts[camera_number].Bass = true;
+                                                doDirectedCut = true;
                                                 break;
                                             case 62:
                                                 if (camera_number == -1) //can't use value -1 in the list
@@ -800,6 +848,7 @@ namespace Nautilus
                                                 }
                                                 cameracuts[camera_number].TimeStamp = note.AbsoluteTime;
                                                 cameracuts[camera_number].Drummer = true;
+                                                doDirectedCut = true;
                                                 break;
                                             case 63:
                                                 if (camera_number == -1) //can't use value -1 in the list
@@ -814,6 +863,7 @@ namespace Nautilus
                                                 }
                                                 cameracuts[camera_number].TimeStamp = note.AbsoluteTime;
                                                 cameracuts[camera_number].Guitar = true;
+                                                doDirectedCut = true;
                                                 break;
                                             case 64:
                                                 if (camera_number == -1) //can't use value -1 in the list
@@ -828,6 +878,7 @@ namespace Nautilus
                                                 }
                                                 cameracuts[camera_number].TimeStamp = note.AbsoluteTime;
                                                 cameracuts[camera_number].Singer = true;
+                                                doDirectedCut = true;
                                                 break;
                                             case 70:
                                                 if (camera_number == -1) //can't use value -1 in the list
@@ -842,6 +893,7 @@ namespace Nautilus
                                                 }
                                                 cameracuts[camera_number].TimeStamp = note.AbsoluteTime;
                                                 cameracuts[camera_number].NoBehind = true;
+                                                doDirectedCut = true;
                                                 break;
                                             case 71:
                                                 if (camera_number == -1) //can't use value -1 in the list
@@ -856,6 +908,7 @@ namespace Nautilus
                                                 }
                                                 cameracuts[camera_number].TimeStamp = note.AbsoluteTime;
                                                 cameracuts[camera_number].OnlyFar = true;
+                                                doDirectedCut = true;
                                                 break;
                                             case 72:
                                                 if (camera_number == -1) //can't use value -1 in the list
@@ -870,6 +923,7 @@ namespace Nautilus
                                                 }
                                                 cameracuts[camera_number].TimeStamp = note.AbsoluteTime;
                                                 cameracuts[camera_number].OnlyClose = true;
+                                                doDirectedCut = true;
                                                 break;
                                             case 73:
                                                 if (camera_number == -1) //can't use value -1 in the list
@@ -884,6 +938,7 @@ namespace Nautilus
                                                 }
                                                 cameracuts[camera_number].TimeStamp = note.AbsoluteTime;
                                                 cameracuts[camera_number].NoClose = true;
+                                                doDirectedCut = true;
                                                 break;
                                         }
                                     }
@@ -954,7 +1009,15 @@ namespace Nautilus
                                         toAdd.Add(new TextEvent(new_postproc, MetaEventType.TextEvent,note.AbsoluteTime + note.NoteLength));
                                         LogDetails("VENUE: post-processing note " + note.NoteNumber + FormattedTime(note.AbsoluteTime) + " was changed to " +
                                                    new_postproc + " Text Event");
-                                        old_postproc = new_postproc;
+                                        old_postproc = new_postproc;                                        
+                                    }
+                                    if (!string.IsNullOrEmpty(directedCutString) && doDirectedCut && !addedDirectedCut && note.AbsoluteTime > directedCutAbsTime)
+                                    {
+                                        toAdd.Add(new TextEvent(directedCutString, MetaEventType.TextEvent, note.AbsoluteTime - 50));
+                                        addedDirectedCut = true;
+                                        directedCutString = "";
+                                        directedCutAbsTime = 0;
+                                        LogDetails($"VENUE: Added directed cut '{directedCutString}'");
                                     }
                                     break;
                             }
@@ -1321,7 +1384,7 @@ namespace Nautilus
                                                 {
                                                     LogDetails(track + ": note " + notes.NoteNumber + FormattedTime(note.AbsoluteTime) + " is a tonic note indicator");
                                                     LogDetails("This method of specifying tonic note value is not supported in RBN 2.0, so it will be removed");
-                                                    LogDetails("Use Magma: C3 Roks Edition and enter tonic note value " + notes.NoteNumber);
+                                                    LogDetails("Use Magma: Rok On Edition and enter tonic note value " + notes.NoteNumber);
                                                 }
                                                 break;
                                             case 2:
@@ -1336,7 +1399,7 @@ namespace Nautilus
                                             case 11:
                                                 LogDetails(track + ": note " + notes.NoteNumber + FormattedTime(note.AbsoluteTime) + " is a tonic note indicator");
                                                 LogDetails("This method of specifying tonic note value is not supported in RBN 2.0, so it will be removed");
-                                                LogDetails("Use Magma: C3 Roks Edition and enter tonic note value " + notes.NoteNumber);
+                                                LogDetails("Use Magma: Rok On Edition and enter tonic note value " + notes.NoteNumber);
                                                 break;
                                             case 105:
                                                 markers++;
@@ -2369,12 +2432,186 @@ namespace Nautilus
             saving = false;
         }
 
+        private bool isCameraEvent(string ev)
+        {
+            var cameraEvents = new List<string>() { 
+                "[coop_all_behind]", 
+                "[coop_all_far]", 
+                "[coop_all_near]", 
+                "[coop_front_behind]", 
+                "[coop_front_near]", 
+                "[coop_d_behind]", 
+                "[coop_d_near]", 
+                "[coop_v_behind]", 
+                "[coop_v_near]", 
+                "[coop_b_behind]",
+                "[coop_b_near]", 
+                "[coop_g_behind]", 
+                "[coop_g_near]", 
+                "[coop_k_behind]", 
+                "[coop_k_near]", 
+                "[coop_dv_near]", 
+                "[coop_bd_near]",
+                "[coop_dg_near]",
+                "[coop_bv_behind]",
+                "[coop_bv_near]",
+                "[coop_gv_behind]",
+                "[coop_gv_near]",
+                "[coop_kv_behind]",
+                "[coop_kv_near]",
+                "[coop_bg_behind]",
+                "[coop_bg_near]",
+                "[coop_bk_behind]",
+                "[coop_bk_near]",
+                "[coop_gk_behind]",
+                "[coop_gk_near]",    
+                "[coop_dv_near]",
+                "[coop_bd_near]",
+                "[coop_dg_near]",
+                "[coop_bv_behind]",
+                "[coop_bv_near]",
+                "[coop_gv_behind]",
+                "[coop_gv_near]",
+                "[coop_kv_behind]",
+                "[coop_kv_near]",
+                "[coop_bg_behind]",
+                "[coop_bg_near]",
+                "[coop_bk_behind]",
+                "[coop_bk_near]",
+                "[coop_gk_behind]",
+                "[coop_gk_near]", 
+                "[directed_all]",
+                "[directed_all_cam]",
+                "[directed_all_yeah]",
+                "[directed_all_lt]",
+                "[directed_bre]",
+                "[directed_brej]",
+                "[directed_crowd]",
+                "[directed_drums]",
+                "[directed_drums_pnt]",
+                "[directed_drums_np]",
+                "[directed_drums_lt]",
+                "[directed_drums_kd]",
+                "[directed_vocals]",
+                "[directed_vocals_np]",
+                "[directed_vocals_cls]",
+                "[directed_vocals_cam_pr]",
+                "[directed_vocals_cam_pt]",
+                "[directed_stagedive]",
+                "[directed_crowdsurf]",
+                "[directed_bass]",
+                "[directed_crowd_b]",
+                "[directed_bass_np]",
+                "[directed_bass_cam]",
+                "[directed_bass_cls]",
+                "[directed_guitar]",
+                "[directed_crowd_g]",
+                "[directed_guitar_np]",
+                "[directed_guitar_cls]",
+                "[directed_guitar_cam_pr]",
+                "[directed_guitar_cam_pt]",
+                "[directed_keys]",
+                "[directed_keys_cam]",
+                "[directed_keys_np]",
+                "[directed_duo_drums]",
+                "[directed_duo_guitar]",
+                "[directed_duo_bass]",
+                "[directed_duo_kv]",
+                "[directed_duo_gb]",
+                "[directed_duo_kb]",
+                "[directed_duo_kg]",    
+                "[directed_all]",
+                "[directed_all_cam]",
+                "[directed_all_yeah]",
+                "[directed_all_lt]",
+                "[directed_bre]",
+                "[directed_brej]",
+                "[directed_crowd]",
+                "[directed_drums]",
+                "[directed_drums_pnt]",
+                "[directed_drums_np]",
+                "[directed_drums_lt]",
+                "[directed_drums_kd]",
+                "[directed_vocals]",
+                "[directed_vocals_np]",
+                "[directed_vocals_cls]",
+                "[directed_vocals_cam_pr]",
+                "[directed_vocals_cam_pt]",
+                "[directed_stagedive]",
+                "[directed_crowdsurf]",
+                "[directed_bass]",
+                "[directed_crowd_b]",
+                "[directed_bass_np]",
+                "[directed_bass_cam]",
+                "[directed_bass_cls]",
+                "[directed_guitar]",
+                "[directed_crowd_g]",
+                "[directed_guitar_np]",
+                "[directed_guitar_cls]",
+                "[directed_guitar_cam_pr]",
+                "[directed_guitar_cam_pt]",
+                "[directed_keys]",
+                "[directed_keys_cam]",
+                "[directed_keys_np]",
+                "[directed_duo_drums]",
+                "[directed_duo_guitar]",
+                "[directed_duo_bass]",
+                "[directed_duo_kv]",
+                "[directed_duo_gb]",
+                "[directed_duo_kb]",
+                "[directed_duo_kg]",
+                "[directed_all]",
+                "[directed_all_cam]",
+                "[directed_all_lt]",
+                "[directed_all_yeah]",
+                "[directed_bre]",
+                "[directed_brej]",
+                "[directed_drums_np]",
+                "[directed_bass_np]",
+                "[directed_guitar_np]",
+                "[directed_vocals_np]",
+                "[directed_keys_np]",
+                "[directed_drums]",
+                "[directed_drums_lt]",
+                "[directed_vocals]",
+                "[directed_bass]",
+                "[directed_guitar]",
+                "[directed_keys]",
+                "[directed_vocals_cam_pr]",
+                "[directed_vocals_cam_pt]",
+                "[directed_guitar_cam_pr]",
+                "[directed_guitar_cam_pt]",
+                "[directed_keys_cam]",
+                "[directed_bass_cam]",
+                "[directed_stagedive]",
+                "[directed_crowdsurf]",
+                "[directed_vocals_cls]",
+                "[directed_bass_cls]",
+                "[directed_guitar_cls]",
+                "[directed_drums_kd]",
+                "[directed_drums_pnt]",
+                "[directed_crowd_g]",
+                "[directed_crowd_b]",
+                "[directed_duo_drums]",
+                "[directed_duo_guitar]",
+                "[directed_duo_bass]",
+                "[directed_duo_kv]",
+                "[directed_duo_gb]",
+                "[directed_duo_kb]",
+                "[directed_duo_kg]",
+                "[directed_crowd]",
+            };
+
+            return cameraEvents.Contains(ev);
+        }
+
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             foreach (var file in inputMIDIs.Where(file => file.ToLowerInvariant().EndsWith(".mid", StringComparison.Ordinal)))
             {
                 Log("");
                 isCON = false;
+                activeFile = file;
                 CleanMIDI(file);
             }
 
@@ -2382,6 +2619,7 @@ namespace Nautilus
             {
                 Log("");
                 isCON = true;
+                activeFile = file;
                 CleanCON(file);
             }
         }

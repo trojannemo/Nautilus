@@ -59,6 +59,7 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.createBEATTracks = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteVENUETracks = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeLighting = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
             this.backUpFileWhenCleaning = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -275,6 +276,7 @@
             this.toolStripMenuItem2,
             this.createBEATTracks,
             this.deleteVENUETracks,
+            this.removeLighting,
             this.toolStripMenuItem3,
             this.backUpFileWhenCleaning});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
@@ -438,6 +440,16 @@
             this.deleteVENUETracks.Text = "Delete VENUE tracks";
             this.deleteVENUETracks.Click += new System.EventHandler(this.SaveOptions);
             // 
+            // removeLighting
+            // 
+            this.removeLighting.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.removeLighting.Checked = true;
+            this.removeLighting.CheckOnClick = true;
+            this.removeLighting.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.removeLighting.Name = "removeLighting";
+            this.removeLighting.Size = new System.Drawing.Size(333, 22);
+            this.removeLighting.Text = "Remove [lighting()] from VENUE  track";
+            // 
             // toolStripMenuItem3
             // 
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
@@ -555,5 +567,6 @@
         private System.Windows.Forms.ToolStripMenuItem backUpFileWhenCleaning;
         private System.Windows.Forms.PictureBox picPin;
         private System.Windows.Forms.ToolStripMenuItem leaveSysEx;
+        private System.Windows.Forms.ToolStripMenuItem removeLighting;
     }
 }

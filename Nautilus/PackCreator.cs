@@ -39,6 +39,8 @@ namespace Nautilus
         private nTools nautilus3;
         private bool doRecursiveSearching;
         private const int minWidth = 430;
+        private readonly Color buttonBackColor;
+        private readonly Color buttonTextColor;
 
         public PackCreator(MainForm xParent, Color ButtonBackColor, Color ButtonTextColor)
         {
@@ -91,21 +93,28 @@ namespace Nautilus
             if (!Directory.Exists(tempFolder))
             {
                 Directory.CreateDirectory(tempFolder);
-                Directory.CreateDirectory(tempFolder + "songs\\");
-                Directory.CreateDirectory(tempFolder + "songs_upgrades");
+                //Directory.CreateDirectory(tempFolder + "songs\\");
+                //Directory.CreateDirectory(tempFolder + "songs_upgrades");
                 Directory.CreateDirectory(tempThumbs);
             }
 
-            var formButtons = new List<Button> { btnFolder,btnReset,btnRefresh,btnShowHide,btnViewPackage,btnPrev,btnNext,btnBegin };
-            foreach (var button in formButtons)
-            {
-                button.BackColor = ButtonBackColor;
-                button.ForeColor = ButtonTextColor;
-                button.FlatAppearance.MouseOverBackColor = button.BackColor == Color.Transparent ? Color.FromArgb(127, Color.AliceBlue.R, Color.AliceBlue.G, Color.AliceBlue.B) : Tools.LightenColor(button.BackColor);
-            }
+            buttonBackColor = ButtonBackColor;
+            buttonTextColor = ButtonTextColor;
+            DoButtonColors();
 
             checkTempFiles();
             doRecursiveSearching = useRecursiveSearching.Checked;
+        }
+
+        private void DoButtonColors()
+        {
+            var formButtons = new List<Button> { btnFolder, btnReset, btnRefresh, btnShowHide, btnViewPackage, btnPrev, btnNext, btnBegin };
+            foreach (var button in formButtons)
+            {
+                button.BackColor = buttonBackColor;
+                button.ForeColor = buttonTextColor;
+                button.FlatAppearance.MouseOverBackColor = button.BackColor == Color.Transparent ? Color.FromArgb(127, Color.AliceBlue.R, Color.AliceBlue.G, Color.AliceBlue.B) : Tools.LightenColor(button.BackColor);
+            }
         }
 
         private void btnFolder_Click(object sender, EventArgs e)
@@ -826,14 +835,14 @@ namespace Nautilus
                 {
                     Directory.CreateDirectory(tempFolder);
                 }
-                if (!(Directory.Exists(tempFolder + "songs_upgrades\\")))
+                /*if (!(Directory.Exists(tempFolder + "songs_upgrades\\")))
                 {
                     Directory.CreateDirectory(tempFolder + "songs_upgrades\\");
                 }
                 if (!(Directory.Exists(tempFolder + "songs\\")))
                 {
                     Directory.CreateDirectory(tempFolder + "songs\\");
-                }
+                }*/
                 
                 EnableDisable(false);
 
@@ -1183,14 +1192,12 @@ namespace Nautilus
         {
             ClearThumbnails();
             
-
             if (!chkKeepFiles.Checked)
             {
                 Tools.DeleteFolder(tempFolder, true);
             }
             
-
-            var newPackager = new PackCreator(xMainForm, Color.FromArgb(34, 169, 31), Color.White);
+            var newPackager = new PackCreator(xMainForm, buttonBackColor, buttonTextColor);
             xMainForm.activeForm = newPackager;
             newPackager.lstLog.Items.AddRange(lstLog.Items);
             newPackager.Log("Finished resetting ... ready");
@@ -1212,8 +1219,8 @@ namespace Nautilus
                     {
                         Tools.SendtoTrash(tempFolder,true); //send files to recycle bin
                         Directory.CreateDirectory(tempFolder); //restore empty extracted folders (requested by C16)
-                        Directory.CreateDirectory(tempFolder + "songs\\");
-                        Directory.CreateDirectory(tempFolder + "songs_upgrades");
+                        //Directory.CreateDirectory(tempFolder + "songs\\");
+                        //Directory.CreateDirectory(tempFolder + "songs_upgrades");
                     }
                     catch
                     {
