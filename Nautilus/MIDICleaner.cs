@@ -383,7 +383,7 @@ namespace Nautilus
                 for (var i = 0; i < dirtyMIDI.Events.Tracks; i++)
                 {
                     if (dirtyMIDI.Events[i][0].ToString().Contains("PART DRUMS"))
-                    {
+                    {                        
                         toRemove = new List<MidiEvent>();
                         toAdd = new List<MidiEvent>();
                         var allowed_drums = new List<int> { 24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 43, 44, 45, 46, 47, 48, 49, 50, 51, 60, 61, 62, 63, 64, 72, 73, 74, 75, 76, 84, 85, 86, 87, 88, 96, 97, 98, 99, 100, 103, 110, 111, 112, 116, 120, 121, 122, 123, 124, 126, 127 };
@@ -393,13 +393,31 @@ namespace Nautilus
                         long greenCymbal = 0;
                         long lastODFill = 0;
 
+                        List<(long start, long end)> overdriveRanges = new List<(long, long)>();
+                        long firstOverdriveTime = -1; // Track first Overdrive marker
+
+                        foreach (var midiEvent in dirtyMIDI.Events[i])
+                        {
+                            if (midiEvent is NoteOnEvent note && note.NoteNumber == 116 && note.Velocity > 0)
+                            {
+                                long odStart = note.AbsoluteTime;
+                                long odEnd = odStart + note.NoteLength; // Assuming odLength defines duration
+
+                                overdriveRanges.Add((odStart, odEnd)); // Store Overdrive range
+                                if (odStart < firstOverdriveTime || firstOverdriveTime == -1) // Track first overdrive appearance
+                                {
+                                    firstOverdriveTime = odStart;
+                                }
+                            }
+                        }
+
                         if (doNotDelete2xBassPedalNotes.Checked)
                         {
                             allowed_drums.Add(95); //will make these notes be skipped during track processing
                         }
 
                         for (var z = 0; z < dirtyMIDI.Events[i].Count; z++)
-                        {
+                        {       
                             var notes = dirtyMIDI.Events[i][z];
 
                             switch (notes.CommandCode)
@@ -495,31 +513,29 @@ namespace Nautilus
                                             case 122:
                                             case 121:
                                             case 120:
-                                                if (!overdrive) //ignore running events
+                                                bool beforeFirstOverdrive = note.AbsoluteTime < firstOverdriveTime;
+                                                bool overlapsOverdrive = false;
+                                                if (note.Velocity > 0) //to avoid null exceptions due to running events
+                                                {
+                                                    overlapsOverdrive = overdriveRanges.Any(od =>
+                                                         // Fill starts inside the overdrive range
+                                                         (note.AbsoluteTime >= od.start && note.AbsoluteTime <= od.end) ||
+                                                         // Fill starts before an overdrive but extends into it
+                                                         (note.AbsoluteTime < od.start && note.AbsoluteTime + note.NoteLength > od.start));
+                                                }
+
+                                                if (beforeFirstOverdrive || overlapsOverdrive) // If before first OD OR overlapping OD, remove it
                                                 {
                                                     toRemove.Add(note);
-                                                    if (note.AbsoluteTime > lastODFill && note.Velocity > 0) //only notify once per set of OD notes
+
+                                                    if (note.AbsoluteTime > lastODFill && note.Velocity > 0) // Only notify once per set of OD notes
                                                     {
-                                                        LogDetails("PART DRUMS: drum fill" + FormattedTime(notes.AbsoluteTime) + " before any overdrive is not allowed and was removed");
+                                                        string reason = beforeFirstOverdrive ? "before any overdrive marker" : "overlapping overdrive";
+                                                        LogDetails($"PART DRUMS: Drum fill at {FormattedTime(note.AbsoluteTime)} {reason} is not allowed and was removed.");
                                                     }
-                                                    if (note.Velocity > 0) //avoid running events causing null exceptions
+                                                    if (note.Velocity > 0) // Avoid null exceptions
                                                     {
                                                         toRemove.Add(note.OffEvent);
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    if (note.AbsoluteTime <= odLength)
-                                                    {
-                                                        toRemove.Add(note);
-                                                        if (note.AbsoluteTime > lastODFill && note.Velocity > 0) //ignore running events
-                                                        {
-                                                            LogDetails("PART DRUMS: drum fill overlapping overdrive marker" + FormattedTime(notes.AbsoluteTime) + " is not allowed and was removed");
-                                                        }
-                                                        if (note.Velocity > 0) //avoid running events causing null exceptions
-                                                        {
-                                                            toRemove.Add(note.OffEvent);
-                                                        }
                                                     }
                                                 }
                                                 if (note.Velocity > 0) //avoid running events causing null exceptions
@@ -534,7 +550,7 @@ namespace Nautilus
                         }
 
                         ProcessTrack(dirtyMIDI.Events[i], i, allowed_drums);
-
+                        
                         if (!doublePedal.Any() || !separate2xBassPedalNotes.Checked) continue;
                         //duplicate part drums, change track name, change expert kick notes
                         newDrums = new List<MidiEvent>(dirtyMIDI.Events[i]);

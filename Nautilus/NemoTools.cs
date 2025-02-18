@@ -61,8 +61,8 @@ namespace Nautilus
         /// <returns></returns>
         public bool ConvertWiiImage(string wii_image, string output_path, string format, bool delete_original)
         {
-            var tplfile = Path.GetDirectoryName(wii_image) + "\\converted\\" + Path.GetFileNameWithoutExtension(wii_image) + ".tpl";
-            if (!Directory.Exists(Path.GetDirectoryName(wii_image) + "\\converted\\"))
+            var tplfile = Path.GetDirectoryName(wii_image) + "\\" + Path.GetFileNameWithoutExtension(wii_image) + ".tpl";
+            if (!Directory.Exists(Path.GetDirectoryName(wii_image) + "\\"))
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(wii_image) + "\\");
             }
@@ -277,12 +277,13 @@ namespace Nautilus
         /// <returns></returns>
         public bool ConvertImagetoWii(string wimgt_path, string image_path, string output_path, bool delete_original)
         {
-            var pngfile = Path.GetDirectoryName(image_path) + "\\converted\\" + Path.GetFileNameWithoutExtension(image_path) + ".png";
-            if (!Directory.Exists(Path.GetDirectoryName(image_path) + "\\converted\\"))
+            var pngfile = Path.GetDirectoryName(image_path) + "\\" + Path.GetFileNameWithoutExtension(image_path) + ".png";
+            if (!Directory.Exists(Path.GetDirectoryName(image_path) + "\\"))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(image_path) + "\\converted\\");
+                Directory.CreateDirectory(Path.GetDirectoryName(image_path) + "\\");
             }
-            var tplfile = Path.GetDirectoryName(image_path) + "\\" + Path.GetFileNameWithoutExtension(image_path) + ".tpl";
+            var tplfile = pngfile.Replace(".png", ".tpl");
+            //var tplfile = Path.GetDirectoryName(image_path) + "\\" + Path.GetFileNameWithoutExtension(image_path) + ".tpl";
             var origfile = image_path;
             var Headers = new ImageHeaders();
 
@@ -2840,7 +2841,7 @@ namespace Nautilus
         public bool ExtractWiiSaveImages(string savefile, string savepath)
         {
             //I won't lie, treating the Wii like a red-headed stepchild here. too crappy to dedicate much more attention
-            //maybe you can finesse it?
+            //maybe you can fine tune it?
 
             if (!File.Exists(savefile)) return false;
 
@@ -2858,14 +2859,14 @@ namespace Nautilus
                 };
 
             SaveFileCharNames = new List<string>();
-            var out_folder = savepath.Replace(".dat", "") + "_extracted\\";
-            if (!Directory.Exists(out_folder))
+            //var out_folder = savepath.Replace(".dat", "") + "_extracted\\";
+            if (!Directory.Exists(savepath))
             {
-                Directory.CreateDirectory(out_folder);
+                Directory.CreateDirectory(savepath);
             }
-            var out_char = out_folder + "character_";
+            var out_char = Path.Combine(savepath, "character_");
             var char_counter = 0;
-            var out_art = out_folder + "art_";
+            var out_art = Path.Combine(savepath, "art_");
             var art_counter = 0;
 
             try
@@ -2945,13 +2946,13 @@ namespace Nautilus
                 var success = char_counter != 0 || art_counter != 0;
                 if (!success)
                 {
-                    DeleteFolder(out_folder, true);
+                    DeleteFolder(savepath, true);
                 }
                 return success;
             }
             catch (Exception)
             {
-                DeleteFolder(out_folder, true);
+                DeleteFolder(savepath, true);
                 return false;
             }
         }

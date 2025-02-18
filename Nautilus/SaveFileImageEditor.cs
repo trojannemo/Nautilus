@@ -194,6 +194,10 @@ namespace Nautilus
 
             ImageFolder = EditorFolder + Path.GetFileNameWithoutExtension(file) + "_extracted\\";
             Tools.DeleteFolder(ImageFolder,true);
+            if (!Directory.Exists(ImageFolder))
+            {
+                Directory.CreateDirectory(ImageFolder);
+            }
 
             var success = false;
             if (isXbox)
@@ -202,7 +206,7 @@ namespace Nautilus
             }
             else if (isWii)
             {
-                success = Tools.ExtractWiiSaveImages(savefile, EditorFolder + Path.GetFileNameWithoutExtension(file));
+                success = Tools.ExtractWiiSaveImages(savefile, ImageFolder);// EditorFolder + Path.GetFileNameWithoutExtension(file));
             }
             else if (isPS3)
             {
@@ -210,18 +214,19 @@ namespace Nautilus
             }
             else
             {
-                switch (MessageBox.Show("Click Yes if this is a *decrypted* PS3 save file\nClick No if this is a Wii save file\nXbox 360 users must use the 'band3' save file\nPress Cancel to go back",
+                switch (MessageBox.Show("Click Yes if this is a *decrypted* PS3 save file\nClick No if this is a Wii save file\n" +
+                    "Xbox 360 users must use the 'band3' save file\nPress Cancel to go back",
                             Text, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question))
                 {
                     case DialogResult.Yes:
                         isPS3 = true;
                         isWii = false;
-                        success = Tools.ExtractSaveImages(savefile, EditorFolder + Path.GetFileNameWithoutExtension(file), true);
+                        success = Tools.ExtractSaveImages(savefile, ImageFolder, true); // EditorFolder + Path.GetFileNameWithoutExtension(file), true);
                         break;
                     case DialogResult.No:
                         isWii = true;
                         isPS3 = false;
-                        success = Tools.ExtractWiiSaveImages(savefile, EditorFolder + Path.GetFileNameWithoutExtension(file));
+                        success = Tools.ExtractWiiSaveImages(savefile, ImageFolder); // EditorFolder + Path.GetFileNameWithoutExtension(file));
                         break;
                     case DialogResult.Cancel:
                         Log("Extracting cancelled by user");
@@ -263,7 +268,7 @@ namespace Nautilus
         private void LoadExtractedImages()
         {
             console = isPS3 ? "ps3" : (isWii ? "wii" : "xbox");
-            var files = Directory.GetFiles(ImageFolder, "*.png_" + console).ToList();
+            var files = Directory.GetFiles(ImageFolder, "*.png_" + console, SearchOption.TopDirectoryOnly).ToList();
                
             if (!files.Any()) return;
 

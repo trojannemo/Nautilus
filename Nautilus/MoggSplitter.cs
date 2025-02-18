@@ -318,6 +318,10 @@ namespace Nautilus
             {
                 if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
                 {
+                    if (Bass.BASS_ErrorGetCode().ToString().Equals("BASS_ERROR_ALREADY"))
+                    {
+                        return true;
+                    }
                     ErrorLog.Add("Error initializing BASS.NET");
                     ErrorLog.Add(Bass.BASS_ErrorGetCode().ToString());
                     ErrorLog.Add("Can't process that mogg file");
@@ -721,7 +725,7 @@ namespace Nautilus
             }
             else
             {
-                //it's a mono track, let's assign based on the panning value
+                //it's a mono track
                 double pan;
                 try
                 {
@@ -732,14 +736,7 @@ namespace Nautilus
                     pan = 0.0; // in case there's an error above, it gets centered
                 }
 
-                if (pan <= 0) //centered or left, assign it to the left channel
-                {
-                    matrix[isDrums ? 0 : new_channel, ArrangedChannels[curr_channel]] = vol;
-                }
-                if (pan >= 0) //centered or right, assign it to the right channel
-                {
-                    matrix[isDrums ? 1 : new_channel + 1, ArrangedChannels[curr_channel + 1]] = vol;
-                }
+                matrix[isDrums ? 0 : new_channel, ArrangedChannels[curr_channel]] = vol;
             }
             return matrix;
         }
