@@ -6,8 +6,6 @@ using System.Windows.Forms;
 using System.Drawing;
 using Nautilus.Properties;
 using Nautilus.x360;
-using System.Windows.Markup.Localizer;
-using DocumentFormat.OpenXml.Math;
 
 namespace Nautilus
 {
@@ -315,8 +313,12 @@ namespace Nautilus
                                                 {
                                                     line = sr.ReadLine(); //skip it
                                                 }
-                                                else if (line.Contains(songTitle) && yearReleased > 0 && chkAddYear.Checked)
+                                                else if ((line.Contains("\"" + songTitle + "\"") || line.Contains("'" + songTitle + "'")) && yearReleased > 0 && chkAddYear.Checked)
                                                 {
+                                                    if (line.Contains("(" + yearReleased + ")")) //in case of being ran through multiple times...god knows why
+                                                    {
+                                                        line = line.Replace("(" + yearReleased + ")", "");
+                                                    }
                                                     line = line.Replace(songTitle, "(" + yearReleased + ") " + songTitle);
                                                 }
                                                 else if (line.Contains("song_id") && !line.Contains(";ORIG_ID=") && !line.Trim().StartsWith(";") && chkSongID.Checked)
