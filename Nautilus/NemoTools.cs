@@ -64,7 +64,7 @@ namespace Nautilus
             var tplfile = Path.GetDirectoryName(wii_image) + "\\converted\\" + Path.GetFileNameWithoutExtension(wii_image) + ".tpl";
             if (!Directory.Exists(Path.GetDirectoryName(wii_image) + "\\converted\\"))
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(wii_image) + "\\converted\\");
+                Directory.CreateDirectory(Path.GetDirectoryName(wii_image) + "\\");
             }
             var pngfile = tplfile.Replace(".tpl", ".png");
             var Headers = new ImageHeaders();
