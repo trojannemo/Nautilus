@@ -259,6 +259,11 @@ namespace Nautilus
                             originalAudioFound = true;
                         }
                     }
+                    else
+                    {
+                        DebugLog("No Audio Hash found, assuming original Audio.");
+                        originalAudioFound = true;
+                    }
 
                 }
                 // Could not find the audio file, we cry.
@@ -341,7 +346,7 @@ namespace Nautilus
                 BassMix.BASS_Mixer_ChannelSetMatrix(BassStream, matrix);
 
                 dBAverage = CalculateVolumeAverage();
-                double dBDistance = Double.Parse(FormatDB(Math.Abs(dBAverage - targetDB)));
+                double dBDistance = double.Parse(FormatDB(Math.Abs(dBAverage - targetDB)));
 
                 DebugLog($"Distance to target: {dBDistance}");
 
@@ -626,22 +631,29 @@ namespace Nautilus
                             double attenuationOffset = dBAverage - targetDB;
 
                             // Strip most of the decimal places, because we don't need to be *that* precise.
-                            attenuationOffset = double.Parse(FormatDB(attenuationOffset));
+                            attenuationOffset = double.Parse(FormatDB(attenuationOffset), CultureInfo.InvariantCulture);
                             volumeOffset = -attenuationOffset;
 
                             Log($"Average dB of song is: {FormatDB(dBAverage)} dB, {FormatDB(attenuationOffset)} dB away from the target dB of: {targetDB} dB.");
 
                             // Get Attenuation values
                             var values = Parser.Songs[0].OriginalAttenuationValues.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
-                            var highestVolume = -64.0;
+                            double highestVolume = -64.0;
+
+                            DebugLog("Values");
+                            DebugLog($"{Parser.Songs[0].OriginalAttenuationValues}");
 
                             // We want to know how far we can increase the volume before we need to
                             // re-render the audio.
+                            DebugLog("highestVolume check");
                             foreach (var value in values)
                             {
-                                double parsedValue = double.Parse(value);
+                                double parsedValue = double.Parse(value, CultureInfo.InvariantCulture);
+                                DebugLog($"Value: {value}, {parsedValue}");
+
                                 if (parsedValue > highestVolume)
                                 {
+                                    DebugLog($"Higher than: {highestVolume}");
                                     highestVolume = parsedValue;
                                 }
                             }
@@ -928,8 +940,8 @@ namespace Nautilus
 
                 for (int i = 0; i < volumes.Length; i++)
                 {
-                    volumes[i] = (double.Parse(volumes[i]) + volumeOffset).ToString("F", CultureInfo.InvariantCulture);
-                    //Log($"{i} - {volumes[i]}");
+                    volumes[i] = (double.Parse(volumes[i], CultureInfo.InvariantCulture) + volumeOffset).ToString("F", CultureInfo.InvariantCulture);
+                    DebugLog($"{i}: {volumes[i]}");
                 }
             }
             catch { }
@@ -949,7 +961,7 @@ namespace Nautilus
             float vol;
             try
             {
-                vol = (float)Utils.DBToLevel(Convert.ToDouble(volumes[curr_channel]), max_dB);
+                vol = (float)Utils.DBToLevel(Convert.ToDouble(volumes[curr_channel], CultureInfo.InvariantCulture), max_dB);
                 //Log($"vol:{vol}");
             }
             catch (Exception)
@@ -1279,8 +1291,10 @@ namespace Nautilus
             EnableDisable(false);
             Debug = chkVerboseOutput.Checked;
 
-            targetDB = Double.Parse(numTargetValue.Value.ToString());
-            thresholdDB = Double.Parse(numThresholdValue.Value.ToString());
+            targetDB = double.Parse(numTargetValue.Value.ToString());
+            thresholdDB = double.Parse(numThresholdValue.Value.ToString());
+
+            DebugLog($"Culture: {CultureInfo.CurrentCulture}");
 
             try
             {
