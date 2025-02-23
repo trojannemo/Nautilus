@@ -130,12 +130,13 @@ namespace Nautilus
             
             var numValues = Parser.Songs[0].OriginalAttenuationValues.Split(new char[0], StringSplitOptions.RemoveEmptyEntries).Length;
 
+            DebugLog($"Audio Channels: {channel_info.chans}");
+            DebugLog($"Values: {numValues}");
+            DebugLog($"{Parser.Songs[0].AttenuationValues}");
+            DebugLog($"{Parser.Songs[0].OriginalAttenuationValues}");
+
             if (channel_info.chans != numValues)
             {
-                Log($"Audio Channels: {channel_info.chans}");
-                Log($"Values: {numValues}");
-                Log($"{Parser.Songs[0].AttenuationValues}");
-                Log($"{Parser.Songs[0].OriginalAttenuationValues}");
                 throw new Exception("Audio file and DTA do not have matching Audio Channels, aborting.");
             }
 
@@ -470,6 +471,9 @@ namespace Nautilus
                 bool valuesExist = false;
                 bool hashExists = false;
 
+                int indexToWrite = 0;
+                int lastClose = 0;
+
                 do
                 {
                     dtaLines.Add(streamReader.ReadLine());
@@ -533,16 +537,32 @@ namespace Nautilus
                     // We write our own line to the DTA file here.
                     if (line.Contains(";ExpertOnly"))
                     {
-                        if (!valuesExist)
+                        indexToWrite = i + 1;
+                    }
+
+                    if (line.Contains(")"))
+                    {
+                        if (line.Trim() == ")")
                         {
-                            dtaLinesNew.Add(";OriginalAttenuationValues=" + Parser.Songs[0].OriginalAttenuationValues.Trim());
-                        }
-                        if (!hashExists && audioModified)
-                        {
-                            dtaLinesNew.Add(";VolumeNormalizerAudioHash=" + audioHash);
+                            lastClose = i;
                         }
                     }
                 }
+
+                if (indexToWrite == 0)
+                {
+                    indexToWrite = lastClose;
+                }
+
+                if (!valuesExist)
+                {
+                    dtaLinesNew.Insert(indexToWrite, ";OriginalAttenuationValues=" + Parser.Songs[0].OriginalAttenuationValues.Trim());
+                }
+                if (!hashExists && audioModified)
+                {
+                    dtaLinesNew.Insert(indexToWrite, ";VolumeNormalizerAudioHash=" + audioHash);
+                }
+
                 streamReader.Close();
             }
 
@@ -761,7 +781,7 @@ namespace Nautilus
                             foreach (var value in values)
                             {
                                 DebugLog($"{value}");
-                                double preFinal = double.Parse(value) + volumeOffset;
+                                double preFinal = double.Parse(value, CultureInfo.InvariantCulture) + volumeOffset;
 
                                 if (audioModified)
                                 {
@@ -993,7 +1013,7 @@ namespace Nautilus
                 double pan;
                 try
                 {
-                    pan = Convert.ToDouble(pans[curr_channel]);
+                    pan = Convert.ToDouble(pans[curr_channel], CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
