@@ -15,6 +15,7 @@ using Un4seen.Bass.AddOn.EncFlac;
 using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.EncOpus;
 using Un4seen.Bass.AddOn.Opus;
+using System.Globalization;
 
 namespace Nautilus
 {
@@ -582,7 +583,7 @@ namespace Nautilus
             float vol;
             try
             {
-                vol = (float)Utils.DBToLevel(Convert.ToDouble(volumes[curr_channel]), max_dB);
+                vol = (float)Utils.DBToLevel(Convert.ToDouble(volumes[curr_channel], CultureInfo.InvariantCulture), max_dB);
             }
             catch (Exception)
             {
@@ -698,7 +699,7 @@ namespace Nautilus
             float vol;
             try
             {
-                vol = (float)Utils.DBToLevel(Convert.ToDouble(volumes[curr_channel]), max_dB);
+                vol = (float)Utils.DBToLevel(Convert.ToDouble(volumes[curr_channel], CultureInfo.InvariantCulture), max_dB);
             }
             catch (Exception)
             {
@@ -729,7 +730,7 @@ namespace Nautilus
                 double pan;
                 try
                 {
-                    pan = Convert.ToDouble(pans[curr_channel]);
+                    pan = Convert.ToDouble(pans[curr_channel], CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
@@ -864,7 +865,7 @@ namespace Nautilus
             float vol;
             try
             {
-                vol = (float)Utils.DBToLevel(Convert.ToDouble(volumes[curr_channel]), max_dB);
+                vol = (float)Utils.DBToLevel(Convert.ToDouble(volumes[curr_channel], CultureInfo.InvariantCulture), max_dB);
             }
             catch (Exception)
             {
@@ -895,7 +896,7 @@ namespace Nautilus
                 double pan;
                 try
                 {
-                    pan = Convert.ToDouble(pans[curr_channel]);
+                    pan = Convert.ToDouble(pans[curr_channel], CultureInfo.InvariantCulture);
                 }
                 catch (Exception)
                 {
