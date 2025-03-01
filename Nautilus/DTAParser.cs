@@ -519,6 +519,10 @@ namespace Nautilus
                         {
                             song.PSDelay = Convert.ToInt16(Tools.GetConfigString(line));
                         }
+                        else if (line.Contains("video_start_time =") || line.Contains("video_start_time="))
+                        {
+                            song.VideoStartTime = Convert.ToInt16(Tools.GetConfigString(line));
+                        }
                         else if (line.Contains("diff_guitar=") || line.Contains("diff_guitar ="))
                         {
                             song.GuitarDiff = Convert.ToInt16(Tools.GetConfigString(line));
@@ -2742,6 +2746,7 @@ namespace Nautilus
         public Int32 PreviewEnd { get; set; }
         public int DTAIndex { get; set; }
         public int PSDelay { get; set; }
+        public int VideoStartTime { get; set; }
 
         public bool Master { get; set; }
         public bool DoNotExport { get; set; }
@@ -2844,13 +2849,13 @@ namespace Nautilus
             CATemh = false;
             DTAIndex = 0;
             PSDelay = 0;
+            VideoStartTime = 0;
             ChannelsBassStart = 0;
             ChannelsDrumsStart = 0;
             ChannelsGuitarStart = 0;
             ChannelsKeysStart = 0;
             ChannelsVocalsStart = 0;
             ChannelsCrowdStart = 0;
-
         }
 
         public string GetRating()

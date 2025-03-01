@@ -90,6 +90,8 @@ namespace Nautilus
             this.btnSave = new System.Windows.Forms.Button();
             this.btnClear = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.picUnpitched = new System.Windows.Forms.PictureBox();
+            this.picPartial = new System.Windows.Forms.PictureBox();
             this.picDIYStems = new System.Windows.Forms.PictureBox();
             this.picRBass = new System.Windows.Forms.PictureBox();
             this.picRKeys = new System.Windows.Forms.PictureBox();
@@ -148,6 +150,8 @@ namespace Nautilus
             this.exportYARGAudio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
             this.exportFNFAudio = new System.Windows.Forms.ToolStripMenuItem();
+            this.cHOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.autoplayMusicVideos = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricsKaraoke = new System.Windows.Forms.ToolStripMenuItem();
             this.lyricsScrolling = new System.Windows.Forms.ToolStripMenuItem();
@@ -183,8 +187,6 @@ namespace Nautilus
             this.picIcon2 = new System.Windows.Forms.PictureBox();
             this.picIcon1 = new System.Windows.Forms.PictureBox();
             this.picVisualizer = new System.Windows.Forms.PictureBox();
-            this.picPartial = new System.Windows.Forms.PictureBox();
-            this.picUnpitched = new System.Windows.Forms.PictureBox();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.yearJoystick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picGenreDown)).BeginInit();
@@ -204,6 +206,8 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picThemes)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picShowTheme)).BeginInit();
             this.panel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picUnpitched)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picPartial)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picDIYStems)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picRBass)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picRKeys)).BeginInit();
@@ -249,8 +253,6 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picIcon2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picIcon1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picVisualizer)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picPartial)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picUnpitched)).BeginInit();
             this.SuspendLayout();
             // 
             // panel1
@@ -1083,6 +1085,30 @@ namespace Nautilus
             this.panel3.Size = new System.Drawing.Size(552, 68);
             this.panel3.TabIndex = 19;
             // 
+            // picUnpitched
+            // 
+            this.picUnpitched.BackColor = System.Drawing.Color.Transparent;
+            this.picUnpitched.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picUnpitched.Location = new System.Drawing.Point(277, 6);
+            this.picUnpitched.Name = "picUnpitched";
+            this.picUnpitched.Size = new System.Drawing.Size(64, 54);
+            this.picUnpitched.TabIndex = 22;
+            this.picUnpitched.TabStop = false;
+            this.toolTip1.SetToolTip(this.picUnpitched, "Click here if the song only has unpitched vocals charted");
+            this.picUnpitched.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
+            // 
+            // picPartial
+            // 
+            this.picPartial.BackColor = System.Drawing.Color.Transparent;
+            this.picPartial.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picPartial.Location = new System.Drawing.Point(145, 6);
+            this.picPartial.Name = "picPartial";
+            this.picPartial.Size = new System.Drawing.Size(64, 54);
+            this.picPartial.TabIndex = 21;
+            this.picPartial.TabStop = false;
+            this.toolTip1.SetToolTip(this.picPartial, "Click here if the song has partial multitrack audio\r\n");
+            this.picPartial.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
+            // 
             // picDIYStems
             // 
             this.picDIYStems.BackColor = System.Drawing.Color.Transparent;
@@ -1636,6 +1662,7 @@ namespace Nautilus
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolsToolStripMenuItem,
+            this.cHOptionsToolStripMenuItem,
             this.lyricOptionsToolStripMenuItem,
             this.fileToolStripMenuItem,
             this.fontsToolStripMenuItem,
@@ -1760,6 +1787,25 @@ namespace Nautilus
             this.exportFNFAudio.Size = new System.Drawing.Size(302, 22);
             this.exportFNFAudio.Text = "Export Fortnite Festival audio as stereo file";
             this.exportFNFAudio.Click += new System.EventHandler(this.exportFNFAudio_Click);
+            // 
+            // cHOptionsToolStripMenuItem
+            // 
+            this.cHOptionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.autoplayMusicVideos});
+            this.cHOptionsToolStripMenuItem.Name = "cHOptionsToolStripMenuItem";
+            this.cHOptionsToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
+            this.cHOptionsToolStripMenuItem.Text = "CH Options";
+            // 
+            // autoplayMusicVideos
+            // 
+            this.autoplayMusicVideos.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.autoplayMusicVideos.Checked = true;
+            this.autoplayMusicVideos.CheckOnClick = true;
+            this.autoplayMusicVideos.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.autoplayMusicVideos.Name = "autoplayMusicVideos";
+            this.autoplayMusicVideos.Size = new System.Drawing.Size(199, 22);
+            this.autoplayMusicVideos.Text = "Auto-play music videos";
+            this.autoplayMusicVideos.Click += new System.EventHandler(this.autoplayMusicVideos_Click);
             // 
             // lyricOptionsToolStripMenuItem
             // 
@@ -2088,30 +2134,6 @@ namespace Nautilus
             this.picVisualizer.TabStop = false;
             this.picVisualizer.Paint += new System.Windows.Forms.PaintEventHandler(this.picVisualizer_Paint);
             // 
-            // picPartial
-            // 
-            this.picPartial.BackColor = System.Drawing.Color.Transparent;
-            this.picPartial.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picPartial.Location = new System.Drawing.Point(145, 6);
-            this.picPartial.Name = "picPartial";
-            this.picPartial.Size = new System.Drawing.Size(64, 54);
-            this.picPartial.TabIndex = 21;
-            this.picPartial.TabStop = false;
-            this.toolTip1.SetToolTip(this.picPartial, "Click here if the song has partial multitrack audio\r\n");
-            this.picPartial.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
-            // 
-            // picUnpitched
-            // 
-            this.picUnpitched.BackColor = System.Drawing.Color.Transparent;
-            this.picUnpitched.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picUnpitched.Location = new System.Drawing.Point(277, 6);
-            this.picUnpitched.Name = "picUnpitched";
-            this.picUnpitched.Size = new System.Drawing.Size(64, 54);
-            this.picUnpitched.TabIndex = 22;
-            this.picUnpitched.TabStop = false;
-            this.toolTip1.SetToolTip(this.picUnpitched, "Click here if the song only has unpitched vocals charted");
-            this.picUnpitched.MouseDown += new System.Windows.Forms.MouseEventHandler(this.sendImage);
-            // 
             // Visualizer
             // 
             this.AllowDrop = true;
@@ -2175,6 +2197,8 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picThemes)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picShowTheme)).EndInit();
             this.panel3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picUnpitched)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picPartial)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picDIYStems)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picRBass)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picRKeys)).EndInit();
@@ -2221,8 +2245,6 @@ namespace Nautilus
             ((System.ComponentModel.ISupportInitialize)(this.picIcon2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picIcon1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picVisualizer)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picPartial)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picUnpitched)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2384,5 +2406,7 @@ namespace Nautilus
         private PictureBox picDIYStems;
         private PictureBox picUnpitched;
         private PictureBox picPartial;
+        private ToolStripMenuItem cHOptionsToolStripMenuItem;
+        private ToolStripMenuItem autoplayMusicVideos;
     }
 }

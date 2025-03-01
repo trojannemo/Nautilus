@@ -31,6 +31,8 @@ using System.Net;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using LibVLCSharp.Shared;
+using LibVLCSharp.WinForms;
 
 namespace Nautilus
 {
@@ -168,10 +170,31 @@ namespace Nautilus
         private Image rb3Version;
         private Image expertOnly;
         private Image catEMH;
+        private LibVLC _libVLC;
+        private MediaPlayer _mediaPlayer;
+        private VideoView videoView;
+        private bool videoIsFullScreen = false;
 
         public Visualizer(Color ButtonBackColor, Color ButtonTextColor, string con)
         {
             InitializeComponent();
+            Core.Initialize(); // Initializes LibVLC
+            this.SetStyle(ControlStyles.UserMouse, true); // Ensure WinForms handles mouse input
+
+            _libVLC = new LibVLC();
+            _mediaPlayer = new MediaPlayer(_libVLC);
+            _mediaPlayer.Volume = 0; //always muted                     
+
+            videoView = new VideoView
+            {
+                Width = 256,
+                Height = 256,
+                MediaPlayer = _mediaPlayer,
+                Dock = DockStyle.Fill
+            };
+
+            this.Controls.Add(videoView);
+
             intVocals = 1;
             inputFile = con;
             config = Application.StartupPath + "\\bin\\config\\visualizer.config";
@@ -202,6 +225,35 @@ namespace Nautilus
                 button.FlatAppearance.MouseOverBackColor = button.BackColor == Color.Transparent ? Color.FromArgb(127, Color.AliceBlue.R, Color.AliceBlue.G, Color.AliceBlue.B) : Tools.LightenColor(button.BackColor);
             } 
             loadImages();
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x210 && m.WParam.ToInt32() == 513)
+            {
+                var cursorPosition = videoView.PointToClient(Cursor.Position);
+
+                if (cursorPosition.X >= 0 && cursorPosition.X < videoView.Width &&
+                    cursorPosition.Y >= 0 && cursorPosition.Y < videoView.Height)
+                {
+                    videoIsFullScreen = !videoIsFullScreen;
+                    if (videoIsFullScreen)
+                    {
+                        videoView.Parent = picVisualizer;
+                        videoView.Width = picVisualizer.Width;
+                        videoView.Height = picVisualizer.Height;
+                    }
+                    else
+                    {
+                        videoView.Parent = picAlbumArt;
+                        videoView.Width = picAlbumArt.Width;
+                        videoView.Height = picAlbumArt.Height;
+                    }
+                    videoView.BringToFront();
+                }
+            }
+
+            base.WndProc(ref m);
         }
 
         private void loadImages()
@@ -319,7 +371,7 @@ namespace Nautilus
             AdjustImageParent(diffKeys, picVisualizer);
             AdjustImageParent(picIcon1, picVisualizer);
             AdjustImageParent(picIcon2, picVisualizer);
-            AdjustImageParent(picAlbumArt, picVisualizer);
+            AdjustImageParent(picAlbumArt, picVisualizer);           
             AdjustImageParent(picWorking, picAlbumArt);
             AdjustImageParent(picLogo, picAlbumArt);
 
@@ -329,6 +381,11 @@ namespace Nautilus
             picWorking.BringToFront();
             picLogo.BringToFront();            
             logoLocation = picLogo.Location;
+                        
+            videoView.Parent = picAlbumArt;
+            videoView.Left = 0;
+            videoView.Top = 0;
+            videoView.BringToFront();
 
             loadDefaults();
         }
@@ -336,6 +393,9 @@ namespace Nautilus
         private void loadDefaults()
         {
             reset = true;
+            videoView.Visible = false;
+            _mediaPlayer.Stop();
+            _mediaPlayer.Media = null;
             isTBRBDLC = false;
             isGDRBDLC = false;
             isBandFuse = false;
@@ -473,6 +533,9 @@ namespace Nautilus
             RESOURCE_ICON1 = null;
             RESOURCE_ICON2 = null;
             Tools.DeleteFile(tempFile);
+            videoView.Visible = false;
+            picLastFM.Visible = true;
+            toolTip1.SetToolTip(lblBottom, "");
             reset = false;
             picVisualizer.Invalidate();
         }
@@ -2091,6 +2154,11 @@ namespace Nautilus
             else if (!string.IsNullOrWhiteSpace(author))
             {
                 lblBottom.Text = RemoveCloneHeroColor(author);
+                if (!string.IsNullOrEmpty(lblBottom.Text) && !lblBottom.Text.Contains(","))
+                {
+                    lblBottom.Cursor = Cursors.Hand;
+                    toolTip1.SetToolTip(lblBottom, $"Click here to search for more {lblBottom.Text} songs");
+                }
                 lblBottom.ForeColor = GetCloneHeroColor(author);
             }
             else
@@ -2109,7 +2177,17 @@ namespace Nautilus
             }
             catch
             {
-                return author;
+                try
+                {
+                    int startIndex = author.IndexOf('<');
+                    int endIndex = author.LastIndexOf('>') + 1;
+                    var color = author.Substring(startIndex, endIndex - startIndex);
+                    return author.Replace(color, "").Trim();
+                }
+                catch
+                {
+                    return author;
+                }
             }            
         }
 
@@ -2121,11 +2199,16 @@ namespace Nautilus
                 int colorEndIndex = author.IndexOf('>');
                 string colorValue = author.Substring(colorStartIndex, colorEndIndex - colorStartIndex);
 
-                Color color = Color.FromName(colorValue);
-                if (!color.IsKnownColor)
+                Color color;
+                try
                 {
-                    color = Color.Black;
+                    color = ColorTranslator.FromHtml(colorValue); // Convert from hex
                 }
+                catch
+                {
+                    color = Color.Black; // Default to black if invalid
+                }
+
                 return color;
             }
             catch
@@ -2230,6 +2313,7 @@ namespace Nautilus
                     {
                         lblTop.Text = "Saved successfully";
                         lblBottom.Text = "Click to view";
+                        toolTip1.SetToolTip(lblBottom, "Click here to view your saved image");
                         lblBottom.Cursor = Cursors.Hand;
                         imgLink = ImageOut;
                     }
@@ -3951,10 +4035,18 @@ namespace Nautilus
                     {
                         MessageBox.Show("Error pausing playback\n" + Bass.BASS_ErrorGetCode());
                     }
+                    if (autoplayMusicVideos.Checked && _mediaPlayer.IsPlaying)
+                    {
+                        _mediaPlayer.Pause();
+                    }
                 }
                 else
                 {
                     StopBASS();
+                    if (autoplayMusicVideos.Checked && _mediaPlayer.IsPlaying)
+                    {
+                        _mediaPlayer.Stop();
+                    }
                 }
             }
             catch (Exception)
@@ -3982,7 +4074,7 @@ namespace Nautilus
             picSpect.Image = null;
         }
 
-        private void SetPlayLocation(double time)
+        private void SetPlayLocation(double time, bool setVideo = true)
         {
             if (time < 0)
             {
@@ -4012,6 +4104,11 @@ namespace Nautilus
                 {
                     MessageBox.Show("Error setting play location: " + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }               
+            }
+            if (!setVideo) return;
+            if (autoplayMusicVideos.Checked && _mediaPlayer.Media != null && _mediaPlayer.IsSeekable)
+            {
+                _mediaPlayer.Time = (long)(time * 1000) + Parser.Songs[0].VideoStartTime;
             }
         }
 
@@ -4150,7 +4247,7 @@ namespace Nautilus
             }
 
             //apply volume correction to entire track
-            SetPlayLocation(PlaybackSeconds);
+            SetPlayLocation(PlaybackSeconds, false);
             var track_vol = (float)Utils.DBToLevel(Convert.ToDouble(-1 * VolumeLevel), 1.0);
             if (picPreview.Tag.ToString() == "preview")
             {
@@ -4171,14 +4268,27 @@ namespace Nautilus
                 Bass.BASS_ChannelSetAttribute(BassMixer, BASSAttribute.BASS_ATTRIB_VOL, track_vol);
             }
                         
-            SetPlayLocation(PlaybackSeconds);
+            SetPlayLocation(PlaybackSeconds, false);
             UpdateTime();
             //start mix playback
             Bass.BASS_ChannelPlay(BassMixer, false);
+            PlayVideo();
             PlaybackTimer.Enabled = true;
             picPlayPause.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\play\\pause.png");
             picPlayPause.Tag = "pause";
         }               
+
+        private void PlayVideo()
+        {
+            if (autoplayMusicVideos.Checked && _mediaPlayer.Media != null)
+            {
+                _mediaPlayer.Play();
+                if (_mediaPlayer.IsSeekable)
+                {
+                    _mediaPlayer.Time = (long)(PlaybackSeconds * 1000) + Parser.Songs[0].VideoStartTime;
+                }
+            }
+        }
 
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
@@ -4383,13 +4493,18 @@ namespace Nautilus
                         break;
                     case BASSActive.BASS_ACTIVE_PAUSED:
                         Bass.BASS_ChannelPlay(BassMixer, false);
+                        var state = _mediaPlayer.State;
+                        if (state == VLCState.Paused)
+                        {
+                            PlayVideo();
+                        }
                         PlaybackTimer.Enabled = true;
                         picPlayPause.Image = Tools.NemoLoadImage(Application.StartupPath + "\\res\\play\\pause.png");
                         picPlayPause.Tag = "pause";
                         toolTip1.SetToolTip(picPlayPause, "Pause");
                         break;
                     default:
-                        StartPlayback();
+                        StartPlayback();                        
                         break;
                 }
             }
@@ -4590,6 +4705,7 @@ namespace Nautilus
 
         private void backgroundWorker2_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
         {
+            toolTip1.SetToolTip(lblBottom, "");
             lblBottom.Cursor = Cursors.Default;
             if (!radioLocal.Checked)
             {
@@ -4613,6 +4729,7 @@ namespace Nautilus
             }
             lblTop.Text = "Uploaded successfully";
             lblBottom.Text = "Click to view";
+            toolTip1.SetToolTip(lblBottom, "Click here to view your uploaded image");
             lblBottom.Cursor = Cursors.Hand;
             Clipboard.SetText(imgLink);
         }
@@ -4663,7 +4780,7 @@ namespace Nautilus
                 StopPlayback();
                 PlaybackSeconds = previewStart == 0 || picPreview.Tag.ToString() == "song" ? 0 : previewStart;
                 if (picLoop.Tag.ToString() != "loop") return;
-                StartPlayback();
+                StartPlayback();                
             }
             catch (Exception)
             { }
@@ -4917,8 +5034,15 @@ namespace Nautilus
         
         private void lblBottom_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button != MouseButtons.Left || lblBottom.Cursor != Cursors.Hand || string.IsNullOrWhiteSpace(imgLink)) return;
-            Process.Start(imgLink);
+            if (e.Button != MouseButtons.Left || lblBottom.Cursor != Cursors.Hand) return;
+            if (!string.IsNullOrEmpty(imgLink))
+            {
+                Process.Start(imgLink);
+            }
+            if (!string.IsNullOrEmpty(lblBottom.Text) && !lblBottom.Text.Contains(","))
+            {
+                Process.Start($"https://rhythmverse.co/songfiles/author/{lblBottom.Text.ToLowerInvariant()}");
+            }
         }
 
         private void picIcon1_MouseEnter(object sender, EventArgs e)
@@ -5368,6 +5492,44 @@ namespace Nautilus
             PlayCHFolder(outFolder);                       
         }
 
+        private void TryPlayCHVideo(string folder)
+        {
+            if (!autoplayMusicVideos.Checked) return;
+            try
+            {
+                var validFileNames = new List<string>() { "background.avi", "video.mp4", "video.webm", "bg.mp4", "bg.webm" };
+                var files = Directory.GetFiles(folder, "*.*", SearchOption.AllDirectories);
+                if (!files.Any()) return;
+                var _mediaFile = "";
+                foreach (var file in files)
+                {
+                    if (validFileNames.Contains(Path.GetFileName(file)))
+                    {
+                        _mediaFile = file;
+                        break;
+                    }
+                }
+                if (string.IsNullOrEmpty(_mediaFile)) return;
+
+                var media = new Media(_libVLC, _mediaFile, FromType.FromPath);
+                if (media == null) return;
+
+                _mediaPlayer.Media = media;
+                _mediaPlayer.Play(); //has to start playing to be seekable
+                if (_mediaPlayer.IsSeekable)
+                {
+                    _mediaPlayer.Time = (long)(PlaybackSeconds * 1000) + Parser.Songs[0].VideoStartTime;
+                }
+                videoView.Visible = true;
+                picLastFM.Visible = false;
+            }
+            catch
+            {
+                videoView.Visible = false;
+                picLastFM.Visible = true;
+            }
+        }
+
         private void PlayCHFolder(string outFolder)
         {
             loadDefaults();
@@ -5392,6 +5554,7 @@ namespace Nautilus
             {
                 ReadMidi(midi[0]);
             }
+            TryPlayCHVideo(outFolder);
             opusFiles = Directory.GetFiles(outFolder, "*.opus");
             oggFiles = Directory.GetFiles(outFolder, "*.ogg");
             if (opusFiles.Count() > 0)
@@ -6305,6 +6468,18 @@ namespace Nautilus
 
                 // Write the memory stream to a file
                 File.WriteAllBytes(sfd.FileName, memoryStream.ToArray());
+            }
+        }
+
+        private void autoplayMusicVideos_Click(object sender, EventArgs e)
+        {
+            if (!autoplayMusicVideos.Checked)
+            {
+                if (_mediaPlayer.IsPlaying)
+                {
+                    _mediaPlayer.Stop();
+                }
+                videoView.Visible = false;
             }
         }
     }   
