@@ -30,6 +30,7 @@ using System.Net.Http;
 using System.Net;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace Nautilus
 {
@@ -483,6 +484,7 @@ namespace Nautilus
                 Directory.CreateDirectory(Application.StartupPath + "\\visualizer\\");
             }
             var ext = "";
+            var imgMoved = false;
             try
             {
                 //if not passed a string path for the image
@@ -530,6 +532,7 @@ namespace Nautilus
                         {
                             RESOURCE_ALBUM_ART = TextureConverter.ToBitmap(TextureReader.ReadStream(fileStream), 0);
                         }
+                        imgMoved = true;
                         break;
                     case ".dds":
                     case ".png_ps3":
@@ -538,6 +541,7 @@ namespace Nautilus
                         {
                             RESOURCE_ALBUM_ART = Tools.NemoLoadImage(newArt);
                         }
+                        imgMoved = true;
                         break;
                     case ".tpl":
                     case ".png_wii":
@@ -545,13 +549,14 @@ namespace Nautilus
                         {
                             RESOURCE_ALBUM_ART = Tools.NemoLoadImage(newArt);
                         }
+                        imgMoved = true;
                         break;
                     default:
                         RESOURCE_ALBUM_ART = Tools.NemoLoadImage(AlbumArt);
                         newArt = AlbumArt;
                         break;
                 }
-                picAlbumArt.Tag = newArt;
+                picAlbumArt.Tag = imgMoved? AlbumArt : newArt;
             }
             catch (Exception ex)
             {
@@ -5334,42 +5339,33 @@ namespace Nautilus
             StartPlayback();           
         }
 
-        private void ExtractYARG(string file)
+        private async Task ExtractYARG(string file)
         {
-            var outFolder = Application.StartupPath + "\\visualizer\\extracted";
+            var outFolder = Application.StartupPath + "\\visualizer\\extracted" + "\\" + Path.GetFileNameWithoutExtension(file).Trim();
+            Tools.DeleteFolder(outFolder, true);
+            Directory.CreateDirectory(outFolder);
+            var success = await Tools.DecryptExtractYARGSONG(file, outFolder);
+            if (!success)
+            {
+                MessageBox.Show("Failed to decode and extract that YARG file, can't Visualize", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            PlayCHFolder(outFolder);
+        }
+
+        private async Task ExtractSNG(string file)
+        {
+            var outFolder = Application.StartupPath + "\\visualizer\\extracted" + Path.GetFileNameWithoutExtension(file).Trim();
             Tools.DeleteFolder(outFolder, true);
             Directory.CreateDirectory(outFolder);
 
-            if (!Tools.DecryptExtractYARGSONG(file, outFolder))
+            await Tools.ExtractSNG(file, outFolder);
+            if (!Directory.Exists(outFolder) || !Directory.GetFiles(outFolder, "*.*", SearchOption.TopDirectoryOnly).Any())
             {
-                MessageBox.Show("Failed to process that YARG file, can't Visualize", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 8 in order to Visualize YARG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-                if (choice == DialogResult.OK)
-                {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
-                }
-                return;
-            }
-            PlayCHFolder(outFolder + "\\" + Path.GetFileNameWithoutExtension(file) + "\\");
-        }
-
-        private void ExtractSNG(string file)
-        {
-            var outFolder = Application.StartupPath + "\\visualizer\\extracted";
-            Tools.DeleteFolder(outFolder, true);
-            Directory.CreateDirectory(outFolder);                      
-
-            if (!Tools.ExtractSNG(file, outFolder))
-            {
-                MessageBox.Show("Failed to process that SNG file, can't Visualize", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                var choice = MessageBox.Show("Visualizer requires .NET Desktop Runtime 8 in order to Visualize Clone Hero SNG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-                if (choice == DialogResult.OK)
-                {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
-                }
+                MessageBox.Show("Failed to decode and extract that SNG file, can't Visualize", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }            
-            PlayCHFolder(outFolder + "\\" + Path.GetFileNameWithoutExtension(file) + "\\");                       
+            PlayCHFolder(outFolder);                       
         }
 
         private void PlayCHFolder(string outFolder)

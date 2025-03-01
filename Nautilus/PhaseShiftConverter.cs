@@ -9,12 +9,9 @@ using Nautilus.x360;
 using Un4seen.Bass;
 using SearchOption = System.IO.SearchOption;
 using System.Drawing;
-using Un4seen.Bass.AddOn.Mix;
 using Un4seen.Bass.AddOn.Opus;
-using Un4seen.Bass.AddOn.Enc;
-using Un4seen.Bass.AddOn.EncOgg;
 using NautilusFREE;
-using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Nautilus
 {
@@ -96,7 +93,6 @@ namespace Nautilus
                 txtFolder.Text = tFolder;
             }
         }
-
         private void Log(string message)
         {
             if (lstLog.InvokeRequired)
@@ -756,7 +752,7 @@ namespace Nautilus
 
         private void decodeSNG_Click(object sender, EventArgs e)
         {
-            var convert = opusToOgg.Checked ? "\n\nConvert .opus to .ogg enabled" : "";
+            var convert = "";//opusToOgg.Checked ? "\n\nConvert .opus to .ogg enabled" : "";
             MessageBox.Show("This will batch extract Clone Hero \".sng\" files into song folders compatible with most PC rhythm games\n\nWILL NOT WORK WITH THE OFFICIAL CLONE HERO SETLIST SNG FILES, ONLY SNG FILES FROM ENCHOR.US OR THOSE MADE WITH CLONE HERO CONVERTER!" + convert, Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             var ofd = new FolderPicker
             {
@@ -775,7 +771,7 @@ namespace Nautilus
             ExtractSNGFiles(sngFiles);
         }
 
-        private void ExtractSNGFiles(List<string> sngFiles)
+        private async Task ExtractSNGFiles(List<string> sngFiles)
         {
             Log("");
             Log("Found " + sngFiles.Count + " SNG files");
@@ -786,81 +782,20 @@ namespace Nautilus
 
             foreach (var sng in sngFiles)
             {
-                var outFolder = Path.GetDirectoryName(sng);// + "\\" + Path.GetFileNameWithoutExtension(sng).Trim();
+                var outFolder = Path.GetDirectoryName(sng) + "\\" + Path.GetFileNameWithoutExtension(sng).Trim();
                 //Tools.DeleteFolder(outFolder, true);
                 Log("Extracting SNG file '" + Path.GetFileName(sng) + "'");
-                counter++;                
-                if (!Tools.ExtractSNG(sng, outFolder))
+                counter++;
+                await Tools.ExtractSNG(sng, outFolder);
+                if (!Directory.Exists(outFolder) || !Directory.GetFiles(outFolder, "*.*", SearchOption.TopDirectoryOnly).Any())
                 {
                     Log("Failed");
                     continue;
-                }
-                if (opusToOgg.Checked)
-                {                    
-                    var opusFiles = Directory.GetFiles(outFolder, "*.opus");
-                    Log("Converting " + opusFiles.Count() + " .opus files to .ogg format");
-                    foreach (var opus in opusFiles)
-                    {
-                        Log("Converting '" + Path.GetFileName(opus) + "' to .ogg format");
-                        if (!BASS_INIT)
-                        {
-                            //initialize BASS.NET
-                            if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, Handle))
-                            {
-                                MessageBox.Show("Error initializing BASS.NET\n" + Bass.BASS_ErrorGetCode());
-                                return;
-                            }
-                            Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_BUFFER, BassBuffer);
-                            Bass.BASS_SetConfig(BASSConfig.BASS_CONFIG_UPDATEPERIOD, 50);
-                            BASS_INIT = true;
-                        }
-
-                        BassStream = BassOpus.BASS_OPUS_StreamCreateFile(opus, 0L, File.ReadAllBytes(opus).Length, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_SAMPLE_FLOAT);
-
-                        // create a decoder for the OGG file(s)
-                        var channel_info = Bass.BASS_ChannelGetInfo(BassStream);
-
-                        // create a stereo mixer with same frequency rate as the input file
-                        BassMixer = BassMix.BASS_Mixer_StreamCreate(channel_info.freq, 2, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_MIXER_END);
-
-                        BassMix.BASS_Mixer_StreamAddChannel(BassMixer, BassStream, BASSFlag.BASS_MIXER_MATRIX);
-
-                        var outFile = opus.Replace(".opus", ".ogg");
-                        BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassMixer, "-q 3", BASSEncode.BASS_ENCODE_AUTOFREE, outFile);
-
-                        while (true)
-                        {
-                            var buffer = new byte[20000];
-                            var c = Bass.BASS_ChannelGetData(BassMixer, buffer, buffer.Length);
-                            if (c <= 0) break;
-                        }
-
-                        Bass.BASS_Free();
-                        BASS_INIT = false;
-
-                        if (File.Exists(outFile))
-                        {
-                            Tools.DeleteFile(opus);
-                            Log("Success");
-                        }
-                        else
-                        {
-                            Log("Failed");
-                        }
-                    }
-                }
+                }                
                 Log("Extracted file successfully");
                 success++;                
             }
-            Log("Extracted " + success + " SNG files out of " + counter + " files attempted");
-            if (success == 0)
-            {
-                var choice = MessageBox.Show("Extracting Clone Hero SNG files requires .NET Desktop Runtime 8\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-                if (choice == DialogResult.OK)
-                {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
-                }
-            }
+            Log("Extracted " + success + " SNG files out of " + counter + " files attempted");  
         }
 
         private void markAsC3_CheckedChanged(object sender, EventArgs e)
@@ -911,7 +846,7 @@ namespace Nautilus
             DecryptExtractYARG(yargFiles);
         }
 
-        private void DecryptExtractYARG(List<string> yargFiles)
+        private async Task DecryptExtractYARG(List<string> yargFiles)
         {
             Log("");
             Log("Found " + yargFiles.Count + " \".yargsong\" files");
@@ -923,8 +858,9 @@ namespace Nautilus
             {
                 counter++;
                 Log("Extracting file " + counter + " of " + yargFiles.Count());
-                var outFolder = Path.GetDirectoryName(file);// + "\\" + Path.GetFileNameWithoutExtension(tempFile).Trim();                
-                if (!Tools.DecryptExtractYARGSONG(file, outFolder))
+                var outFolder = Path.GetDirectoryName(file) + "\\" + Path.GetFileNameWithoutExtension(file).Trim();
+                bool decrypted = await Tools.DecryptExtractYARGSONG(file, outFolder);
+                if (!decrypted)
                 {
                     Log("Failed");
                     continue;
@@ -933,15 +869,6 @@ namespace Nautilus
                 Log("Extracted file " + counter + " of " + yargFiles.Count() + " successfully");                
             }
             Log("Extracted " + success + " file(s) successfully");
-
-            if (success == 0)
-            {
-                var choice = MessageBox.Show("Extracting YARG .yargsong files requires .NET Desktop Runtime 8\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-                if (choice == DialogResult.OK)
-                {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
-                }
-            }
         }
 
         private void packCloneHeroFoldersToSng_Click(object sender, EventArgs e)
@@ -964,40 +891,43 @@ namespace Nautilus
             PackSNGFiles(ofd.ResultPath, sngFolders);
         }
 
-        private void PackSNGFiles(string mainFolder, List<string> sngFolders, bool isYARG = false)
+        private async void PackSNGFiles(string mainFolder, List<string> sngFolders, bool isYARG = false)
         {
-            Log("");
-            Log("Found " + sngFolders.Count + " potential song folders");            
-            var outFolder = mainFolder + (isYARG ? "\\_YARGSONG_FILES" : "\\_SNG_FILES");
-            if (!Directory.Exists(outFolder))
+            try
             {
-                Directory.CreateDirectory(outFolder);
+                Log("");
+                Log("Found " + sngFolders.Count + " potential song folders");
+                var outFolder = mainFolder + (isYARG ? "\\_YARGSONG_FILES" : "\\_SNG_FILES");
+                if (!Directory.Exists(outFolder))
+                {
+                    Directory.CreateDirectory(outFolder);
+                }
+                foreach (var folder in sngFolders)
+                {
+                    await Tools.PackSNG(folder, outFolder);
+                }
+                var sng = Directory.GetFiles(outFolder, "*.sng", SearchOption.TopDirectoryOnly);
+                var success = sng.Count();
+                if (!isYARG)
+                {
+                    Log("Packed " + success + " song folders out of " + sngFolders.Count + " folders attempted");
+                }
+                if (isYARG)
+                {
+                    success = 0;
+                    foreach (var file in sng)
+                    {
+                        if (Tools.EncryptSNGtoYargSong(file)) success++;
+                        //Tools.DeleteFile(file);
+                    }
+                    Log("Packed " + success + " song folders out of " + sngFolders.Count + " folders attempted");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log("Error packing files:");
+                Log(ex.ToString());
             }            
-            Tools.PackSNG(mainFolder, outFolder, !isYARG && convertOggToOpus.Checked);
-            var sng = Directory.GetFiles(outFolder, "*.sng", SearchOption.TopDirectoryOnly);
-            var success = sng.Count();
-            if (!isYARG)
-            {
-                Log("Packed " + success + " song folders out of " + sngFolders.Count + " folders attempted");
-            }
-            if (success == 0)
-            {
-                var choice = MessageBox.Show("Packing song folders into Clone Hero sng files or YARG yargsong files requires .NET Desktop Runtime 8\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-                if (choice == DialogResult.OK)
-                {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
-                }
-            }
-            if (isYARG)
-            {
-                success = 0;
-                foreach (var file in sng)
-                {
-                    if (Tools.EncryptSNGtoYargSong(file)) success++;
-                    //Tools.DeleteFile(file);
-                }
-                Log("Packed " + success + " song folders out of " + sngFolders.Count + " folders attempted");
-            }
         }
 
         private void packToYargSong_Click(object sender, EventArgs e)

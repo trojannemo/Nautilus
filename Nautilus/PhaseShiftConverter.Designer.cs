@@ -38,12 +38,10 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.decodeYARG = new System.Windows.Forms.ToolStripMenuItem();
+            this.packToYargSong = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
             this.decodeSNG = new System.Windows.Forms.ToolStripMenuItem();
             this.packCloneHeroFoldersToSng = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertOggToOpus = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.opusToOgg = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.useguitaroggForNonmultitrackSongs = new System.Windows.Forms.ToolStripMenuItem();
             this.useSubgenreInsteadOfGenreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,7 +68,6 @@
             this.grpFormat = new System.Windows.Forms.GroupBox();
             this.radioOpus = new System.Windows.Forms.RadioButton();
             this.radioOgg = new System.Windows.Forms.RadioButton();
-            this.packToYargSong = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -168,10 +165,7 @@
             this.packToYargSong,
             this.toolStripMenuItem2,
             this.decodeSNG,
-            this.opusToOgg,
-            this.toolStripMenuItem1,
-            this.packCloneHeroFoldersToSng,
-            this.convertOggToOpus});
+            this.packCloneHeroFoldersToSng});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
@@ -183,6 +177,14 @@
             this.decodeYARG.Size = new System.Drawing.Size(326, 22);
             this.decodeYARG.Text = "Extract YARG yargsong files to folders";
             this.decodeYARG.Click += new System.EventHandler(this.decodeYARG_Click);
+            // 
+            // packToYargSong
+            // 
+            this.packToYargSong.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.packToYargSong.Name = "packToYargSong";
+            this.packToYargSong.Size = new System.Drawing.Size(326, 22);
+            this.packToYargSong.Text = "Pack Clone Hero folders to YARG yargsong files ";
+            this.packToYargSong.Click += new System.EventHandler(this.packToYargSong_Click);
             // 
             // toolStripMenuItem2
             // 
@@ -204,27 +206,6 @@
             this.packCloneHeroFoldersToSng.Size = new System.Drawing.Size(326, 22);
             this.packCloneHeroFoldersToSng.Text = "Pack Clone Hero folders to sng files";
             this.packCloneHeroFoldersToSng.Click += new System.EventHandler(this.packCloneHeroFoldersToSng_Click);
-            // 
-            // convertOggToOpus
-            // 
-            this.convertOggToOpus.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.convertOggToOpus.CheckOnClick = true;
-            this.convertOggToOpus.Name = "convertOggToOpus";
-            this.convertOggToOpus.Size = new System.Drawing.Size(326, 22);
-            this.convertOggToOpus.Text = "Convert ogg to opus when packing";
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(323, 6);
-            // 
-            // opusToOgg
-            // 
-            this.opusToOgg.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.opusToOgg.CheckOnClick = true;
-            this.opusToOgg.Name = "opusToOgg";
-            this.opusToOgg.Size = new System.Drawing.Size(326, 22);
-            this.opusToOgg.Text = "Convert opus to ogg when extracting";
             // 
             // optionsToolStripMenuItem
             // 
@@ -523,14 +504,6 @@
             this.radioOgg.Text = "Ogg";
             this.radioOgg.UseVisualStyleBackColor = true;
             // 
-            // packToYargSong
-            // 
-            this.packToYargSong.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.packToYargSong.Name = "packToYargSong";
-            this.packToYargSong.Size = new System.Drawing.Size(326, 22);
-            this.packToYargSong.Text = "Pack Clone Hero folders to YARG yargsong files ";
-            this.packToYargSong.Click += new System.EventHandler(this.packToYargSong_Click);
-            // 
             // PhaseShiftConverter
             // 
             this.AllowDrop = true;
@@ -608,7 +581,6 @@
         private System.Windows.Forms.ToolStripMenuItem dontAddHopoThreshold;
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem decodeSNG;
-        private System.Windows.Forms.ToolStripMenuItem opusToOgg;
         private System.Windows.Forms.CheckBox markAsC3;
         private System.Windows.Forms.CheckBox markAsRV;
         private System.Windows.Forms.CheckBox markAsCustom;
@@ -618,9 +590,7 @@
         private System.Windows.Forms.RadioButton radioOpus;
         private System.Windows.Forms.RadioButton radioOgg;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem packCloneHeroFoldersToSng;
-        private System.Windows.Forms.ToolStripMenuItem convertOggToOpus;
         private System.Windows.Forms.ToolStripMenuItem packToYargSong;
     }
 }

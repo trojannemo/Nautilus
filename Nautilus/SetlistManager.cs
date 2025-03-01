@@ -21,6 +21,7 @@ using Newtonsoft.Json;
 using Nautilus.LibForge.SongData;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
+using System.Threading.Tasks;
 
 namespace Nautilus
 {
@@ -319,7 +320,7 @@ namespace Nautilus
             }            
         }
 
-        private void ValidateFile(IList<string> files, bool AskUser = false)
+        private async Task ValidateFile(IList<string> files, bool AskUser = false)
         {
             var cache_out = setlist_folder + "songcache" + (files[0].ToLowerInvariant().Contains("blitz") ? "_blitz.cache" : "cache");
             ActiveCacheFile = "";
@@ -328,7 +329,7 @@ namespace Nautilus
             {
                 if (btnNew.Enabled)
                 {
-                    if (PrepForNewSong() && Parser.ReadINIFile(ExtractYargSongIni(yargSongFile)))
+                    if (PrepForNewSong() && Parser.ReadINIFile(await ExtractYargSongIni(yargSongFile)))
                     {
                         importPath = yargSongFile;
                         FinalizeImport(Parser.Songs, silentMode.Checked || files.Count > 1);
@@ -346,7 +347,7 @@ namespace Nautilus
             {
                 if (btnNew.Enabled)
                 {
-                    if (PrepForNewSong() && Parser.ReadINIFile(ExtractSNGIni(sngFile)))
+                    if (PrepForNewSong() && Parser.ReadINIFile(await ExtractSNGIni(sngFile)))
                     {
                         importPath = sngFile;
                         FinalizeImport(Parser.Songs, silentMode.Checked || files.Count > 1);
@@ -1504,20 +1505,15 @@ namespace Nautilus
             return new string(line.Where(c => !char.IsControl(c)).ToArray());
         }
 
-        private string ExtractYargSongIni(string file)
+        private async Task<string> ExtractYargSongIni(string file)
         {
             var outFolder = Application.StartupPath + "\\setlist\\yargsong";
             Tools.DeleteFolder(outFolder, true);
             Directory.CreateDirectory(outFolder);
-
-            if (!Tools.DecryptExtractYARGSONG(file, outFolder))
+            var success = await Tools.DecryptExtractYARGSONG(file, outFolder);
+            if (!success)
             {
                 MessageBox.Show("Failed to process that YARGSONG file, can't add to setlist", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                var choice = MessageBox.Show("Setlist Manager requires .NET Desktop Runtime 8 in order to read YARGSONG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-                if (choice == DialogResult.OK)
-                {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
-                }
                 return "";
             }
 
@@ -1526,23 +1522,17 @@ namespace Nautilus
             return ini[0];
         }
 
-        private string ExtractSNGIni(string file)
+        private async Task<string> ExtractSNGIni(string file)
         {
             var outFolder = Application.StartupPath + "\\setlist\\sng";
             Tools.DeleteFolder(outFolder, true);
             Directory.CreateDirectory(outFolder);
 
-            if (!Tools.ExtractSNG(file, outFolder))
+            await Tools.ExtractSNG(file, outFolder);
+            if (!Directory.Exists(outFolder) || Directory.GetFiles(outFolder, "*.ini", SearchOption.AllDirectories).Count() == 0)
             {
-                MessageBox.Show("Failed to process that YARGSONG file, can't add to setlist", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                var choice = MessageBox.Show("Setlist Manager requires .NET Desktop Runtime 8 in order to read YARGSONG files\n\nIf you already have .NET Desktop Runtime 8 installed and it still doesn't work, notify Nemo\n\nIf you don't have .NET Desktop Runtime 8 installed, click OK to go to the Microsoft website and download it from there\n\nOr Click Cancel to go back", Text, MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
-                if (choice == DialogResult.OK)
-                {
-                    Process.Start("https://dotnet.microsoft.com/en-us/download/dotnet/8.0");
-                }
-                return "";
+                MessageBox.Show("Failed to process that input file, can't add to setlist", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);                
             }
-
             var ini = Directory.GetFiles(outFolder, "*.ini", SearchOption.AllDirectories);
             if (!ini.Any()) return "";
             return ini[0];

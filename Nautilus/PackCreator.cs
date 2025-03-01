@@ -535,6 +535,14 @@ namespace Nautilus
                 totalInput += Directory.GetDirectories(upgFolder).Count();
             }
 
+            if (hidePackFromRB3.Checked)
+            {
+                using (var dtaOut = new StreamWriter(dtafile, false, fileEncoding))
+                {
+                    dtaOut.WriteLine("#ifndef kControllerRealGuitar");
+                }
+            }            
+
             if (Directory.Exists(songsFolder))
             {
                 var songsInput = Directory.GetFiles(songsFolder);
@@ -576,8 +584,8 @@ namespace Nautilus
                         if (File.Exists(songsFolder + songName + "\\songs.dta"))
                         {
                             var dtaIn = new StreamReader(songsFolder + songName + "\\songs.dta", fileEncoding);
-                            var dtaOut = new StreamWriter(dtafile, true, fileEncoding);
-                                    
+                           var dtaOut = new StreamWriter(dtafile, true, fileEncoding);
+                                                                
                             while (dtaIn.Peek() >= 0)
                             {
                                 var line = dtaIn.ReadLine();
@@ -674,6 +682,14 @@ namespace Nautilus
                                 break;
                         }
                     }
+                                        
+                    if (hidePackFromRB3.Checked)
+                    {
+                        using (var dtaOut = new StreamWriter(dtafile, true, fileEncoding))
+                        {
+                            dtaOut.Write("#endif");
+                        }
+                    }                    
 
                     if (File.Exists(dtafile))
                     {

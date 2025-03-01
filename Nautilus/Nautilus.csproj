@@ -30,7 +30,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>476</ApplicationRevision>
+    <ApplicationRevision>477</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -84,6 +84,9 @@
     <Reference Include="Bass.Net, Version=2.4.11.0, Culture=neutral, PublicKeyToken=b7566c273e6ef480, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Debug\Bass.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="BinaryEx, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\BinaryEx.0.4.0\lib\netstandard2.0\BinaryEx.dll</HintPath>
     </Reference>
     <Reference Include="DevComponents.DotNetBar2">
       <HintPath>.\DevComponents.DotNetBar2.dll</HintPath>
@@ -143,8 +146,8 @@
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
@@ -239,6 +242,17 @@
     <Compile Include="SMDialog.designer.cs">
       <DependentUpon>SMDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="SngLib\KnownKeys.cs" />
+    <Compile Include="SngLib\LargeFile.cs" />
+    <Compile Include="SngLib\NativeByteArray\NativeByteArray.cs" />
+    <Compile Include="SngLib\NativeByteArray\NativeByteArrayExtensions.cs" />
+    <Compile Include="SngLib\NativeByteArray\PointerMemoryManager.cs" />
+    <Compile Include="SngLib\NativeByteArray\ThrowHelper.cs" />
+    <Compile Include="SngLib\SngDecode.cs" />
+    <Compile Include="SngLib\SngEncode.cs" />
+    <Compile Include="SngLib\SngFile.cs" />
+    <Compile Include="SngLib\SngSerializer.cs" />
+    <Compile Include="SngLib\SongLib.cs" />
     <Compile Include="yargSNG.cs" />
     <Compile Include="Updater.cs">
       <SubType>Form</SubType>

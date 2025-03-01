@@ -17,6 +17,8 @@ using Encoder = System.Drawing.Imaging.Encoder;
 using Path = System.IO.Path;
 using NautilusFREE;
 using static Nautilus.YARGSongFileStream;
+using Nautilus.Sng;
+using System.Threading.Tasks;
 
 
 namespace Nautilus
@@ -3096,116 +3098,63 @@ namespace Nautilus
             return File.Exists(outFile);
         }
 
-        public bool DecryptExtractYARGSONG(string inFile, string outFolder)
+        public async Task<bool> DecryptExtractYARGSONG(string inFile, string outFolder)
         {
-            byte[] SNGPKG = { (byte)'S', (byte)'N', (byte)'G', (byte)'P', (byte)'K', (byte)'G' };
-            var tempFile = Path.GetTempPath() + Path.GetFileNameWithoutExtension(inFile) + ".sng";
-            DeleteFile(tempFile);
-            using (FileStream fileStream = File.OpenRead(inFile))
-            {                
-                YARGSongFileStream yargFileStream = TryLoad(fileStream);
-                byte[] bytes = new byte[yargFileStream.Length];
-                yargFileStream.Read(bytes, 0, bytes.Length);
-                yargFileStream.Close();
-                using (var fs = File.Create(tempFile))
+                await ExtractSNG(inFile, outFolder);
+                return Directory.Exists(outFolder) && Directory.GetFiles(outFolder, "*.*", SearchOption.TopDirectoryOnly).Any();            
+        }
+
+        public async Task PackSNG(string inFolder, string outFolder)
+        {
+            try
+            {
+                await SngEncode.EncodeSng(inFolder, outFolder);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error encoding input folder to SNG file:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }       
+
+        public async Task ExtractSNG(string filePath, string outFolder)
+        {
+            try
+            {
+                if (Path.GetExtension(filePath) == ".yargsong")
                 {
-                    using (var bw = new BinaryWriter(fs))
+                    byte[] SNGPKG = { (byte)'S', (byte)'N', (byte)'G', (byte)'P', (byte)'K', (byte)'G' };
+
+                    using (FileStream fileStream = File.OpenRead(filePath))
                     {
-                        bw.Write(bytes);
+                        // Load YARG file into memory
+                        YARGSongFileStream yargFileStream = TryLoad(fileStream);
+                        byte[] sngBytes = new byte[yargFileStream.Length];
+                        yargFileStream.Read(sngBytes, 0, sngBytes.Length);
+                        yargFileStream.Close();
+
+                        // ✅ Overwrite the first bytes of sngBytes with SNGPKG (exactly like your temp file method)
+                        Buffer.BlockCopy(SNGPKG, 0, sngBytes, 0, SNGPKG.Length);
+
+                        // Process directly in memory                        
+                        using (var ms = new MemoryStream(sngBytes))
+                        {
+                            await SngDecode.DecodeSng(ms, outFolder);
+                        }
                     }
                 }
-            }
-            using (FileStream fileStream = new FileStream(tempFile, FileMode.Open, FileAccess.Write))
-            {
-                fileStream.Write(SNGPKG, 0, SNGPKG.Length);
-            }
-            var success = ExtractSNG(tempFile, outFolder);
-            DeleteFile(tempFile);
-            return success;
-        }
-
-        public bool PackSNG(string inFolder, string outFolder, bool doOpus)
-        {
-            var path = Application.StartupPath + "\\bin\\";
-            if (!File.Exists(path + "SngCli.exe"))
-            {
-                MessageBox.Show("SngCli.exe is missing from the bin directory and I can't continue without it", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            try
-            {
-                var opus = doOpus ? " --opusEncode" : "";
-                var arg = " encode -i \"" + inFolder + "\" -o \"" + outFolder + "\" --noStatusBar" + opus;
-                var app = new ProcessStartInfo
+                else
                 {
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = false,
-                    RedirectStandardError = false,
-                    RedirectStandardInput = false,
-                    UseShellExecute = false,
-                    FileName = path + "SngCli.exe",
-                    Arguments = arg,
-                    WorkingDirectory = path
-                };
-                var process = Process.Start(app);
-                do
-                {
-                    //
-                } while (!process.HasExited);
-                process.Dispose();
+                    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 8192, FileOptions.Asynchronous))
+                    {
+                        await SngDecode.DecodeSng(fs, outFolder); // ✅ Pass FileStream instead of byte[]
+                    } 
+                }                
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error creating SNG package:\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
+                MessageBox.Show("Error decoding that file:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            return File.Exists(outFolder);
-        }
-
-        public bool ExtractSNG(string inFile, string outFolder)
-        {       
-            var path = Application.StartupPath + "\\bin\\";
-            if (!File.Exists(path + "SngCli.exe"))
-            {
-                MessageBox.Show("SngCli.exe is missing from the bin directory and I can't continue without it", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-
-            //updated version of SNGCLI now won't accept individual sng files only folders...ridiculous
-            var tempFolder = Path.GetTempPath() + "sng";
-            DeleteFolder(tempFolder, true);
-            Directory.CreateDirectory(tempFolder);
-            File.Copy(inFile, tempFolder + "\\" + Path.GetFileName(inFile), true);
-
-            try
-            {
-                var arg = " decode -i \"" + tempFolder + "\" -o \"" + outFolder + "\" --noStatusBar";
-                var app = new ProcessStartInfo
-                {
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = false,
-                    RedirectStandardError = false,
-                    RedirectStandardInput = false,
-                    UseShellExecute = false,
-                    FileName = path + "SngCli.exe",
-                    Arguments = arg,
-                    WorkingDirectory = path
-                };
-                var process = Process.Start(app);
-                do
-                {
-                    //
-                } while (!process.HasExited);
-                process.Dispose();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error extracting SNG package:\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            DeleteFolder(tempFolder, true);
-            return Directory.Exists(outFolder) && File.Exists(outFolder + "\\" + Path.GetFileNameWithoutExtension(inFile) + "\\song.ini");
-        }
+        }       
 
         public bool ExtractPKG(string pkg, string folder, out string klic)
         {

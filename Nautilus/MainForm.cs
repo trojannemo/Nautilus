@@ -272,7 +272,7 @@ namespace Nautilus
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            WavPlayer.Stop();
+            WavPlayer?.Stop();
             if (isLocked)
             {
                 e.Cancel = true;

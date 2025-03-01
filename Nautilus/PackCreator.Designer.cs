@@ -84,6 +84,7 @@
             this.btnRB1 = new System.Windows.Forms.Button();
             this.btnRB2 = new System.Windows.Forms.Button();
             this.btnRB3 = new System.Windows.Forms.Button();
+            this.hidePackFromRB3 = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.thumb10)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.thumb9)).BeginInit();
@@ -526,7 +527,8 @@
             this.useRecursiveSearching,
             this.toolStripMenuItem1,
             this.setGameIDToolStripMenuItem,
-            this.setDTAEncodingToolStripMenuItem});
+            this.setDTAEncodingToolStripMenuItem,
+            this.hidePackFromRB3});
             this.advancedToolStripMenuItem.Name = "advancedToolStripMenuItem";
             this.advancedToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
             this.advancedToolStripMenuItem.Text = "&Advanced";
@@ -570,7 +572,7 @@
             // 
             this.rockBandToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.rockBandToolStripMenuItem.Name = "rockBandToolStripMenuItem";
-            this.rockBandToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.rockBandToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.rockBandToolStripMenuItem.Text = "Rock Band";
             this.rockBandToolStripMenuItem.Click += new System.EventHandler(this.rockBandToolStripMenuItem_Click);
             // 
@@ -578,7 +580,7 @@
             // 
             this.rockBand2ToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.rockBand2ToolStripMenuItem.Name = "rockBand2ToolStripMenuItem";
-            this.rockBand2ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.rockBand2ToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.rockBand2ToolStripMenuItem.Text = "Rock Band 2";
             this.rockBand2ToolStripMenuItem.Click += new System.EventHandler(this.rockBand2ToolStripMenuItem_Click);
             // 
@@ -588,7 +590,7 @@
             this.rockBand3ToolStripMenuItem.Checked = true;
             this.rockBand3ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.rockBand3ToolStripMenuItem.Name = "rockBand3ToolStripMenuItem";
-            this.rockBand3ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.rockBand3ToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.rockBand3ToolStripMenuItem.Text = "Rock Band 3";
             this.rockBand3ToolStripMenuItem.Click += new System.EventHandler(this.rockBand3ToolStripMenuItem_Click);
             // 
@@ -606,7 +608,7 @@
             // 
             this.aNSIToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.aNSIToolStripMenuItem.Name = "aNSIToolStripMenuItem";
-            this.aNSIToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aNSIToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.aNSIToolStripMenuItem.Text = "ANSI";
             this.aNSIToolStripMenuItem.Click += new System.EventHandler(this.aNSIToolStripMenuItem_Click);
             // 
@@ -616,7 +618,7 @@
             this.uTF8ToolStripMenuItem.Checked = true;
             this.uTF8ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.uTF8ToolStripMenuItem.Name = "uTF8ToolStripMenuItem";
-            this.uTF8ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.uTF8ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.uTF8ToolStripMenuItem.Text = "UTF8";
             this.uTF8ToolStripMenuItem.Click += new System.EventHandler(this.uTF8ToolStripMenuItem_Click);
             // 
@@ -812,6 +814,14 @@
             this.btnRB3.UseVisualStyleBackColor = true;
             this.btnRB3.Click += new System.EventHandler(this.btnRB3_Click);
             // 
+            // hidePackFromRB3
+            // 
+            this.hidePackFromRB3.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.hidePackFromRB3.CheckOnClick = true;
+            this.hidePackFromRB3.Name = "hidePackFromRB3";
+            this.hidePackFromRB3.Size = new System.Drawing.Size(221, 22);
+            this.hidePackFromRB3.Text = "Hide pack from RB3";
+            // 
             // PackCreator
             // 
             this.AllowDrop = true;
@@ -934,5 +944,6 @@
         private System.Windows.Forms.Button btnRB1;
         private System.Windows.Forms.Button btnRB2;
         private System.Windows.Forms.Button btnRB3;
+        private System.Windows.Forms.ToolStripMenuItem hidePackFromRB3;
     }
 }
