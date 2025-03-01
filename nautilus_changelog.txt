@@ -6,6 +6,57 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+v5.4.0
+
+BATCH PROCESSOR
+- Added option to remove subgenre from DTA files
+- Added option to batch change from Magma's Karaoke or Multitrack tag to DIY Stems tag
+
+AUDIO CONVERTER
+- Added ability to convert Bink (.bik) audio files (encrypted or not) directly to .mogg format in one go by drag/dropping your Bink file(s) on the appropriate button - thanks to StackOverflow0x for making this possible!
+- Added ability to convert mono audio files to mono (before it would automatically make them fake stereo)
+
+VISUALIZER
+- Added ability to read DIY Stems tag from Magma: Rok On Edition v4
+- Added ability to read Partial Multitrack tag from Magma: Rok On Edition v4
+- Added ability to read Unpitched Vocals tag from Magma: Rok On Edition v4
+- Added ability to read author tag from DTA array (useful for RB3DX and for songs created with Magma: Rok On Edition v4)
+
+SETLIST MANAGER
+- Major rework of the code to enable near instant loading times when loading thousands of songs in your SETLIST - please let me know if anything broke!
+- Now when selecting a single song, Setlist Manager automatically attempts to find the corresponding YouTube video and presents you with a button to click to open on YouTube
+- Now when selecting a single song, Setlist Manager automatically attempts to find the song lyrics and presents you with a button to click to view the lyrics right in Nautilus
+- Added 2020s+ filter option to filter songs from 2020 and on...and there's space for a 2030s+ if we get that far!
+
+MIDI CLEANER
+- Added option (enabled by default) to remove erroneous “[lighting ()]” event at the beginning of the VENUE track, which prevents any lighting cues from autogenerating when compiling with Magma - will also generate a .log file in the same folder as the input file(s) that will list all songs that had this issue so you can then drag/drop into Magma Rok On Edition and quickly recompiled
+- Added feature that will fix directed cuts in the VENUE track that require a second copy of the same camera event or the game would ignore the next camera event
+- Improved detection and removal of drum fills that overlap overdrive phrases (was working before, but not very well due to poor logic assumptions)
+
+PACK CREATOR
+- Totally reworked how file encoding works, now it defaults to UTF8 (which can display all ANSI/latin1 characters, but not the other way around) and encodes the resulting DTA file as UTF8 without BOM (reducing likelihood of problems) AND now it will replace all entries in the pack DTAs' encoding lines to match the file encoding, so Rock Band gets the instruction that matches the actual file encoding. Can still choose ANSI/latin1 but it is recommended that you use UTF8 going forward
+- Added option under Advanced menu to Hide from RB3 where Pack Creator will wrap the DTA file in code so it works in RB2 but not in RB3
+- Attempted patch to fix issue created by old code where empty "songs" and "songs_upgrades" folders would prevent the creation of a pack when using the folder structure that seems to be so popular lately - let me know if you stille encounter issues
+- Fixed buttons losing their backcolor and forecolor when clicking on the Reset button
+
+QUICK PACK EDITOR
+- Changed behavior so now you can go to Advanced -> dePACK options -> Use ArtistSongShortName and that will be the file name for dePACKed files, greately reducing the possibility of file conflicts and songs being skipped during dePACKing
+
+SAVE FILE IMAGE EDITOR
+- Fixed broken compatibility with Wii save files where it would detect them and extract them but fail to find the converted (.png) files
+
+WII CONVERTER
+- Fixed bug where if the backing track was mono and had a panning value of 0.0 (centered) it would cause a crash because the code was looking for another channel that didn't exist
+
+BATCH PROCESSOR
+- Fixed rare bug where adding release year to the song title would create a broken DTA file if the song had the song title in the shortname/id/internal name
+- Fixed behavior so if a song that already had the year added to the song title is ran through the Batch Processor again, it wouldn't add it again and again
+
+DECRYPTION
+- Fixed decryption of RB4-era (i.e. Dropmix) mogg files not working unless themethod3.dll was moved to the main directory rather than the bin folder
+
+----------
+
 v5.3.0
 
 VISUALIZER
