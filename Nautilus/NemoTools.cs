@@ -2708,6 +2708,22 @@ namespace Nautilus
             }
         }
 
+        /// <summary>
+        /// Detects if the application is running under WINE.
+        /// </summary>
+        public bool IsRunningInWine()
+        {
+            try
+            {
+                var wineKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Wine");
+                return wineKey != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public bool ExtractSaveImages(string saveFile, string savepath, bool isPS3 = false)
         {
             if (!File.Exists(saveFile)) return false;

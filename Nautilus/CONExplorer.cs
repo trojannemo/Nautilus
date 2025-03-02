@@ -59,7 +59,7 @@ namespace Nautilus
             Parser = new DTAParser();
             isRunningShortcut = runningshortcut;
 
-            var formButtons = new List<Button> { btnExtract,btnSave,btnVisualize };
+            var formButtons = new List<Button> { btnExtract,btnSave,btnVisualize, btnChange };
             foreach (var button in formButtons)
             {
                 button.BackColor = ButtonBackColor;
@@ -1233,59 +1233,109 @@ namespace Nautilus
 
         private void ExtractFile(FileEntry xent, FileEntry xent2 = null)
         {
-            var ext_folder = Application.StartupPath + "\\temp\\";
+            var ext_folder = Path.Combine(Application.StartupPath, "temp");
             if (!Directory.Exists(ext_folder))
             {
                 Directory.CreateDirectory(ext_folder);
             }
-            
+
             Enabled = false;
             Log("Extracting " + xent.Name);
-            var ext_file = new StringCollection {ext_folder + xent.Name};
+            var ext_file = new List<string> { Path.Combine(ext_folder, xent.Name) };
             Tools.DeleteFile(ext_file[0]);
+
             if (!xent.ExtractToFile(ext_file[0]))
             {
                 Log("Error extracting " + xent.Name);
                 Enabled = true;
                 return;
             }
+
             if (xent2 != null)
             {
                 Log("Extracting " + xent2.Name);
-                ext_file.Add(ext_folder + xent2.Name);
-                Tools.DeleteFile(ext_file[1]);
-                if (!xent2.ExtractToFile(ext_file[1]))
+                string secondFilePath = Path.Combine(ext_folder, xent2.Name);
+                ext_file.Add(secondFilePath);
+                Tools.DeleteFile(secondFilePath);
+
+                if (!xent2.ExtractToFile(secondFilePath))
                 {
                     Log("Error extracting " + xent2.Name);
-                    ext_file.RemoveAt(1);
+                    ext_file.Remove(secondFilePath);
                 }
             }
-                       
+
             Enabled = true;
 
             if (File.Exists(ext_file[0]))
             {
-                var moveEffect = new byte[] { 2, 0, 0, 0 };
-                var dropEffect = new MemoryStream();
-                dropEffect.Write(moveEffect, 0, moveEffect.Length);
-
-                var data = new DataObject();
-                data.SetFileDropList(ext_file);
-                data.SetData("Preferred DropEffect", dropEffect);
-
-                Clipboard.Clear();
-                Clipboard.SetDataObject(data, true);
-                
-                Log("File " + Path.GetFileName(ext_file[0]) + " extracted successfully");
-                if (ext_file.Count > 1)
+                if (Tools.IsRunningInWine())
                 {
-                    Log("File " + Path.GetFileName(ext_file[1]) + " extracted successfully");
+                    // Running under WINE - use Save File Dialog instead of clipboard
+                    foreach (var filePath in ext_file)
+                    {
+                        SaveFileUsingDialog(filePath);
+                    }
                 }
-                Log(ext_file.Count > 1 ? "Files are in your clipboard, paste them anywhere" : "File is in your clipboard, paste it anywhere");
+                else
+                {
+                    // Normal Windows behavior - copy to clipboard
+                    var moveEffect = new byte[] { 2, 0, 0, 0 };
+                    var dropEffect = new MemoryStream();
+                    dropEffect.Write(moveEffect, 0, moveEffect.Length);
+
+                    var data = new DataObject();
+                    var fileDropList = new StringCollection();
+                    fileDropList.AddRange(ext_file.ToArray());
+
+                    data.SetFileDropList(fileDropList);
+                    data.SetData("Preferred DropEffect", dropEffect);
+
+                    Clipboard.Clear();
+                    Clipboard.SetDataObject(data, true);
+
+                    Log("File " + Path.GetFileName(ext_file[0]) + " extracted successfully");
+                    if (ext_file.Count > 1)
+                    {
+                        Log("File " + Path.GetFileName(ext_file[1]) + " extracted successfully");
+                    }
+                    Log(ext_file.Count > 1 ? "Files are in your clipboard, paste them anywhere" : "File is in your clipboard, paste it anywhere");
+                }
             }
             else
             {
                 Log("Could not extract file " + Path.GetFileName(ext_file[0]));
+            }
+        }        
+
+        /// <summary>
+        /// Prompts the user with a Save File Dialog and copies the extracted file to the chosen location.
+        /// </summary>
+        private void SaveFileUsingDialog(string sourcePath)
+        {
+            using (SaveFileDialog saveDialog = new SaveFileDialog())
+            {
+                saveDialog.FileName = Path.GetFileName(sourcePath); // Prepopulate filename
+                saveDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                saveDialog.Title = "Save Extracted File";
+                saveDialog.Filter = "All Files|*.*";
+
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        File.Copy(sourcePath, saveDialog.FileName, true);
+                        Log($"File saved successfully: {saveDialog.FileName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log($"Error saving file: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    Log("File save cancelled.");
+                }
             }
         }
 
