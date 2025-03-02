@@ -31,7 +31,8 @@ namespace Nautilus
         private string songToDePack;
         public string fileToExtract;
         private bool isPKG;
- 
+        private bool isDTA;
+        
         public QuickPackEditor(MainForm xParent, Color ButtonBackColor, Color ButtonTextColor, string dta = "", string inpack = "")
         {
             InitializeComponent();
@@ -90,15 +91,17 @@ namespace Nautilus
 
         private void ValidateFile(string file)
         {
+            isDTA = false;
             try
             {
                 if (Path.GetExtension(file) == ".dta")
                 {
+                    isDTA = true;
                     DTAPath = file;
                     DoDTAOnly();
                 }
                 else if (VariousFunctions.ReadFileType(file) == XboxFileType.STFS)
-                {
+                {                    
                     pack = file;
                     ReadContents();
                 }
@@ -228,6 +231,11 @@ namespace Nautilus
             }
             PopulateEntries();
             Log("Found " + Songs.Count + " song " + (Songs.Count == 1 ? "entry" : "entries"));
+            if (Songs.Count > 0)
+            {
+                btnDePack.Visible = true;
+                btnDePack.Enabled = true;
+            }
         }
 
         private void PopulateEntries(int sort_order = 1)
@@ -942,15 +950,50 @@ namespace Nautilus
             btnDePack.Text = "Cancel";
             toolTip1.SetToolTip(btnDePack, "Click to cancel dePACKing process");
             
-            Log("dePACKaging your files ... sit tight");
-            Log("THIS WILL TAKE A WHILE. DON'T CLOSE ME DOWN!");
             PackagesToUnpack.Clear();
             PackagesToUnpack.Add(pack);
-            dePACKFiles();
+            if (isDTA)
+            {
+                dePACKDTA();
+            }
+            else
+            {
+                dePACKFiles();
+            }            
+        }
+
+        private void dePACKDTA()
+        {
+            Log("dePACKing " + Songs.Count + " component DTA files from pack DTA file");
+
+            foreach (var song in Songs)
+            {
+                var path = Path.GetDirectoryName(DTAPath) + "\\" + song.Artist + " - " + song.Name + ".dta";
+                var sw = new StreamWriter(path, false, Encoding.UTF8);
+                foreach (var line in song.DTALines)
+                {
+                    if (line.Contains("#ifndef kControllerRealGuitar") || line.Contains("#endif")) continue;
+                    if (line.Contains("latin1"))
+                    {
+                        sw.WriteLine(line.Replace("latin1", "utf8"));
+                    }
+                    else
+                    {
+                        sw.WriteLine(line);
+                    }
+                }
+                sw.Dispose();
+            }
+
+            Log("Finished");
+            Process.Start(Path.GetDirectoryName(DTAPath));
         }
 
         private void dePACKFiles()
         {
+            Log("dePACKing your files ... sit tight");
+            Log("THIS MIGHT TAKE A WHILE. DON'T CLOSE ME DOWN!");
+
             EnableDisable(false, true);
             ChangeCursors(true);
             var tempfolder = Application.StartupPath + "\\quickpackeditor\\";
@@ -979,7 +1022,7 @@ namespace Nautilus
 
             if (PackagesToUnpack.Count > 1)
             {
-                Log("Starting Batch dePACKaging ... this might take a while");
+                Log("Starting Batch dePACKing ... this might take a while");
             }
             foreach (var file in PackagesToUnpack.TakeWhile(file => !backgroundWorker1.CancellationPending))
             {
@@ -1034,6 +1077,7 @@ namespace Nautilus
                         var sw = new StreamWriter(tempdta, false, Encoding.UTF8);
                         foreach (var line in song.DTALines)
                         {
+                            if (line.Contains("#ifndef kControllerRealGuitar") || line.Contains("#endif")) continue;
                             if (line.Contains("latin1"))
                             {
                                 sw.WriteLine(line.Replace("latin1", "utf8"));
@@ -1129,7 +1173,7 @@ namespace Nautilus
 
             if (PackagesToUnpack.Count > 1)
             {
-                Log("Batch dePACKaging completed");
+                Log("Batch dePACKing completed");
             }
         }
 
