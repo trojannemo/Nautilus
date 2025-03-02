@@ -2745,6 +2745,7 @@ namespace Nautilus
         public Int32 PreviewStart { get; set; }
         public Int32 PreviewEnd { get; set; }
         public int DTAIndex { get; set; }
+        public int ListIndex { get; set; }
         public int PSDelay { get; set; }
         public int VideoStartTime { get; set; }
 
@@ -2848,6 +2849,7 @@ namespace Nautilus
             VNAudioHash = "";
             CATemh = false;
             DTAIndex = 0;
+            ListIndex = 0;
             PSDelay = 0;
             VideoStartTime = 0;
             ChannelsBassStart = 0;

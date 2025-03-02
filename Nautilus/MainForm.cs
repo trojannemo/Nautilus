@@ -244,8 +244,8 @@ namespace Nautilus
         private void SaveConfig()
         {
             var sw = new StreamWriter(config, false);
-            sw.WriteLine("Width=" + Width);
-            sw.WriteLine("Height=" + Height);
+            sw.WriteLine("Width=" + (WindowState == FormWindowState.Minimized ? RestoreBounds.Width : Width));
+            sw.WriteLine("Height=" + (WindowState == FormWindowState.Minimized ? RestoreBounds.Height : Height));
             sw.WriteLine("BackColor=#" + GetColorHex(BackColor));
             sw.WriteLine("BackgroundImage=" + bg_image);
             var i = 0;
@@ -271,14 +271,14 @@ namespace Nautilus
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            WavPlayer?.Stop();
+        {            
             if (isLocked)
             {
                 e.Cancel = true;
                 MessageBox.Show("You must unlock the program first", "Locked", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
+            WavPlayer?.Stop();
             //resetEverythingToolStripMenuItem_Click(sender, e);
             SaveConfig();
             SaveFlappyConfig();

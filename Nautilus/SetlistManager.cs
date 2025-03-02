@@ -667,7 +667,7 @@ namespace Nautilus
             isImportingCache = true;
 
             TotalSongs = 0;
-            Songs.Clear();
+            AllSongs.Clear();
 
             doBlitzImport = file.ToLowerInvariant().Contains("blitz");
 
@@ -707,41 +707,41 @@ namespace Nautilus
 
                 if (!doBlitzImport) //not playable on Blitz sadly
                 {
-                    AddRB3Songs(); //loads the on-disc RB3 songs that are not found in the cache
+                    AddRB3Songs(); //loads the on-disc RB3 AllSongs that are not found in the cache
                 }
 
                 for (var i = 0; i < TotalSongs; i++)
                 {
-                    Songs.Add(new SongData());
-                    var index = Songs.Count - 1;
-                    Songs[index].Initialize();
+                    AllSongs.Add(new SongData());
+                    var index = AllSongs.Count - 1;
+                    AllSongs[index].Initialize();
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //song id
-                    Songs[index].SongId = BytesToInt(buffer);
+                    AllSongs[index].SongId = BytesToInt(buffer);
 
                     br.ReadBytes(8); //skip unknown stuff
 
                     buffer = Arrange2Bytes(br.ReadBytes(2)); //preview start in milliseconds
-                    Songs[index].GameVersion = BytesToInt(buffer);
+                    AllSongs[index].GameVersion = BytesToInt(buffer);
 
                     br.ReadBytes(4); //song id a second time, skip
                     br.ReadBytes(1); //skip unknown byte
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //game id
                     var length = BytesToInt(buffer);
-                    Songs[index].Source = Encoding.UTF8.GetString(br.ReadBytes(length));
+                    AllSongs[index].Source = Encoding.UTF8.GetString(br.ReadBytes(length));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //preview start in milliseconds
                     Array.Reverse(buffer);
-                    Songs[index].PreviewStart = Convert.ToInt32(BitConverter.ToSingle(buffer, 0));
+                    AllSongs[index].PreviewStart = Convert.ToInt32(BitConverter.ToSingle(buffer, 0));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //preview end in milliseconds
                     Array.Reverse(buffer);
-                    Songs[index].PreviewEnd = Convert.ToInt32(BitConverter.ToSingle(buffer, 0));
+                    AllSongs[index].PreviewEnd = Convert.ToInt32(BitConverter.ToSingle(buffer, 0));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //short name
                     length = BytesToInt(buffer);
-                    Songs[index].ShortName = Encoding.UTF8.GetString(br.ReadBytes(length));
+                    AllSongs[index].ShortName = Encoding.UTF8.GetString(br.ReadBytes(length));
 
                     br.ReadBytes(8); //skip unknown stuff
                     br.ReadBytes(4 + length); //short name length + string again, skip
@@ -749,12 +749,12 @@ namespace Nautilus
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //file path length
                     length = BytesToInt(buffer);
                     var path = Encoding.UTF8.GetString(br.ReadBytes(length));
-                    Songs[index].FilePath = path;
+                    AllSongs[index].FilePath = path;
 
                     br.ReadBytes(4); //skip unknown stuff
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //vocal parts
-                    Songs[index].VocalParts = BytesToInt(buffer);
+                    AllSongs[index].VocalParts = BytesToInt(buffer);
 
                     //skip unknown stuff
                     br.ReadBytes(doBlitzImport ? 8 : 12);
@@ -824,31 +824,31 @@ namespace Nautilus
                             switch (instrument)
                             {
                                 case "guitar":
-                                    Songs[index].GuitarDiff = Parser.GuitarDiff(diff);//diff > 0 ? Parser.GuitarDiff(diff) + 1 : 0;
+                                    AllSongs[index].GuitarDiff = Parser.GuitarDiff(diff);//diff > 0 ? Parser.GuitarDiff(diff) + 1 : 0;
                                     break;
                                 case "drum":
-                                    Songs[index].DrumsDiff = Parser.DrumDiff(diff);//diff > 0 ? Parser.DrumDiff(diff) + 1 : 0;
+                                    AllSongs[index].DrumsDiff = Parser.DrumDiff(diff);//diff > 0 ? Parser.DrumDiff(diff) + 1 : 0;
                                     break;
                                 case "bass":
-                                    Songs[index].BassDiff = Parser.BassDiff(diff);//diff > 0 ? Parser.BassDiff(diff) + 1 : 0;
+                                    AllSongs[index].BassDiff = Parser.BassDiff(diff);//diff > 0 ? Parser.BassDiff(diff) + 1 : 0;
                                     break;
                                 case "vocals":
-                                    Songs[index].VocalsDiff = Parser.VocalsDiff(diff);//diff > 0 ? Parser.VocalsDiff(diff) + 1 : 0;
+                                    AllSongs[index].VocalsDiff = Parser.VocalsDiff(diff);//diff > 0 ? Parser.VocalsDiff(diff) + 1 : 0;
                                     break;
                                 case "band":
-                                    Songs[index].BandDiff = Parser.BandDiff(diff) + 1; //band is always at least 1
+                                    AllSongs[index].BandDiff = Parser.BandDiff(diff) + 1; //band is always at least 1
                                     break;
                                 case "keys":
-                                    Songs[index].KeysDiff = Parser.KeysDiff(diff);//diff > 0 ? Parser.KeysDiff(diff) + 1 : 0;
+                                    AllSongs[index].KeysDiff = Parser.KeysDiff(diff);//diff > 0 ? Parser.KeysDiff(diff) + 1 : 0;
                                     break;
                                 case "real_keys":
-                                    Songs[index].ProKeysDiff = Parser.ProKeysDiff(diff);//diff > 0 ? Parser.ProKeysDiff(diff) + 1 : 0;
+                                    AllSongs[index].ProKeysDiff = Parser.ProKeysDiff(diff);//diff > 0 ? Parser.ProKeysDiff(diff) + 1 : 0;
                                     break;
                                 case "real_guitar":
-                                    Songs[index].ProGuitarDiff = Parser.ProGuitarDiff(diff);//diff > 0 ? Parser.ProGuitarDiff(diff) + 1 : 0;
+                                    AllSongs[index].ProGuitarDiff = Parser.ProGuitarDiff(diff);//diff > 0 ? Parser.ProGuitarDiff(diff) + 1 : 0;
                                     break;
                                 case "real_bass":
-                                    Songs[index].ProBassDiff = Parser.ProBassDiff(diff);//diff > 0 ? Parser.ProBassDiff(diff) + 1 : 0;
+                                    AllSongs[index].ProBassDiff = Parser.ProBassDiff(diff);//diff > 0 ? Parser.ProBassDiff(diff) + 1 : 0;
                                     break;
                             }
                         }
@@ -856,11 +856,11 @@ namespace Nautilus
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //song name
                     length = BytesToInt(buffer);
-                    Songs[index].Name = Parser.GetSongName(Encoding.UTF8.GetString(br.ReadBytes(length)));
+                    AllSongs[index].Name = Parser.GetSongName(Encoding.UTF8.GetString(br.ReadBytes(length)));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //artist / band name
                     length = BytesToInt(buffer);
-                    Songs[index].Artist = Parser.GetArtistName(Encoding.UTF8.GetString(br.ReadBytes(length)));
+                    AllSongs[index].Artist = Parser.GetArtistName(Encoding.UTF8.GetString(br.ReadBytes(length)));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //album name
                     length = BytesToInt(buffer);
@@ -875,12 +875,12 @@ namespace Nautilus
                     }
                     else
                     {
-                        Songs[index].Album = Encoding.UTF8.GetString(br.ReadBytes(length));
+                        AllSongs[index].Album = Encoding.UTF8.GetString(br.ReadBytes(length));
                         if (!doBlitzImport)
                         {
                             buffer = Arrange4Bytes(br.ReadBytes(4)); //track number
                             //avoid ridiculous/error numbers
-                            Songs[index].TrackNumber = BytesToInt(buffer) > 100 ? 0 : BytesToInt(buffer);
+                            AllSongs[index].TrackNumber = BytesToInt(buffer) > 100 ? 0 : BytesToInt(buffer);
                         }
                     }
 
@@ -888,13 +888,13 @@ namespace Nautilus
                     {
                         buffer = Arrange4Bytes(br.ReadBytes(4)); //genre
                         length = BytesToInt(buffer);
-                        Songs[index].Genre = Parser.doGenre(Encoding.UTF8.GetString(br.ReadBytes(length)));
+                        AllSongs[index].Genre = Parser.doGenre(Encoding.UTF8.GetString(br.ReadBytes(length)));
 
                         buffer = Arrange4Bytes(br.ReadBytes(4)); //year recorded
-                        Songs[index].YearRecorded = BytesToInt(buffer);
+                        AllSongs[index].YearRecorded = BytesToInt(buffer);
 
                         buffer = Arrange4Bytes(br.ReadBytes(4)); //year released
-                        Songs[index].YearReleased = BytesToInt(buffer);
+                        AllSongs[index].YearReleased = BytesToInt(buffer);
 
                         br.ReadBytes(5); //unknown 5 bytes at end of song
                         continue;
@@ -904,16 +904,16 @@ namespace Nautilus
                     br.ReadBytes(3); //skip unknown stuff
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //year recorded
-                    Songs[index].YearRecorded = 1900 + BytesToInt(buffer);
+                    AllSongs[index].YearRecorded = 1900 + BytesToInt(buffer);
 
                     br.ReadBytes(2); //skip unknown stuff
 
                     buffer = br.ReadBytes(1); //year released
-                    Songs[index].YearReleased = 1900 + BytesToInt(buffer);
+                    AllSongs[index].YearReleased = 1900 + BytesToInt(buffer);
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //genre
                     length = BytesToInt(buffer);
-                    Songs[index].Genre = Parser.doGenre(Encoding.UTF8.GetString(br.ReadBytes(length)));
+                    AllSongs[index].Genre = Parser.doGenre(Encoding.UTF8.GetString(br.ReadBytes(length)));
 
                     br.ReadBytes(8); //skip unknown stuff
 
@@ -931,74 +931,74 @@ namespace Nautilus
                         switch (instrument)
                         {
                             case "guitar":
-                                Songs[index].GuitarDiff = Parser.GuitarDiff(diff);//diff > 0 ? Parser.GuitarDiff(diff) + 1 : 0;
+                                AllSongs[index].GuitarDiff = Parser.GuitarDiff(diff);//diff > 0 ? Parser.GuitarDiff(diff) + 1 : 0;
                                 break;
                             case "drum":
-                                Songs[index].DrumsDiff = Parser.DrumDiff(diff);//diff > 0 ? Parser.DrumDiff(diff) + 1 : 0;
+                                AllSongs[index].DrumsDiff = Parser.DrumDiff(diff);//diff > 0 ? Parser.DrumDiff(diff) + 1 : 0;
                                 break;
                             case "bass":
-                                Songs[index].BassDiff = Parser.BassDiff(diff);//diff > 0 ? Parser.BassDiff(diff) + 1 : 0;
+                                AllSongs[index].BassDiff = Parser.BassDiff(diff);//diff > 0 ? Parser.BassDiff(diff) + 1 : 0;
                                 break;
                             case "vocals":
-                                Songs[index].VocalsDiff = Parser.VocalsDiff(diff);//diff > 0 ? Parser.VocalsDiff(diff) + 1 : 0;
+                                AllSongs[index].VocalsDiff = Parser.VocalsDiff(diff);//diff > 0 ? Parser.VocalsDiff(diff) + 1 : 0;
                                 break;
                             case "band":
-                                Songs[index].BandDiff = Parser.BandDiff(diff); //band is always at least 1
+                                AllSongs[index].BandDiff = Parser.BandDiff(diff); //band is always at least 1
                                 break;
                             case "keys":
-                                Songs[index].KeysDiff = Parser.KeysDiff(diff);//diff > 0 ? Parser.KeysDiff(diff) + 1 : 0;
+                                AllSongs[index].KeysDiff = Parser.KeysDiff(diff);//diff > 0 ? Parser.KeysDiff(diff) + 1 : 0;
                                 break;
                             case "real_keys":
-                                Songs[index].ProKeysDiff = Parser.ProKeysDiff(diff);//diff > 0 ? Parser.ProKeysDiff(diff) + 1 : 0;
+                                AllSongs[index].ProKeysDiff = Parser.ProKeysDiff(diff);//diff > 0 ? Parser.ProKeysDiff(diff) + 1 : 0;
                                 break;
                             case "real_guitar":
-                                Songs[index].ProGuitarDiff = Parser.ProGuitarDiff(diff);//diff > 0 ? Parser.ProGuitarDiff(diff) + 1 : 0;
+                                AllSongs[index].ProGuitarDiff = Parser.ProGuitarDiff(diff);//diff > 0 ? Parser.ProGuitarDiff(diff) + 1 : 0;
                                 break;
                             case "real_bass":
-                                Songs[index].ProBassDiff = Parser.ProBassDiff(diff);//diff > 0 ? Parser.ProBassDiff(diff) + 1 : 0;
+                                AllSongs[index].ProBassDiff = Parser.ProBassDiff(diff);//diff > 0 ? Parser.ProBassDiff(diff) + 1 : 0;
                                 break;
                         }
                     }
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //rating
                     var rating = BytesToInt(buffer);
-                    Songs[index].Rating = rating < 5 && rating > 0 ? rating : 4; //some times rating returns weird numbers
+                    AllSongs[index].Rating = rating < 5 && rating > 0 ? rating : 4; //some times rating returns weird numbers
 
                     br.ReadBytes(2); //skip unknown stuff
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //song scroll speed, skip it
                     Array.Reverse(buffer);
-                    Songs[index].ScrollSpeed = Convert.ToInt16(BitConverter.ToSingle(buffer, 0));
+                    AllSongs[index].ScrollSpeed = Convert.ToInt16(BitConverter.ToSingle(buffer, 0));
 
                     br.ReadBytes(4); //skip unknown stuff
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //bank (vocal percussion)
                     length = BytesToInt(buffer);
-                    Songs[index].PercussionBank = Encoding.UTF8.GetString(br.ReadBytes(length));
+                    AllSongs[index].PercussionBank = Encoding.UTF8.GetString(br.ReadBytes(length));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //drum_bank
                     length = BytesToInt(buffer);
-                    Songs[index].DrumBank = Encoding.UTF8.GetString(br.ReadBytes(length));
+                    AllSongs[index].DrumBank = Encoding.UTF8.GetString(br.ReadBytes(length));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //vocal tonic note
-                    Songs[index].TonicNote = BytesToInt(buffer);
+                    AllSongs[index].TonicNote = BytesToInt(buffer);
                     
                     br.ReadBytes(4); //skip unknown stuff
                     
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //song tonality
-                    Songs[index].Tonality = BytesToInt(buffer);
+                    AllSongs[index].Tonality = BytesToInt(buffer);
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //song length
-                    Songs[index].Length = BytesToInt(buffer);
+                    AllSongs[index].Length = BytesToInt(buffer);
 
                     buffer = br.ReadBytes(2); //master status
-                    Songs[index].Master = (buffer[0] == 01 && buffer[1] == 01); //master is always 01 01, cover is 00 00
+                    AllSongs[index].Master = (buffer[0] == 01 && buffer[1] == 01); //master is always 01 01, cover is 00 00
 
                     br.ReadBytes(isWiiFile ? 6 : 5); //skip unknown stuff
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //vocal gender
                     length = BytesToInt(buffer);
-                    Songs[index].Gender = Encoding.UTF8.GetString(br.ReadBytes(length)).ToLowerInvariant().Contains("female") ? "Female" : "Male";
+                    AllSongs[index].Gender = Encoding.UTF8.GetString(br.ReadBytes(length)).ToLowerInvariant().Contains("female") ? "Female" : "Male";
 
                     br.ReadBytes(24); //skip guitar tuning;
                     br.ReadBytes(16); //skip bass tuning;
@@ -1829,6 +1829,10 @@ namespace Nautilus
             ActiveSetlistPath = file;
 
             Songs = GrabSongsFromSetlist(file, true);
+            for (var i = 0; i < Songs.Count; i++)
+            {
+                Songs[i].ListIndex = i;//need to do this to properly recall the song details due to virtual mode
+            }
             AllSongs = Songs;
             SortSongs(lastSortedColumn);
 
@@ -3152,43 +3156,43 @@ namespace Nautilus
             int index;
             if (isNewSong)
             {
-                Songs.Add(new SongData());
-                index = Songs.Count - 1;
-
+                AllSongs.Add(new SongData());
+                index = AllSongs.Count - 1;
+                AllSongs[index].ListIndex = index;
                 //need some sort of value, only do this with new entries, keep old values for existing entries
-                Songs[index].ShortName = txtInfoSong.Text.Replace(" ", "").Replace("'", "").ToLowerInvariant();
-                Songs[index].SongId = 1234567890;
+                AllSongs[index].ShortName = txtInfoSong.Text.Replace(" ", "").Replace("'", "").ToLowerInvariant();
+                AllSongs[index].SongId = 1234567890;
             }
             else if (lstSongs.FocusedItem != null)
             {
-                index = (int)(lstSongs.FocusedItem.Tag);
+                index = Convert.ToInt16(lstSongs.Items[lstSongs.SelectedIndices[0]].SubItems[22].Text); //ListIndex
             }
             else
             {
                 //wtf are we here?
                 return;
             }
-            Songs[index].Name = txtInfoSong.Text;
-            Songs[index].Artist = txtInfoArtist.Text;
-            Songs[index].Album = txtInfoAlbum.Text;
-            Songs[index].VocalParts = cboVocals.SelectedIndex;
-            Songs[index].YearRecorded = (int)numRecorded.Value;
-            Songs[index].YearReleased = (int)numReleased.Value;
-            Songs[index].TrackNumber = (int)numTrack.Value;
+            AllSongs[index].Name = txtInfoSong.Text;
+            AllSongs[index].Artist = txtInfoArtist.Text;
+            AllSongs[index].Album = txtInfoAlbum.Text;
+            AllSongs[index].VocalParts = cboVocals.SelectedIndex;
+            AllSongs[index].YearRecorded = (int)numRecorded.Value;
+            AllSongs[index].YearReleased = (int)numReleased.Value;
+            AllSongs[index].TrackNumber = (int)numTrack.Value;
             string source;
             switch (cboSource.SelectedIndex)
             {
                     //adding the ## in front of the shortname allows us to bypass the check for RBN1 and RBN2
                 case 0:
                     source = "rb1";
-                    Songs[index].ShortName = "##" + Songs[index].ShortName.Replace("##", "");
+                    AllSongs[index].ShortName = "##" + Songs[index].ShortName.Replace("##", "");
                     break;
                 case 1:
                     source = "rb1_dlc";
                     break;
                 case 2:
                     source = "rb2";
-                    Songs[index].ShortName = "##" + Songs[index].ShortName.Replace("##", "");
+                    AllSongs[index].ShortName = "##" + Songs[index].ShortName.Replace("##", "");
                     break;
                 case 3:
                     source = "rb2_dlc";
@@ -3233,12 +3237,12 @@ namespace Nautilus
                     source = "custom";
                     break;
             }
-            Songs[index].Source = source;
-            Songs[index].Rating = cboRating.SelectedIndex + 1;
-            Songs[index].Genre = cboInfoGenre.Text;
-            Songs[index].Gender = cboGender.SelectedIndex == 0 ? "Male" : (cboGender.SelectedIndex == 1 ? "Female" : "N/A");
-            Songs[index].Master = chkMaster.Checked;
-            var time = Songs[index].Length;
+            AllSongs[index].Source = source;
+            AllSongs[index].Rating = cboRating.SelectedIndex + 1;
+            AllSongs[index].Genre = cboInfoGenre.Text;
+            AllSongs[index].Gender = cboGender.SelectedIndex == 0 ? "Male" : (cboGender.SelectedIndex == 1 ? "Female" : "N/A");
+            AllSongs[index].Master = chkMaster.Checked;
+            var time = AllSongs[index].Length;
             try
             {
                 var hours = 0;
@@ -3258,21 +3262,21 @@ namespace Nautilus
                     minutes = Convert.ToInt16(txtDuration.Text.Substring(0, i));
                     seconds = Convert.ToInt16(txtDuration.Text.Substring(i + 1, txtDuration.Text.Length - (i + 1)));
                 }
-                Songs[index].Length = (((hours * 60) + minutes) * 60000) + (seconds * 1000);
+                AllSongs[index].Length = (((hours * 60) + minutes) * 60000) + (seconds * 1000);
             }
             catch (Exception)
             {
-                Songs[index].Length = time;
+                AllSongs[index].Length = time;
             }
-            Songs[index].DrumsDiff = Tools.GetDiffTag(diffDrums);
-            Songs[index].BassDiff = Tools.GetDiffTag(diffBass);
-            Songs[index].ProBassDiff = Tools.GetDiffTag(diffProBass);
-            Songs[index].GuitarDiff = Tools.GetDiffTag(diffGuitar);
-            Songs[index].ProGuitarDiff = Tools.GetDiffTag(diffProGuitar);
-            Songs[index].KeysDiff = Tools.GetDiffTag(diffKeys);
-            Songs[index].ProKeysDiff = Tools.GetDiffTag(diffProKeys);
-            Songs[index].VocalsDiff = Tools.GetDiffTag(diffVocals);
-            Songs[index].BandDiff = Tools.GetDiffTag(diffBand);
+            AllSongs[index].DrumsDiff = Tools.GetDiffTag(diffDrums);
+            AllSongs[index].BassDiff = Tools.GetDiffTag(diffBass);
+            AllSongs[index].ProBassDiff = Tools.GetDiffTag(diffProBass);
+            AllSongs[index].GuitarDiff = Tools.GetDiffTag(diffGuitar);
+            AllSongs[index].ProGuitarDiff = Tools.GetDiffTag(diffProGuitar);
+            AllSongs[index].KeysDiff = Tools.GetDiffTag(diffKeys);
+            AllSongs[index].ProKeysDiff = Tools.GetDiffTag(diffProKeys);
+            AllSongs[index].VocalsDiff = Tools.GetDiffTag(diffVocals);
+            AllSongs[index].BandDiff = Tools.GetDiffTag(diffBand);
             ClearDetailedInfo();
             SaveSetlist(ActiveSetlistPath);
             LoadSongs();
@@ -3418,7 +3422,25 @@ namespace Nautilus
             var indices = lstSongs.SelectedIndices.Cast<int>().OrderByDescending(i => i).ToList();
 
             // Create confirmation message
-            var to_delete = indices.Aggregate("", (current, index) => current + Songs[index].Artist + " - " + Songs[index].Name + "\n");
+            //var to_delete = indices.Aggregate("", (current, index) => current + AllSongs[index].Artist + " - " + AllSongs[index].Name + "\n");
+            var to_delete = "";
+            foreach (var index in indices)
+            {
+                if (index >= 0 && index < AllSongs.Count)
+                {
+                    int i = -1;
+                    try
+                    {
+                        i = Convert.ToInt16(lstSongs.Items[index].SubItems[22].Text); //ListIndex
+                    }
+                    catch { }
+
+                    if (i >= 0)
+                    {
+                        to_delete += $"{AllSongs[i].Artist} - {AllSongs[i].Name}\n" ;
+                    }
+                }
+            }
 
             if (confirmBeforeDeleting.Checked)
             {
@@ -3437,16 +3459,32 @@ namespace Nautilus
             // Remove songs from the list in reverse order (prevents index shifting issues)
             foreach (var index in indices)
             {
-                if (index >= 0 && index < Songs.Count)
-                    Songs.RemoveAt(index);
+                if (index >= 0 && index < AllSongs.Count)
+                {
+                    int i = -1;
+                    try
+                    {
+                        i = Convert.ToInt16(lstSongs.Items[index].SubItems[22].Text); //ListIndex
+                    }
+                    catch { }
+
+                    if (i >= 0)
+                    {
+                        AllSongs.RemoveAt(i);
+                    }
+                }
             }
 
             // Update ListView
-            lstSongs.BeginUpdate();
+            /*lstSongs.BeginUpdate();
             lstSongs.VirtualListSize = Songs.Count;
             lstSongs.EndUpdate();
-            lstSongs.Invalidate();
+            lstSongs.Invalidate();*/
 
+            for (var i = 0; i < AllSongs.Count; i++)
+            {
+                AllSongs[i].ListIndex = i;
+            }
             SaveSetlist(ActiveSetlistPath);
             LoadSongs();
         }
@@ -4610,6 +4648,7 @@ namespace Nautilus
             foreach (var song in from song in newSongs let exists = AllSongs.Any(s => s.Name == song.Name && s.Artist == song.Artist) where (!exists || song.ShortName == "giveitaway2" || song.ShortName == "spoonman2") select song)
             {
                 AllSongs.Add(song);
+                AllSongs[AllSongs.Count - 1].ListIndex = AllSongs.Count - 1;
                 uniqueSongs.Add(song);
             }
             if (!quiet)
@@ -5147,7 +5186,7 @@ namespace Nautilus
                 modeRB3.Checked ? DoDifficulty(song.ProGuitarDiff) : "N/A",
                 modeRB3.Checked ? DoDifficulty(song.ProBassDiff) : "N/A",
                 modeRB3.Checked ? DoDifficulty(song.ProKeysDiff) : "N/A",
-                song.SongLink
+                song.SongLink, song.ListIndex.ToString(CultureInfo.InvariantCulture),
             });
         }
 
@@ -5162,7 +5201,7 @@ namespace Nautilus
 
             try
             {
-                string apiKey = "AIzaSyCGeH3j0am3-rFCZ8egCcNOldXJZ53tjQ0"; // Replace with your API key
+                string apiKey = "AIzaSyCGeH3j0am3-rFCZ8egCcNOldXJZ53tjQ0"; // Replace with your own API key
                 string query = Uri.EscapeDataString($"{artist} {title} music");
                 string url = $"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q={query}&key={apiKey}";
 
