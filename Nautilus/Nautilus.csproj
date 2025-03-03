@@ -259,6 +259,12 @@
     <Compile Include="SngLib\SngFile.cs" />
     <Compile Include="SngLib\SngSerializer.cs" />
     <Compile Include="SngLib\SongLib.cs" />
+    <Compile Include="Wine.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Wine.Designer.cs">
+      <DependentUpon>Wine.cs</DependentUpon>
+    </Compile>
     <Compile Include="yargSNG.cs" />
     <Compile Include="Updater.cs">
       <SubType>Form</SubType>
@@ -667,6 +673,9 @@
     <EmbeddedResource Include="WiiConverter.resx">
       <DependentUpon>WiiConverter.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Wine.resx">
+      <DependentUpon>Wine.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Worker.resx">
       <DependentUpon>Worker.cs</DependentUpon>
     </EmbeddedResource>
@@ -699,6 +708,7 @@
     <None Include="Resources\youtube.png" />
     <None Include="Resources\lyrics.png" />
     <None Include="Resources\lyrics1.png" />
+    <None Include="Resources\wine.png" />
     <Content Include="submarine.ico" />
     <None Include="bin\Debug\res\thumbs\GH3.jpg" />
     <None Include="bin\Debug\res\thumbs\GH4WT.jpg" />

@@ -473,6 +473,16 @@ namespace Nautilus.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap wine {
+            get {
+                object obj = ResourceManager.GetObject("wine", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap working {
             get {
                 object obj = ResourceManager.GetObject("working", resourceCulture);

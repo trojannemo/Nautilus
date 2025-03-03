@@ -909,7 +909,7 @@ namespace Nautilus
                 if (!chkSongID.Checked) return;
                 Log("A total of " + counter + " song IDs were merged into the existing DTA file");
                 Log("Beginning batch replacing of song IDs with unique numeric values");
-                doBatchReplace(MergeDTA, true);
+                doIDReplace(MergeDTA, true);
             }
             catch (Exception ex)
             {
@@ -1109,10 +1109,10 @@ namespace Nautilus
             };
             if (ofd.ShowDialog() != DialogResult.OK) return;
             if (string.IsNullOrWhiteSpace(ofd.FileName)) return;
-            doBatchReplace(ofd.FileName);
+            doIDReplace(ofd.FileName);
         }
         
-        private bool doBatchReplace(string dta, bool hide_message = false, bool doLinos = false)
+        private bool doIDReplace(string dta, bool hide_message = false)
         {
             var counter = 0;
             try
@@ -1137,19 +1137,13 @@ namespace Nautilus
                             sw.WriteLine(newline);
                             var corrector = new SongIDCorrector();
                             var newID = corrector.ShortnameToSongID(Parser.GetSongID(line));
-                            newline = "   ('song_id' " + newID + ")";//GetNumericID() + ")";
-                            Log("Song has alphanumeric ID: " + origID + " - replacing with numeric ID: " + newID);
+                            newline = "   ('song_id' " + newID + ")";
+                            Log($"Song has alphanumeric ID: {origID} - replacing with numeric ID: {newID}");
                             counter++;                            
                         }
                         else
                         {
-                            Log("This song already has a numeric ID: " + origID + " ... leaving it alone");
-                            if (doLinos)
-                            {
-                                sw.Dispose();
-                                Tools.DeleteFile(dta);
-                                return false;
-                            }
+                            Log($"This song already has a numeric ID: {origID} - leaving the song ID alone");                            
                         }
                     }
                     if (newline.Trim() != "")
@@ -1355,7 +1349,7 @@ namespace Nautilus
             }
             var mogg = folderPath + "\\" + internalName + ".mogg";
             Tools.DeleteFile(mogg);
-            if (backgroundWorker1.CancellationPending)
+            if (backgroundWorker1.CancellationPending || backgroundWorker2.CancellationPending)
             {
                 xCON.CloseIO();
                 return false;
@@ -1400,7 +1394,7 @@ namespace Nautilus
                 }
                 midi = folderPath + "\\" + internalName + ".mid";
                 Tools.DeleteFile(midi);
-                if (backgroundWorker1.CancellationPending)
+                if (backgroundWorker1.CancellationPending || backgroundWorker2.CancellationPending)
                 {
                     xCON.CloseIO();
                     return false;
@@ -1813,15 +1807,7 @@ namespace Nautilus
                 }
             }
 
-            if (!doBatchReplace(dta, true, true))
-            {
-                Tools.DeleteFile(backup);
-                Tools.DeleteFile(mogg);
-                Tools.DeleteFile(dta);
-                Tools.DeleteFile(midi);                
-                xCON.CloseIO();
-                return false;
-            }
+            doIDReplace(dta, true);
 
             if (editedMogg)
             {
