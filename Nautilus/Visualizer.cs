@@ -178,10 +178,20 @@ namespace Nautilus
         public Visualizer(Color ButtonBackColor, Color ButtonTextColor, string con)
         {
             InitializeComponent();
-            Core.Initialize(); // Initializes LibVLC
-            this.SetStyle(ControlStyles.UserMouse, true); // Ensure WinForms handles mouse input
+            Core.Initialize();
+            this.SetStyle(ControlStyles.UserMouse, true);
 
-            _libVLC = new LibVLC();
+            Core.Initialize();
+
+            var options = new[]
+            {
+            "--vout=d3d11", // Ensure Direct3D 11 is used if available
+            "--no-audio", // Disable audio processing
+            "--no-sub-autodetect-file", // Skip subtitle loading
+            "--no-video-title-show" // Hide overlay text on videos
+        };
+
+            _libVLC = new LibVLC(options);
             _mediaPlayer = new MediaPlayer(_libVLC);
             _mediaPlayer.Volume = 0; //always muted                     
 
