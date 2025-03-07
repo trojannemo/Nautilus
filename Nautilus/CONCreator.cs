@@ -405,6 +405,10 @@ namespace Nautilus
                     xSession.HeaderData.TitleID = 0x373307D9;
                     title = "Dance Central 3";
                     break;
+                case 14:
+                    xSession.HeaderData.TitleID = 0x5841122D;
+                    title = "Rock Band Blitz";
+                    break;
             }
             xSession.HeaderData.Publisher = "";
             xSession.HeaderData.Title_Package = title;
@@ -514,6 +518,10 @@ namespace Nautilus
                     xSession.HeaderData.TitleID = 0x373307D9; //Dance Central 3
                     picContent.Image = Resources.dc3;
                     radioLIVE.Checked = true;
+                    break;
+                case 14:
+                    xSession.HeaderData.TitleID = 0x5841122D; //Rock Band Blitz
+                    picContent.Image = Resources.RBB;
                     break;
 
             }

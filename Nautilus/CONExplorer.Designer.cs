@@ -309,7 +309,8 @@
             "Dance Central 2",
             "Dance Central 3",
             "DJ Hero",
-            "DJ Hero 2"});
+            "DJ Hero 2",
+            "Rock Band Blitz"});
             this.cboGameID.Location = new System.Drawing.Point(71, 21);
             this.cboGameID.Name = "cboGameID";
             this.cboGameID.Size = new System.Drawing.Size(160, 21);
