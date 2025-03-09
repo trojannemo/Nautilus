@@ -560,7 +560,7 @@ namespace Nautilus
                 gifTmr.Enabled = true;
                 File.Create(k50);
             }*/
-            if (Tools.IsRunningInWine() && !File.Exists(Application.StartupPath + "\\bin\\wine"))
+            if (Tools.IsRunningOnWine() && !File.Exists(Application.StartupPath + "\\bin\\wine"))
             {
                 var wine = new Wine();
                 wine.Show();

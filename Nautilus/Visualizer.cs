@@ -303,25 +303,27 @@ namespace Nautilus
             }
         }
 
-        private static bool isFontAvailable(string FontName)
+        private bool isFontAvailable(string[] FontNames, bool isMyriad = false)
         {
             try
             {
-                var fontName = FontName;
-                const float fontSize = 12;
-                using (var fontTester = new Font(
-                        fontName,
-                        fontSize,
-                        FontStyle.Regular,
-                        GraphicsUnit.Pixel))
+                foreach (var fontName in FontNames)
                 {
-                    return fontTester.Name == fontName;
+                    using (var fontTester = new Font(fontName, 12, FontStyle.Regular, GraphicsUnit.Pixel))
+                    {
+                        if (fontTester.Name == fontName)
+                        {
+                            if (isMyriad)
+                            {
+                                ActiveFont = fontName;
+                            }
+                            return true;
+                        }                            
+                    }
                 }
             }
-            catch (Exception)
-            {
-                return false;
-            }
+            catch { }
+            return false;
         }
 
         public void ReadMidi(string midiFile)
@@ -3454,14 +3456,15 @@ namespace Nautilus
         {
             toolTip1.SetToolTip(SplitJoinArtist,SplitJoinArtist.Text == "SPLIT"? "Click here to split the artist / band name into two lines": "Click here to join the two lines into one");
         }
-        
+
         private void CheckLoadFonts()
         {
-            calibriToolStrip.Enabled = isFontAvailable("Calibri");
-            tahomaToolStrip.Enabled = isFontAvailable("Tahoma");
-            timesNewRomanToolStrip.Enabled = isFontAvailable("Times New Roman");
-            verdanaToolStrip.Enabled = isFontAvailable("Verdana");
-            segoeUIToolStrip.Enabled = isFontAvailable("Segoe UI");
+            calibriToolStrip.Enabled = isFontAvailable(new string[] { "Calibri" });
+            tahomaToolStrip.Enabled = isFontAvailable(new string[] { "Tahoma" });
+            timesNewRomanToolStrip.Enabled = isFontAvailable(new string[] { "Times New Roman" });
+            verdanaToolStrip.Enabled = isFontAvailable(new string[] { "Verdana" });
+            segoeUIToolStrip.Enabled = isFontAvailable(new string[] { "Segoe UI" });
+            myriadProToolStrip.Enabled = isFontAvailable(new string[] { "Myriad Pro", "Myriad Pro Bold", "MyriadPro-Bold" }, true);
 
             if (File.Exists(Application.StartupPath + "\\res\\font.txt"))
             {
@@ -3469,12 +3472,11 @@ namespace Nautilus
                 var fontName = Tools.GetConfigString(sr.ReadLine()).Replace("\"","");
                 sr.Dispose();
 
-                if (isFontAvailable(fontName))
+                if (isFontAvailable(new string[] { fontName }))
                 {
                     customFontToolStrip.Text = "Custom Font: " + fontName;
                     customFontToolStrip.Visible = true;
                     customFontToolStrip.Checked = true;
-                    //ActiveFont = fontName;
                     CustomFontName = fontName;
                 }
                 else
@@ -3488,6 +3490,8 @@ namespace Nautilus
             switch (ActiveFont)
             {
                 case "Myriad Pro":
+                case "Myriad Pro Bold":
+                case "MyriadPro-Bold":
                     myriadProToolStrip.Checked = true;
                     break;
                 case "Calibri":
@@ -4018,9 +4022,9 @@ namespace Nautilus
 
         private void myriadProToolStrip_Click(object sender, EventArgs e)
         {
-            if (isFontAvailable("Myriad Pro"))
+            if (isFontAvailable(new string[] { "Myriad Pro", "Myriad Pro Bold", "MyriadPro-Bold" }, true))
             {
-                ActiveFont = "Myriad Pro";
+                //ActiveFont = "Myriad Pro";
                 UncheckAllFonts((ToolStripMenuItem)sender);
             }
             else
@@ -5307,7 +5311,9 @@ namespace Nautilus
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error preparing CH mixer: " + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var error = $"Error preparing CH mixer\nError:\n{ex.Message}\nStack Trace:\n{ex.StackTrace}";
+                Clipboard.SetText(error);
+                MessageBox.Show(error, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }            
             return true;

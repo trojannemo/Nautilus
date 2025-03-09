@@ -1269,7 +1269,7 @@ namespace Nautilus
 
             if (File.Exists(ext_file[0]))
             {
-                if (Tools.IsRunningInWine())
+                if (Tools.IsRunningOnWine())
                 {
                     // Running under WINE - use Save File Dialog instead of clipboard
                     foreach (var filePath in ext_file)

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Windows.Forms;
 using BinaryEx;
 using Nautilus.Cysharp.Collections;
 
@@ -47,7 +48,7 @@ namespace Nautilus.Sng
             }
         }
 
-        private static void DoMaskData(Span<byte> data, long filePos)
+        /*private static void DoMaskData(Span<byte> data, long filePos)
         {
             int vecElements = Vector<byte>.Count;
             long totalVectorFilePos = (long)Math.Ceiling(filePos / (double)vecElements) * vecElements;
@@ -91,23 +92,107 @@ namespace Nautilus.Sng
                 data[i] = (byte)(data[i] ^ loopLookup[endOfVecFilePos & 0xFF]);
             }
         }
+        */
+
+        private static void DoMaskData(Span<byte> data, long filePos)
+        {
+            try
+            {
+                int vecElements = Vector<byte>.Count;
+                long totalVectorFilePos = (long)Math.Ceiling(filePos / (double)vecElements) * vecElements;
+                int nonAlignedBytes = (int)(totalVectorFilePos - filePos);
+
+                //MessageBox.Show($"Debug: Starting DoMaskData\nfilePos={filePos}\ndata.Length={data.Length}\nvecElements={vecElements}\ntotalVectorFilePos={totalVectorFilePos}\nnonAlignedBytes={nonAlignedBytes}");
+
+                // Step 1: Process non-aligned bytes
+                for (int i = 0; i < nonAlignedBytes; ++i, ++filePos)
+                {
+                    if (i >= data.Length)
+                    {
+                        MessageBox.Show($"Error: Out-of-bounds access in non-aligned loop!\nIndex={i}, data.Length={data.Length}",
+                            "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    data[i] = (byte)(data[i] ^ loopLookup[filePos & 0xFF]);
+                }
+
+                int remainingBytes = data.Length - nonAlignedBytes;
+                int startPos = nonAlignedBytes;
+
+                int lastByteIndex = startPos + remainingBytes;
+                long endOfVecFilePos = filePos;
+
+                // ❌ SKIP VECTOR PROCESSING – Replace with Simple XOR
+                for (int i = startPos; i < lastByteIndex; ++i, ++endOfVecFilePos)
+                {
+                    if (i >= data.Length)
+                    {
+                        MessageBox.Show($"Error: Out-of-bounds access in final loop!\nIndex={i}, data.Length={data.Length}",
+                            "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    data[i] = (byte)(data[i] ^ loopLookup[endOfVecFilePos & 0xFF]);
+                }
+
+                //MessageBox.Show("Debug: DoMaskData completed successfully without vector processing!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error in DoMaskData!\nException: {ex}",
+                    "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
         /// <summary>
         /// An optimized Masking routine using Vector<byte> objects along with some pre-computation
         /// This is about 5-10x faster than the standard implementation on coreclr, in unity/mono it's slower
-        /// </summary>
+        /// </summary>      
         private static void MaskData(NativeByteArray data, byte[] seed)
         {
             if (dataIndexVectors == null)
             {
-                // Precompute the lookup table for xormask
                 InitializeDataIndexVectors(seed);
             }
+
+            if (dataIndexVectors == null) // Double-check initialization
+            {
+                MessageBox.Show("Error: dataIndexVectors is NULL after initialization!", "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             long filePos = 0;
+
             foreach (var segment in data.AsMemoryList())
             {
+                if (segment.Length == 0)
+                {
+                    MessageBox.Show("Error: Empty segment found in AsMemoryList()!", "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 var sp = segment.Span;
-                DoMaskData(sp, filePos);
+
+                // Check for filePos issues
+                if (filePos < 0 || filePos >= data.Length)
+                {
+                    MessageBox.Show($"Invalid filePos={filePos}, data.Length={data.Length}", "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                try
+                {
+                    DoMaskData(sp, filePos);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error in DoMaskData!\nfilePos={filePos}, sp.Length={sp.Length}\nException: {ex}",
+                        "Critical Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 filePos += sp.Length;
             }
         }
@@ -123,7 +208,7 @@ namespace Nautilus.Sng
         public static SngFile LoadSngFile(Stream stream)
         {
             using (var fs = stream)
-            {// ✅ Use the provided stream (either FileStream or MemoryStream)
+            {// Use the provided stream (either FileStream or MemoryStream)
                 return LoadSngFileInternal(fs);
             }
         }
@@ -159,7 +244,7 @@ namespace Nautilus.Sng
 
                 EnsureValidLength(fs, (ulong)keyLen);
                 var keyBytes = new byte[keyLen];
-                fs.Read(keyBytes, 0, keyBytes.Length); // ✅ FIXED
+                fs.Read(keyBytes, 0, keyBytes.Length);
                 string key = Encoding.UTF8.GetString(keyBytes);
 
                 int valueLen = fs.ReadInt32LE();
@@ -168,7 +253,7 @@ namespace Nautilus.Sng
                     throw new FormatException("Metadata Value length value cannot be negative");
 
                 var valueBytes = new byte[valueLen];
-                fs.Read(valueBytes, 0, valueBytes.Length); // ✅ FIXED
+                fs.Read(valueBytes, 0, valueBytes.Length);
                 string value = Encoding.UTF8.GetString(valueBytes);
 
                 sngFile.SetString(key, value);
@@ -188,7 +273,7 @@ namespace Nautilus.Sng
                     throw new FormatException("File name length value cannot be negative");
 
                 var fileNameBytes = new byte[fileNameLength];
-                fs.Read(fileNameBytes, 0, fileNameBytes.Length); // ✅ FIXED
+                fs.Read(fileNameBytes, 0, fileNameBytes.Length);
                 string fileName = Encoding.UTF8.GetString(fileNameBytes);
 
                 ulong contentsLen = fs.ReadUInt64LE();
@@ -214,7 +299,7 @@ namespace Nautilus.Sng
                     fs.Seek((long)pos, SeekOrigin.Begin);
 
                 var contents = new NativeByteArray((long)size, skipZeroClear: true);
-                fs.ReadToNativeArray(contents, (long)size); // ✅ FIXED (Assumes `ReadToNativeArray` is correct)
+                fs.ReadToNativeArray(contents, (long)size);
 
                 // Unmask data
                 MaskData(contents, sngFile.XorMask);
@@ -233,7 +318,7 @@ namespace Nautilus.Sng
             {
                 // Read header
                 byte[] identifier = new byte[6];
-                fs.Read(identifier, 0, identifier.Length); // ✅ FIXED
+                fs.Read(identifier, 0, identifier.Length);
 
                 if (!FileIdentifierBytes.SequenceEqual(identifier))
                     throw new FormatException("Invalid SNG file identifier");
@@ -243,7 +328,7 @@ namespace Nautilus.Sng
                     Version = fs.ReadUInt32LE(),
                     XorMask = new byte[16]
                 };
-                fs.Read(sngFile.XorMask, 0, sngFile.XorMask.Length); // ✅ FIXED
+                fs.Read(sngFile.XorMask, 0, sngFile.XorMask.Length);
 
                 if (sngFile.Version != SngFile.CurrentVersion)
                     throw new NotSupportedException("Unsupported SNG file version");
@@ -260,7 +345,7 @@ namespace Nautilus.Sng
 
                     EnsureValidLength(fs, (ulong)keyLen);
                     var keyBytes = new byte[keyLen];
-                    fs.Read(keyBytes, 0, keyBytes.Length); // ✅ FIXED
+                    fs.Read(keyBytes, 0, keyBytes.Length); 
                     string key = Encoding.UTF8.GetString(keyBytes);
 
                     int valueLen = fs.ReadInt32LE();
@@ -269,7 +354,7 @@ namespace Nautilus.Sng
                         throw new FormatException("Metadata Value length value cannot be negative");
 
                     var valueBytes = new byte[valueLen];
-                    fs.Read(valueBytes, 0, valueBytes.Length); // ✅ FIXED
+                    fs.Read(valueBytes, 0, valueBytes.Length);
                     string value = Encoding.UTF8.GetString(valueBytes);
 
                     sngFile.SetString(key, value);
@@ -289,7 +374,7 @@ namespace Nautilus.Sng
                         throw new FormatException("File name length value cannot be negative");
 
                     var fileNameBytes = new byte[fileNameLength];
-                    fs.Read(fileNameBytes, 0, fileNameBytes.Length); // ✅ FIXED
+                    fs.Read(fileNameBytes, 0, fileNameBytes.Length);
                     string fileName = Encoding.UTF8.GetString(fileNameBytes);
 
                     ulong contentsLen = fs.ReadUInt64LE();
@@ -315,7 +400,7 @@ namespace Nautilus.Sng
                         fs.Seek((long)pos, SeekOrigin.Begin);
 
                     var contents = new NativeByteArray((long)size, skipZeroClear: true);
-                    fs.ReadToNativeArray(contents, (long)size); // ✅ FIXED (Assumes `ReadToNativeArray` is correct)
+                    fs.ReadToNativeArray(contents, (long)size); 
 
                     // Unmask data
                     MaskData(contents, sngFile.XorMask);

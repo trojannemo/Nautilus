@@ -2711,8 +2711,16 @@ namespace Nautilus
         /// <summary>
         /// Detects if the application is running under WINE.
         /// </summary>
-        public bool IsRunningInWine()
+        public bool IsRunningOnWine()
         {
+            // Primary check using WINE environment variables
+            if (Environment.GetEnvironmentVariable("WINELOADER") != null ||
+                Environment.GetEnvironmentVariable("WINEPREFIX") != null)
+            {
+                return true;
+            }
+
+            // Secondary check using Registry (fallback)
             try
             {
                 var wineKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Wine");
@@ -3168,7 +3176,9 @@ namespace Nautilus
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error decoding that file:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var error = $"Error decoding that file\nError:\n{ex.Message}\nStack Trace:\n{ex.StackTrace}";
+                Clipboard.SetText(error);
+                MessageBox.Show(error, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }       
 
