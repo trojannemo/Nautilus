@@ -257,6 +257,9 @@ namespace Nautilus
                 case 0x4156087F:
                     cboGameID.SelectedIndex = 15; //DJ Hero 2
                     break;
+                case 0x5841122D:
+                    cboGameID.SelectedIndex = 16; //Rock Band Blitz
+                    break;
                 default:
                     cboGameID.Items.Add("Unknown - " + xPackage.Header.TitleID);
                     cboGameID.SelectedIndex = 16;
@@ -925,6 +928,11 @@ namespace Nautilus
                     xPackage.Header.TitleID = 0x4156087F;
                     picContent.Image = Resources.djh2;
                     title = "DJ Hero 2";
+                    break;
+                case 16:
+                    xPackage.Header.TitleID = 0x5841122D;
+                    picContent.Image = Resources.RBB;
+                    title = "Rock Band Blitz";
                     break;
             }
             xPackage.Header.Title_Package = title; 

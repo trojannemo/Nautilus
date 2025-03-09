@@ -314,7 +314,8 @@
             "41560883 - Guitar Hero: Warriors of Rock",
             "545607D3 - Dance Central",
             "373307D2 - Dance Central 2",
-            "373307D9 - Dance Central 3"});
+            "373307D9 - Dance Central 3",
+            "5841122D - Rock Band Blitz"});
             this.cboGameID.Location = new System.Drawing.Point(92, 9);
             this.cboGameID.Name = "cboGameID";
             this.cboGameID.Size = new System.Drawing.Size(221, 21);
