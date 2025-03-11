@@ -6,6 +6,68 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+v5.4.2
+FRAMEWORK
+- Downgraded from .NET Framework 4.8.1 to .NET Framework v.4.8 for compatibility for Windows 7 users without having to manually modify the .exe.config file
+
+SNG FILE PROCESSING (this affects any Tool that interacts with Clone Hero SNG files or YARG YARGSONG files)
+- Removed BinarEx as an external library and integrated the code directly into Nautilus to avoid a problem for Linux on WINE users - thanks to mdsitton for the library and to Oznogon for all the WINE troubleshooting help
+
+VISUALIZER
+- Modified code for loading the default Myriad Pro Bold font that apparently wasn't working well for older Windows versions - still not working well for WINE users please let me know if you find a solution
+
+CON EXPLORER
+- Rock Band Blitz is now an option thanks to contribution from InvoxiPlayGames
+
+CON CREATOR
+- Rock Band Blitz is now an option thanks to contribution from InvoxiPlayGames
+
+SAVE SCORES VIEWER v2.4 (Thanks be to StackOverflow0x!)
+- Fixes issue that was destroying all pro trainer progress if you interacted with it
+
+MILOMOD v1.8f (Thanks be to StackOverflow0x!)
+- Minor fix for stability
+
+---
+
+v5.4.1
+
+SNG FILE PROCESSING (this affects any Tool that interacts with Clone Hero SNG files or YARG YARGSONG files)
+- Integrated source code of SNG File Format library right into Nautilus so we can handle SNG files natively without needing to call the external application sngCLI - this also gives me more control of how to process SNG files, which in turns means that the conversion from YARGSONG to extracted folder now happens in one go without needing an intermediary SNG file on disk - thanks to mdsitton for the library
+- Eliminating sngCLI should also fix one more "Nautilus on Linux using WINE" issue - let me know!
+
+VOLUME NORMALIZER (thanks be to Sean!)
+- Fixed culture problems
+- Added more logging to Verbose Output
+- Fixed an issue with DTA writing
+
+VISUALIZER
+- Implemented video playback for Clone Hero style song formats (folder/sng files/yargsong files) - supports background.avi, video.mp4, video.webm, bg.mp4 and bg.webm - if your song has a video background it'll play instead of showing the album art - click on it to enlarge it - click on it to return it to smaller size - you can disable playback on the CH Options menu at the top
+- Now reads video_start_time value in song.ini files that have it
+- Improved reading of custom colors for Clone Hero charter name
+- Now lets you click on the author name to search for their songs on RhythmVerse - only works for single authors, not multi author collaborations
+
+SETLIST MANAGER
+- Fixed deleting songs from the Setlist, where it wouldn't actually do anything after the v5.4.0 update
+- Fixed editing songs from the Setlist, where it would crash after the v5.4.0 update
+- Fixed songcache not importing correctly after the v5.4.0 update
+
+QUICK PACK EDITOR
+- Added (or added back??? who knows!) option to dePACK a pack songs.dta file into component DTA files (useful for PS3 peeps)
+- Added check so if the programming code to hide the pack from Rock Band 3 (introduced in Pack Creator recently) is found, it is not kept as part of the dePACKed DTA files
+
+CON EXPLORER
+- Added work-around for users running Nautilus on Linux using WINE who found the copy buttons would not work for them - let me know if this is an improvement
+
+PS3 CONVERTER
+- Fixed bug where when using the Batch PS3 Fixer if the song already had a numeric ID, it wouldn't save the edits to the mogg file
+
+MAIN FORM
+- Minor change but should eliminate a crash for users running Nautilus on Linux using WINE
+- Fixed long-standing bug that would sometimes open Nautilus only showing a tiny portion of the screen - thanks to jnack for finally figuring out what caused it!
+
+----------
+
 v5.4.0
 
 BATCH PROCESSOR
