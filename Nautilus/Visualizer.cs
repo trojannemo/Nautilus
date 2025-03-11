@@ -307,7 +307,7 @@ namespace Nautilus
         {
             try
             {
-                foreach (var fontName in FontNames)
+                /*foreach (var fontName in FontNames)
                 {
                     using (var fontTester = new Font(fontName, 12, FontStyle.Regular, GraphicsUnit.Pixel))
                     {
@@ -319,6 +319,17 @@ namespace Nautilus
                             }
                             return true;
                         }                            
+                    }
+                }*/
+                using (InstalledFontCollection fonts = new InstalledFontCollection())
+                {
+                    foreach (var fontName in FontNames)
+                    {
+                        if (fonts.Families.Any(f => f.Name.Equals(fontName, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            if (isMyriad) ActiveFont = fontName;
+                            return true;
+                        }
                     }
                 }
             }
@@ -4024,7 +4035,6 @@ namespace Nautilus
         {
             if (isFontAvailable(new string[] { "Myriad Pro", "Myriad Pro Bold", "MyriadPro-Bold" }, true))
             {
-                //ActiveFont = "Myriad Pro";
                 UncheckAllFonts((ToolStripMenuItem)sender);
             }
             else
@@ -4035,7 +4045,6 @@ namespace Nautilus
                     Process.Start(Application.StartupPath + "\\res\\");
                 }
             }
-            picVisualizer.Invalidate();
         }
 
         private void StopPlayback(bool Pause = false)
