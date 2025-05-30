@@ -248,6 +248,7 @@
             // 
             this.dontAddHopoThreshold.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.dontAddHopoThreshold.Checked = true;
+            this.dontAddHopoThreshold.CheckOnClick = true;
             this.dontAddHopoThreshold.CheckState = System.Windows.Forms.CheckState.Checked;
             this.dontAddHopoThreshold.Name = "dontAddHopoThreshold";
             this.dontAddHopoThreshold.Size = new System.Drawing.Size(406, 22);
