@@ -221,7 +221,7 @@ namespace Nautilus
                     case DialogResult.Yes:
                         isPS3 = true;
                         isWii = false;
-                        success = Tools.ExtractSaveImages(savefile, ImageFolder, true); // EditorFolder + Path.GetFileNameWithoutExtension(file), true);
+                        success = Tools.ExtractSaveImages(savefile, EditorFolder + Path.GetFileNameWithoutExtension(file), true); // EditorFolder + Path.GetFileNameWithoutExtension(file), true);
                         break;
                     case DialogResult.No:
                         isWii = true;

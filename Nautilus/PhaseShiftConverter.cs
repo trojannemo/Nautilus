@@ -1172,7 +1172,8 @@ namespace Nautilus
                 //makes it clearer in the interface that these instruments are disabled
                 sw.WriteLine("diff_drums_real_ps = -1");
                 sw.WriteLine("diff_keys_real_ps = -1");
-                sw.WriteLine("diff_dance = -1");                
+                sw.WriteLine("diff_dance = -1");
+                sw.WriteLine("video_start_time = ");
                 sw.Dispose();
                 return true;
             }

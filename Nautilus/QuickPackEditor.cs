@@ -233,8 +233,17 @@ namespace Nautilus
             Log("Found " + Songs.Count + " song " + (Songs.Count == 1 ? "entry" : "entries"));
             if (Songs.Count > 0)
             {
-                btnDePack.Visible = true;
-                btnDePack.Enabled = true;
+                if (picWorking.Visible) //background worker running, need to invoke
+                {
+                    btnDePack.Invoke(new MethodInvoker(() => btnDePack.Visible = true));
+                    btnDePack.Invoke(new MethodInvoker(() => btnDePack.Enabled = true));
+                }
+                else
+                {
+                    btnDePack.Visible = true;
+                    btnDePack.Enabled = true;
+                }
+                
             }
         }
 

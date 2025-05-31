@@ -173,7 +173,10 @@ namespace Nautilus
             {
                 Log("No changes were made to DTA file");
                 Tools.DeleteFile(dta);
-                Tools.DeleteFile(backup);
+                if (File.Exists(backup))
+                {
+                    Tools.DeleteFile(backup);
+                }
                 song.CloseIO();
                 return;
             }
