@@ -2767,6 +2767,8 @@ namespace Nautilus
         public bool HasSongIDError { get; set; }
         public string VNAudioHash { get; set; }
 
+        public DateTime DateAdded { get; set; }
+
         public void Initialize()
         {
             DTALines = new List<string>();
@@ -2858,6 +2860,7 @@ namespace Nautilus
             ChannelsKeysStart = 0;
             ChannelsVocalsStart = 0;
             ChannelsCrowdStart = 0;
+            DateAdded = DateTime.Now;
         }
 
         public string GetRating()

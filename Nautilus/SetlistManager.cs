@@ -84,6 +84,7 @@ namespace Nautilus
         private bool lastSortAscending = false;
         private string YouTubeLink = "";
         private LyricsResponse LyricsData = null;
+        private readonly DateTime C3rapture = new DateTime(2013, 4, 9, 10, 0, 0);
 
         public SetlistManager(Color ButtonBackColor, Color ButtonTextColor, string args = "", MainForm xParent = null)
         {
@@ -310,6 +311,7 @@ namespace Nautilus
                     song.ShortName = songData.Shortname;
                     song.Source = songData.GameOrigin;
                     song.Gender = songData.VocalGender == 1 ? "Masc." : "Fem.";
+                    song.DateAdded = DateTime.Now;
                     Parser.Songs.Add(song);
                 }
                 return true;
@@ -600,6 +602,7 @@ namespace Nautilus
                 song.Length = string.IsNullOrEmpty(songs[i].SongLength) ? 0 : Convert.ToInt32(songs[i].SongLength)/1000;
                 song.Master = true; //let's default to Master even though we don't really know
                 song.Source = "custom"; //let's default to Custom source since this json doesn't specify source
+                song.DateAdded = DateTime.Now;
                 Songs.Add(song);
             }
 
@@ -645,6 +648,7 @@ namespace Nautilus
                 song.Length = songs[i].SongLength;
                 song.Master = true; //let's default to Master even though we don't really know
                 song.Source = "custom"; //let's default to Custom source since this json doesn't specify source
+                song.DateAdded = DateTime.Now;
                 Songs.Add(song);
             }
 
@@ -999,6 +1003,7 @@ namespace Nautilus
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //vocal gender
                     length = BytesToInt(buffer);
                     AllSongs[index].Gender = Encoding.UTF8.GetString(br.ReadBytes(length)).ToLowerInvariant().Contains("female") ? "Female" : "Male";
+                    AllSongs[index].DateAdded = DateTime.Now;
 
                     br.ReadBytes(24); //skip guitar tuning;
                     br.ReadBytes(16); //skip bass tuning;
@@ -1056,22 +1061,22 @@ namespace Nautilus
                 sw.WriteLine("SongCount=" + SongsToSave.Count);
                 sw.WriteLine("PackageCount=" + CachePackages);
 
-                var cache = "RB_5";
+                var cache = "RB_6";
                 if (modeRB4.Checked)
                 {
-                    cache = "RBFour_5";
+                    cache = "RBFour_6";
                 }
                 else if (doBlitzImport)
                 {
-                    cache = "Blitz_5";
+                    cache = "Blitz_6";
                 }
                 else if (modeYARG.Checked)
                 {
-                    cache = "YARG_5";
+                    cache = "YARG_6";
                 }
                 else if (modeCH.Checked)
                 {
-                    cache = "CloneHero_5";
+                    cache = "CloneHero_6";
                 }
                 //only change if additions are made to the setlist in the future
                 sw.WriteLine("CacheFormat=" + cache);
@@ -1139,6 +1144,10 @@ namespace Nautilus
                     //Use for both RB3 and Blitz
                     sw.WriteLine("SongLink=" + song.SongLink);
 
+                    //entry for CacheFormat 6
+                    //Use for all games
+                    sw.WriteLine("DateAdded=" + (song.DateAdded == null ? C3rapture.ToString(CultureInfo.InvariantCulture) : song.DateAdded.ToString(CultureInfo.InvariantCulture)));
+                    
                     //if adding anything else, change CacheFormat for anything below this line
                 }
                 sw.Dispose();
@@ -1201,6 +1210,7 @@ namespace Nautilus
             Application.DoEvents();
             LoadOptions();
             doUpdateGameMode();
+            ResizeColumns();
         }
         
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1685,7 +1695,7 @@ namespace Nautilus
                             SongsGrabbed[index].Source = "dlc";
                         }
 
-                        if (!format.Contains("2") && !format.Contains("3") && !format.Contains("4") && !format.Contains("5")) continue;
+                        if (!format.Contains("2") && !format.Contains("3") && !format.Contains("4") && !format.Contains("5") && !format.Contains("6")) continue;
                         //Setlist Manager cache format 2-4, both RB3 and Blitz
                         line = sr.ReadLine();
                         linenum++;
@@ -1727,13 +1737,13 @@ namespace Nautilus
                             SongsGrabbed[index].DrumBank = Tools.GetConfigString(line);
                         }
 
-                        if (!format.Contains("3") && !format.Contains("4") && !format.Contains("5")) continue;
+                        if (!format.Contains("3") && !format.Contains("4") && !format.Contains("5") && !format.Contains("6")) continue;
                         //Setlist Manager cache format 3-4, both RB3 and Blitz
                         line = sr.ReadLine();
                         linenum++;
                         SongsGrabbed[index].DoNotExport = line.Contains("True");
 
-                        if (!format.Contains("4") && !format.Contains("5")) continue;
+                        if (!format.Contains("4") && !format.Contains("5") && !format.Contains("6")) continue;
                         if (!format.ToLowerInvariant().Contains("blitz"))
                         {
                             //Setlist Manager cache format 4-5, only RB3
@@ -1747,11 +1757,28 @@ namespace Nautilus
                             SongsGrabbed[index].ProGuitarTuning = Tools.GetConfigString(line);
                         }
 
-                        if (!format.Contains("5")) continue;
+                        if (!format.Contains("5") && !format.Contains("6")) continue;
                         //Setlist Manager cache format 5, RB3 and Blitz
                         line = sr.ReadLine();
                         linenum++;
                         SongsGrabbed[index].SongLink = Tools.GetConfigString(line);
+
+                        if (!format.Contains("6"))
+                        {
+                            SongsGrabbed[index].DateAdded = C3rapture;
+                            continue;
+                        }
+                        line = sr.ReadLine();
+                        linenum++;
+                        string dateText = Tools.GetConfigString(line);
+                        if (DateTime.TryParse(dateText, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+                        {
+                            SongsGrabbed[index].DateAdded = parsedDate;
+                        }
+                        else
+                        {
+                            SongsGrabbed[index].DateAdded = C3rapture;
+                        }
 
                         //add further checks for newer cache versions here
                     }
@@ -2189,6 +2216,35 @@ namespace Nautilus
             return featured;
         }
         
+        private void ResizeColumns()
+        {
+            lstSongs.VirtualListSize = Songs.Count;
+            lstSongs.Columns[0].Width = 120; //artist
+            lstSongs.Columns[1].Width = 120; //song
+            lstSongs.Columns[2].Width = 120; //album
+            lstSongs.Columns[3].Width = 70; //date added
+            lstSongs.Columns[4].Width = 44; //year
+            lstSongs.Columns[5].Width = 32; //track
+            lstSongs.Columns[6].Width = 44; //master
+            lstSongs.Columns[7].Width = 90; //genre
+            lstSongs.Columns[8].Width = 32; //vocal parts
+            lstSongs.Columns[9].Width = 52; //duration
+            lstSongs.Columns[10].Width = 44; //rating
+            lstSongs.Columns[11].Width = 48; //singer
+            lstSongs.Columns[12].Width = 48; //source
+            lstSongs.Columns[13].Width = 85; //guitar
+            lstSongs.Columns[14].Width = 85; //bass
+            lstSongs.Columns[15].Width = 85; //drums
+            lstSongs.Columns[16].Width = 85; //vocals
+            lstSongs.Columns[17].Width = 85; //keys
+            lstSongs.Columns[18].Width = 85; //band
+            lstSongs.Columns[19].Width = 85; //pro guitar
+            lstSongs.Columns[20].Width = 85; //pro bass
+            lstSongs.Columns[21].Width = 85; //pro keys
+            lstSongs.Columns[22].Width = 120; //link
+            lstSongs.Columns[23].Width = 0; //index
+        }
+
         private bool LoadSongs()
         {
             picWorking.Visible = true;
@@ -2212,8 +2268,8 @@ namespace Nautilus
 
             ApplyFilters();
 
-            lstSongs.BeginUpdate();            
-            lstSongs.VirtualListSize = Songs.Count;
+            lstSongs.BeginUpdate();
+            ResizeColumns();
             lstSongs.EndUpdate();                      
 
             UpdateSongCounter();
@@ -2394,6 +2450,9 @@ namespace Nautilus
                         break;
                     case "Source":
                         Songs = Songs.OrderBy(song => song.GetSource() ?? "").ToList();
+                        break;
+                    case "Date Added":
+                        Songs = Songs.OrderBy(song => song.DateAdded).ToList();
                         break;
                     case "Artist":
                     default:
@@ -4649,6 +4708,7 @@ namespace Nautilus
             {
                 AllSongs.Add(song);
                 AllSongs[AllSongs.Count - 1].ListIndex = AllSongs.Count - 1;
+                AllSongs[AllSongs.Count - 1].DateAdded = DateTime.Now;
                 uniqueSongs.Add(song);
             }
             if (!quiet)
@@ -5165,17 +5225,18 @@ namespace Nautilus
             {
                 artist,
                 name,
-                song.Master ? "✔" : "X",
                 song.Album,
+                song.DateAdded == null ? C3rapture.ToString("M/d/yyyy", CultureInfo.InvariantCulture) : song.DateAdded.ToString("M/d/yyyy", CultureInfo.InvariantCulture),                
                 song.YearReleased > 0 ? song.YearReleased.ToString(CultureInfo.InvariantCulture) : "",
                 song.TrackNumber > 0 ? song.TrackNumber.ToString(CultureInfo.InvariantCulture) : "",
+                song.Master ? "✔" : "X",
                 song.Genre,
-                song.VocalsDiff == 0 ? "0" : song.VocalParts.ToString(CultureInfo.InvariantCulture),
-                song.GetGender(true).Replace("Masc.","M").Replace("Fem.", "F"),
+                song.VocalsDiff == 0 ? "0" : song.VocalParts.ToString(CultureInfo.InvariantCulture),                
                 song.Length == 0
                     ? (song.PreviewEnd == 0 ? "0:00" : Parser.GetSongDuration(song.PreviewEnd.ToString(CultureInfo.InvariantCulture)))
                     : Parser.GetSongDuration(song.Length.ToString(CultureInfo.InvariantCulture)),
                 song.GetRating(),
+                song.GetGender(true).Replace("Masc.","M").Replace("Fem.", "F"),
                 song.GetSource(),
                 DoDifficulty(song.GuitarDiff),
                 DoDifficulty(song.BassDiff),
@@ -5524,6 +5585,8 @@ namespace Nautilus
         public string Charter { get; set; }
         public string Year { get; set; }
         public string SongLength { get; set; }
+
+        public DateTime DateAdded { get; set; }
     }
 
     public class CHSong
@@ -5540,6 +5603,8 @@ namespace Nautilus
         public int SongLength { get; set; }
 
         public long chartsAvailable { get; set; }
+
+        public DateTime DateAdded { get; set; }
     }
 
     public class ColumnInfo
