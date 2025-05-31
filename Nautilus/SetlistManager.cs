@@ -95,6 +95,7 @@ namespace Nautilus
             Tools = new NemoTools();
             Parser  = new DTAParser();
             Songs = new List<SongData>();
+            AllSongs = new List<SongData>();
             duplicates = new List<int>();
             binFolder = Application.StartupPath + "\\bin\\";
             FormPanels = new List<Panel>
@@ -1963,6 +1964,10 @@ namespace Nautilus
             {
                 passes = false;
             }
+            else if (!chkNoVocals.Checked && song.GetGender() == "N/A")
+            {
+                passes = false;
+            }
             else if (cboGenre.SelectedIndex > 0 && song.Genre != cboGenre.SelectedItem.ToString())
             {
                 passes = false;
@@ -2857,6 +2862,7 @@ namespace Nautilus
             cboGenre.SelectedIndex = 0;
             chkMale.Checked = true;
             chkFemale.Checked = true;
+            chkNoVocals.Checked = true;
             txtSearch.Text = "";
             FilterInstruments(false);
             cboTime.SelectedIndex = 0;

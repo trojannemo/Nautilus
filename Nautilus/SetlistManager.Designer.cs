@@ -155,6 +155,7 @@
             this.chkRB2 = new System.Windows.Forms.CheckBox();
             this.chkRB1 = new System.Windows.Forms.CheckBox();
             this.PanelGender = new System.Windows.Forms.Panel();
+            this.chkNoVocals = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.chkFemale = new System.Windows.Forms.CheckBox();
             this.chkMale = new System.Windows.Forms.CheckBox();
@@ -2179,6 +2180,7 @@
             this.PanelGender.BackColor = System.Drawing.Color.Transparent;
             this.PanelGender.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.PanelGender.ContextMenuStrip = this.contextMenuStrip1;
+            this.PanelGender.Controls.Add(this.chkNoVocals);
             this.PanelGender.Controls.Add(this.label3);
             this.PanelGender.Controls.Add(this.chkFemale);
             this.PanelGender.Controls.Add(this.chkMale);
@@ -2191,6 +2193,22 @@
             this.PanelGender.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PanelsMouseDown);
             this.PanelGender.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PanelsMouseMove);
             this.PanelGender.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PanelsMouseUp);
+            // 
+            // chkNoVocals
+            // 
+            this.chkNoVocals.AutoSize = true;
+            this.chkNoVocals.BackColor = System.Drawing.Color.Transparent;
+            this.chkNoVocals.Checked = true;
+            this.chkNoVocals.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkNoVocals.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkNoVocals.Location = new System.Drawing.Point(72, 23);
+            this.chkNoVocals.Name = "chkNoVocals";
+            this.chkNoVocals.Size = new System.Drawing.Size(46, 17);
+            this.chkNoVocals.TabIndex = 7;
+            this.chkNoVocals.Text = "N/A";
+            this.toolTip1.SetToolTip(this.chkNoVocals, "Feminine lead singer");
+            this.chkNoVocals.UseVisualStyleBackColor = false;
+            this.chkNoVocals.CheckedChanged += new System.EventHandler(this.FiltersChanged);
             // 
             // label3
             // 
@@ -2210,11 +2228,11 @@
             this.chkFemale.Checked = true;
             this.chkFemale.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkFemale.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkFemale.Location = new System.Drawing.Point(67, 23);
+            this.chkFemale.Location = new System.Drawing.Point(42, 23);
             this.chkFemale.Name = "chkFemale";
-            this.chkFemale.Size = new System.Drawing.Size(49, 17);
+            this.chkFemale.Size = new System.Drawing.Size(32, 17);
             this.chkFemale.TabIndex = 3;
-            this.chkFemale.Text = "Fem.";
+            this.chkFemale.Text = "F";
             this.toolTip1.SetToolTip(this.chkFemale, "Feminine lead singer");
             this.chkFemale.UseVisualStyleBackColor = false;
             this.chkFemale.CheckedChanged += new System.EventHandler(this.FiltersChanged);
@@ -2226,11 +2244,11 @@
             this.chkMale.Checked = true;
             this.chkMale.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkMale.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkMale.Location = new System.Drawing.Point(10, 23);
+            this.chkMale.Location = new System.Drawing.Point(8, 23);
             this.chkMale.Name = "chkMale";
-            this.chkMale.Size = new System.Drawing.Size(55, 17);
+            this.chkMale.Size = new System.Drawing.Size(35, 17);
             this.chkMale.TabIndex = 2;
-            this.chkMale.Text = "Masc.";
+            this.chkMale.Text = "M";
             this.toolTip1.SetToolTip(this.chkMale, "Masculine lead singer");
             this.chkMale.UseVisualStyleBackColor = false;
             this.chkMale.CheckedChanged += new System.EventHandler(this.FiltersChanged);
@@ -4684,5 +4702,6 @@
         private System.Windows.Forms.PictureBox picLyrics;
         private System.Windows.Forms.CheckBox chkYear20;
         private System.Windows.Forms.ColumnHeader colListIndex;
+        private System.Windows.Forms.CheckBox chkNoVocals;
     }
 }
