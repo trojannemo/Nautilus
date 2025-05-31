@@ -80,6 +80,11 @@ namespace Nautilus
 
         private void ErrorOut()
         {
+            if (InvokeRequired)
+            {
+                Invoke(new MethodInvoker(ErrorOut));
+                return;
+            }
             Log("Nothing was changed");
             Log("Ready");
             lstLog.Cursor = Cursors.Default;
@@ -151,6 +156,7 @@ namespace Nautilus
             var xDTA = song.GetFile("/songs/songs.dta");
             Log("Opening DTA file...");
 
+            string originalDtaContents = File.ReadAllText(dta);
             var process = Process.Start(dta);
             Log("DTA file is being edited by the user ... waiting...");
 
@@ -162,6 +168,19 @@ namespace Nautilus
             process.Dispose();
 
             Log("DTA file closed by user, continuing...");
+            string newDtaContents = File.ReadAllText(dta);
+            if (newDtaContents == originalDtaContents)
+            {
+                Log("No changes were made to DTA file");
+                Tools.DeleteFile(dta);
+                if (File.Exists(backup))
+                {
+                    Tools.DeleteFile(backup);
+                }
+                song.CloseIO();
+                return;
+            }
+
             Log("Replacing old DTA file with modified DTA file");
             Log("THIS STEP MAY TAKE A WHILE. DON'T CLOSE ME DOWN!");
             
