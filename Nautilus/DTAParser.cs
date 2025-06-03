@@ -2241,7 +2241,7 @@ namespace Nautilus
 
         /// <summary>
         /// Can be used to get the raw string value of a DTA entry containing a specified field.
-        /// <code>getDTAStringValue("('name' "Ain't Messin Round (RB3 version)")", "name") => Ain't Messin Round (RB3 version)</code>
+        /// <code>getDTAStringValue("('name' \"Ain't Messin Round (RB3 version)\")", "name") => Ain't Messin Round (RB3 version)</code>
         /// <code>getDTAStringValue("\t(\n\tdrum_bank\n\t"sfx/kit01_bank.milo"\n)", "drum_bank") => sfx/kit01_bank.milo</code>
         /// </summary>
         private string getDTAStringValue(string line, string field)
