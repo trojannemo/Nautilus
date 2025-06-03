@@ -959,7 +959,7 @@ namespace Nautilus
                             }
                             else if (line.Contains("drum_bank"))
                             {
-                                song.DrumBank = line.Replace("drum_bank", "").Replace("(", "").Replace(")", "").Trim();
+                                song.DrumBank = getDTAStringValue(line, "drum_bank");
                             }
                             else if (line.Contains("song_scroll_speed"))
                             {
@@ -2237,6 +2237,17 @@ namespace Nautilus
             {
                 return 0;
             }
+        }
+
+        /// <summary>
+        /// Can be used to get the raw string value of a single dta line containing a specific field
+        /// <code>getDTAStringValue("('some field' 'some value')", "some field") => "some value"</code>
+        /// </summary>
+        private string getDTAStringValue(string line, string field)
+        {
+            string quote = "['\"]";
+            string stripOut = "['\"()]|;.*?$"; // quotes, parens, comments
+            return Regex.Replace(Regex.Replace(line, $"{quote}?{field}{quote}?", ""), stripOut, "").Trim();
         }
 
         /// <summary>
