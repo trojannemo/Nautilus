@@ -2240,14 +2240,21 @@ namespace Nautilus
         }
 
         /// <summary>
-        /// Can be used to get the raw string value of a single dta line containing a specific field
-        /// <code>getDTAStringValue("('some field' 'some value')", "some field") => "some value"</code>
+        /// Can be used to get the raw string value of a DTA entry containing a specified field.
+        /// <code>getDTAStringValue("('name' 'Ain't Messin Round (RB3 version)')", "name") => Ain't Messin Round (RB3 version)</code>
+        /// <code>getDTAStringValue("\t(\n\tdrum_bank\n\t"sfx/kit01_bank.milo"\n)", "drum_bank") => sfx/kit01_bank.milo</code>
         /// </summary>
         private string getDTAStringValue(string line, string field)
         {
             string quote = "['\"]";
-            string stripOut = "['\"()]|;.*?$"; // quotes, parens, comments
-            return Regex.Replace(Regex.Replace(line, $"{quote}?{field}{quote}?", ""), stripOut, "").Trim();
+            string openCloseParen = "^\\(|\\)$";
+            string openCloseQuote = $"^{quote}|{quote}$";
+
+            string result = RemoveDTAComments(line).Trim();
+            result = Regex.Replace(result, $"{quote}?{field}{quote}?", "").Trim();
+            result = Regex.Replace(result, openCloseParen, "").Trim();
+            result = Regex.Replace(result, openCloseQuote, "").Trim();
+            return result;
         }
 
         /// <summary>
