@@ -95,7 +95,6 @@
             this.btnQuickPackEditor = new System.Windows.Forms.Button();
             this.btnStemsIsolator = new System.Windows.Forms.Button();
             this.btnWiiConverter = new System.Windows.Forms.Button();
-            this.btnVideoPreparer = new System.Windows.Forms.Button();
             this.btnPhaseShiftConverter = new System.Windows.Forms.Button();
             this.btnBatchExtractor = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
@@ -148,6 +147,7 @@
             this.columnA2 = new System.Windows.Forms.PictureBox();
             this.columnA1 = new System.Windows.Forms.PictureBox();
             this.btnAudioConverter = new System.Windows.Forms.Button();
+            this.btnCDG = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picSettings)).BeginInit();
@@ -210,7 +210,7 @@
             this.btnBatchRenamer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBatchRenamer.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnBatchRenamer.ForeColor = System.Drawing.Color.Black;
-            this.btnBatchRenamer.Location = new System.Drawing.Point(297, 138);
+            this.btnBatchRenamer.Location = new System.Drawing.Point(297, 201);
             this.btnBatchRenamer.Name = "btnBatchRenamer";
             this.btnBatchRenamer.Size = new System.Drawing.Size(122, 43);
             this.btnBatchRenamer.TabIndex = 15;
@@ -817,7 +817,7 @@
             this.btnSetlistManager.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSetlistManager.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSetlistManager.ForeColor = System.Drawing.Color.Black;
-            this.btnSetlistManager.Location = new System.Drawing.Point(296, 12);
+            this.btnSetlistManager.Location = new System.Drawing.Point(297, 12);
             this.btnSetlistManager.Name = "btnSetlistManager";
             this.btnSetlistManager.Size = new System.Drawing.Size(122, 43);
             this.btnSetlistManager.TabIndex = 13;
@@ -837,7 +837,7 @@
             this.btnMIDICleaner.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMIDICleaner.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnMIDICleaner.ForeColor = System.Drawing.Color.Black;
-            this.btnMIDICleaner.Location = new System.Drawing.Point(154, 75);
+            this.btnMIDICleaner.Location = new System.Drawing.Point(154, 201);
             this.btnMIDICleaner.Name = "btnMIDICleaner";
             this.btnMIDICleaner.Size = new System.Drawing.Size(122, 43);
             this.btnMIDICleaner.TabIndex = 7;
@@ -922,7 +922,7 @@
             this.btnWiiConverter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnWiiConverter.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnWiiConverter.ForeColor = System.Drawing.Color.Black;
-            this.btnWiiConverter.Location = new System.Drawing.Point(439, 138);
+            this.btnWiiConverter.Location = new System.Drawing.Point(438, 138);
             this.btnWiiConverter.Name = "btnWiiConverter";
             this.btnWiiConverter.Size = new System.Drawing.Size(122, 43);
             this.btnWiiConverter.TabIndex = 22;
@@ -935,25 +935,6 @@
             this.btnWiiConverter.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseMove);
             this.btnWiiConverter.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseUp);
             // 
-            // btnVideoPreparer
-            // 
-            this.btnVideoPreparer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
-            this.btnVideoPreparer.ContextMenuStrip = this.contextMenuStrip1;
-            this.btnVideoPreparer.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnVideoPreparer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnVideoPreparer.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnVideoPreparer.ForeColor = System.Drawing.Color.Black;
-            this.btnVideoPreparer.Location = new System.Drawing.Point(580, 75);
-            this.btnVideoPreparer.Name = "btnVideoPreparer";
-            this.btnVideoPreparer.Size = new System.Drawing.Size(122, 43);
-            this.btnVideoPreparer.TabIndex = 28;
-            this.btnVideoPreparer.Text = "Video Preparer";
-            this.btnVideoPreparer.UseVisualStyleBackColor = false;
-            this.btnVideoPreparer.Click += new System.EventHandler(this.btnVideo_Click);
-            this.btnVideoPreparer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseDown);
-            this.btnVideoPreparer.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseMove);
-            this.btnVideoPreparer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Buttons_MouseUp);
-            // 
             // btnPhaseShiftConverter
             // 
             this.btnPhaseShiftConverter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
@@ -962,7 +943,7 @@
             this.btnPhaseShiftConverter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnPhaseShiftConverter.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnPhaseShiftConverter.ForeColor = System.Drawing.Color.Black;
-            this.btnPhaseShiftConverter.Location = new System.Drawing.Point(439, 264);
+            this.btnPhaseShiftConverter.Location = new System.Drawing.Point(438, 75);
             this.btnPhaseShiftConverter.Name = "btnPhaseShiftConverter";
             this.btnPhaseShiftConverter.Size = new System.Drawing.Size(122, 43);
             this.btnPhaseShiftConverter.TabIndex = 24;
@@ -981,7 +962,7 @@
             this.btnBatchExtractor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBatchExtractor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnBatchExtractor.ForeColor = System.Drawing.Color.Black;
-            this.btnBatchExtractor.Location = new System.Drawing.Point(296, 75);
+            this.btnBatchExtractor.Location = new System.Drawing.Point(297, 264);
             this.btnBatchExtractor.Name = "btnBatchExtractor";
             this.btnBatchExtractor.Size = new System.Drawing.Size(122, 43);
             this.btnBatchExtractor.TabIndex = 14;
@@ -1048,7 +1029,7 @@
             this.btnAudioAnalyzer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAudioAnalyzer.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAudioAnalyzer.ForeColor = System.Drawing.Color.Black;
-            this.btnAudioAnalyzer.Location = new System.Drawing.Point(155, 201);
+            this.btnAudioAnalyzer.Location = new System.Drawing.Point(154, 138);
             this.btnAudioAnalyzer.Name = "btnAudioAnalyzer";
             this.btnAudioAnalyzer.Size = new System.Drawing.Size(122, 43);
             this.btnAudioAnalyzer.TabIndex = 9;
@@ -1088,7 +1069,7 @@
             this.btnEventManager.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnEventManager.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnEventManager.ForeColor = System.Drawing.Color.Black;
-            this.btnEventManager.Location = new System.Drawing.Point(297, 264);
+            this.btnEventManager.Location = new System.Drawing.Point(297, 75);
             this.btnEventManager.Name = "btnEventManager";
             this.btnEventManager.Size = new System.Drawing.Size(122, 43);
             this.btnEventManager.TabIndex = 17;
@@ -1108,7 +1089,7 @@
             this.btnSongAnalyzer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSongAnalyzer.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSongAnalyzer.ForeColor = System.Drawing.Color.Black;
-            this.btnSongAnalyzer.Location = new System.Drawing.Point(155, 138);
+            this.btnSongAnalyzer.Location = new System.Drawing.Point(154, 75);
             this.btnSongAnalyzer.Name = "btnSongAnalyzer";
             this.btnSongAnalyzer.Size = new System.Drawing.Size(122, 43);
             this.btnSongAnalyzer.TabIndex = 8;
@@ -1167,7 +1148,7 @@
             this.btnCONConverter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCONConverter.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCONConverter.ForeColor = System.Drawing.Color.Black;
-            this.btnCONConverter.Location = new System.Drawing.Point(438, 75);
+            this.btnCONConverter.Location = new System.Drawing.Point(438, 327);
             this.btnCONConverter.Name = "btnCONConverter";
             this.btnCONConverter.Size = new System.Drawing.Size(122, 43);
             this.btnCONConverter.TabIndex = 21;
@@ -1186,7 +1167,7 @@
             this.btnSaveFileImageEditor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSaveFileImageEditor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSaveFileImageEditor.ForeColor = System.Drawing.Color.Black;
-            this.btnSaveFileImageEditor.Location = new System.Drawing.Point(154, 327);
+            this.btnSaveFileImageEditor.Location = new System.Drawing.Point(297, 390);
             this.btnSaveFileImageEditor.Name = "btnSaveFileImageEditor";
             this.btnSaveFileImageEditor.Size = new System.Drawing.Size(122, 43);
             this.btnSaveFileImageEditor.TabIndex = 11;
@@ -1238,7 +1219,7 @@
             this.btnVolumeNormalizer.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnVolumeNormalizer.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnVolumeNormalizer.ForeColor = System.Drawing.Color.Black;
-            this.btnVolumeNormalizer.Location = new System.Drawing.Point(154, 264);
+            this.btnVolumeNormalizer.Location = new System.Drawing.Point(154, 390);
             this.btnVolumeNormalizer.Name = "btnVolumeNormalizer";
             this.btnVolumeNormalizer.Size = new System.Drawing.Size(122, 43);
             this.btnVolumeNormalizer.TabIndex = 10;
@@ -1254,7 +1235,7 @@
             this.btnBatchProcessor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnBatchProcessor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnBatchProcessor.ForeColor = System.Drawing.Color.Black;
-            this.btnBatchProcessor.Location = new System.Drawing.Point(297, 201);
+            this.btnBatchProcessor.Location = new System.Drawing.Point(297, 138);
             this.btnBatchProcessor.Name = "btnBatchProcessor";
             this.btnBatchProcessor.Size = new System.Drawing.Size(122, 43);
             this.btnBatchProcessor.TabIndex = 16;
@@ -1274,7 +1255,7 @@
             this.btnRBAEditor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRBAEditor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnRBAEditor.ForeColor = System.Drawing.Color.Black;
-            this.btnRBAEditor.Location = new System.Drawing.Point(439, 327);
+            this.btnRBAEditor.Location = new System.Drawing.Point(438, 390);
             this.btnRBAEditor.Name = "btnRBAEditor";
             this.btnRBAEditor.Size = new System.Drawing.Size(122, 43);
             this.btnRBAEditor.TabIndex = 25;
@@ -1295,7 +1276,7 @@
             this.btnScores.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnScores.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnScores.ForeColor = System.Drawing.Color.Black;
-            this.btnScores.Location = new System.Drawing.Point(155, 390);
+            this.btnScores.Location = new System.Drawing.Point(580, 75);
             this.btnScores.Name = "btnScores";
             this.btnScores.Size = new System.Drawing.Size(122, 43);
             this.btnScores.TabIndex = 12;
@@ -1312,7 +1293,7 @@
             this.btnMiloMod.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMiloMod.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnMiloMod.ForeColor = System.Drawing.Color.Black;
-            this.btnMiloMod.Location = new System.Drawing.Point(438, 390);
+            this.btnMiloMod.Location = new System.Drawing.Point(580, 138);
             this.btnMiloMod.Name = "btnMiloMod";
             this.btnMiloMod.Size = new System.Drawing.Size(122, 43);
             this.btnMiloMod.TabIndex = 26;
@@ -1371,7 +1352,7 @@
             this.btnCharEditor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCharEditor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCharEditor.ForeColor = System.Drawing.Color.Black;
-            this.btnCharEditor.Location = new System.Drawing.Point(297, 390);
+            this.btnCharEditor.Location = new System.Drawing.Point(580, 201);
             this.btnCharEditor.Name = "btnCharEditor";
             this.btnCharEditor.Size = new System.Drawing.Size(122, 43);
             this.btnCharEditor.TabIndex = 19;
@@ -1387,7 +1368,7 @@
             this.btnMoggMaker.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnMoggMaker.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnMoggMaker.ForeColor = System.Drawing.Color.Black;
-            this.btnMoggMaker.Location = new System.Drawing.Point(580, 138);
+            this.btnMoggMaker.Location = new System.Drawing.Point(154, 264);
             this.btnMoggMaker.Name = "btnMoggMaker";
             this.btnMoggMaker.Size = new System.Drawing.Size(122, 43);
             this.btnMoggMaker.TabIndex = 29;
@@ -1594,13 +1575,29 @@
             this.btnAudioConverter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAudioConverter.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAudioConverter.ForeColor = System.Drawing.Color.Black;
-            this.btnAudioConverter.Location = new System.Drawing.Point(580, 201);
+            this.btnAudioConverter.Location = new System.Drawing.Point(154, 327);
             this.btnAudioConverter.Name = "btnAudioConverter";
             this.btnAudioConverter.Size = new System.Drawing.Size(122, 43);
             this.btnAudioConverter.TabIndex = 56;
             this.btnAudioConverter.Text = "Audio Converter";
             this.btnAudioConverter.UseVisualStyleBackColor = false;
             this.btnAudioConverter.Click += new System.EventHandler(this.btnAudioConverter_Click);
+            // 
+            // btnCDG
+            // 
+            this.btnCDG.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnCDG.ContextMenuStrip = this.contextMenuStrip1;
+            this.btnCDG.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnCDG.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnCDG.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCDG.ForeColor = System.Drawing.Color.Black;
+            this.btnCDG.Location = new System.Drawing.Point(438, 264);
+            this.btnCDG.Name = "btnCDG";
+            this.btnCDG.Size = new System.Drawing.Size(122, 43);
+            this.btnCDG.TabIndex = 57;
+            this.btnCDG.Text = "???";
+            this.btnCDG.UseVisualStyleBackColor = false;
+            this.btnCDG.Click += new System.EventHandler(this.btnCDG_Click);
             // 
             // MainForm
             // 
@@ -1611,6 +1608,7 @@
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(714, 444);
             this.ContextMenuStrip = this.contextMenuStrip2;
+            this.Controls.Add(this.btnCDG);
             this.Controls.Add(this.btnAudioConverter);
             this.Controls.Add(this.picSettings);
             this.Controls.Add(this.btnStudio);
@@ -1645,7 +1643,6 @@
             this.Controls.Add(this.btnSetlistManager);
             this.Controls.Add(this.btnAudioAnalyzer);
             this.Controls.Add(this.btnMIDICleaner);
-            this.Controls.Add(this.btnVideoPreparer);
             this.Controls.Add(this.btnBatchExtractor);
             this.Controls.Add(this.btnEventManager);
             this.Controls.Add(this.btnUpgradeBundler);
@@ -1730,7 +1727,6 @@
         private System.Windows.Forms.Button btnBatchExtractor;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.Button btnStemsIsolator;
-        private System.Windows.Forms.Button btnVideoPreparer;
         private System.Windows.Forms.Button btnWiiConverter;
         private System.Windows.Forms.Button btnPhaseShiftConverter;
         private System.Windows.Forms.Button btnMIDICleaner;
@@ -1834,6 +1830,7 @@
         private System.Windows.Forms.ToolStripMenuItem resetEverythingNew;
         private System.Windows.Forms.PictureBox picSettings;
         private System.Windows.Forms.Button btnAudioConverter;
+        private System.Windows.Forms.Button btnCDG;
     }
 }
 

@@ -210,7 +210,8 @@ namespace Nautilus
             }
             else if (isPS3)
             {
-                success = Tools.ExtractSaveImages(savefile, EditorFolder + Path.GetFileNameWithoutExtension(file), true);
+                var offset = offsetFix.Checked? 1 : 0;
+                success = Tools.ExtractSaveImages(savefile, EditorFolder + Path.GetFileNameWithoutExtension(file), true, offset);
             }
             else
             {
@@ -682,7 +683,8 @@ namespace Nautilus
             Tools.DeleteFile(backup);
             File.Copy(UserSaveFile, backup);
 
-            if (!Tools.ReplaceSaveImages(UserSaveFile, ImageFolder, isPS3))
+            var offset = offsetFix.Checked ? 1 : 0;
+            if (!Tools.ReplaceSaveImages(UserSaveFile, ImageFolder, isPS3, offset))
             {
                 Log("Saving changes to file failed");
                 Tools.DeleteFile(UserSaveFile);

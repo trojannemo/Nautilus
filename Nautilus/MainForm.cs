@@ -36,7 +36,7 @@ namespace Nautilus
         private readonly List<MyButton> FormButtons;
         private const int form_width = 730;
         private const int form_height = 483;
-        private string bg_image = "default";
+        private string bg_image = "";
         private Color ActiveBackground;
         private readonly Random Randomizer;
         private bool IncreaseColor;
@@ -114,7 +114,7 @@ namespace Nautilus
                 btnVisualizer, btnMIDICleaner, btnSongAnalyzer, btnAudioAnalyzer, btnVolumeNormalizer, btnSaveFileImageEditor, btnScores,
                 btnSetlistManager, btnBatchExtractor, btnBatchRenamer, btnBatchProcessor, btnEventManager, btnFileIndexer, btnCharEditor,
                 btnAdvancedArtConverter, btnCONConverter, btnWiiConverter, btnPS3Converter, btnPhaseShiftConverter, btnRBAEditor, btnMiloMod,
-                btnUpgradeBundler, btnVideoPreparer, btnStemsIsolator, btnBatchCryptor, btnMoggMaker, btnStudio, btnSettings, btnAudioConverter
+                btnUpgradeBundler, btnStemsIsolator, btnBatchCryptor, btnMoggMaker, btnStudio, btnAudioConverter, btnCDG
             };
             FormButtons = new List<MyButton>();
             foreach (var mybutton in buttons.Select(button => new MyButton
@@ -574,16 +574,7 @@ namespace Nautilus
             activeForm = newExtractor;
             activeForms.Add(activeForm);
             newExtractor.Show();
-        }
-
-        private void btnVideo_Click(object sender, EventArgs e)
-        {
-            if (MovedButton) return;
-            var newVideo = new VideoPreparer(btnVideoPreparer.BackColor, btnVideoPreparer.ForeColor);
-            activeForm = newVideo;
-            activeForms.Add(activeForm);
-            newVideo.Show();
-        }
+        }        
         
         private void btnWiiPrep_Click(object sender, EventArgs e)
         {
@@ -933,10 +924,10 @@ namespace Nautilus
         private void defaultColorToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var greens = new List<Button> { btnRBtoUSB, btnPackCreator, btnQuickPackEditor, btnQuickDTAEditor, btnCONCreator, btnCONExplorer };
-            var reds = new List<Button> { btnVisualizer, btnMIDICleaner, btnSongAnalyzer, btnAudioAnalyzer, btnVolumeNormalizer, btnSaveFileImageEditor, btnScores };
-            var yellows = new List<Button> { btnSetlistManager, btnBatchExtractor, btnBatchRenamer, btnBatchProcessor, btnEventManager, btnFileIndexer, btnCharEditor };
-            var blues = new List<Button> { btnAdvancedArtConverter, btnCONConverter, btnWiiConverter, btnPS3Converter, btnPhaseShiftConverter, btnRBAEditor, btnMiloMod };
-            var oranges = new List<Button> { btnUpgradeBundler, btnVideoPreparer, btnStemsIsolator, btnMoggMaker, btnBatchCryptor, btnStudio, btnAudioConverter};
+            var reds = new List<Button> { btnVisualizer, btnSongAnalyzer, btnAudioAnalyzer, btnMIDICleaner, btnMoggMaker, btnAudioConverter, btnVolumeNormalizer };
+            var yellows = new List<Button> { btnSetlistManager, btnBatchExtractor, btnBatchRenamer, btnBatchProcessor, btnEventManager, btnFileIndexer, btnSaveFileImageEditor };
+            var blues = new List<Button> { btnAdvancedArtConverter, btnCONConverter, btnWiiConverter, btnPS3Converter, btnPhaseShiftConverter, btnRBAEditor, btnCDG };
+            var oranges = new List<Button> { btnUpgradeBundler, btnStemsIsolator, btnBatchCryptor, btnStudio, btnCharEditor, btnMiloMod, btnScores };
 
             if (greens.Contains(CurrentButton))
             {
@@ -958,7 +949,7 @@ namespace Nautilus
             {
                 CurrentButton.BackColor = Color.FromArgb(200, 238, 144, 51);
             }
-            btnSettings.BackColor = Color.FromArgb(200, 151, 54, 189);
+            //btnSettings.BackColor = Color.FromArgb(200, 151, 54, 189);
             CurrentButton.FlatAppearance.MouseOverBackColor = Tools.LightenColor(CurrentButton.BackColor);
         }
         
@@ -2110,16 +2101,16 @@ namespace Nautilus
             {
                 flappy.Left -= 2;
             }
-            var left = btnScores.Left;
-            if (!btnScores.Visible)
+            var left = btnVolumeNormalizer.Left;
+            if (!btnVolumeNormalizer.Visible)
             {
-                left = btnCharEditor.Left;
-                if (!btnCharEditor.Visible)
+                left = btnSaveFileImageEditor.Left;
+                if (!btnSaveFileImageEditor.Visible)
                 {
-                    left = btnMiloMod.Left;
-                    if (!btnMiloMod.Visible)
+                    left = btnRBAEditor.Left;
+                    if (!btnRBAEditor.Visible)
                     {
-                        left = btnMiloMod.Left;
+                        left = btnBatchCryptor.Left;
                         if (!btnBatchCryptor.Visible)
                         {
                             left = Width - (flappy.Width/2);
@@ -2170,6 +2161,11 @@ namespace Nautilus
             activeForm = converter;
             activeForms.Add(converter);
             converter.Show();
+        }
+
+        private void btnCDG_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("This is just a placeholder for now...", "Nautilus", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 

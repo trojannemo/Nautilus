@@ -1021,6 +1021,111 @@ namespace Nautilus
         {
             try
             {
+                var newImage = Path.Combine(Path.GetDirectoryName(output_path), Path.GetFileNameWithoutExtension(output_path));
+
+                Il.ilInit();
+                Ilu.iluInit();
+
+                var imageId = new int[1];
+                Il.ilGenImages(1, imageId);
+                Il.ilBindImage(imageId[0]);
+
+                if (!Il.ilLoadImage(image_path))
+                    return false;
+
+                Il.ilEnable(Il.IL_FILE_OVERWRITE);
+
+                var height = isHorizontalTexture ? image_size / TextureDivider : image_size;
+                var width = isVerticalTexture ? image_size / TextureDivider : image_size;
+
+                // Ensure we’re working in RGBA format
+                Il.ilConvertImage(Il.IL_RGBA, Il.IL_UNSIGNED_BYTE);
+
+                // Step 1: Premultiply alpha
+                int origWidth = Il.ilGetInteger(Il.IL_IMAGE_WIDTH);
+                int origHeight = Il.ilGetInteger(Il.IL_IMAGE_HEIGHT);
+                int bpp = Il.ilGetInteger(Il.IL_IMAGE_BPP); // should be 4 (RGBA)
+                IntPtr data = Il.ilGetData();
+
+                byte[] pixels = new byte[origWidth * origHeight * bpp];
+                Marshal.Copy(data, pixels, 0, pixels.Length);
+
+                for (int i = 0; i < pixels.Length; i += 4)
+                {
+                    float alpha = pixels[i + 3] / 255f;
+                    pixels[i + 0] = (byte)(pixels[i + 0] * alpha); // R
+                    pixels[i + 1] = (byte)(pixels[i + 1] * alpha); // G
+                    pixels[i + 2] = (byte)(pixels[i + 2] * alpha); // B
+                }
+
+                Marshal.Copy(pixels, 0, data, pixels.Length);
+
+                // Step 2: Resize with bilinear filter
+                Ilu.iluImageParameter(Ilu.ILU_FILTER, Ilu.ILU_BILINEAR);
+                Ilu.iluScale(width, height, 1);
+
+                // Step 3: Un-premultiply alpha
+                int scaledWidth = Il.ilGetInteger(Il.IL_IMAGE_WIDTH);
+                int scaledHeight = Il.ilGetInteger(Il.IL_IMAGE_HEIGHT);
+                bpp = Il.ilGetInteger(Il.IL_IMAGE_BPP);
+                data = Il.ilGetData();
+                pixels = new byte[scaledWidth * scaledHeight * bpp];
+                Marshal.Copy(data, pixels, 0, pixels.Length);
+
+                for (int i = 0; i < pixels.Length; i += 4)
+                {
+                    float alpha = pixels[i + 3] / 255f;
+                    if (alpha > 0)
+                    {
+                        pixels[i + 0] = (byte)Math.Min(255, pixels[i + 0] / alpha); // R
+                        pixels[i + 1] = (byte)Math.Min(255, pixels[i + 1] / alpha); // G
+                        pixels[i + 2] = (byte)Math.Min(255, pixels[i + 2] / alpha); // B
+                    }
+                }
+
+                Marshal.Copy(pixels, 0, data, pixels.Length);
+
+                // Set output format
+                if (format.ToLowerInvariant().Contains("bmp"))
+                {
+                    Il.ilSetInteger(Il.IL_BMP_RLE, 0);
+                    newImage += ".bmp";
+                }
+                else if (format.ToLowerInvariant().Contains("jpg") || format.ToLowerInvariant().Contains("jpeg"))
+                {
+                    Il.ilSetInteger(Il.IL_JPG_QUALITY, 99);
+                    newImage += ".jpg";
+                }
+                else if (format.ToLowerInvariant().Contains("tif"))
+                {
+                    newImage += ".tif";
+                }
+                else if (format.ToLowerInvariant().Contains("tga"))
+                {
+                    Il.ilSetInteger(Il.IL_TGA_RLE, 0);
+                    newImage += ".tga";
+                }
+                else
+                {
+                    Il.ilSetInteger(Il.IL_PNG_INTERLACE, 0); // Fine to keep
+                    newImage += ".png";
+                }
+
+                if (!Il.ilSaveImage(newImage))
+                    return false;
+
+                Il.ilDeleteImages(1, imageId);
+                return File.Exists(newImage);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        /*public bool ResizeImage(string image_path, int image_size, string format, string output_path)
+        {
+            try
+            {
                 var newImage = Path.GetDirectoryName(output_path) + "\\" + Path.GetFileNameWithoutExtension(output_path);
 
                 Il.ilInit();
@@ -1049,8 +1154,51 @@ namespace Nautilus
                 const int scaler = Ilu.ILU_BILINEAR;
 
                 //resize image
-                Ilu.iluImageParameter(Ilu.ILU_FILTER, scaler);
+                //Ilu.iluImageParameter(Ilu.ILU_FILTER, scaler);
+                //Ilu.iluScale(width, height, 1);
+
+                // Premultiply alpha
+                int width = Il.ilGetInteger(Il.IL_IMAGE_WIDTH);
+                int height = Il.ilGetInteger(Il.IL_IMAGE_HEIGHT);
+                int bpp = Il.ilGetInteger(Il.IL_IMAGE_BPP); // should be 4
+                IntPtr data = Il.ilGetData();
+                byte[] pixels = new byte[width * height * bpp];
+                System.Runtime.InteropServices.Marshal.Copy(data, pixels, 0, pixels.Length);
+
+                // Premultiply alpha
+                for (int i = 0; i < pixels.Length; i += 4)
+                {
+                    float alpha = pixels[i + 3] / 255f;
+                    pixels[i + 0] = (byte)(pixels[i + 0] * alpha); // R
+                    pixels[i + 1] = (byte)(pixels[i + 1] * alpha); // G
+                    pixels[i + 2] = (byte)(pixels[i + 2] * alpha); // B
+                }
+
+                // Write modified data back to DevIL
+                System.Runtime.InteropServices.Marshal.Copy(pixels, 0, data, pixels.Length);
+
+                // Now do your iluScale
+                Ilu.iluImageParameter(Ilu.ILU_FILTER, Ilu.ILU_BILINEAR);
                 Ilu.iluScale(width, height, 1);
+
+                // After scaling, un-premultiply alpha
+                data = Il.ilGetData();
+                pixels = new byte[width * height * bpp];
+                System.Runtime.InteropServices.Marshal.Copy(data, pixels, 0, pixels.Length);
+
+                for (int i = 0; i < pixels.Length; i += 4)
+                {
+                    float alpha = pixels[i + 3] / 255f;
+                    if (alpha > 0)
+                    {
+                        pixels[i + 0] = (byte)Math.Min(255, pixels[i + 0] / alpha); // R
+                        pixels[i + 1] = (byte)Math.Min(255, pixels[i + 1] / alpha); // G
+                        pixels[i + 2] = (byte)Math.Min(255, pixels[i + 2] / alpha); // B
+                    }
+                }
+
+                // Write back to DevIL
+                System.Runtime.InteropServices.Marshal.Copy(pixels, 0, data, pixels.Length);
 
                 if (format.ToLowerInvariant().Contains("bmp"))
                 {
@@ -1092,7 +1240,7 @@ namespace Nautilus
             {
                 return false;
             }
-        }
+        }*/
 
         /// <summary>
         /// Use to resize images up or down or convert across BMP/JPG/PNG
@@ -2568,14 +2716,14 @@ namespace Nautilus
 
         #region Savegame File Stuff
 
-        public bool ReplaceSaveImages(string saveFile, string image_folder, bool isPS3 = false)
+        public bool ReplaceSaveImages(string saveFile, string image_folder, bool isPS3 = false, int offsetDiff = 0)
         {
             if (!File.Exists(saveFile)) return false;
 
             var in_char = image_folder + "character_";
             var in_art = image_folder + "art_";
             var ext = isPS3 ? ".png_ps3" : ".png_xbox";
-            const int PS3_OFFSET = 0x74;
+            int PS3_OFFSET = 0x74 + offsetDiff;
 
             try
             {
@@ -2732,7 +2880,7 @@ namespace Nautilus
             }
         }
 
-        public bool ExtractSaveImages(string saveFile, string savepath, bool isPS3 = false)
+        public bool ExtractSaveImages(string saveFile, string savepath, bool isPS3 = false, int offsetDiff = 0)
         {
             if (!File.Exists(saveFile)) return false;
 
@@ -2749,7 +2897,7 @@ namespace Nautilus
             {
                 const int BAND_OFFSET = 0x43A773;
                 const int BAND_LENGTH = 31;
-                const int PS3_OFFSET = 0x74;
+                int PS3_OFFSET = 0x74 + offsetDiff;
                 var ext = isPS3 ? ".png_ps3" : ".png_xbox";
 
                 //get band name from save file

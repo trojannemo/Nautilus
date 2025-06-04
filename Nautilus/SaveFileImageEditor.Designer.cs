@@ -68,6 +68,8 @@
             this.lblConsole = new System.Windows.Forms.Label();
             this.lblCharacter = new System.Windows.Forms.Label();
             this.lblArt = new System.Windows.Forms.Label();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.offsetFix = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.picArt)).BeginInit();
             this.contextMenuStrip3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picCharacter)).BeginInit();
@@ -199,6 +201,7 @@
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
+            this.optionsToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -504,6 +507,22 @@
             this.lblArt.TabIndex = 81;
             this.lblArt.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.offsetFix});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.optionsToolStripMenuItem.Text = "Options";
+            // 
+            // offsetFix
+            // 
+            this.offsetFix.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.offsetFix.CheckOnClick = true;
+            this.offsetFix.Name = "offsetFix";
+            this.offsetFix.Size = new System.Drawing.Size(194, 22);
+            this.offsetFix.Text = "ScientistsSay Offset Fix";
+            // 
             // SaveFileImageEditor
             // 
             this.AllowDrop = true;
@@ -600,5 +619,7 @@
         private System.Windows.Forms.Label lblCharacter;
         private System.Windows.Forms.Label lblArt;
         private System.Windows.Forms.PictureBox picPin;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem offsetFix;
     }
 }
