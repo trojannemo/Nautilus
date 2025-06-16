@@ -93,6 +93,10 @@ namespace Nautilus
             {
                 Application.Run(new AudioConverter());
             }
+            else if (argument.Contains("-karaoke"))
+            {
+                Application.Run(new CDGConverter());
+            }
             else if (argument.Contains("-extractor"))
             {
                 Application.Run(new BatchExtractor(Color.FromArgb(197, 34, 35), Color.Black));

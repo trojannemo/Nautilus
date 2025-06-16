@@ -2540,13 +2540,20 @@ namespace Nautilus
 
             try
             {
-                var time = Regex.Match(line, @"\d+").Value;
-                time = time.Substring(0, time.Length - 3);
-                return GetSongDuration(Convert.ToDouble(time));
+                return GetSongDuration(Convert.ToDouble(raw_line));
             }
             catch (Exception)
             {
-                return "";
+                try
+                {
+                    var time = Regex.Match(line, @"\d+").Value;
+                    time = time.Substring(0, time.Length - 3);
+                    return GetSongDuration(Convert.ToDouble(time));
+                }
+                catch
+                {
+                    return "0:00";
+                }
             }
         }
 

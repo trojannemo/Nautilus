@@ -1595,7 +1595,7 @@
             this.btnCDG.Name = "btnCDG";
             this.btnCDG.Size = new System.Drawing.Size(122, 43);
             this.btnCDG.TabIndex = 57;
-            this.btnCDG.Text = "???";
+            this.btnCDG.Text = "RB to Karaoke Converter";
             this.btnCDG.UseVisualStyleBackColor = false;
             this.btnCDG.Click += new System.EventHandler(this.btnCDG_Click);
             // 

@@ -909,6 +909,8 @@ namespace Nautilus
         public string NoteName { get; set; }
         public Color NoteColor { get; set; }
         public bool isTom { get; set; }
+
+        public long Ticks { get; set; }
     }
 
     public class TempoEvent

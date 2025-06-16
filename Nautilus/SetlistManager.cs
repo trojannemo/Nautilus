@@ -580,7 +580,7 @@ namespace Nautilus
             List<YARGSong> songs = JsonConvert.DeserializeObject<List<YARGSong>>(File.ReadAllText(json));
 
             TotalSongs = 0;
-            Songs.Clear();
+            AllSongs.Clear();
 
             for (var i = 0; i < songs.Count; i++)
             {
@@ -604,7 +604,7 @@ namespace Nautilus
                 song.Master = true; //let's default to Master even though we don't really know
                 song.Source = "custom"; //let's default to Custom source since this json doesn't specify source
                 song.DateAdded = DateTime.Now;
-                Songs.Add(song);
+                AllSongs.Add(song);
             }
 
             var setlist_file = setlist_folder + "_YARG_" + DateTime.Now.Year + DateTime.Now.Month + DateTime.Now.Day +
@@ -626,7 +626,7 @@ namespace Nautilus
             List<CHSong> songs = JsonConvert.DeserializeObject<List<CHSong>>(File.ReadAllText(json));
 
             TotalSongs = 0;
-            Songs.Clear();
+            AllSongs.Clear();
 
             for (var i = 0; i < songs.Count; i++)
             {
@@ -650,7 +650,7 @@ namespace Nautilus
                 song.Master = true; //let's default to Master even though we don't really know
                 song.Source = "custom"; //let's default to Custom source since this json doesn't specify source
                 song.DateAdded = DateTime.Now;
-                Songs.Add(song);
+                AllSongs.Add(song);
             }
 
             var setlist_file = setlist_folder + "_CH_" + DateTime.Now.Year + DateTime.Now.Month + DateTime.Now.Day +
@@ -2223,6 +2223,7 @@ namespace Nautilus
         
         private void ResizeColumns()
         {
+            lstSongs.SelectedIndices.Clear();
             lstSongs.VirtualListSize = Songs.Count;
             lstSongs.Columns[0].Width = 120; //artist
             lstSongs.Columns[1].Width = 120; //song
@@ -2477,6 +2478,7 @@ namespace Nautilus
             }
 
             // Update VirtualMode ListView
+            lstSongs.SelectedIndices.Clear();
             lstSongs.VirtualListSize = Songs.Count;
             lstSongs.Invalidate();
 
@@ -5150,6 +5152,7 @@ namespace Nautilus
             }
 
             lstSongs.BeginUpdate();
+            lstSongs.SelectedIndices.Clear();
             lstSongs.VirtualListSize = Songs.Count;
             lstSongs.EndUpdate();
             lstSongs.Invalidate(); // Refresh the ListView                      
@@ -5261,13 +5264,13 @@ namespace Nautilus
         {
             if (lstSongs.SelectedIndices.Count > 1) return;
 
-            youtubeTmr.Enabled = false;
-
-            var artist = Songs[lstSongs.SelectedIndices[0]].Artist;
-            var title = Songs[lstSongs.SelectedIndices[0]].Name;
+            youtubeTmr.Enabled = false;            
 
             try
             {
+                var artist = Songs[lstSongs.SelectedIndices[0]].Artist;
+                var title = Songs[lstSongs.SelectedIndices[0]].Name;
+
                 string apiKey = "AIzaSyCGeH3j0am3-rFCZ8egCcNOldXJZ53tjQ0"; // Replace with your own API key
                 string query = Uri.EscapeDataString($"{artist} {title} music");
                 string url = $"https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q={query}&key={apiKey}";
@@ -5312,37 +5315,48 @@ namespace Nautilus
             Process.Start(YouTubeLink);
         }
 
-        private void lyricsTmr_Tick(object sender, EventArgs e)
+        private async void lyricsTmr_Tick(object sender, EventArgs e)
         {
-            if (lstSongs.SelectedIndices.Count > 1) return;
-
             lyricsTmr.Enabled = false;
 
-            var artist = Songs[lstSongs.SelectedIndices[0]].Artist;
-            var title = Songs[lstSongs.SelectedIndices[0]].Name;
+            if (lstSongs.SelectedIndices.Count != 1)
+                return;
 
             try
             {
+                var index = lstSongs.SelectedIndices[0];
+                if (index < 0 || index >= Songs.Count)
+                    return;
+
+                var artist = Songs[index].Artist;
+                var title = Songs[index].Name;
+
+                if (string.IsNullOrWhiteSpace(artist) || string.IsNullOrWhiteSpace(title))
+                    return;
+
                 string apiUrl = $"https://api.lyrics.ovh/v1/{Uri.EscapeDataString(artist)}/{Uri.EscapeDataString(title)}";
 
-                using (HttpClient client = new HttpClient())
+                using (HttpClient client = new HttpClient { Timeout = TimeSpan.FromSeconds(3) }) // Set timeout
                 {
-                    HttpResponseMessage response = client.GetAsync(apiUrl).Result; // Synchronous call
+                    var response = await client.GetAsync(apiUrl);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        string json = response.Content.ReadAsStringAsync().Result;
+                        var json = await response.Content.ReadAsStringAsync();
                         LyricsData = JsonConvert.DeserializeObject<LyricsResponse>(json);
-
                         picLyrics.Visible = LyricsData != null;
+                        return;
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                picLyrics.Visible = false;
+                // Timeout, network error, or no lyrics
             }
+
+            picLyrics.Visible = false;
         }
+
 
         private void picLyrics_MouseClick(object sender, MouseEventArgs e)
         {

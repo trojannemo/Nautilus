@@ -1659,7 +1659,7 @@ namespace Nautilus
         {
             var version = GetAppVersion();
             var message = Tools.ReadHelpFile("about");
-            MessageBox.Show(Text + " " + version + "\nDeveloped by TrojanNemo\n© 2013-2024\n\n" + message, "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(Text + " " + version + "\nDeveloped by TrojanNemo\n© 2013-2025\n\n" + message, "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void viewChangeLogToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2165,7 +2165,12 @@ namespace Nautilus
 
         private void btnCDG_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("This is just a placeholder for now...", "Nautilus", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (MovedButton) return;
+            var cdg = new CDGConverter();
+            activeForm = cdg;
+            activeForms.Add(activeForm);
+            cdg.Show();
+            //MessageBox.Show("This is just a placeholder for now...", "Nautilus", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 
