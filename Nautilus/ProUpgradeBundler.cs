@@ -198,7 +198,7 @@ namespace Nautilus
                 MIDIFixFailed(orig_midi, false);
                 return;
             }
-            if (!File.Exists(orig_dta))
+            if (!File.Exists(orig_dta) && !string.IsNullOrEmpty(orig_dta))
             {
                 Log("DTA file " + Path.GetFileName(orig_dta) + " is missing! Did you just delete it?");
                 MIDIFixFailed(orig_dta, false);
