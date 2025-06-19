@@ -2926,15 +2926,39 @@ namespace Nautilus
                 }
 
                 //grab character images
-                var CHAR_OFFSET = 0x4C07D;
+                //var CHAR_OFFSET = 0x4C07D;
                 const int CHAR_SIZE = 0x20020;
-                const int CHAR_SPACER = 0xED6;
+                //const int CHAR_SPACER = 0xED6;
                 var CHAR_HEADER = new byte[]
                 {
                     0x01, 0x08, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00
                 };
+                //recursive find to fix issues with things being out of expected place
                 var CHAR_COUNTER = 0;
                 var OUTPUT_CHAR = outFolder + "character_";
+
+                for (var z = 0; z < saveBytes.Count() - CHAR_SIZE; z++)
+                {
+                    var saveStream = new MemoryStream(saveBytes, z, CHAR_HEADER.Length);
+                    var checkBytes = new byte[CHAR_HEADER.Length];
+                    saveStream.Read(checkBytes, 0, CHAR_HEADER.Length);
+                    saveStream.Dispose();
+
+                    if (!checkBytes.SequenceEqual(CHAR_HEADER)) continue;
+                    
+                    var imgStream = new MemoryStream(saveBytes, z, CHAR_SIZE);
+                    var imgBytes = new byte[CHAR_SIZE];
+                    imgStream.Read(imgBytes, 0, CHAR_SIZE);
+                    imgStream.Dispose();
+                    
+                    CHAR_COUNTER++;
+                    var outfile = OUTPUT_CHAR + CHAR_COUNTER + ext;
+                    DeleteFile(outfile);
+                    File.WriteAllBytes(outfile, imgBytes);
+                    ConvertRBImage(outfile);
+                }
+
+                /* original code
                 for (var i = 0; i < 10; i++)
                 {
                     var saveStream = new MemoryStream(saveBytes, isPS3 ? CHAR_OFFSET + PS3_OFFSET : CHAR_OFFSET, CHAR_HEADER.Length);
@@ -2959,21 +2983,45 @@ namespace Nautilus
                     DeleteFile(outfile);
                     File.WriteAllBytes(outfile, imgBytes);
                     ConvertRBImage(outfile);
-                }
+                }*/
 
                 //grab art images
-                var ART_OFFSET = 0x19495B;
+                //var ART_OFFSET = 0x19495B;
                 const int ART_SIZE = 0x10020;
-                const int ART_SPACER = 0x214;
+                //const int ART_SPACER = 0x214;
                 var ART_HEADER = new byte[]
                 {
                     0x01, 0x08, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00
                 };
+
+                //recursive find to fix issues with things being out of expected place
                 var ART_COUNTER = 0;
                 var OUTPUT_ART = outFolder + "art_";
 
-                for (var i = 0; i < 19; i++)
+                for (var z = 0; z < saveBytes.Count() - ART_SIZE; z++)
                 {
+                    var save_stream = new MemoryStream(saveBytes, z, ART_HEADER.Length);
+                    var check_bytes = new byte[ART_HEADER.Length];
+                    save_stream.Read(check_bytes, 0, ART_HEADER.Length);
+                    save_stream.Dispose();
+
+                    if (!check_bytes.SequenceEqual(ART_HEADER)) continue;
+                    
+                    var imgStream = new MemoryStream(saveBytes, z, ART_SIZE);
+                    var imgBytes = new byte[ART_SIZE];
+                    imgStream.Read(imgBytes, 0, ART_SIZE);
+                    imgStream.Dispose();
+                   
+                    ART_COUNTER++;
+                    var outFile = OUTPUT_ART + ART_COUNTER + ext;
+                    DeleteFile(outFile);
+                    File.WriteAllBytes(outFile, imgBytes);
+                    ConvertRBImage(outFile);
+                }
+
+                /* original code
+                for (var i = 0; i < 19; i++)
+                { 
                     var save_stream = new MemoryStream(saveBytes, isPS3 ? ART_OFFSET + PS3_OFFSET : ART_OFFSET, ART_HEADER.Length);
                     var check_bytes = new byte[ART_HEADER.Length];
                     save_stream.Read(check_bytes, 0, ART_HEADER.Length);
@@ -2996,7 +3044,7 @@ namespace Nautilus
                     DeleteFile(outFile);
                     File.WriteAllBytes(outFile, imgBytes);
                     ConvertRBImage(outFile);
-                }
+                }*/
 
                 var success = ART_COUNTER != 0 || CHAR_COUNTER != 0;
                 if (success) return true;

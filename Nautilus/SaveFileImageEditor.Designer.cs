@@ -47,6 +47,8 @@
             this.saveChangesToFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.offsetFix = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnExportArt = new System.Windows.Forms.Button();
             this.btnReplaceArt = new System.Windows.Forms.Button();
@@ -68,8 +70,6 @@
             this.lblConsole = new System.Windows.Forms.Label();
             this.lblCharacter = new System.Windows.Forms.Label();
             this.lblArt = new System.Windows.Forms.Label();
-            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.offsetFix = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.picArt)).BeginInit();
             this.contextMenuStrip3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picCharacter)).BeginInit();
@@ -262,6 +262,23 @@
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
+            // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.offsetFix});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.optionsToolStripMenuItem.Text = "Options";
+            this.optionsToolStripMenuItem.Visible = false;
+            // 
+            // offsetFix
+            // 
+            this.offsetFix.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.offsetFix.CheckOnClick = true;
+            this.offsetFix.Name = "offsetFix";
+            this.offsetFix.Size = new System.Drawing.Size(194, 22);
+            this.offsetFix.Text = "ScientistsSay Offset Fix";
             // 
             // helpToolStripMenuItem
             // 
@@ -506,22 +523,6 @@
             this.lblArt.Size = new System.Drawing.Size(111, 13);
             this.lblArt.TabIndex = 81;
             this.lblArt.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // optionsToolStripMenuItem
-            // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.offsetFix});
-            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
-            this.optionsToolStripMenuItem.Text = "Options";
-            // 
-            // offsetFix
-            // 
-            this.offsetFix.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.offsetFix.CheckOnClick = true;
-            this.offsetFix.Name = "offsetFix";
-            this.offsetFix.Size = new System.Drawing.Size(194, 22);
-            this.offsetFix.Text = "ScientistsSay Offset Fix";
             // 
             // SaveFileImageEditor
             // 
