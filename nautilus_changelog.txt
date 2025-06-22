@@ -6,12 +6,57 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+v5.5.1
+
+SAVE FILE IMAGE EDITOR
+- Rewrote entire code that EXTRACTS information and images from the save file and also the code that REWRITES the information and images back to the save file - should address the recent issues popping up with RPCS3 PS3 save files - I'm interested to hear from you if you still encounter failures or crashes when editing your save file
+
+DTA PARSER
+- Fixed error introduced in v5.5.0 that would show incorrect song durations throughout the entire program since I broke a function in the DTA Parser
+
+---
+
+v5.5.0
+
+ROCK BAND TO KARAOKE CONVERTER (NEW FEATURE!)
+- Converts Rock Band song files to .mp3 + .cdg files for use with most karaoke players - see Help information in the tool
+
+SETLIST MANAGER
+- Added field to keep track of when a song is added to your setlist - this will work best when making a new setlist going forward as it has no way of knowing retroactively when you added something - you can sort by date just like you can sort by all other fields
+- Merged pull request by jcollums that added filtering option for songs with no vocals (before it was just only masculine and feminine, now there's a third option)
+- Fixed broken importing of yarg.json and Clone Hero ch.json setlists - thanks to RazQ for pointing out the issue
+- Fixed code that searches for lyrics to the selected song to get around bug in the API that would hang when it didn't recognize the song, freezing Nautilus
+
+QUICK PACK EDITOR
+- Fixed broken dePACKing feature that was apparently broken since v5.4.0??? Should work fine now
+
+CLONE HERO CONVERTER
+- Merged pull request by jcollums that fixed the "don't add hopo threshold" toggle as brought up by ataeaf
+- Added placeholder video_start_time = line to the .ini file as requested by MrPrezident
+
+SAVE FILE IMAGE EDITOR
+- Fixed (?) long-standing issue with transparent art images when being applied in game to characters
+- Added workaround for user ScientistsSay (and anyone else on the same boat) that has their images offset off by one byte - click on Options and select ScientistsSay Offset Fix and try loading your PS3 save then
+
+QUICK DTA EDITOR
+- Merged pull request by jcollums that fixed Quick DTA Editor not detecting when there were no changes to the DTA file
+
+UPGRADE BUNDLER
+Fixed issue where bundling MIDI with MIDI would fail due to missing DTA file (which was not needed)
+
+MAIN FORM
+- Moved around a ton of buttons to re-organize in a way that (to me) makes more sense
+- Removed button for Video Preparer as that feature is not being used by anyone in 2025 - if you still need it, it can be accessed via shortcut argument
+- Fixed quirky behavior that would sometimes default to the black starry sky background image, which would make it seem as if all the (transparent) buttons disappeared
+
+---
+
 v5.4.2
 FRAMEWORK
-- Downgraded from .NET Framework 4.8.1 to .NET Framework v.4.8 for compatibility for Windows 7 users without having to manually modify the .exe.config file
+- Downgraded from .NET Framework 4.8.1 to .NET Framework 4.8.0 for compatibility for Windows 7 users without having to manually modify the .exe.config file
 
 SNG FILE PROCESSING (this affects any Tool that interacts with Clone Hero SNG files or YARG YARGSONG files)
-- Removed BinarEx as an external library and integrated the code directly into Nautilus to avoid a problem for Linux on WINE users - thanks to mdsitton for the library and to Oznogon for all the WINE troubleshooting help
+- Removed BinaryEx as an external library and integrated the code directly into Nautilus to avoid a problem for Linux on WINE users - thanks to mdsitton for the library and to Oznogon for all the WINE troubleshooting help
 
 VISUALIZER
 - Modified code for loading the default Myriad Pro Bold font that apparently wasn't working well for older Windows versions - still not working well for WINE users please let me know if you find a solution
@@ -23,7 +68,7 @@ CON CREATOR
 - Rock Band Blitz is now an option thanks to contribution from InvoxiPlayGames
 
 SAVE SCORES VIEWER v2.4 (Thanks be to StackOverflow0x!)
-- Fixes issue that was destroying all pro trainer progress if you interacted with it
+- Fixed issue that was destroying all pro trainer progress if you interacted with it
 
 MILOMOD v1.8f (Thanks be to StackOverflow0x!)
 - Minor fix for stability
