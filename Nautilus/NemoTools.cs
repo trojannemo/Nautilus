@@ -2716,18 +2716,64 @@ namespace Nautilus
 
         #region Savegame File Stuff
 
-        public bool ReplaceSaveImages(string saveFile, string image_folder, bool isPS3 = false, int offsetDiff = 0)
+        public bool ReplaceSaveImages(string saveFile, string image_folder, bool isPS3 = false)//, int offsetDiff = 0)
         {
             if (!File.Exists(saveFile)) return false;
 
             var in_char = image_folder + "character_";
             var in_art = image_folder + "art_";
             var ext = isPS3 ? ".png_ps3" : ".png_xbox";
-            int PS3_OFFSET = 0x74 + offsetDiff;
+            int PS3_OFFSET = 0x74;// + offsetDiff;
+            var char_offsets = image_folder + "char.offset";
+            var art_offsets = image_folder + "art.offset";
+            var name_offsets = image_folder + "names.offset";
+            var band_offset = image_folder + "band.offset";
+            List<long> char_offset_list = new List<long>();
+            List<long> art_offset_list = new List<long>();
+            List<long> name_offset_list = new List<long>();
+            long actualBandOffset = 0;
 
             try
             {
-                BinaryWriter bw;
+                var sr = new StreamReader(char_offsets);
+                for (var i = 0; i < 10; i++)
+                {
+                    char_offset_list.Add(Convert.ToInt64(sr.ReadLine()));
+                }
+                sr.Dispose();
+                sr = new StreamReader(art_offsets);
+                for (var i = 0; i < 19; i++)
+                {
+                    art_offset_list.Add(Convert.ToInt64(sr.ReadLine()));
+                }
+                sr.Dispose();
+                sr = new StreamReader(name_offsets);
+                for (var i = 0; i < 10; i++)
+                {
+                    var offset = Convert.ToInt64(sr.ReadLine());
+                    if (offset > 0)
+                    {
+                        name_offset_list.Add(offset);
+                    }
+                }
+                sr.Dispose();
+                sr = new StreamReader(band_offset);
+                actualBandOffset = Convert.ToInt64(sr.ReadLine());
+                sr.Dispose();
+            }
+            catch
+            {
+                MessageBox.Show("Offset information not found or corrupted, can't proceed!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            if (SaveFileCharNames.Count != name_offset_list.Count)
+            {
+                MessageBox.Show("Mismatch between character name count and character name offset count, can't proceed", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            try
+            {               
                 //hack the save.dat file and replace inside the CON
                 var datFile = saveFile;
                 var tempDAT = Application.StartupPath + "\\bin\\temp.dat";
@@ -2759,78 +2805,180 @@ namespace Nautilus
                     datFile = tempDAT;
                 }
 
-                //write band name
                 const int BAND_OFFSET = 0x43A773;
-                const int BAND_LENGTH = 31;
-                const string BAND_BLANK = "                              ";
-                var bLength = SaveFileBandName.Length > BAND_LENGTH ? BAND_LENGTH : SaveFileBandName.Length;
-                var bName = (SaveFileBandName + BAND_BLANK).Substring(0, BAND_LENGTH);
-                bw = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write));
-                bw.BaseStream.Seek((isPS3 ? BAND_OFFSET + PS3_OFFSET : BAND_OFFSET) - 4, SeekOrigin.Begin);
-                bw.Write(Convert.ToByte(bLength));
-                bw.BaseStream.Seek(isPS3 ? BAND_OFFSET + PS3_OFFSET : BAND_OFFSET, SeekOrigin.Begin);
-                bw.Write(Encoding.UTF8.GetBytes(bName));
-                bw.Dispose();
+                const int BAND_LENGTH = 31; // Max string bytes
+                const int BAND_META_OFFSET = BAND_OFFSET - 4;
 
-                //write character names
-                var NAME_OFFSET = 0x4B1AB;
-                const int NAME_SPACER = 0x20EDE;
-                const int NAME_LENGTH = 24;
-                const string NAME_BLANK = "                       ";
-                foreach (var n in SaveFileCharNames)
+                string bName = SaveFileBandName;
+                if (bName.Length > BAND_LENGTH)
                 {
-                    var name = (n + NAME_BLANK).Substring(0, NAME_LENGTH);
-                    var nLength = n.Length > NAME_LENGTH ? NAME_LENGTH : n.Length;
-                    bw = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write));
-                    bw.BaseStream.Seek((isPS3 ? NAME_OFFSET + PS3_OFFSET : NAME_OFFSET) - 4, SeekOrigin.Begin);
-                    bw.Write(Convert.ToByte(nLength));
-                    bw.BaseStream.Seek(isPS3 ? NAME_OFFSET + PS3_OFFSET : NAME_OFFSET, SeekOrigin.Begin);
-                    bw.Write(Encoding.UTF8.GetBytes(name));
-                    bw.Dispose();
-
-                    NAME_OFFSET += NAME_LENGTH + NAME_SPACER;
+                    bName = bName.Substring(0, BAND_LENGTH);
                 }
 
-                //write all art images
-                Int32 ART_OFFSET = 0x19495B;
-                const Int32 ART_SIZE = 0x10020;
-                const Int32 ART_SPACER = 0x214;
-                for (var i = 0; i < 19; i++)
+                // Encode the string as bytes
+                byte[] bandNameBytes = Encoding.UTF8.GetBytes(bName);
+
+                // Create a zero-filled byte array of full length
+                byte[] bandPaddedBytes = new byte[BAND_LENGTH];
+                Array.Clear(bandPaddedBytes, 0, BAND_LENGTH);
+
+                // Copy the encoded name into the padded array
+                Array.Copy(bandNameBytes, 0, bandPaddedBytes, 0, bandNameBytes.Length);
+
+                using (var bw3 = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write)))
                 {
-                    var file = in_art + (i + 1) + ext;
-                    if (!File.Exists(file))
+                    // Write actual length
+                    //bw3.BaseStream.Seek((isPS3 ? BAND_META_OFFSET + PS3_OFFSET : BAND_META_OFFSET), SeekOrigin.Begin);
+                    bw3.BaseStream.Seek(actualBandOffset - 4, SeekOrigin.Begin);
+                    bw3.Write(BitConverter.GetBytes(bandNameBytes.Length));
+
+                    // Write padded name with nulls instead of spaces
+                    //bw3.BaseStream.Seek((isPS3 ? BAND_OFFSET + PS3_OFFSET : BAND_OFFSET), SeekOrigin.Begin);
+                    bw3.BaseStream.Seek(actualBandOffset, SeekOrigin.Begin);
+                    bw3.Write(bandPaddedBytes);
+                }                
+
+                int NAME_OFFSET = 0x4B1AB;
+                const int NAME_SPACER = 0x20EDE;
+                const int NAME_LENGTH = 24; // fixed-length name field (UTF-8 + nulls)
+
+                using (var bw = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write)))
+                {        
+                    for (var c = 0; c < SaveFileCharNames.Count; c++)
                     {
-                        ART_OFFSET += ART_SIZE + ART_SPACER;
-                        continue;
+                        var name = SaveFileCharNames[c];
+                        string charName = name.Length > NAME_LENGTH ? name.Substring(0, NAME_LENGTH) : name;
+                        byte[] nameBytes = Encoding.UTF8.GetBytes(charName);
+
+                        // Build 24-byte null-padded buffer
+                        byte[] paddedBytes = new byte[NAME_LENGTH];
+                        Array.Clear(paddedBytes, 0, NAME_LENGTH);
+                        Array.Copy(nameBytes, 0, paddedBytes, 0, Math.Min(nameBytes.Length, NAME_LENGTH));
+
+                        // Compute write positions
+                        long offset = Convert.ToInt64(name_offset_list[c]);
+                        offset = isPS3 ? offset + PS3_OFFSET : offset;
+                        long lengthOffset = offset - 4;
+
+                        // Write name
+                        bw.BaseStream.Seek(offset, SeekOrigin.Begin);
+                        bw.Write(paddedBytes);
+
+                        // Write 4-byte length
+                        bw.BaseStream.Seek(lengthOffset, SeekOrigin.Begin);
+                        bw.Write((byte)nameBytes.Count());
+
+                        // Move to next entry
+                        NAME_OFFSET += NAME_LENGTH + NAME_SPACER;
+                    }
+                    /*foreach (var name in SaveFileCharNames)
+                    {
+                        string charName = name.Length > NAME_LENGTH ? name.Substring(0, NAME_LENGTH) : name;
+                        byte[] nameBytes = Encoding.UTF8.GetBytes(charName);
+
+                        // Build 24-byte null-padded buffer
+                        byte[] paddedBytes = new byte[NAME_LENGTH];
+                        Array.Clear(paddedBytes, 0, NAME_LENGTH);
+                        Array.Copy(nameBytes, 0, paddedBytes, 0, Math.Min(nameBytes.Length, NAME_LENGTH));
+
+                        // Compute write positions
+                        int offset = isPS3 ? NAME_OFFSET + PS3_OFFSET : NAME_OFFSET;
+                        int lengthOffset = offset - 4;                                             
+
+                        // Write name
+                        bw.BaseStream.Seek(offset, SeekOrigin.Begin);
+                        bw.Write(paddedBytes);
+
+                        // Write 4-byte length
+                        bw.BaseStream.Seek(lengthOffset, SeekOrigin.Begin);
+                        bw.Write((byte)nameBytes.Count());
+
+                        // Move to next entry
+                        NAME_OFFSET += NAME_LENGTH + NAME_SPACER;
+                    }*/
+                }
+
+                /*foreach (var name in SaveFileCharNames)
+                {
+                    // Truncate if needed
+                    string charName = name.Length > NAME_LENGTH ? name.Substring(0, NAME_LENGTH) : name;
+
+                    // Encode to UTF-8 bytes
+                    byte[] nameBytes = Encoding.UTF8.GetBytes(charName);
+
+                    // Create a null-padded byte array of fixed length
+                    byte[] paddedBytes = new byte[NAME_LENGTH];
+                    Array.Clear(paddedBytes, 0, NAME_LENGTH);
+                    Array.Copy(nameBytes, 0, paddedBytes, 0, Math.Min(nameBytes.Length, NAME_LENGTH));
+
+                    // Write length and padded name in one stream
+                    using (var bw4 = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write)))
+                    {
+                        // Write name length (in bytes, not characters!)
+                        bw4.BaseStream.Seek((isPS3 ? NAME_OFFSET + PS3_OFFSET : NAME_OFFSET) - 4, SeekOrigin.Begin);
+                        bw4.Write(BitConverter.GetBytes(nameBytes.Length));
+
+                        // Write null-padded name
+                        bw4.BaseStream.Seek(isPS3 ? NAME_OFFSET + PS3_OFFSET : NAME_OFFSET, SeekOrigin.Begin);
+                        bw4.Write(paddedBytes);
                     }
 
-                    bw = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write));
-                    bw.BaseStream.Seek(isPS3 ? ART_OFFSET + PS3_OFFSET : ART_OFFSET, SeekOrigin.Begin);
-                    bw.Write(File.ReadAllBytes(file), 0, ART_SIZE);
-                    bw.Close();
+                    // Move to the next character name slot
+                    NAME_OFFSET += NAME_LENGTH + NAME_SPACER;
+                }*/
 
-                    ART_OFFSET += ART_SIZE + ART_SPACER;
+                //write all art images
+                //Int32 ART_OFFSET = 0x19495B;
+                const Int32 ART_SIZE = 0x10020;
+                //const Int32 ART_SPACER = 0x214;
+                using (var bw1 = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write)))
+                {
+                    for (var i = 0; i < 19; i++)
+                    {
+                        var file = in_art + (i + 1) + ext;
+                        if (!File.Exists(file) || art_offset_list[i] == 0)
+                        {
+                            //ART_OFFSET += ART_SIZE + ART_SPACER;
+                            continue;
+                        }
+                        bw1.BaseStream.Seek(art_offset_list[i], SeekOrigin.Begin);
+                        bw1.Write(File.ReadAllBytes(file), 0, ART_SIZE);
+
+                        /* original code
+                        bw = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write));
+                        bw.BaseStream.Seek(isPS3 ? ART_OFFSET + PS3_OFFSET : ART_OFFSET, SeekOrigin.Begin);
+                        bw.Write(File.ReadAllBytes(file), 0, ART_SIZE);
+                        bw.Close();
+
+                        ART_OFFSET += ART_SIZE + ART_SPACER;*/
+                    }
                 }
 
                 //write all character images
-                Int32 CHAR_OFFSET = 0x4C07D;
-                const Int32 CHAR_SPACER = 0xED6;
+                //Int32 CHAR_OFFSET = 0x4C07D;
+                //const Int32 CHAR_SPACER = 0xED6;
                 const Int32 CHAR_SIZE = 0x20020;
-                for (var i = 0; i < 19; i++)
+                using (var bw2 = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write)))
                 {
-                    var file = in_char + (i + 1) + ext;
-                    if (!File.Exists(file))
+                    for (var i = 0; i < 10; i++)
                     {
-                        CHAR_OFFSET += CHAR_SIZE + CHAR_SPACER;
-                        continue;
+                        var file = in_char + (i + 1) + ext;
+                        if (!File.Exists(file) || char_offset_list[i] == 0)
+                        {
+                            //CHAR_OFFSET += CHAR_SIZE + CHAR_SPACER;
+                            continue;
+                        }
+                        bw2.BaseStream.Seek(char_offset_list[i], SeekOrigin.Begin);
+                        bw2.Write(File.ReadAllBytes(file), 0, CHAR_SIZE);
+
+                        /*original code
+                        bw = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write));
+                        bw.BaseStream.Seek(isPS3 ? CHAR_OFFSET + PS3_OFFSET : CHAR_OFFSET, SeekOrigin.Begin);
+                        bw.Write(File.ReadAllBytes(file), 0, CHAR_SIZE);
+                        bw.Close();
+
+                        CHAR_OFFSET += CHAR_SIZE + CHAR_SPACER;*/
                     }
-
-                    bw = new BinaryWriter(File.Open(datFile, FileMode.Open, FileAccess.Write));
-                    bw.BaseStream.Seek(isPS3 ? CHAR_OFFSET + PS3_OFFSET : CHAR_OFFSET, SeekOrigin.Begin);
-                    bw.Write(File.ReadAllBytes(file), 0, CHAR_SIZE);
-                    bw.Close();
-
-                    CHAR_OFFSET += CHAR_SIZE + CHAR_SPACER;
                 }
 
                 if (!isCON) return true;
@@ -2892,12 +3040,24 @@ namespace Nautilus
             {
                 Directory.CreateDirectory(outFolder);
             }
+            var char_offsets = outFolder + "char.offset";
+            var art_offsets = outFolder + "art.offset";
+            var names_offsets = outFolder + "names.offset";
+            var band_offset = outFolder + "band.offset";
+            DeleteFile(char_offsets);
+            DeleteFile(art_offsets);
+            DeleteFile(names_offsets);
+            DeleteFile(band_offset);
+            List<long> char_offset_list = new List<long>();
+            List<long> art_offset_list = new List<long>();
+            List<long> name_offset_list = new List<long>();
+            long actualBandOffset = 0;
 
             try
             {
                 const int BAND_OFFSET = 0x43A773;
                 const int BAND_LENGTH = 31;
-                int PS3_OFFSET = 0x74 + offsetDiff;
+                int PS3_OFFSET = 0x74;// + offsetDiff;
                 var ext = isPS3 ? ".png_ps3" : ".png_xbox";
 
                 //get band name from save file
@@ -2907,6 +3067,7 @@ namespace Nautilus
                 nameStream.Read(nameBytes, 0, BAND_LENGTH);
                 nameStream.Dispose();
                 SaveFileBandName = Encoding.UTF8.GetString(nameBytes).Replace("\0", "").Trim();
+                actualBandOffset = (isPS3 ? BAND_OFFSET + PS3_OFFSET : BAND_OFFSET) + (nameBytes[0] == 0x00 ? 1 : 0); //to account for shifted PS3 files
 
                 //get character names
                 var NAME_OFFSET = 0x4B1AB;
@@ -2918,11 +3079,13 @@ namespace Nautilus
                     nameBytes = new byte[NAME_LENGTH];
                     nameStream.Read(nameBytes, 0, NAME_LENGTH);
                     nameStream.Dispose();
-                    var name = Encoding.UTF8.GetString(nameBytes).Replace("\0", "").Trim();
-
-                    NAME_OFFSET += NAME_LENGTH + NAME_SPACER;
+                    var name = Encoding.UTF8.GetString(nameBytes).Replace("\0","").Trim();
+                                                            
                     if (string.IsNullOrWhiteSpace(name)) break;
+
+                    name_offset_list.Add(nameBytes[0] == 0x00 ? NAME_OFFSET + 1 : NAME_OFFSET);//to account for shifted PS3 values
                     SaveFileCharNames.Add(name);
+                    NAME_OFFSET += NAME_LENGTH + NAME_SPACER;
                 }
 
                 //grab character images
@@ -2937,22 +3100,22 @@ namespace Nautilus
                 var CHAR_COUNTER = 0;
                 var OUTPUT_CHAR = outFolder + "character_";
 
-                for (var z = 0; z < saveBytes.Count() - CHAR_SIZE; z++)
+                int saveLength = saveBytes.Length;
+                for (int z = 0; z <= saveLength - CHAR_SIZE; z++)
                 {
-                    var saveStream = new MemoryStream(saveBytes, z, CHAR_HEADER.Length);
-                    var checkBytes = new byte[CHAR_HEADER.Length];
-                    saveStream.Read(checkBytes, 0, CHAR_HEADER.Length);
-                    saveStream.Dispose();
+                    // Fast slice without memory allocations
+                    if (!saveBytes.AsSpan(z, CHAR_HEADER.Length).SequenceEqual(CHAR_HEADER))
+                        continue;
 
-                    if (!checkBytes.SequenceEqual(CHAR_HEADER)) continue;
-                    
-                    var imgStream = new MemoryStream(saveBytes, z, CHAR_SIZE);
-                    var imgBytes = new byte[CHAR_SIZE];
-                    imgStream.Read(imgBytes, 0, CHAR_SIZE);
-                    imgStream.Dispose();
-                    
+                    char_offset_list.Add(z);
+
+                    // Copy only when matched
+                    byte[] imgBytes = new byte[CHAR_SIZE];
+                    Array.Copy(saveBytes, z, imgBytes, 0, CHAR_SIZE);
+
                     CHAR_COUNTER++;
-                    var outfile = OUTPUT_CHAR + CHAR_COUNTER + ext;
+                    string outfile = OUTPUT_CHAR + CHAR_COUNTER + ext;
+
                     DeleteFile(outfile);
                     File.WriteAllBytes(outfile, imgBytes);
                     ConvertRBImage(outfile);
@@ -2998,25 +3161,24 @@ namespace Nautilus
                 var ART_COUNTER = 0;
                 var OUTPUT_ART = outFolder + "art_";
 
-                for (var z = 0; z < saveBytes.Count() - ART_SIZE; z++)
+                for (int z = 0; z <= saveLength - ART_SIZE; z++)
                 {
-                    var save_stream = new MemoryStream(saveBytes, z, ART_HEADER.Length);
-                    var check_bytes = new byte[ART_HEADER.Length];
-                    save_stream.Read(check_bytes, 0, ART_HEADER.Length);
-                    save_stream.Dispose();
+                    // Fast slice without memory allocations
+                    if (!saveBytes.AsSpan(z, ART_HEADER.Length).SequenceEqual(ART_HEADER))
+                        continue;
 
-                    if (!check_bytes.SequenceEqual(ART_HEADER)) continue;
-                    
-                    var imgStream = new MemoryStream(saveBytes, z, ART_SIZE);
-                    var imgBytes = new byte[ART_SIZE];
-                    imgStream.Read(imgBytes, 0, ART_SIZE);
-                    imgStream.Dispose();
-                   
+                    art_offset_list.Add(z);
+
+                    // Copy only when matched
+                    byte[] imgBytes = new byte[ART_SIZE];
+                    Array.Copy(saveBytes, z, imgBytes, 0, ART_SIZE);
+
                     ART_COUNTER++;
-                    var outFile = OUTPUT_ART + ART_COUNTER + ext;
-                    DeleteFile(outFile);
-                    File.WriteAllBytes(outFile, imgBytes);
-                    ConvertRBImage(outFile);
+                    string outfile = OUTPUT_ART + ART_COUNTER + ext;
+
+                    DeleteFile(outfile);
+                    File.WriteAllBytes(outfile, imgBytes);
+                    ConvertRBImage(outfile);
                 }
 
                 /* original code
@@ -3047,7 +3209,32 @@ namespace Nautilus
                 }*/
 
                 var success = ART_COUNTER != 0 || CHAR_COUNTER != 0;
-                if (success) return true;
+                if (success)
+                {
+                    //save offsets to file for reference when saving changes
+                    var sw = new StreamWriter(char_offsets, false);
+                    foreach (var offset in char_offset_list)
+                    {
+                        sw.WriteLine(offset);
+                    }
+                    sw.Dispose();
+                    sw = new StreamWriter(art_offsets, false);
+                    foreach (var offset in art_offset_list)
+                    {
+                        sw.WriteLine(offset);
+                    }
+                    sw.Dispose();
+                    sw = new StreamWriter(names_offsets, false);
+                    foreach (var offset in name_offset_list)
+                    {
+                        sw.WriteLine(offset);
+                    }
+                    sw.Dispose();
+                    sw = new StreamWriter(band_offset, false);
+                    sw.WriteLine(actualBandOffset);
+                    sw.Dispose();
+                    return true;
+                }
                 DeleteFolder(outFolder, true);
                 MessageBox.Show("No character or art images found in that save game file\nThis tool only allows you to edit existing images,\nso try again after you've created characters or art in game",
                     "Save File Image Editor", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);

@@ -684,7 +684,7 @@ namespace Nautilus
             File.Copy(UserSaveFile, backup);
 
             var offset = offsetFix.Checked ? 1 : 0;
-            if (!Tools.ReplaceSaveImages(UserSaveFile, ImageFolder, isPS3, offset))
+            if (!Tools.ReplaceSaveImages(UserSaveFile, ImageFolder, isPS3))// offset))
             {
                 Log("Saving changes to file failed");
                 Tools.DeleteFile(UserSaveFile);
