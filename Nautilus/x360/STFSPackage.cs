@@ -1319,7 +1319,7 @@ namespace Nautilus.x360
             try
             {
                 x.Position = 0;
-                x.Write("Modified Header Details by TrojanNemo for Customs Creators Collective" + Environment.NewLine);
+                x.Write("Modified Header Details by Nemo" + Environment.NewLine);
                 x.Write("Display Title: " + xTitles[0] + Environment.NewLine);
                 x.Write("Display Description: " + xDescriptions[0] + Environment.NewLine);
                 x.Write("Title ID: " + TitleID.ToString("X2") + Environment.NewLine);

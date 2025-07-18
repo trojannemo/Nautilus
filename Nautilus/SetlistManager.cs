@@ -486,6 +486,9 @@ namespace Nautilus
                         return;
                     }
                     break;
+                case ".playlist":
+                    ImportPlaylist(files[0]);
+                    break;
                 case ".vff":
                     ActiveCacheFile = files[0];
                     break;
@@ -573,6 +576,74 @@ namespace Nautilus
             {
                 SortSongs(lastSortedColumn);
             }
+        }
+
+        private void ImportPlaylist(string file)
+        {
+            var sr = new StreamReader(file);
+            var header = sr.ReadLine();
+            if (!header.Contains("cPlayer"))
+            {
+                MessageBox.Show("Invalid .playlist file", "Invalid File", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                sr.Dispose();
+                return;
+            }
+            sr.ReadLine();
+            var playlistName = Tools.GetConfigString(sr.ReadLine());
+            var songCount = Convert.ToInt32(Tools.GetConfigString(sr.ReadLine()));
+
+            if (songCount > 0)
+            {
+                TotalSongs = 0;
+                AllSongs.Clear();
+                for (var i = 0; i < songCount; i++)
+                {
+                    var line = sr.ReadLine();
+                    var song_info = line.Split(new[] { "\t" }, StringSplitOptions.None);
+                    var song = new SongData
+                    {
+                        Artist = song_info[0],
+                        Name = song_info[1],
+                        Album = song_info[2],
+                        TrackNumber = Convert.ToInt16(song_info[3]),
+                        Genre = song_info[4],
+                        YearReleased = Convert.ToInt16(song_info[5]),
+                        Length = Convert.ToInt32(song_info[6]),
+                        AttenuationValues = song_info[7],
+                        PanningValues = song_info[8],
+                        ChannelsDrums = Convert.ToInt16(song_info[9]),
+                        ChannelsBass = Convert.ToInt16(song_info[10]),
+                        ChannelsGuitar = Convert.ToInt16(song_info[11]),
+                        ChannelsVocals = Convert.ToInt16(song_info[12]),
+                        ChannelsKeys = Convert.ToInt16(song_info[13]),
+                        ChannelsCrowd = Convert.ToInt16(song_info[14]),
+                        ChartAuthor = song_info[16],
+                        InternalName = song_info[17],
+                        DTAIndex = Convert.ToInt16(song_info[19]),
+                        RhythmBass = song_info.Count() >= 25 && song_info[22].Contains("True"),
+                        RhythmKeys = song_info.Count() >= 25 && song_info[23].Contains("True"),
+                        PSDelay = song_info.Count() >= 26 ? Convert.ToInt16(song_info[25]) : 0
+                    };
+                    song.Genre = Parser.doGenre(song.Genre);                   
+                    song.Master = true; //let's default to Master even though we don't really know
+                    song.Source = "cPlayer"; //let's default to Custom source since this json doesn't specify source
+                    song.DateAdded = DateTime.Now;
+                    AllSongs.Add(song);
+                }
+            }
+            sr.Dispose();
+
+            var setlist_file = setlist_folder + Tools.CleanString(playlistName, false, true) + ".setlist";
+            ActiveSetlist = Path.GetFileNameWithoutExtension(setlist_file);
+            ActiveConsole = "Xbox 360";
+            isImportingCache = false;
+            if (!SaveSetlist(setlist_file)) return;
+            if (!LoadSetlist(setlist_file)) return;
+            if (LoadSongs())
+            {
+                SortSongs(lastSortedColumn);
+            }
+            doBlitzImport = false;
         }
 
         private void ImportYARG(string json)

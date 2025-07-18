@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using System.Text;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Text;
 
 namespace Nautilus
 {
@@ -21,49 +22,53 @@ namespace Nautilus
         private List<KaraokeLyric> VocalLyrics;
         private List<KaraokeLyric> Harm1Lyrics;
         private List<KaraokeLyric> Harm2Lyrics;
+        private List<KaraokeLyric> Harm3Lyrics;
         private List<MIDINote> Harm1Notes;
         private List<MIDINote> Harm2Notes;
+        private List<MIDINote> Harm3Notes;
         private List<MIDINote> VocalNotes;
         private List<LyricPhrase> VocalPhrases;
         private List<string> inputFiles;
         private string backgroundColor = "";
         private string textColor1 = "";
-        private string sungColor1 = "";
-        private string textColor2 = "#0FF";
-        private string sungColor2 = "#F8F";
-        private string fontName = "";
-        private string fontStyle = "";
+        private string highlightColor1 = "";
+        private string textColor2 = "";
+        private string highlightColor2 = "";
+        private string textColor3 = "";
+        private string highlightColor3 = "";
         private int fileCounter = 0;
         private int successCounter = 0;
         private int failureCounter = 0;
         private string failedSongs = "";
         private string vocalOption = "";
-        private bool doKeepLRC;
+        private bool doKeepTOML;
         private string cdgOutput = "";
         private bool workSilently = true;
         private bool doHarmonies = true;
         private readonly string configFile;
-        
+        private PrivateFontCollection pfc = new PrivateFontCollection();
+        private string ActiveFont;
+        private int trackLength = 0;
+
         List<string> karaokeColorHexes = new List<string>
-{
-    "#000", // Black
-    "#FFF", // White
-    "#F00", // Red
-    "#0F0", // Green
-    //"#00F", // Blue
-    "#29F", // Approximate DodgerBlue
-    "#FF0", // Yellow
-    "#0FF", // Cyan
-    "#F0F", // Magenta
-    "#888", // Gray
-    "#F80", // Orange
-    "#F8F", // Pink
-    "#80F", // Purple
-    "#088", // Teal
-    "#8F0", // Lime
-    "#008", // Navy
-    "#840"  // Brown
-};
+        {
+            "#000000", //Black
+            "#FFFFFF", //White
+            "#FF0000", //Red
+            "#00FF00", //Green
+            "#2299FF", //Approximate DodgerBlue
+            "#FFFF00", //Yellow
+            "#00FFFF", //Cyan
+            "#FF00FF", //Magenta
+            "#888888", //Gray
+            "#FF8800", //Orange
+            "#FF88FF", //Pink
+            "#8800FF", //Purple
+            "#008888", //Teal
+            "#88FF00", //Lime
+            "#000088", //Navy
+            "#884400"  //Brown
+        };
 
         public CDGConverter()
         {
@@ -84,22 +89,27 @@ namespace Nautilus
             VocalPhrases = new List<LyricPhrase>();
             Harm1Lyrics = new List<KaraokeLyric>();
             Harm2Lyrics = new List<KaraokeLyric>();
-            Harm2Notes = new List<MIDINote>();
+            Harm3Lyrics = new List<KaraokeLyric>();            
             Harm1Notes = new List<MIDINote>();
+            Harm2Notes = new List<MIDINote>();
+            Harm3Notes = new List<MIDINote>();
         }
         
         private void SaveConfig()
         {
             var sw = new StreamWriter(configFile, false);
             sw.WriteLine(cboBackground.SelectedIndex.ToString());
-            sw.WriteLine(cboText.SelectedIndex.ToString());
-            sw.WriteLine(cboSung.SelectedIndex.ToString());
+            sw.WriteLine(cboTextColor1.SelectedIndex.ToString());
+            sw.WriteLine(cboTextHighlight1.SelectedIndex.ToString());
+            sw.WriteLine(cboTextColor2.SelectedIndex.ToString());
+            sw.WriteLine(cboTextHighlight2.SelectedIndex.ToString());
+            sw.WriteLine(cboTextColor3.SelectedIndex.ToString());
+            sw.WriteLine(cboTextHighlight3.SelectedIndex.ToString());
             sw.WriteLine(cboFont.SelectedIndex.ToString());
-            sw.WriteLine(cboType.SelectedIndex.ToString());
             sw.WriteLine(radioRemove.Checked ? "True" : "False");
             sw.WriteLine(radioKeep.Checked ? "True" : "False");
-            sw.WriteLine(chkKeepLRC.Checked ? "True" : "False");
-            sw.WriteLine(chkSilent.Checked ? "True" : "False");
+            sw.WriteLine(chkKeepTOML.Checked ? "True" : "False");
+            sw.WriteLine(chkHarmonies.Checked ? "True" : "False");
             sw.Dispose();
         }
 
@@ -110,10 +120,13 @@ namespace Nautilus
             try
             {
                 cboBackground.SelectedIndex = Convert.ToInt16(sr.ReadLine());
-                cboText.SelectedIndex = Convert.ToInt16(sr.ReadLine());
-                cboSung.SelectedIndex = Convert.ToInt16(sr.ReadLine());
+                cboTextColor1.SelectedIndex = Convert.ToInt16(sr.ReadLine());
+                cboTextHighlight1.SelectedIndex = Convert.ToInt16(sr.ReadLine());
+                cboTextColor2.SelectedIndex = Convert.ToInt16(sr.ReadLine());
+                cboTextHighlight2.SelectedIndex = Convert.ToInt16(sr.ReadLine());
+                cboTextColor3.SelectedIndex = Convert.ToInt16(sr.ReadLine());
+                cboTextHighlight3.SelectedIndex = Convert.ToInt16(sr.ReadLine());
                 cboFont.SelectedIndex = Convert.ToInt16(sr.ReadLine());
-                cboType.SelectedIndex = Convert.ToInt16(sr.ReadLine());
                 var remove = sr.ReadLine().Contains("True");
                 if (remove)
                 {
@@ -126,8 +139,8 @@ namespace Nautilus
                     radioKeep.Checked = true;
                 }
                 sr.ReadLine();
-                chkKeepLRC.Checked = sr.ReadLine().Contains("True");
-                chkSilent.Checked = sr.ReadLine().Contains("True");
+                chkKeepTOML.Checked = sr.ReadLine().Contains("True");
+                chkHarmonies.Checked = sr.ReadLine().Contains("True");
             }
             catch 
             {
@@ -154,13 +167,15 @@ namespace Nautilus
             }
             inputFiles = files.ToList();
             backgroundColor = karaokeColorHexes[cboBackground.SelectedIndex];
-            textColor1 = karaokeColorHexes[cboText.SelectedIndex];
-            sungColor1 = karaokeColorHexes[cboSung.SelectedIndex];
-            fontName = cboFont.Text;
-            fontStyle = cboType.Text;
-            doKeepLRC = chkKeepLRC.Checked;
-            workSilently = chkSilent.Checked;
-            doHarmonies = false;//disable for now while I work on the library backend
+            textColor1 = karaokeColorHexes[cboTextColor1.SelectedIndex];
+            highlightColor1 = karaokeColorHexes[cboTextHighlight1.SelectedIndex];
+            textColor2 = karaokeColorHexes[cboTextColor2.SelectedIndex];
+            highlightColor2 = karaokeColorHexes[cboTextHighlight2.SelectedIndex];
+            textColor3 = karaokeColorHexes[cboTextColor3.SelectedIndex];
+            highlightColor3 = karaokeColorHexes[cboTextHighlight3.SelectedIndex];
+            doKeepTOML = chkKeepTOML.Checked;
+            doHarmonies = chkHarmonies.Checked;
+            ActiveFont = cboFont.Text.Split('|')[1].Trim();
             var remove = "drums|bass|guitar|keys|backing|NOcrowd";
             var keep = "allstems|NOcrowd";
             vocalOption = radioRemove.Checked ? remove : keep;
@@ -172,20 +187,23 @@ namespace Nautilus
         {
             cboBackground.Enabled = enable;
             cboFont.Enabled = enable;
-            cboSung.Enabled = enable;
-            cboText.Enabled = enable;
-            cboType.Enabled = enable;
+            cboTextColor1.Enabled = enable;
+            cboTextColor2.Enabled = enable;
+            cboTextColor3.Enabled = enable;
+            cboTextHighlight1.Enabled = enable;
+            cboTextHighlight2.Enabled = enable;
+            cboTextHighlight3.Enabled = enable;
             btnHelp.Enabled = enable;
             radioRemove.Enabled = enable;
             radioKeep.Enabled = enable;
-            chkKeepLRC.Enabled = enable;
+            chkKeepTOML.Enabled = enable;
             picWorking.Visible = !enable;
-            chkSilent.Enabled = enable;
+            chkHarmonies.Enabled = enable;
         }
 
         private string CleanString(string str)
         {
-            return str.Replace("#", "").Replace("^", "").Replace("\"", "").Replace("§", " ").Replace(",", "");
+            return str.Replace("#", "").Replace("^", "").Replace("\"", "").Replace("§", "_").Replace(",", "").Replace("$", "");
         }
 
         private void ProcessFile(string file)
@@ -211,18 +229,19 @@ namespace Nautilus
             }
 
             var title = CleanString(Parser.Songs[0].Artist) + " - " + CleanString(Parser.Songs[0].Name);
+            trackLength = Parser.Songs[0].Length;
 
             var folder = Path.GetDirectoryName(file) + "\\Karaoke\\" + title + "\\";
             if (!Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
             }
+            var wav = folder + title + ".wav";
             var mp3 = folder + title + ".mp3";
             var cdg = folder + title + ".cdg";
-            var vocals = folder + title + ".lrc";
-            var harmonies = folder + title + "_harm2.lrc";
+            var toml = folder + title + ".toml";
 
-            moggSplitter.DownmixMogg(file, mp3, MoggSplitter.MoggSplitFormat.MP3, vocalOption);
+            moggSplitter.DownmixMogg(file, wav, MoggSplitter.MoggSplitFormat.WAV, vocalOption);
 
             var xPackage = new STFSPackage(file);
 
@@ -277,6 +296,10 @@ namespace Nautilus
                 {
                     AnalyzeVocals(MIDIFile.Events[i], 2);
                 }
+                else if (trackname.Contains("HARM3"))
+                {
+                    AnalyzeVocals(MIDIFile.Events[i], 3);
+                }
             }
 
             foreach (var lyric in VocalLyrics)
@@ -314,19 +337,21 @@ namespace Nautilus
                         }
                     }
                 }
+                foreach (var lyric in Harm3Lyrics)
+                {
+                    foreach (var note in Harm3Notes)
+                    {
+                        if (note.Ticks <= lyric.Ticks && note.Ticks >= lyric.Ticks)
+                        {
+                            lyric.End = note.NoteEnd;
+                            break;
+                        }
+                    }
+                }
             }
-            
-            if (doHarmonies && Harm2Lyrics != null && Harm2Lyrics.Count > 0)
-            {
-                WriteLRC(vocals, 1);
-                WriteLRC(harmonies, 2);
-                CreateCDG(cdg, vocals, harmonies);
-            }
-            else
-            {
-                WriteLRC(vocals, 0);
-                CreateCDG(cdg, vocals);
-            }            
+
+            WriteTOML(toml, wav, cdg);
+            CreateCDG(toml);                      
 
             if (!workSilently)
             {
@@ -334,7 +359,12 @@ namespace Nautilus
                 message += Parser.Songs[0].Artist + " - " + Parser.Songs[0].Name;
                 message += "\nMP3: " + (File.Exists(mp3) ? "Success" : "Failed");
                 message += "\nCDG: " + (File.Exists(cdg) ? "Success" : "Failed");
-                MessageBox.Show(message, "Progress Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(message, "Progress Update", MessageBoxButtons.OK, MessageBoxIcon.Information);                
+            }
+            Tools.DeleteFile(wav);
+            if (!doKeepTOML)
+            {
+                Tools.DeleteFile(toml);
             }
             if (File.Exists(mp3) && File.Exists(cdg))
             {
@@ -347,28 +377,307 @@ namespace Nautilus
             }
         }
 
-        private void CreateCDG(string cdg, string lrc, string lrc2 = "")
+        private string EscapeTomlString(string input)
         {
-            var folderPath = Application.StartupPath + "\\bin\\cdg\\";
-            var exePath = Path.Combine(folderPath, "CDGSharp.CLI.exe");
+            if (input.Contains('"'))
+                return "\"\"\"" + input + "\"\"\""; // wrap in triple quotes
+            return "\"" + input + "\"";
+
+        }
+
+        public void InsertLoadingBars(ref List<TimedLyricLine> lines, List<TimedLyricLine> lyricsVocals, int vocal_parts)
+        {
+            const int minGapCs = 500; // 5 seconds
+            const int paddingCs = 100; // 1 second
+            const string loadingBar = "████████████████";
+
+            var loadingLines = new List<(int InsertIndex, List<TimedLyricLine> Lines)>();
+
+            // Gather all actual lyric timings
+            var lyricTimings = lyricsVocals
+                .SelectMany(line => line.StartTimes.Zip(line.EndTimes, (start, end) => new { Start = start, End = end }))
+                .OrderBy(t => t.Start)
+                .ToList();
+
+            if (lyricTimings.Count == 0)
+                return; // no sung content at all
+
+            // Handle gap before first sung line
+            if (lyricTimings[0].Start >= minGapCs)
+            {
+                int start = paddingCs;
+                int end = lyricTimings[0].Start - paddingCs;
+                loadingLines.Add((0, BuildLoadingBlock(start, end, loadingBar, vocal_parts)));
+            }
+
+            // Handle gaps between sung syllables
+            for (int i = 0; i < lyricTimings.Count - 1; i++)
+            {
+                int endCurrent = lyricTimings[i].End;
+                int startNext = lyricTimings[i + 1].Start;
+                int gap = startNext - endCurrent;
+
+                if (gap >= minGapCs)
+                {
+                    int start = endCurrent + paddingCs;
+                    int end = startNext - paddingCs;
+
+                    // Find insertion index in lines
+                    int insertIndex = lines.FindIndex(l =>
+                        l.StartTimes.Count > 0 && l.StartTimes[0] > start);
+
+                    if (insertIndex == -1)
+                        insertIndex = lines.Count;
+
+                    loadingLines.Add((insertIndex, BuildLoadingBlock(start, end, loadingBar, vocal_parts)));
+                }
+            }
+
+            if (trackLength > 0)
+            {
+                // Handle gap after last sung lyric to near end of track
+                int lastEnd = lyricTimings.Last().End;
+                int trackEnd = (int)(trackLength * 0.1);
+                int outroEnd = trackEnd - minGapCs;
+
+                if (lastEnd < outroEnd)
+                {
+                    int start = lastEnd + paddingCs;
+                    int end = outroEnd;
+
+                    int insertIndex = lines.Count; // append at the end
+                    loadingLines.Add((insertIndex, BuildLoadingBlock(start, end, loadingBar, vocal_parts)));
+                }
+            }
+
+            // Insert all loading bar blocks in reverse to preserve indices
+            foreach (var (insertIndex, barLines) in loadingLines.OrderByDescending(l => l.InsertIndex))
+            {
+                lines.InsertRange(insertIndex, barLines);
+            }
+        }
+
+
+        public static void InsertLoadingBars2(ref List<TimedLyricLine> lines, List<LyricPhrase> phrases, int vocal_parts)
+        {
+            const int minGapCs = 500; // 5 seconds
+            const int paddingCs = 100; // 1 second
+            const string loadingBar = "████████████████";
+
+            var loadingLines = new List<(int InsertIndex, List<TimedLyricLine> Lines)>();
+
+            // Handle gap before first phrase
+            if (phrases.Count > 0)
+            {
+                int firstStart = (int)(phrases[0].PhraseStart / 1000 * 100);
+                if (firstStart >= minGapCs)
+                {
+                    int start = paddingCs;
+                    int end = firstStart - paddingCs;
+                    loadingLines.Add((0, BuildLoadingBlock(start, end, loadingBar, vocal_parts)));
+                }
+            }
+
+            // Handle gaps between phrases
+            for (int i = 0; i < phrases.Count - 1; i++)
+            {
+                int endCurrent = (int)(phrases[i].PhraseEnd / 1000 * 100);
+                int startNext = (int)(phrases[i + 1].PhraseStart / 1000 * 100);
+                int gap = startNext - endCurrent;
+
+                if (gap >= minGapCs)
+                {
+                    int start = endCurrent + paddingCs;
+                    int end = startNext - paddingCs;
+
+                    // Find insertion index in lines
+                    int insertIndex = lines.FindIndex(l =>
+                        l.StartTimes.Count > 0 && l.StartTimes[0] > start);
+
+                    if (insertIndex == -1)
+                        insertIndex = lines.Count;
+
+                    loadingLines.Add((insertIndex, BuildLoadingBlock(start, end, loadingBar, vocal_parts)));
+                }
+            }
+
+            // Insert all loading bar blocks in reverse to preserve indices
+            foreach (var (insertIndex, barLines) in loadingLines.OrderByDescending(l => l.InsertIndex))
+            {
+                lines.InsertRange(insertIndex, barLines);
+            }
+        }
+
+        private static List<TimedLyricLine> BuildLoadingBlock(int start, int end, string loadingBar, int vocal_parts)
+        {
+            var lines = new List<TimedLyricLine>();
+
+            if (vocal_parts == 1)
+            {// Empty line (~)
+                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
+            }
+
+            // Loading bar line with timing
+            lines.Add(new TimedLyricLine
+            {
+                Syllables = new List<string> { loadingBar, "^" },
+                StartTimes = new List<int> { start, end },
+                EndTimes = new List<int> { end, end },
+                FormattedLine = $"{loadingBar}/^"
+            });
+
+            // Empty line (~)
+            lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
+            lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
+            return lines;
+        }
+
+        private void WriteTOML(string toml, string wav, string cdg)
+        {
+            var vocal_parts = !doHarmonies || !Harm2Lyrics.Any() ? 1 : (Harm3Lyrics.Any() ? 3 : 2);
+            int harm1Top = vocal_parts == 1 ? 5 : (Harm3Lyrics.Any() ? 1 : 2);
+            int harm1Parts = vocal_parts == 1 ? 4 : (Harm3Lyrics.Any() ? 2 : 3);
+            int harm2Top = vocal_parts == 2 ? 11 : 7;
+            int harm2Parts = vocal_parts == 2 ? 3 : 2;
+            const int harm3Top = 13;
+            const int harm3Parts = 2;
+            var fontPath = Application.StartupPath + "\\bin\\fonts\\" + ActiveFont;
+
+            var sw = new StreamWriter(toml, false);
+            sw.WriteLine("title = " + EscapeTomlString(Parser.Songs[0].Name));
+            sw.WriteLine("artist = " + EscapeTomlString(Parser.Songs[0].Artist));
+            sw.WriteLine("file = \"" + wav.Replace("\\", "\\\\") + "\"");
+            sw.WriteLine("outname = \"" + cdg.Replace("\\", "\\\\") + "\"");
+            sw.WriteLine("");
+            sw.WriteLine("clear_mode = \"" + (vocal_parts == 1 ? "page" : "delayed") + "\"");
+            sw.WriteLine("");
+            sw.WriteLine("background = \"" + backgroundColor + "\"");
+            sw.WriteLine("border = \"" + backgroundColor + "\""); //match the background for now
+            sw.WriteLine("");
+            sw.WriteLine("font = '" + ActiveFont + "'");//"" + fontPath.Replace("\\", "\\\\") + "\"");
+            sw.WriteLine("font_size = 18"); //hardcoded
+            sw.WriteLine("");
+            sw.WriteLine("[[singers]]"); //always must have atleast one, this is lead/harm1
+            sw.WriteLine("active_fill = \"" + highlightColor1 + "\"");
+            sw.WriteLine("active_stroke = \"" + highlightColor1 + "\""); //match the highlight color
+            sw.WriteLine("inactive_fill = \"" + textColor1 + "\""); //
+            sw.WriteLine("inactive_stroke = \"" + textColor1 + "\""); //match the inactive color
+            if (Harm2Lyrics.Any())
+            {
+                sw.WriteLine("");
+                sw.WriteLine("[[singers]]"); //harm2
+                sw.WriteLine("active_fill = \"" + highlightColor2 + "\"");
+                sw.WriteLine("active_stroke = \"" + highlightColor2 + "\""); //match the highlight color
+                sw.WriteLine("inactive_fill = \"" + textColor2 + "\""); //
+                sw.WriteLine("inactive_stroke = \"" + textColor2 + "\""); //match the inactive color
+            }
+            if (Harm3Lyrics.Any())
+            {
+                sw.WriteLine("");
+                sw.WriteLine("[[singers]]"); //harm3
+                sw.WriteLine("active_fill = \"" + highlightColor3 + "\"");
+                sw.WriteLine("active_stroke = \"" + highlightColor3 + "\""); //match the highlight color
+                sw.WriteLine("inactive_fill = \"" + textColor3 + "\""); //
+                sw.WriteLine("inactive_stroke = \"" + textColor3 + "\""); //match the inactive color
+            }
+            sw.WriteLine("");
+            sw.WriteLine("[[lyrics]]"); //must always have one, this is lead/harm1
+            sw.WriteLine("singer = 1");
+            sw.WriteLine("sync = [");
+            var lyricsVocals = GetTimedLyricsForTOML(vocal_parts > 1 ? 1 : 0);
+            if (vocal_parts == 1)
+            {
+                InsertLoadingBars(ref lyricsVocals, lyricsVocals, vocal_parts);
+            }
+            foreach (var lyricLine in lyricsVocals)
+            {
+                for (int i = 0; i < lyricLine.Syllables.Count; i++)
+                {
+                    if (lyricLine.StartTimes.Count == 0) continue;
+                    sw.Write(lyricLine.StartTimes[i] + ",");
+                }
+            }
+            sw.Write("\n");
+            sw.WriteLine("]");
+            sw.WriteLine("row = " + harm1Top);
+            sw.WriteLine("line_tile_height = 2");
+            sw.WriteLine("lines_per_page = " + harm1Parts);
+            sw.WriteLine("text = '''");
+            foreach (var line in lyricsVocals)
+            {
+                sw.WriteLine(line.FormattedLine);
+            }
+            sw.WriteLine("'''");
+            if (Harm2Lyrics.Any() && doHarmonies)
+            {
+                sw.WriteLine("");
+                sw.WriteLine("[[lyrics]]");
+                sw.WriteLine("singer = 2");
+                sw.WriteLine("sync = [");                
+                var lyricsHarm2 = GetTimedLyricsForTOML(2);
+                if (vocal_parts > 1)
+                {
+                    InsertLoadingBars(ref lyricsHarm2, lyricsVocals, vocal_parts);
+                }
+                foreach (var lyricLine in lyricsHarm2)
+                {
+                    for (int i = 0; i < lyricLine.Syllables.Count; i++)
+                    {
+                        if (lyricLine.StartTimes.Count == 0) continue;
+                        sw.Write(lyricLine.StartTimes[i] + ",");
+                    }
+                }
+                sw.WriteLine("]");
+                sw.WriteLine("row = " + harm2Top);
+                sw.WriteLine("line_tile_height = 2");
+                sw.WriteLine("lines_per_page = " + harm2Parts);
+                sw.WriteLine("text = '''");
+                foreach (var line in lyricsHarm2)
+                {
+                    sw.WriteLine(line.FormattedLine);
+                }
+                sw.WriteLine("'''");
+                if (Harm3Lyrics.Any())
+                {
+                    sw.WriteLine("");
+                    sw.WriteLine("[[lyrics]]");
+                    sw.WriteLine("singer = 3");
+                    sw.WriteLine("sync = [");
+                    var lyricsHarm3 = GetTimedLyricsForTOML(3);
+                    foreach (var lyricLine in lyricsHarm3)
+                    {
+                        for (int i = 0; i < lyricLine.Syllables.Count; i++)
+                        {
+                            if (lyricLine.StartTimes.Count == 0) continue;
+                            sw.Write(lyricLine.StartTimes[i] + ",");
+                        }
+                    }
+                    sw.WriteLine("]");
+                    sw.WriteLine("row = " + harm3Top);
+                    sw.WriteLine("line_tile_height = 2");
+                    sw.WriteLine("lines_per_page = " + harm3Parts);
+                    sw.WriteLine("text = '''");
+                    foreach (var line in lyricsHarm3)
+                    {
+                        sw.WriteLine(line.FormattedLine);
+                    }
+                    sw.WriteLine("'''");
+                }
+            }
+            sw.Dispose();
+        }
+
+        private void CreateCDG(string toml)
+        {
+            var folderPath = Application.StartupPath + "\\bin\\";
+            var exePath = Path.Combine(folderPath, "cdgmaker.exe");
             if (!File.Exists(exePath))
             {
-                MessageBox.Show("CDGSharp.CLI.exe is missing and I can't continue without it", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("cdgmaker.exe is missing and I can't continue without it", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            Tools.DeleteFile(cdg);
-
-            var arg = "";
-            if (!string.IsNullOrEmpty(lrc2))
-            {
-                arg = $"convert-lrc --file-path \"{lrc}\" --file-path2 \"{lrc2}\" --bg-color {backgroundColor} --text-color {textColor1} --sung-text-color {sungColor1} --text-color2 {textColor2} --sung-text-color2 {sungColor2} --font \"{fontName}\" --font-size 20 --font-style {fontStyle}";
-
-            }
-            else
-            {
-                arg = $"convert-lrc --file-path \"{lrc}\" --bg-color {backgroundColor} --text-color {textColor1} --sung-text-color {sungColor1} --font \"{fontName}\" --font-size 20 --font-style {fontStyle}";
-            }
+            var arg = "\"" + toml + "\"";
 
             var app = new ProcessStartInfo
             {
@@ -378,208 +687,172 @@ namespace Nautilus
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
+                RedirectStandardError = true
             };
 
             var process = Process.Start(app);
-            cdgOutput += $"Begin log for song '{Parser.Songs[0].Artist} - {Parser.Songs[0].Name}'\n{process.StandardOutput.ReadToEnd()}" +
+            cdgOutput += $"Begin log for song '{Parser.Songs[0].Artist} - {Parser.Songs[0].Name}'{process.StandardError.ReadToEnd()}" +
                 $"End log for song '{Parser.Songs[0].Artist} - {Parser.Songs[0].Name}'\n\n";
             process.WaitForExit();
             process.Dispose();
-
-            if (File.Exists(cdg) && !doKeepLRC)
-            {
-                Tools.DeleteFile(lrc);
-                Tools.DeleteFile(lrc2);
-            }
         }
-
-        public static string TruncateLine(string input, int maxLength = 24)
+                       
+        private List<TimedLyricLine> GetTimedLyricsForTOML(int part)
         {
-            if (string.IsNullOrWhiteSpace(input)) return input;
-            if (input.Length <= maxLength) return input;
+            var result = new List<TimedLyricLine>();
+            int maxLineLength = 24;
 
-            return input.Substring(0, maxLength - 3).TrimEnd() + "...";
-        }
+            var allLyrics = (part == 0 ? VocalLyrics :
+                            (part == 1 ? Harm1Lyrics :
+                            (part == 2 ? Harm2Lyrics : Harm3Lyrics)));
 
-        private void WriteLRC(string lrc, int part)
-        {
-            if (VocalPhrases.Count == 0) return;
-
-            string FormatTime(double ms)
+            foreach (var phrase in VocalPhrases)
             {
-                var ts = TimeSpan.FromMilliseconds(ms);
-                return $"{ts.Minutes:D2}:{ts.Seconds:D2}:{ts.Milliseconds / 10:D2}";
-            }
-
-            var sb = new StringBuilder();
-
-            // Prepend metadata
-            sb.Append("[ti:" + TruncateLine(Parser.Songs[0].Name) + "]\n"); //biggest font
-            sb.Append("[ar:" + TruncateLine(Parser.Songs[0].Artist, 26) + "]\n"); //slightly smaller font   
-            sb.Append("[al:" + TruncateLine(Parser.Songs[0].Album, 36) + "]\n\n"); //this was not supported in the original CDGSharp.CLI library but I added it
-
-            int phrase = 0;
-            const string loadingBar = "████████████████";
-            const int loadingBarThreshold = 5000;
-
-            if (part < 2) //don't do double loading bar for harm 1 and harm 2, only part vocals or harm 1
-            {
-                //intro loading bar where applicable
-                double firstPhraseStart = VocalPhrases[0].PhraseStart;
-                double introStart = firstPhraseStart - 6000.0;
-                double introEnd = firstPhraseStart - 1000.0; // 1.0s before lyrics
-
-                if (introStart >= loadingBarThreshold && introEnd > introStart)
-                {
-                    sb.AppendLine($"[{FormatTime(introStart)}]{loadingBar}[{FormatTime(introEnd)}]\n");
-                }
-            }
-
-            //display song lyrics
-            for (phrase = 0; phrase < VocalPhrases.Count; phrase++)
-            {
-                var phraseInfo = VocalPhrases[phrase];
-                var phraseLyrics = (part == 0 ? VocalLyrics : (part == 1 ? Harm1Lyrics : Harm2Lyrics))
-                    .Where(l => l.Start >= phraseInfo.PhraseStart && l.Start <= phraseInfo.PhraseEnd)
+                var phraseLyrics = allLyrics
+                    .Where(l => l.Start >= phrase.PhraseStart && l.Start <= phrase.PhraseEnd)
                     .ToList();
 
                 if (phraseLyrics.Count == 0)
+                {
+                    result.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
                     continue;
+                }
 
-                // STEP 1: Convert syllables into full words
-                List<KaraokeLyric> wordList = new List<KaraokeLyric>();
+                var currentLine = new TimedLyricLine();
+                int visibleCharCount = 0;
+                var formattedLineBuilder = new List<string>();
+
                 int i = 0;
-
                 while (i < phraseLyrics.Count)
                 {
-                    var first = phraseLyrics[i];
-                    if (first.Lyric.Trim() == "+")
+                    var lyric = phraseLyrics[i];
+                    string raw = lyric.Lyric.Trim().Replace("^", "").Replace("$", "").Replace("#", "");
+
+                    // Handle hold syllables
+                    if (raw == "+")
                     {
+                        int holdStart = (int)Math.Round(lyric.Start * 0.1);
+                        int holdEnd = (int)Math.Round(lyric.End * 0.1);
+                        
+                        currentLine.Syllables.Add("^");
+                        currentLine.StartTimes.Add(holdStart);
+                        currentLine.EndTimes.Add(holdEnd);
+                        formattedLineBuilder.Add("/^");
                         i++;
                         continue;
                     }
 
-                    string wordText = CleanString(first.Lyric);
-                    double wordStart = first.Start;
-                    double wordEnd = first.End;
-                    bool lastNonPlusEndedWithDash = wordText.Trim().EndsWith("-");
+                    // Rebuild full word from syllables
+                    var syllables = new List<(string Text, int Start, int End)>();
+                    bool endsWithDash = EndsWithDash(raw);
+                    string clean = CleanSyllable(raw);
+
+                    if (!string.IsNullOrWhiteSpace(clean))
+                        syllables.Add((clean, (int)Math.Round(lyric.Start * 0.1), (int)Math.Round(lyric.End * 0.1)));
+
                     int j = i + 1;
-
-                    while (j < phraseLyrics.Count)
+                    while (endsWithDash && j < phraseLyrics.Count)
                     {
-                        var curr = phraseLyrics[j];
-                        string currText = curr.Lyric.Trim();
+                        var next = phraseLyrics[j];
+                        string nextRaw = next.Lyric.Trim();
+                        endsWithDash = EndsWithDash(nextRaw) || nextRaw == "+";
+                        string nextClean = CleanSyllable(nextRaw);
+                        if (!string.IsNullOrWhiteSpace(nextClean))
+                            syllables.Add((nextClean, (int)Math.Round(next.Start * 0.1), (int)Math.Round(next.End * 0.1)));
 
-                        if (currText == "+")
-                        {
-                            wordText += curr.Lyric;
-                            wordEnd = curr.End;
-                            j++;
-                            continue;
-                        }
-
-                        if (!lastNonPlusEndedWithDash)
-                            break;
-
-                        wordText += curr.Lyric;
-                        wordEnd = curr.End;
-                        lastNonPlusEndedWithDash = CleanString(currText).EndsWith("-");
                         j++;
                     }
 
-                    string cleanWord = CleanString(wordText).Replace("+", "").Replace("-", "").Replace("=", "-");
-                    if (!string.IsNullOrWhiteSpace(cleanWord))
+                    int visibleLen = syllables.Sum(s => s.Text.Length);
+
+                    // Wrap if too long
+                    if (visibleCharCount + (visibleCharCount > 0 ? 1 : 0) + visibleLen > maxLineLength)
                     {
-                        wordList.Add(new KaraokeLyric
+                        if (currentLine.Syllables.Count > 0)
                         {
-                            Lyric = cleanWord,
-                            Start = wordStart,
-                            End = wordEnd
-                        });
+                            currentLine.FormattedLine = string.Join("", formattedLineBuilder);
+                            result.Add(currentLine);
+                        }
+                        currentLine = new TimedLyricLine();
+                        formattedLineBuilder.Clear();
+                        visibleCharCount = 0;
+                    }
+
+                    // Add space before word
+                    if (visibleCharCount > 0)
+                    {
+                        currentLine.Syllables.Add(" ");
+                        currentLine.StartTimes.Add(syllables[0].Start);
+                        currentLine.EndTimes.Add(syllables[0].Start);
+                        formattedLineBuilder.Add(" ");
+                        visibleCharCount++;
+                    }
+
+                    for (int s = 0; s < syllables.Count; s++)
+                    {
+                        var syll = syllables[s];
+
+                        int highlightStart = syll.Start;
+                        int highlightEnd = syll.End;
+
+                        currentLine.Syllables.Add(syll.Text);
+                        currentLine.StartTimes.Add(highlightStart);
+                        currentLine.EndTimes.Add(highlightEnd);
+                        formattedLineBuilder.Add(syll.Text);
+                        visibleCharCount += syll.Text.Length;
+
+                        currentLine.Syllables.Add("^");
+                        currentLine.StartTimes.Add(highlightEnd);
+                        currentLine.EndTimes.Add(highlightEnd);
+
+                        if (s < syllables.Count - 1)
+                            formattedLineBuilder.Add("/^/");
+                        else
+                            formattedLineBuilder.Add("/^");
                     }
 
                     i = j;
                 }
-                                
-                // STEP 2: Render full phrase with wrapping
-                string currentLineText = "";
-                double? lineStart = null;
-                double? lineEnd = null;
-                int charCount = 0;
 
-                foreach (var word in wordList.OrderBy(w => w.Start))
+                if (currentLine.Syllables.Count > 0)
                 {
-                    string w = word.Lyric.Trim();
-                    int wordLen = w.Length;
-                    int spaceLen = charCount > 0 ? 1 : 0;
-                    int projectedLen = charCount + spaceLen + wordLen;
-
-                    if (projectedLen > 24)
-                    {
-                        if (!string.IsNullOrWhiteSpace(currentLineText))
-                        {
-                            sb.AppendLine(currentLineText.TrimEnd());
-                        }
-
-                        currentLineText = "";
-                        lineStart = null;
-                        lineEnd = null;
-                        charCount = 0;
-                        spaceLen = 0;
-                    }
-
-                    if (lineStart == null)
-                        lineStart = word.Start;
-                    lineEnd = word.End;
-
-                    if (spaceLen > 0)
-                        currentLineText += " ";
-
-                    currentLineText += $"[{FormatTime(word.Start)}]{w}[{FormatTime(word.End)}]";
-                    charCount += spaceLen + wordLen;
-                }
-
-                // Final flush
-                if (!string.IsNullOrWhiteSpace(currentLineText))
-                {
-                    sb.AppendLine(currentLineText.TrimEnd());
-                }
-
-                // STEP 3: Insert loading bar based on gap between phrases
-                if (phrase < VocalPhrases.Count - 1)
-                {
-                    sb.AppendLine(); // spacing between phrases
-
-                    double currentEnd = VocalPhrases[phrase].PhraseEnd;
-                    double nextStart = VocalPhrases[phrase + 1].PhraseStart;
-                    double gap = nextStart - currentEnd;
-
-                    double startCountdown = currentEnd + 1000; // 1.0s after current phrase
-                    double endCountdown = nextStart - 1000;    // 1.0s before next phrase
-
-                    double countdownSpan = endCountdown - startCountdown;
-                    
-                    if (countdownSpan >= loadingBarThreshold && startCountdown < endCountdown)
-                    {
-                        sb.AppendLine($"[{FormatTime(startCountdown)}]{loadingBar}[{FormatTime(endCountdown)}]\n");
-                        sb.AppendLine();
-                    }                    
+                    currentLine.FormattedLine = string.Join("", formattedLineBuilder);
+                    result.Add(currentLine);
                 }
             }
 
-            /*double nemoStart = VocalPhrases[VocalPhrases.Count - 1].PhraseEnd + 1000;
-            double nemoEnd = Parser.Songs[0].Length;
-            //sb.Append($"[{FormatTime(nemoStart)}].:MADE.WITH.NAUTILUS:.[{FormatTime(nemoEnd)}]");
-            if (nemoEnd > nemoStart && (nemoEnd - nemoStart >= loadingBarThreshold))
-            {
-                sb.AppendLine();
-                sb.AppendLine($"[{FormatTime(nemoStart)}]{loadingBar}[{FormatTime(nemoEnd)}]\n");                
-            }
-            */
-            // Write to file
-            File.WriteAllText(lrc, sb.ToString().Replace("\r\n", "\n"), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-        }        
+            return result;
+        }
 
+        public class TimedLyricLine
+        {
+            public List<string> Syllables { get; set; } = new List<string>();
+            public List<int> StartTimes { get; set; } = new List<int>();
+            public List<int> EndTimes { get; set; } = new List<int>();
+
+            public string FormattedLine { get; set; } = "";
+        }
+
+        private bool EndsWithDash(string s)
+        {
+            return s.Replace("#", "").Replace("^", "")
+                    .TrimEnd('.', ',', '!', '?', '…', ';', ':')
+                    .Trim()
+                    .EndsWith("-");
+        }
+
+        private string CleanSyllable(string s)
+        {
+            return CleanString(s)                
+                .Replace("-", "")
+                .Replace("=", "-")
+                .Replace("#", "")
+                .Replace("^", "")
+                .Replace("$", "")
+                .Replace("+", "^")
+                .Trim();
+        }
+        
         private void AnalyzeVocals(IEnumerable<MidiEvent> track, int part)
         {
             foreach (var notes in track)
@@ -592,7 +865,7 @@ namespace Nautilus
                             !vocal_event.ToString().Contains("["))
                         {
                             var lyric = GetCleanMIDILyric(vocal_event.ToString());
-                            if (string.IsNullOrWhiteSpace(lyric)) continue;
+                            if (string.IsNullOrWhiteSpace(lyric)) continue;                            
                             var k = new KaraokeLyric()
                             {
                                 Lyric = lyric,
@@ -607,6 +880,9 @@ namespace Nautilus
                                 case 2:
                                     Harm2Lyrics.Add(k);
                                     break;
+                                case 3:
+                                    Harm3Lyrics.Add(k);
+                                    break;
                                 default:
                                     VocalLyrics.Add(k);
                                     break;
@@ -617,32 +893,30 @@ namespace Nautilus
                         var note = (NoteOnEvent)notes;
                         if (note.Velocity <= 0) continue;
 
-                        switch (note.NoteNumber)
+                        if (note.NoteNumber <= 84 && note.NoteNumber >= 36)
                         {
-                            default:
-                                if (note.NoteNumber <= 84 && note.NoteNumber >= 36)
-                                {
-                                    var n = new MIDINote()
-                                    {
-                                        NoteNumber = note.NoteNumber,
-                                        NoteStart = GetRealtime(note.AbsoluteTime),
-                                        Ticks = note.AbsoluteTime,
-                                        NoteEnd = GetRealtime(note.AbsoluteTime + note.NoteLength)
-                                    };
-                                    switch (part)
-                                    {
-                                        case 1:
-                                            Harm1Notes.Add(n);
-                                            break;
-                                        case 2:
-                                            Harm2Notes.Add(n);
-                                            break;
-                                        default:
-                                            VocalNotes.Add(n);
-                                            break;
-                                    }                                    
-                                }
-                                break;
+                            var n = new MIDINote()
+                            {
+                                NoteNumber = note.NoteNumber,
+                                NoteStart = GetRealtime(note.AbsoluteTime),
+                                Ticks = note.AbsoluteTime,
+                                NoteEnd = GetRealtime(note.AbsoluteTime + note.NoteLength)
+                            };
+                            switch (part)
+                            {
+                                case 1:
+                                    Harm1Notes.Add(n);
+                                    break;
+                                case 2:
+                                    Harm2Notes.Add(n);
+                                    break;
+                                case 3:
+                                    Harm3Notes.Add(n);
+                                    break;
+                                default:
+                                    VocalNotes.Add(n);
+                                    break;
+                            }
                         }
                         break;
                 }
@@ -729,7 +1003,7 @@ namespace Nautilus
                 reldelta = absdelta - tempo.AbsoluteTime;
             }
             time += (double)reldelta / TicksPerQuarter * (60000.0 / BPM);
-            return time;// Math.Round(time / 1000, 3);
+            return time;
         }
 
         private void BuildTimeSignatureList(MidiFile MIDIFile)
@@ -738,98 +1012,91 @@ namespace Nautilus
             foreach (var ev in MIDIFile.Events[0])
             {
                 if (ev.CommandCode != MidiCommandCode.MetaEvent) continue;
-                var signature = (MetaEvent)ev;
-                if (signature.MetaEventType != MetaEventType.TimeSignature) continue;
-                //Track the time signature change
-                var index1 = signature.ToString().IndexOf(" ", signature.ToString().IndexOf("TimeSignature", StringComparison.Ordinal), StringComparison.Ordinal) + 1;
-                var index2 = signature.ToString().IndexOf("/", StringComparison.Ordinal);
-                var numerator = Convert.ToInt16(signature.ToString().Substring(index1, index2 - index1));
-                //Track the time signature change
-                index1 = signature.ToString().IndexOf("/", StringComparison.Ordinal) + 1;
-                index2 = signature.ToString().IndexOf(" ", signature.ToString().IndexOf("/", StringComparison.Ordinal), StringComparison.Ordinal);
-                var denominator = Convert.ToInt16(signature.ToString().Substring(index1, index2 - index1));
-                var time_sig = new TimeSignature
+                var meta = ev as MetaEvent;
+                if (meta?.MetaEventType != MetaEventType.TimeSignature) continue;
+
+                var ts = meta as TimeSignatureEvent;
+                if (ts == null) continue;
+
+                // The actual denominator is 2 raised to the power of denominator exponent
+                int numerator = ts.Numerator;
+                int denominator = (int)Math.Pow(2, ts.Denominator);
+
+                var timeSig = new TimeSignature
                 {
                     AbsoluteTime = ev.AbsoluteTime,
                     Numerator = numerator,
                     Denominator = denominator
                 };
-                TimeSignatures.Add(time_sig);
+
+                TimeSignatures.Add(timeSig);
             }
         }
 
         private void BuildTempoList(MidiFile MIDIFile)
         {
-            //code provided by raynebc
-            //Build tempo list
-            var currentbpm = 120.00;
-            var realtime = 0.0;
-            var reldelta = 0;   //The number of delta ticks since the last tempo change
             TempoEvents = new List<TempoEvent>();
+
+            double currentBpm = 120.0;
+            double realTimeMs = 0.0;
+            int relDeltaTicks = 0;
+
             foreach (var ev in MIDIFile.Events[0])
             {
-                reldelta += ev.DeltaTime;
+                relDeltaTicks += ev.DeltaTime;
+
                 if (ev.CommandCode != MidiCommandCode.MetaEvent) continue;
-                var tempo = (MetaEvent)ev;
-                if (tempo.MetaEventType != MetaEventType.SetTempo) continue;
-                var relativetime = (double)reldelta / TicksPerQuarter * (60000.0 / currentbpm);
-                var index1 = tempo.ToString().IndexOf("SetTempo", StringComparison.Ordinal) + 9;
-                var index2 = tempo.ToString().IndexOf("bpm", StringComparison.Ordinal);
-                var bpm = tempo.ToString().Substring(index1, index2 - index1);
-                currentbpm = Convert.ToDouble(bpm);   //As per the MIDI specification, until a tempo change is reached, 120BPM is assumed
-                realtime += relativetime;   //Add that to the ongoing current real time of the MIDI
-                reldelta = 0;
-                var tempo_event = new TempoEvent
+
+                var meta = ev as MetaEvent;
+                if (meta?.MetaEventType != MetaEventType.SetTempo) continue;
+
+                var tempoEvent = meta as NAudio.Midi.TempoEvent;
+                if (tempoEvent == null) continue;
+
+                // Convert ticks to ms using current tempo
+                double deltaMs = relDeltaTicks / (double)TicksPerQuarter * (60000.0 / currentBpm);
+                realTimeMs += deltaMs;
+
+                // Convert microseconds/quarter note to BPM
+                currentBpm = 60000000.0 / tempoEvent.MicrosecondsPerQuarterNote;
+                relDeltaTicks = 0;
+
+                TempoEvents.Add(new TempoEvent
                 {
-                    AbsoluteTime = tempo.AbsoluteTime,
-                    RealTime = realtime,
-                    BPM = currentbpm
-                };
-                TempoEvents.Add(tempo_event);
+                    AbsoluteTime = ev.AbsoluteTime,
+                    RealTime = realTimeMs,
+                    BPM = currentBpm
+                });
             }
         }
 
         private void cboBackground_SelectedIndexChanged(object sender, EventArgs e)
         {
-            picSample.BackColor = GetColorFromIndex(cboBackground.SelectedIndex);
-            lblHighlight.BackColor = picSample.BackColor;
-            lblText.BackColor = picSample.BackColor;
+            Color backColor = GetColorFromIndex(cboBackground.SelectedIndex);
+            picBackground1.BackColor = backColor;
+            lblTextHighlight1.BackColor = backColor;
+            lblTextColor1.BackColor = backColor;
+            
+            picBackground2.BackColor = backColor;
+            lblTextHighlight2.BackColor = backColor;
+            lblTextColor2.BackColor = backColor;
+            
+            picBackground3.BackColor = backColor;
+            lblTextHighlight3.BackColor = backColor;
+            lblTextColor3.BackColor = backColor;
         }
 
         private System.Drawing.Color GetColorFromIndex(int index)
         {
-            var color = System.Drawing.Color.Black;
-            switch (index)
+            try
             {
-                case 0: color = System.Drawing.Color.Black; break;
-                case 1: color = System.Drawing.Color.White; break;
-                case 2: color = System.Drawing.Color.Red; break;
-                case 3: color = System.Drawing.Color.Lime; break;      // #0F0
-                case 4: color = System.Drawing.Color.DodgerBlue; break;
-                case 5: color = System.Drawing.Color.Yellow; break;
-                case 6: color = System.Drawing.Color.Cyan; break;
-                case 7: color = System.Drawing.Color.Magenta; break;
-                case 8: color = System.Drawing.Color.Gray; break;
-                case 9: color = System.Drawing.Color.Orange; break;
-                case 10: color = System.Drawing.Color.HotPink; break;  // #F8F approx
-                case 11: color = System.Drawing.Color.MediumPurple; break; // #80F approx
-                case 12: color = System.Drawing.Color.Teal; break;
-                case 13: color = System.Drawing.Color.YellowGreen; break;  // #8F0 approx
-                case 14: color = System.Drawing.Color.Navy; break;
-                case 15: color = System.Drawing.Color.SaddleBrown; break; // #840 approx
+                return ColorTranslator.FromHtml(karaokeColorHexes[index]);
             }
-            return color;
-        }
-
-        private void cboText_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            lblText.ForeColor = GetColorFromIndex(cboText.SelectedIndex);
-        }
-
-        private void cboSung_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            lblHighlight.ForeColor = GetColorFromIndex(cboSung.SelectedIndex);
-        }
+            catch
+            {
+                return Color.Black;
+            }            
+        }        
 
         private void cboFont_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -838,11 +1105,22 @@ namespace Nautilus
 
         private void UpdateFont()
         {
+            if (!cboFont.Text.Contains(".ttf")) return;
             try
             {
-                var font = new System.Drawing.Font(cboFont.Text, 16f, cboType.SelectedIndex == 0 ? System.Drawing.FontStyle.Bold : System.Drawing.FontStyle.Regular);
-                lblText.Font = font;
-                lblHighlight.Font = font;
+                var fontFile = cboFont.Text.Split('|')[1].Trim();
+                string fontPath = Path.Combine(Application.StartupPath, "bin", "fonts", fontFile);
+                pfc = new PrivateFontCollection();
+                pfc.AddFontFile(fontPath);               
+                FontFamily ff = pfc.Families[0]; // assuming the TTF file only contains one family
+                             
+                var font = new Font(ff, 16f, FontStyle.Bold);
+                lblTextColor1.Font = font;
+                lblTextHighlight1.Font = font;
+                lblTextColor2.Font = font;
+                lblTextHighlight2.Font = font;
+                lblTextColor3.Font = font;
+                lblTextHighlight3.Font = font;
             }
             catch
             {
@@ -903,11 +1181,10 @@ namespace Nautilus
                 ".mp3 and .cdg files that are used by most karaoke emulators and professional karaoke players. In essence, as the title says " +
                 "it is a Rock Band to Karaoke Converter\r\n\r\nIt is limited in what it can do because the .cdg format is very limited itself, but " +
                 "the goal is compatibility with as many karaoke players as possible\r\n\r\nYou can drag and drop one or multiple files and it'll batch " +
-                " process them\r\n\r\nOutput files are in a 'Karaoke' folder in the same directory as the source file(s)\r\n\r\nI rely on the CDGSharp.CLI library" +
-                " which at the moment does not support harmonies, so this version only works with PART VOCALS and therefore only supports one singer\r\n\r\n" +
-                "Another unfortunate problem with this library is that it struggles with songs with very fast syllables - \"Weird Al\" Yankovic's Polka Power!" +
-                " is an example of a song that has some visual glitches as a result of the very fast syllables in the song - if I find a solution I will update" +
-                " the tool\r\n\r\nOptions are pretty limited but also self explanatory\r\n\r\nEnjoy!";
+                " process them\r\n\r\nOutput files are in a 'Karaoke' folder in the same directory as the source file(s)\r\n\r\nThis tool wraps around the" +
+                " cdgmaker Python application by Josiah Winslow (https://github.com/WinslowJosiah/cdgmaker) made to work as an executable on Windows after " +
+                "many modifications by me\r\n\r\nI'm still learning all the ins and outs of the original Python application so if I missed " +
+                "something let me know so I can try to address it in a future update" + "\r\n\r\nOptions are limited but also self explanatory\r\n\r\nEnjoy!";
             var helper = new HelpForm(Text + " - Help", message, false, false);
             helper.ShowDialog();
         }
@@ -915,6 +1192,23 @@ namespace Nautilus
         private void CDGConverter_Shown(object sender, EventArgs e)
         {
             LoadConfig();
+            var folder = Application.StartupPath + "\\bin\\fonts\\";
+            var fonts = Directory.GetFiles(folder, "*.ttf", SearchOption.TopDirectoryOnly);
+            if (fonts.Any())
+            {
+                cboFont.Items.Clear();
+                foreach (var font in fonts)
+                {
+                    pfc = new PrivateFontCollection();
+                    pfc.AddFontFile(font);
+                    FontFamily ff = pfc.Families[0];
+                    cboFont.Items.Add(ff.Name + " | " + Path.GetFileName(font));
+                }
+                if (cboFont.Items.Count > 0)
+                {
+                    cboFont.SelectedIndex = 0;
+                }
+            }
             UpdateFont();
         }
 
@@ -928,6 +1222,43 @@ namespace Nautilus
                 return;
             }
             SaveConfig();
+        }
+
+        private void cboTextColor1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblTextColor1.ForeColor = GetColorFromIndex(cboTextColor1.SelectedIndex);
+        }
+
+        private void cboTextHighlight1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblTextHighlight1.ForeColor = GetColorFromIndex(cboTextHighlight1.SelectedIndex);
+        }
+
+        private void cboTextColor2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblTextColor2.ForeColor = GetColorFromIndex(cboTextColor2.SelectedIndex);
+        }
+
+        private void cboTextColor3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblTextColor3.ForeColor = GetColorFromIndex(cboTextColor3.SelectedIndex);
+        }
+
+        private void cboTextHighlight2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblTextHighlight2.ForeColor = GetColorFromIndex(cboTextHighlight2.SelectedIndex);
+        }
+
+        private void cboTextHighlight3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblTextHighlight3.ForeColor = GetColorFromIndex(cboTextHighlight3.SelectedIndex);
+        }
+
+        private void lblFontQuestion_MouseClick(object sender, MouseEventArgs e)
+        {
+            const string message = "You can customize the font that the converter will use\n\nPut your preferred fonts in the \\bin\\fonts\\ folder and they will be displayed here\n\n"
+                + "Please note that only .ttf font files are accepted";
+            MessageBox.Show(message, "Fonts", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 

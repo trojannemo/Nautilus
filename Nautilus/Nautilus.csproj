@@ -105,8 +105,8 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="NAudio">
-      <HintPath>bin\Debug\bin\NAudio.dll</HintPath>
+    <Reference Include="NAudio.Midi">
+      <HintPath>C:\Users\Yemil-PC\source\repos\cPlayerBright\cPlayerBright\CONPlayer\bin\Debug\NAudio.Midi.dll</HintPath>
     </Reference>
     <Reference Include="NautilusFREE">
       <HintPath>bin\Debug\bin\NautilusFREE.dll</HintPath>
