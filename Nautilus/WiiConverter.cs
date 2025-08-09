@@ -843,45 +843,57 @@ namespace Nautilus
                                         }
                                         Log("Editing DTA file to reflect changes to mogg file");
 
-                                        var drumsDiff = Parser.Songs[0].ChannelsDrums - 2;
-                                        var pans = "-1.0 1.0 ";
+                                        var drumsDiff = Parser.Songs[0].ChannelsDrums > 2 ? Parser.Songs[0].ChannelsDrums - 2 : 0;
+                                        var pans = "";
                                         var vols = "";
                                         var cores = "";
-                                        var track_count = "2 ";
+                                        var track_count = "";
                                         for (var i = 0; i < channels; i++)
                                         {
                                             vols += "0.0 ";
-                                            cores += "-1 ";
+                                            //cores += "-1 ";
+                                        }
+                                        if (Parser.Songs[0].ChannelsDrums > 0)
+                                        {
+                                            pans += Parser.Songs[0].ChannelsDrums == 1 ? "0.0 " : "-1.0 1.0 ";
+                                            track_count += "2 ";
+                                            cores += "-1 -1 ";
                                         }
                                         if (Parser.Songs[0].ChannelsBass > 0)
                                         {
                                             pans += Parser.Songs[0].ChannelsBass == 1 ? "0.0 " : "-1.0 1.0 ";
                                             track_count += Parser.Songs[0].ChannelsBass.ToString() + " ";
+                                            cores += Parser.Songs[0].ChannelsBass == 1 ? "-1 " : "-1 -1 ";
                                         }
                                         if (Parser.Songs[0].ChannelsGuitar > 0)
                                         {
                                             pans += Parser.Songs[0].ChannelsGuitar == 1 ? "0.0 " : "-1.0 1.0 ";
                                             track_count += Parser.Songs[0].ChannelsGuitar.ToString() + " ";
+                                            cores += Parser.Songs[0].ChannelsGuitar == 1 ? "1 " : "1 1 ";
                                         }
                                         if (Parser.Songs[0].ChannelsVocals > 0)
                                         {
                                             pans += Parser.Songs[0].ChannelsVocals == 1 ? "0.0 " : "-1.0 1.0 ";
                                             track_count += Parser.Songs[0].ChannelsVocals.ToString() + " ";
+                                            cores += Parser.Songs[0].ChannelsVocals == 1 ? "-1 " : "-1 -1 ";
                                         }
                                         if (Parser.Songs[0].ChannelsKeys > 0)
                                         {
                                             pans += Parser.Songs[0].ChannelsKeys == 1 ? "0.0 " : "-1.0 1.0 ";
                                             track_count += Parser.Songs[0].ChannelsKeys.ToString() + " ";
+                                            cores += Parser.Songs[0].ChannelsKeys == 1 ? "-1 " : "-1 -1 ";
                                         }
                                         if (backing > 0)
                                         {
                                             pans += backing == 1 ? "0.0 " : "-1.0 1.0 ";
                                             track_count += backing.ToString() + " ";
+                                            cores += backing == 1 ? "-1 " : "-1 -1 ";
                                         }
                                         if (Parser.Songs[0].ChannelsCrowd > 0 && (!deleteCrowdAudio.Checked || !deleteCrowdAudio.Enabled))
                                         {
                                             pans += Parser.Songs[0].ChannelsCrowd == 1 ? "0.0 " : "-1.0 1.0 ";
                                             track_count += Parser.Songs[0].ChannelsCrowd.ToString() + " ";
+                                            cores += Parser.Songs[0].ChannelsCrowd == 1 ? "-1 " : "-1 -1 ";
                                         }
                                         var didDrums = false;
                                         var didBass = false;
