@@ -63,6 +63,7 @@
             this.chkDIYStems = new System.Windows.Forms.CheckBox();
             this.chkSubgenre = new System.Windows.Forms.CheckBox();
             this.sortSongsByDTALanguageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkForceNumericOverride = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
@@ -441,12 +442,26 @@
             this.sortSongsByDTALanguageToolStripMenuItem.Text = "Sort songs by DTA language";
             this.sortSongsByDTALanguageToolStripMenuItem.Click += new System.EventHandler(this.sortSongsByDTALanguageToolStripMenuItem_Click);
             // 
+            // chkForceNumericOverride
+            // 
+            this.chkForceNumericOverride.AutoSize = true;
+            this.chkForceNumericOverride.Checked = true;
+            this.chkForceNumericOverride.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkForceNumericOverride.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkForceNumericOverride.Location = new System.Drawing.Point(362, 402);
+            this.chkForceNumericOverride.Name = "chkForceNumericOverride";
+            this.chkForceNumericOverride.Size = new System.Drawing.Size(211, 17);
+            this.chkForceNumericOverride.TabIndex = 84;
+            this.chkForceNumericOverride.Text = "Force overwrite even if already numeric";
+            this.chkForceNumericOverride.UseVisualStyleBackColor = true;
+            // 
             // BatchProcessor
             // 
             this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ClientSize = new System.Drawing.Size(614, 495);
+            this.Controls.Add(this.chkForceNumericOverride);
             this.Controls.Add(this.chkSubgenre);
             this.Controls.Add(this.chkDIYStems);
             this.Controls.Add(this.chkAddYear);
@@ -530,5 +545,6 @@
         private System.Windows.Forms.CheckBox chkDIYStems;
         private System.Windows.Forms.CheckBox chkSubgenre;
         private System.Windows.Forms.ToolStripMenuItem sortSongsByDTALanguageToolStripMenuItem;
+        private System.Windows.Forms.CheckBox chkForceNumericOverride;
     }
 }
