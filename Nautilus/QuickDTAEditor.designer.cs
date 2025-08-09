@@ -45,6 +45,9 @@
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.picWorking = new System.Windows.Forms.PictureBox();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.openWithNotepadPlusPlus = new System.Windows.Forms.ToolStripMenuItem();
+            this.openWithNotepad = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
@@ -128,7 +131,7 @@
             // 
             this.openFileToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.openFileToolStripMenuItem.Name = "openFileToolStripMenuItem";
-            this.openFileToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.openFileToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.openFileToolStripMenuItem.Text = "&Open CON file...";
             this.openFileToolStripMenuItem.Click += new System.EventHandler(this.openFileToolStripMenuItem_Click);
             // 
@@ -136,14 +139,17 @@
             // 
             this.exitToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.backUpCONFile});
+            this.backUpCONFile,
+            this.toolStripMenuItem1,
+            this.openWithNotepadPlusPlus,
+            this.openWithNotepad});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -185,6 +191,31 @@
             this.picWorking.TabIndex = 58;
             this.picWorking.TabStop = false;
             this.picWorking.Visible = false;
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(261, 6);
+            // 
+            // openWithNotepadPlusPlus
+            // 
+            this.openWithNotepadPlusPlus.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.openWithNotepadPlusPlus.Checked = true;
+            this.openWithNotepadPlusPlus.CheckOnClick = true;
+            this.openWithNotepadPlusPlus.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.openWithNotepadPlusPlus.Name = "openWithNotepadPlusPlus";
+            this.openWithNotepadPlusPlus.Size = new System.Drawing.Size(264, 22);
+            this.openWithNotepadPlusPlus.Text = "Open with Notepad++";
+            this.openWithNotepadPlusPlus.Click += new System.EventHandler(this.openWithNotepadToolStripMenuItem_Click);
+            // 
+            // openWithNotepad
+            // 
+            this.openWithNotepad.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.openWithNotepad.CheckOnClick = true;
+            this.openWithNotepad.Name = "openWithNotepad";
+            this.openWithNotepad.Size = new System.Drawing.Size(264, 22);
+            this.openWithNotepad.Text = "Open with Notepad";
+            this.openWithNotepad.Click += new System.EventHandler(this.openWithNotepadToolStripMenuItem1_Click);
             // 
             // QuickDTAEditor
             // 
@@ -233,5 +264,8 @@
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem openWithNotepadPlusPlus;
+        private System.Windows.Forms.ToolStripMenuItem openWithNotepad;
     }
 }

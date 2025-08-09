@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
@@ -119,7 +120,13 @@ namespace Nautilus
             lstLog.Items.Clear();
             InitLog();
         }
-        
+
+        private sealed class EditArgs
+        {
+            public string FilePath { get; set; }
+            public bool UseNotepadPP { get; set; }
+        }
+
         private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             Tools.CurrentFolder = Path.GetDirectoryName(con);
@@ -157,15 +164,53 @@ namespace Nautilus
             Log("Opening DTA file...");
 
             string originalDtaContents = File.ReadAllText(dta);
-            var process = Process.Start(dta);
-            Log("DTA file is being edited by the user ... waiting...");
+            var bw = (BackgroundWorker)sender;
+            var args = (EditArgs)e.Argument;
 
-            do
+            string npp = @"C:\Program Files\Notepad++\notepad++.exe";
+            Process p = null;
+
+            try
             {
-                //wait while user has DTA file opened
-            } while (!process.HasExited);
-            
-            process.Dispose();
+                //use Notepad++
+                if (openWithNotepadPlusPlus.Checked && File.Exists(npp))
+                {
+                    p = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = npp,
+                        Arguments = $"-multiInst -nosession \"{dta}\"",
+                        UseShellExecute = false
+                    });
+                }
+                else
+                {
+                    //Use Notepad
+                    p = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "notepad.exe",
+                        Arguments = $"\"{dta}\"",
+                        UseShellExecute = false
+                    });
+                }
+
+                if (p == null) throw new InvalidOperationException("Failed to start editor.");
+
+                // Wait in small chunks so we can honor cancellation
+                while (true)
+                {
+                    if (bw.CancellationPending)
+                    {
+                        e.Cancel = true;
+                        try { if (!p.HasExited) p.Kill(); } catch { /* ignore */ }
+                        break;
+                    }
+                    if (p.WaitForExit(250)) break;
+                }
+            }
+            finally
+            {
+                p?.Dispose();
+            }
 
             Log("DTA file closed by user, continuing...");
             string newDtaContents = File.ReadAllText(dta);
@@ -304,6 +349,16 @@ namespace Nautilus
             {
                 DoDTA(con);
             }
+        }
+
+        private void openWithNotepadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            openWithNotepad.Checked = false;
+        }
+
+        private void openWithNotepadToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            openWithNotepadPlusPlus.Checked = false;
         }
     }
 }
