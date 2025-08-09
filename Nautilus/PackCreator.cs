@@ -583,7 +583,7 @@ namespace Nautilus
                         //if songs.dta is there, add to main songs.dta and then delete
                         if (File.Exists(songsFolder + songName + "\\songs.dta"))
                         {
-                            var dtaIn = new StreamReader(songsFolder + songName + "\\songs.dta", fileEncoding);
+                           var dtaIn = new StreamReader(songsFolder + songName + "\\songs.dta", fileEncoding);
                            var dtaOut = new StreamWriter(dtafile, true, fileEncoding);
                                                                 
                             while (dtaIn.Peek() >= 0)
@@ -595,7 +595,15 @@ namespace Nautilus
                                 line = Tools.FixBadChars(line);
                                 if (line.Contains("(encoding") || line.Contains("'encoding"))
                                 {
-                                    line = "   ('encoding' '" + fileEncodingString + "')";
+                                    //line = "   ('encoding' '" + fileEncodingString + "')";
+                                    if (line.Contains("utf8") && fileEncodingString == "latin1")
+                                    {
+                                        line.Replace("utf8", "latin1");
+                                    }
+                                    else if (line.Contains("latin1") && fileEncodingString == "utf8")
+                                    {
+                                        line.Replace("latin1", "utf8");
+                                    }
                                 }
                                 dtaOut.WriteLine(line);
                             }
