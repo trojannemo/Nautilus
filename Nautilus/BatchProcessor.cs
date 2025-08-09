@@ -720,5 +720,73 @@ namespace Nautilus
             gameRB2.Enabled = chkOverrideGameID.Checked;
             gameRB3.Enabled = chkOverrideGameID.Checked;
         }
+
+        private void sortSongsByDTALanguageToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(txtFolder.Text))
+            {
+                MessageBox.Show("Please select a folder that contains your song files first, then click this menu button again", Text, MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+                return;
+            }
+            if (inputFiles.Count == 0)
+            {
+                MessageBox.Show("No valid input files found", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+
+            EnableDisable(false);
+            List<string> languages = new List<string>();            
+            var folders = txtFolder.Text + "\\";
+
+            foreach (var file in inputFiles)
+            {
+                if (VariousFunctions.ReadFileType(file) != XboxFileType.STFS)
+                {
+                    continue;
+                }
+                var xDTA = Parser.ExtractDTA(file);
+                if (!xDTA) continue;
+                if (Parser.Songs.Count != 1) continue; //no packs or errored files
+                var language = Parser.Songs[0].Languages.Replace(",", "|");
+                if (string.IsNullOrEmpty(language))
+                {
+                    Log("File '" + Path.GetFileName(file) + "' does not have a language tag, skipping");
+                    continue;
+                }
+                if (!languages.Contains(language))
+                {
+                    languages.Add(language);
+                }
+                Log("File '" + Path.GetFileName(file) + "' is tagged with language(s): " + language);
+                var newFolder = folders + language.Replace("|", "") + "\\";
+                if (!Directory.Exists(newFolder))
+                {
+                    Directory.CreateDirectory(newFolder);
+                }
+                if (Tools.MoveFile(file, newFolder + Path.GetFileName(file)))
+                {
+                    Log("Sorted successfully");
+                }
+                else
+                {
+                    Log("Failed to sort");
+                }                
+            }
+            if (languages.Count > 0)
+            {
+                Log("Found songs with the following language tags:");
+                foreach (var language in languages)
+                {
+                    Log(language);
+                }
+            }
+            else
+            {
+                Log("Could not find any language tags for the songs that were processed");
+            }
+
+            EnableDisable(true);
+        }
     }
 }

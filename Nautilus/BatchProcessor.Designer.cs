@@ -62,6 +62,7 @@
             this.chkAddYear = new System.Windows.Forms.CheckBox();
             this.chkDIYStems = new System.Windows.Forms.CheckBox();
             this.chkSubgenre = new System.Windows.Forms.CheckBox();
+            this.sortSongsByDTALanguageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
@@ -245,7 +246,8 @@
             // 
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.separateDTA});
+            this.separateDTA,
+            this.sortSongsByDTALanguageToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(614, 24);
@@ -432,6 +434,13 @@
             this.chkSubgenre.Text = "Remove subgenre from DTA file";
             this.chkSubgenre.UseVisualStyleBackColor = true;
             // 
+            // sortSongsByDTALanguageToolStripMenuItem
+            // 
+            this.sortSongsByDTALanguageToolStripMenuItem.Name = "sortSongsByDTALanguageToolStripMenuItem";
+            this.sortSongsByDTALanguageToolStripMenuItem.Size = new System.Drawing.Size(165, 20);
+            this.sortSongsByDTALanguageToolStripMenuItem.Text = "Sort songs by DTA language";
+            this.sortSongsByDTALanguageToolStripMenuItem.Click += new System.EventHandler(this.sortSongsByDTALanguageToolStripMenuItem_Click);
+            // 
             // BatchProcessor
             // 
             this.AllowDrop = true;
@@ -520,5 +529,6 @@
         private System.Windows.Forms.CheckBox chkAddYear;
         private System.Windows.Forms.CheckBox chkDIYStems;
         private System.Windows.Forms.CheckBox chkSubgenre;
+        private System.Windows.Forms.ToolStripMenuItem sortSongsByDTALanguageToolStripMenuItem;
     }
 }

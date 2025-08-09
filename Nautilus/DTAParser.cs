@@ -1169,7 +1169,7 @@ namespace Nautilus
                             }
                             else if (line.Contains(";Language(s)"))
                             {
-                                song.Languages = line.Replace(";Languages(s)", "").Replace("=", "");
+                                song.Languages = line.Replace(";Language(s)", "").Replace("=", "");
                             }
                             else if (line.Contains(";DisableProKeys=1"))
                             {
