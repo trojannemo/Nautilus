@@ -1604,9 +1604,7 @@ namespace Nautilus
             var xArt = xPackage.GetFile("songs/" + internalname + "/gen/" + internalname + "_keep.png_xbox");
             if (xArt == null)
             {
-                Log("Failed to grab _keep.png_xbox file, can't extract this file");
-                xPackage.CloseIO();
-                return;
+                Log("Failed to grab _keep.png_xbox file, continuing without it");
             }
             else
             {
@@ -1617,9 +1615,7 @@ namespace Nautilus
             var xMilo = xPackage.GetFile("songs/" + internalname + "/gen/" + internalname + ".milo_xbox");
             if (xMilo == null)
             {
-                Log("Failed to grab .milo_xbox file, can't extract this file");
-                xPackage.CloseIO();
-                return;
+                Log("Failed to grab .milo_xbox file, continuing without it");
             }
             else
             {
@@ -1639,8 +1635,14 @@ namespace Nautilus
             repackaged.AddFile(mogg, "songs/" + song.InternalName + "/" + Path.GetFileName(mogg));
             repackaged.AddFolder("songs/" + song.InternalName + "/gen");
             //add png_xbox and milo_xbox files
-            repackaged.AddFile(art, "songs/" + song.InternalName + "/gen/" + Path.GetFileName(art));
-            repackaged.AddFile(milo, "songs/" + song.InternalName + "/gen/" + Path.GetFileName(milo));
+            if (File.Exists(art))
+            {
+                repackaged.AddFile(art, "songs/" + song.InternalName + "/gen/" + Path.GetFileName(art));
+            }
+            if (File.Exists(milo))
+            {
+                repackaged.AddFile(milo, "songs/" + song.InternalName + "/gen/" + Path.GetFileName(milo));
+            }
 
             var thumbnail = tempfolder + "thumb.png";
             Tools.DeleteFile(thumbnail);
