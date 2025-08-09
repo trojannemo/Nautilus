@@ -2791,6 +2791,7 @@ namespace Nautilus
         public bool CATemh { get; set; }
         public bool HasSongIDError { get; set; }
         public string VNAudioHash { get; set; }
+        public double BPM { get; set; }
 
         public DateTime DateAdded { get; set; }
 
@@ -2799,6 +2800,7 @@ namespace Nautilus
             DTALines = new List<string>();
             SongId = 0;
             Name = "";
+            BPM = 120.0;
             ShortName = "";
             Artist = "";
             Album = "";

@@ -3303,7 +3303,7 @@ namespace Nautilus
             }
             else if (lstSongs.FocusedItem != null)
             {
-                index = Convert.ToInt16(lstSongs.Items[lstSongs.SelectedIndices[0]].SubItems[22].Text); //ListIndex
+                index = Convert.ToInt16(lstSongs.Items[lstSongs.SelectedIndices[0]].SubItems[23].Text); //ListIndex
             }
             else
             {

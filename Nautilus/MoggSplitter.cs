@@ -14,7 +14,6 @@ using NautilusFREE;
 using Un4seen.Bass.AddOn.EncFlac;
 using Un4seen.Bass.AddOn.EncMp3;
 using Un4seen.Bass.AddOn.EncOpus;
-using Un4seen.Bass.AddOn.Opus;
 using System.Globalization;
 
 namespace Nautilus

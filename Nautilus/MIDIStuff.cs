@@ -17,7 +17,7 @@ namespace Nautilus
         private MidiFile MIDIFile;
         public MIDIChart MIDIInfo;
         public MIDIChart MIDI_Chart;
-        private long LengthLong;
+        public long LengthLong;
         private LyricCollection InternalVocals;
         private LyricCollection InternalHarmonies1;
         private LyricCollection InternalHarmonies2;
@@ -710,7 +710,7 @@ namespace Nautilus
             }
         }
 
-        private double AverageBPM()
+        public double AverageBPM()
         {
             var total_bpm = 0.0;
             var last = 0.0;
