@@ -112,7 +112,7 @@ namespace Nautilus
                 btnBegin.Enabled = false;
                 return;
             }
-            if (!chkAuthor.Checked && !chkOrigin.Checked && !chkOverrideAuthor.Checked && !chkVocalGender.Checked && !chkSongID.Checked && !chkOverrideGameID.Checked && !chkAddYear.Checked)
+            if (!chkAuthor.Checked && !chkOrigin.Checked && !chkOverrideAuthor.Checked && !chkVocalGender.Checked && !chkSongID.Checked && !chkOverrideGameID.Checked && !chkAddYear.Checked && !chkDefAutID.Checked)
             {
                 MessageBox.Show("No options selected, nothing to do", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 Log("No options selected, nothing to do");
@@ -190,6 +190,7 @@ namespace Nautilus
             chkRecursive.Enabled = enabled;
             menuStrip1.Enabled = enabled;
             chkSongID.Enabled = enabled;
+            chkDefAutID.Enabled = enabled;
             lstLog.Cursor = enabled ? Cursors.Default : Cursors.WaitCursor;
             Cursor = lstLog.Cursor;
             chkFallback.Enabled = enabled;
@@ -208,7 +209,7 @@ namespace Nautilus
 
         private bool ModifyDTA()
         {
-            return chkAuthor.Checked || chkOrigin.Checked || chkOverrideAuthor.Checked || chkVocalGender.Checked || chkSongID.Checked || chkAddYear.Checked;
+            return chkAuthor.Checked || chkOrigin.Checked || chkOverrideAuthor.Checked || chkVocalGender.Checked || chkSongID.Checked || chkAddYear.Checked || chkDefAutID.Checked;
         }
 
         private void FileProcessor_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -323,7 +324,7 @@ namespace Nautilus
                                                 }
                                                 else if (line.Contains("song_id") && !line.Contains(";ORIG_ID=") && !line.Trim().StartsWith(";") && chkSongID.Checked)
                                                 {
-                                                    if (!Parser.IsNumericID(line) || chkForceNumericOverride.Checked) //only if not already a numeric ID or forced
+                                                    if (!Parser.IsNumericID(line) || chkForceNumericOverride.Checked || ((Parser.GetSongID(line).StartsWith("1000") && Parser.GetSongID(line).Length == 10))) //only if not already a numeric ID or forced or it has the default 1000 MAGMA C3 Author ID
                                                     {
                                                         var origID = Parser.GetSongID(line);
                                                         sw.WriteLine(";ORIG_ID=" + origID);

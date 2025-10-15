@@ -47,6 +47,7 @@
             this.txtOrigin = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.separateDTA = new System.Windows.Forms.ToolStripMenuItem();
+            this.sortSongsByDTALanguageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.txtAuthor = new System.Windows.Forms.TextBox();
             this.chkOverrideAuthor = new System.Windows.Forms.CheckBox();
             this.chkVocalGender = new System.Windows.Forms.CheckBox();
@@ -62,8 +63,8 @@
             this.chkAddYear = new System.Windows.Forms.CheckBox();
             this.chkDIYStems = new System.Windows.Forms.CheckBox();
             this.chkSubgenre = new System.Windows.Forms.CheckBox();
-            this.sortSongsByDTALanguageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chkForceNumericOverride = new System.Windows.Forms.CheckBox();
+            this.chkDefAutID = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
@@ -262,6 +263,13 @@
             this.separateDTA.Text = "Separate bundled DTA files";
             this.separateDTA.Click += new System.EventHandler(this.separateDTA_Click);
             // 
+            // sortSongsByDTALanguageToolStripMenuItem
+            // 
+            this.sortSongsByDTALanguageToolStripMenuItem.Name = "sortSongsByDTALanguageToolStripMenuItem";
+            this.sortSongsByDTALanguageToolStripMenuItem.Size = new System.Drawing.Size(165, 20);
+            this.sortSongsByDTALanguageToolStripMenuItem.Text = "Sort songs by DTA language";
+            this.sortSongsByDTALanguageToolStripMenuItem.Click += new System.EventHandler(this.sortSongsByDTALanguageToolStripMenuItem_Click);
+            // 
             // txtAuthor
             // 
             this.txtAuthor.Enabled = false;
@@ -435,25 +443,31 @@
             this.chkSubgenre.Text = "Remove subgenre from DTA file";
             this.chkSubgenre.UseVisualStyleBackColor = true;
             // 
-            // sortSongsByDTALanguageToolStripMenuItem
-            // 
-            this.sortSongsByDTALanguageToolStripMenuItem.Name = "sortSongsByDTALanguageToolStripMenuItem";
-            this.sortSongsByDTALanguageToolStripMenuItem.Size = new System.Drawing.Size(165, 20);
-            this.sortSongsByDTALanguageToolStripMenuItem.Text = "Sort songs by DTA language";
-            this.sortSongsByDTALanguageToolStripMenuItem.Click += new System.EventHandler(this.sortSongsByDTALanguageToolStripMenuItem_Click);
-            // 
             // chkForceNumericOverride
             // 
             this.chkForceNumericOverride.AutoSize = true;
             this.chkForceNumericOverride.Checked = true;
             this.chkForceNumericOverride.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkForceNumericOverride.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkForceNumericOverride.Location = new System.Drawing.Point(362, 402);
+            this.chkForceNumericOverride.Location = new System.Drawing.Point(396, 402);
             this.chkForceNumericOverride.Name = "chkForceNumericOverride";
             this.chkForceNumericOverride.Size = new System.Drawing.Size(211, 17);
             this.chkForceNumericOverride.TabIndex = 84;
             this.chkForceNumericOverride.Text = "Force overwrite even if already numeric";
             this.chkForceNumericOverride.UseVisualStyleBackColor = true;
+            // 
+            // chkDefAutID
+            // 
+            this.chkDefAutID.AutoSize = true;
+            this.chkDefAutID.Checked = true;
+            this.chkDefAutID.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDefAutID.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkDefAutID.Location = new System.Drawing.Point(396, 425);
+            this.chkDefAutID.Name = "chkDefAutID";
+            this.chkDefAutID.Size = new System.Drawing.Size(212, 17);
+            this.chkDefAutID.TabIndex = 84;
+            this.chkDefAutID.Text = "Automatically correct default Author IDs";
+            this.chkDefAutID.UseVisualStyleBackColor = true;
             // 
             // BatchProcessor
             // 
@@ -461,6 +475,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ClientSize = new System.Drawing.Size(614, 495);
+            this.Controls.Add(this.chkDefAutID);
             this.Controls.Add(this.chkForceNumericOverride);
             this.Controls.Add(this.chkSubgenre);
             this.Controls.Add(this.chkDIYStems);
@@ -546,5 +561,6 @@
         private System.Windows.Forms.CheckBox chkSubgenre;
         private System.Windows.Forms.ToolStripMenuItem sortSongsByDTALanguageToolStripMenuItem;
         private System.Windows.Forms.CheckBox chkForceNumericOverride;
+        private System.Windows.Forms.CheckBox chkDefAutID;
     }
 }
