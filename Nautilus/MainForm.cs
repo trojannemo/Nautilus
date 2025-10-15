@@ -1407,7 +1407,7 @@ namespace Nautilus
             var path = Application.StartupPath + "\\bin\\update.txt";
             Tools.DeleteFile(path);
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault; //(SecurityProtocolType)3072; //TLS 1.2 for .NET 4.0
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault;
             using (var client = new WebClient())
             {
                 try

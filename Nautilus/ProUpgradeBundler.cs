@@ -9,6 +9,8 @@ using System.Drawing;
 using Nautilus.Properties;
 using Nautilus.x360;
 using NAudio.Midi;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Nautilus
 {
@@ -17,9 +19,9 @@ namespace Nautilus
         private RSAParams signature;
         private readonly NemoTools Tools;
         private readonly DTAParser Parser;
-        private string orig_midi;
-        private string orig_con;
-        private string orig_dta;
+        private string originalMIDI;
+        private string originalCON;
+        private string originalDTA;
         private string newMIDI;
         private string newDTA;
         private string songID;
@@ -29,15 +31,17 @@ namespace Nautilus
         private readonly string temp_folder;
         private readonly List<string> SongInstruments;
         private readonly List<string> UpgradeInstruments; 
-        private readonly List<string> UpgradeMidis;
+        private readonly List<string> UpgradeMIDIs;
         private string UpgradeCON; 
-        private string newsongdta;
-        private string newupgdta;
+        private string newSongDTA;
+        private string newUpgradeDTA;
         private string proguitartuning;
         private string probasstuning;
         private string proguitardiff;
         private string probassdiff;
         private const string NA = "NOT FOUND IN DTA";
+        private List<string> batchBundleFiles;
+        private bool isBatchBundle;
  
         public ProUpgradeBundler(Color ButtonBackColor, Color ButtonTextColor)
         {
@@ -47,7 +51,8 @@ namespace Nautilus
             Parser = new DTAParser();
             SongInstruments = new List<string>();
             UpgradeInstruments = new List<string>();
-            UpgradeMidis = new List<string>();
+            UpgradeMIDIs = new List<string>();
+            batchBundleFiles = new List<string>();
             upgradeID = NA;
             songID = NA;
             song_int_name = NA;
@@ -109,13 +114,22 @@ namespace Nautilus
             btnBundle.Enabled = false;
             SongInstruments.Clear();
             UpgradeInstruments.Clear();
-            UpgradeMidis.Clear();
+            ClearVariables();
+            CleanUp();
+            EnableDisable(true);
+            Log("Ready");
+            btnBundle.Visible = true;
+        }
+
+        private void ClearVariables()
+        {
+            UpgradeMIDIs.Clear();
             UpgradeCON = "";
-            newsongdta = "";
-            newupgdta = "";
-            orig_midi = "";
-            orig_con = "";
-            orig_dta = "";
+            newSongDTA = "";
+            newUpgradeDTA = "";
+            originalMIDI = "";
+            originalCON = "";
+            originalDTA = "";
             upgradeID = NA;
             songID = NA;
             song_int_name = NA;
@@ -124,10 +138,6 @@ namespace Nautilus
             probasstuning = "";
             proguitardiff = "";
             probassdiff = "";
-            CleanUp();
-            EnableDisable(true);
-            Log("Ready");
-            btnBundle.Visible = true;
         }
 
         private void EnableDisable(bool enable)
@@ -136,11 +146,12 @@ namespace Nautilus
             menuStrip1.Enabled = enable;
             btnReset.Enabled = enable;
             btnBundle.Enabled = false;
+            btnBundle.Visible = enable;
             Cursor = enable ? Cursors.Default : Cursors.WaitCursor;
             lstLog.Cursor = Cursor;
         }
 
-        private void ReadUpgDTA(string dta)
+        private void ReadUpgradeDTA(string dta)
         {
             if (!File.Exists(dta))
             {
@@ -192,99 +203,106 @@ namespace Nautilus
 
         private void btnBundle_Click(object sender, EventArgs e)
         {
-            if (!File.Exists(orig_midi))
+            ProcessUpgradeFiles();
+            EnableDisable(false);
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void ProcessUpgradeFiles()
+        {
+            if (!File.Exists(originalMIDI))
             {
-                Log("MIDI file " + Path.GetFileName(orig_midi) + " is missing! Did you just delete it?");
-                MIDIFixFailed(orig_midi, false);
+                Log("MIDI file " + Path.GetFileName(originalMIDI) + " is missing! Did you just delete it?");
+                MIDIFixFailed(originalMIDI, false);
                 return;
             }
-            if (!File.Exists(orig_dta) && !string.IsNullOrEmpty(orig_dta))
+            if (!File.Exists(originalDTA) && !string.IsNullOrEmpty(originalDTA))
             {
-                Log("DTA file " + Path.GetFileName(orig_dta) + " is missing! Did you just delete it?");
-                MIDIFixFailed(orig_dta, false);
+                Log("DTA file " + Path.GetFileName(originalDTA) + " is missing! Did you just delete it?");
+                MIDIFixFailed(originalDTA, false);
                 return;
             }
 
-            newMIDI = Path.GetDirectoryName(orig_midi) + "\\" + Path.GetFileNameWithoutExtension(orig_midi) + " (bundled).mid";
-            newDTA = Path.GetDirectoryName(orig_dta) + "\\" + Path.GetFileNameWithoutExtension(orig_dta) + " (bundled).dta";
-            var skip_tracks = ignoreNoninstrumentTracks.Checked ? new List<string> {"EVENTS", "VENUE", "BEAT"} : new List<string>();
+            newMIDI = Path.GetDirectoryName(originalMIDI) + "\\" + Path.GetFileNameWithoutExtension(originalMIDI) + " (bundled).mid";
+            newDTA = Path.GetDirectoryName(originalDTA) + "\\" + Path.GetFileNameWithoutExtension(originalDTA) + " (bundled).dta";
+            var skip_tracks = ignoreNoninstrumentTracks.Checked ? new List<string> { "EVENTS", "VENUE", "BEAT" } : new List<string>();
 
-            var midi = Tools.NemoLoadMIDI(orig_midi);
+            var midi = Tools.NemoLoadMIDI(originalMIDI);
             if (midi == null)
             {
-                MIDIFixFailed(orig_midi);
+                MIDIFixFailed(originalMIDI);
                 return;
             }
 
             var harm1 = false;
             var harm2 = false;
             var harm3 = false;
-            foreach (var UpgMidi in UpgradeMidis)
+            foreach (var UpgradeMIDI in UpgradeMIDIs)
             {
-                if (!File.Exists(UpgMidi))
+                if (!File.Exists(UpgradeMIDI))
                 {
-                    Log("Upgrade MIDI file " + Path.GetFileName(UpgMidi) + " is missing! Did you just delete it?");
+                    Log("Upgrade MIDI file " + Path.GetFileName(UpgradeMIDI) + " is missing! Did you just delete it?");
                     continue;
                 }
-                var upgrade = Tools.NemoLoadMIDI(UpgMidi);
+                var upgrade = Tools.NemoLoadMIDI(UpgradeMIDI);
                 if (upgrade == null)
                 {
-                    MIDIFixFailed(UpgMidi);
+                    MIDIFixFailed(UpgradeMIDI);
                     return;
                 }
                 Tools.DeleteFile(newMIDI);
                 Tools.DeleteFile(newDTA);
-                var origtracks = new List<string>();
+                var originalTracks = new List<string>();
                 //check which tracks are in original midi
                 for (var i = 0; i < midi.Events.Tracks; i++)
                 {
-                    var trackname = Tools.GetMidiTrackName(midi.Events[i][0].ToString());
-                    if (!origtracks.Contains(trackname) && !skip_tracks.Contains(trackname))
+                    var trackName = Tools.GetMidiTrackName(midi.Events[i][0].ToString());
+                    if (!originalTracks.Contains(trackName) && !skip_tracks.Contains(trackName))
                     {
-                        origtracks.Add(trackname);
+                        originalTracks.Add(trackName);
                     }
                 }
-                var upgtracks = new List<string>();
+                var upgradeTracks = new List<string>();
                 //check what tracks are in the upgrade midi
                 //skip track 0 = tempo track
                 for (var i = 1; i < upgrade.Events.Tracks; i++)
                 {
-                    var trackname = Tools.GetMidiTrackName(upgrade.Events[i][0].ToString());
-                    if (trackname.Contains("HARM1") || trackname.Contains("VOCALS"))
+                    var trackName = Tools.GetMidiTrackName(upgrade.Events[i][0].ToString());
+                    if (trackName.Contains("HARM1") || trackName.Contains("VOCALS"))
                     {
                         harm1 = true;
                     }
-                    else if (trackname.Contains("HARM2"))
+                    else if (trackName.Contains("HARM2"))
                     {
                         harm2 = true;
                     }
-                    else if (trackname.Contains("HARM3"))
+                    else if (trackName.Contains("HARM3"))
                     {
                         harm3 = true;
                     }
-                    if (!upgtracks.Contains(trackname) && !skip_tracks.Contains(trackname))
+                    if (!upgradeTracks.Contains(trackName) && !skip_tracks.Contains(trackName))
                     {
-                        upgtracks.Add(trackname);
+                        upgradeTracks.Add(trackName);
                     }
                 }
                 if (overwriteExistingTrack.Checked) //only remove if checked to overwrite
                 {
-                    var to_remove = new List<int>();
+                    var toRemove = new List<int>();
                     for (var i = 0; i < midi.Events.Tracks; i++)
                     {
-                        var trackname = Tools.GetMidiTrackName(midi.Events[i][0].ToString());
-                        if (upgtracks.Contains(trackname))
+                        var trackName = Tools.GetMidiTrackName(midi.Events[i][0].ToString());
+                        if (upgradeTracks.Contains(trackName))
                         {
-                            to_remove.Add(i); //remove only if found in the upgrade midi and overwrite is checked
+                            toRemove.Add(i); //remove only if found in the upgrade midi and overwrite is checked
                         }
                     }
-                    to_remove.Sort();
-                    for (var i = to_remove.Count - 1; i >= 0; i--)
+                    toRemove.Sort();
+                    for (var i = toRemove.Count - 1; i >= 0; i--)
                     {
-                        var trackname = Tools.GetMidiTrackName(midi.Events[to_remove[i]][0].ToString());
+                        var trackname = Tools.GetMidiTrackName(midi.Events[toRemove[i]][0].ToString());
                         try
                         {
-                            midi.Events.RemoveTrack(to_remove[i]);
+                            midi.Events.RemoveTrack(toRemove[i]);
                         }
                         catch (Exception ex)
                         {
@@ -298,12 +316,12 @@ namespace Nautilus
                 //combine upgrade with original
                 for (var i = 0; i < upgrade.Events.Tracks; i++)
                 {
-                    var trackname = Tools.GetMidiTrackName(upgrade.Events[i][0].ToString());
-                    if (!upgtracks.Contains(trackname) || (origtracks.Contains(trackname) && onlyAddNewTracks.Checked))
+                    var trackName = Tools.GetMidiTrackName(upgrade.Events[i][0].ToString());
+                    if (!upgradeTracks.Contains(trackName) || (originalTracks.Contains(trackName) && onlyAddNewTracks.Checked))
                         continue;
                     try
                     {
-                        if (trackname.Contains("KEYS_X"))
+                        if (trackName.Contains("KEYS_X"))
                         {
                             if (!rbhp_xkeys)
                             {
@@ -312,7 +330,7 @@ namespace Nautilus
                             rbhp_xkeys = true; //sometimes rbhp uses two pro keys x tracks for whatever reason, only add one
                             continue;
                         }
-                        if (trackname.Contains("KEYS_E"))
+                        if (trackName.Contains("KEYS_E"))
                         {
                             if (!rbhp_ekeys)
                             {
@@ -348,25 +366,25 @@ namespace Nautilus
                 Log("There was an error creating the combined MIDI file");
                 return;
             }
-            if (string.IsNullOrWhiteSpace(orig_con))
+            if (string.IsNullOrWhiteSpace(originalCON))
             {
                 Log("Process completed successfully");
                 Log("Bundled MIDI file can be found in:");
                 Log(newMIDI);
                 return;
             }
-            if (!string.IsNullOrWhiteSpace(newsongdta) && File.Exists(newsongdta))
+            if (!string.IsNullOrWhiteSpace(newSongDTA) && File.Exists(newSongDTA))
             {
                 Log("Replacing original songs.dta with RBHP songs.dta file");
-                orig_dta = newsongdta; //if we got RBHP dta, completely replace original one
+                originalDTA = newSongDTA; //if we got RBHP dta, completely replace original one
             }
-            if (!string.IsNullOrWhiteSpace(newupgdta) && File.Exists(newupgdta))
+            if (!string.IsNullOrWhiteSpace(newUpgradeDTA) && File.Exists(newUpgradeDTA))
             {
                 Log("Merging upgrades.dta information into songs.dta file");
-                var sr = new StreamReader(orig_dta, Encoding.Default);
+                var sr = new StreamReader(originalDTA, Encoding.Default);
                 var sw = new StreamWriter(newDTA, false, Encoding.Default);
-                var doneTuning = false;
-                //first pass, replace values if already present
+                
+                var doneFormat = false;                
                 while (sr.Peek() > 0)
                 {
                     var line = sr.ReadLine();
@@ -397,7 +415,16 @@ namespace Nautilus
                                 }
                                 if (!string.IsNullOrWhiteSpace(line))
                                 {
-                                    sw.WriteLine(line);
+                                    //avoid duplicating format line, not sure why it happens but this avoids it
+                                    if (line.Contains("format") && !doneFormat)
+                                    {
+                                        sw.WriteLine(line);
+                                        doneFormat = true;
+                                    }
+                                    else if (!line.Contains("format"))
+                                    {
+                                        sw.WriteLine(line);
+                                    }
                                 }
                             }
                         }
@@ -406,28 +433,54 @@ namespace Nautilus
                         {
                             line = "";
                         }
-                        else if (line.Contains(";The following values"))
+                        /*else if (line.Contains(";The following values"))
                         {
-                            sw.WriteLine(proguitartuning);
-                            sw.WriteLine(probasstuning);
-                            doneTuning = true;
+                            if (!string.IsNullOrEmpty(proguitartuning))
+                            {
+                                sw.WriteLine(proguitartuning);
+                                doneTuning = true;
+                            }
+                            if (!string.IsNullOrEmpty(probasstuning))
+                            {
+                                sw.WriteLine(probasstuning);
+                                doneTuning = true;
+                            }
                         }
                         else if (line == ")" && !doneTuning)
                         {
                             if (sr.Peek() <= 0)
                             {
-                                sw.WriteLine(proguitartuning);
-                                sw.WriteLine(probasstuning);
+                                if (!string.IsNullOrEmpty(proguitartuning))
+                                {
+                                    sw.WriteLine(proguitartuning);
+                                    doneTuning = true;
+                                }
+                                if (!string.IsNullOrEmpty(probasstuning))
+                                {
+                                    sw.WriteLine(probasstuning);
+                                    doneTuning = true;
+                                }
                             }
-                        }
-                    }
+                        }*/
+                    }   
                     if (!string.IsNullOrWhiteSpace(line))
                     {
-                        sw.WriteLine(line);
+                        //avoid duplicating format line, not sure why it happens but this avoids it
+                        if (line.Contains("format") && !doneFormat)
+                        {
+                            sw.WriteLine(line);
+                            doneFormat = true;
+                        }
+                        else if (!line.Contains("format"))
+                        {
+                            sw.WriteLine(line);
+                        }
                     }
                 }
                 sr.Dispose();
                 sw.Dispose();
+                var edited = InsertTuningsAboveRank(File.ReadAllText(newDTA), proguitartuning, probasstuning);
+                File.WriteAllText(newDTA, edited, Encoding.Default);
                 if (File.Exists(newDTA))
                 {
                     Log("Merged DTA information successfully");
@@ -441,30 +494,66 @@ namespace Nautilus
             else
             {
                 Tools.DeleteFile(newDTA);
-                File.Copy(orig_dta, newDTA);
+                File.Copy(originalDTA, newDTA);
             }
-            var vocals = harm3 ? 3 : (harm2 ? 2 : (harm1) ? 1 : 0);
-            if (showSongIDPrompt.Checked)
+            if (!isBatchBundle)
             {
-                var popup = new PasswordUnlocker(songID == NA || useUpgradeID.Checked ? upgradeID : songID);
-                popup.IDChanger();
-                popup.ShowDialog();
-                var newID = popup.EnteredText;
-                popup.Dispose();
-                if (!string.IsNullOrWhiteSpace(newID))
+                var vocals = harm3 ? 3 : (harm2 ? 2 : (harm1) ? 1 : 0);
+                if (showSongIDPrompt.Checked)
                 {
-                    songID = newID;
+                    var popup = new PasswordUnlocker(songID == NA || useUpgradeID.Checked ? upgradeID : songID);
+                    popup.IDChanger();
+                    popup.ShowDialog();
+                    var newID = popup.EnteredText;
+                    popup.Dispose();
+                    if (!string.IsNullOrWhiteSpace(newID))
+                    {
+                        songID = newID;
+                    }
                 }
+                else if (useUpgradeID.Checked)
+                {
+                    songID = upgradeID;
+                }
+                Tools.ReplaceSongID(newDTA, songID, vocals.ToString(CultureInfo.InvariantCulture));
             }
-            else if (useUpgradeID.Checked)
+        }
+
+        public static string InsertTuningsAboveRank(string dtaText, string guitarTuning, string bassTuning)
+        {
+            if (string.IsNullOrEmpty(dtaText)) return dtaText;
+
+            // Preserve original newline style
+            var nl = dtaText.Contains("\r\n") ? "\r\n" : "\n";
+
+            // Normalize provided lines to avoid embedded newlines duplicating spacing
+            string Normalize(string s) => s?.TrimEnd('\r', '\n');
+
+            var lines = new[]
             {
-                songID = upgradeID;
-            }
-            Tools.ReplaceSongID(newDTA, songID, vocals.ToString(CultureInfo.InvariantCulture));
-            Log("Creating the bundled file");
-            EnableDisable(false);
-            btnBundle.Visible = false;
-            backgroundWorker1.RunWorkerAsync();
+            Normalize(guitarTuning),
+            Normalize(bassTuning)
+        }
+            // keep nulls (skip), keep empty strings (blank line), keep non-empty
+            .Where(s => s != null)
+            .ToArray();
+
+            if (lines.Length == 0) return dtaText; // nothing to insert
+
+            var insertion = string.Join(nl, lines) + nl;
+
+            // Match "(" line that starts the rank list, whether "rank" is on same or next line
+            var pattern = @"(?m)^[ \t]*\(\s*(?:'rank'|rank)\b";
+
+            bool inserted = false;
+            string result = Regex.Replace(dtaText, pattern, m =>
+            {
+                if (inserted) return m.Value;
+                inserted = true;
+                return insertion + m.Value;
+            });
+
+            return result;
         }
 
         private void CleanUp()
@@ -493,18 +582,17 @@ namespace Nautilus
             Log("Ready to begin");
         }
 
-        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        private void doBundleFiles()
         {
-            if (!File.Exists(orig_con))
+            if (!File.Exists(originalCON))
             {
-                Log("CON file " + Path.GetFileName(orig_con) + " seems to have been deleted, can't continue without it");
+                Log("CON file " + Path.GetFileName(originalCON) + " seems to have been deleted, can't continue without it");
                 return;
             }
 
-            var BundleFile = orig_con + " (bundled)";
+            var BundleFile = originalCON + " (bundled)";
             Tools.DeleteFile(BundleFile);
-            File.Copy(orig_con, BundleFile);
-            
+            File.Copy(originalCON, BundleFile);
 
             var xPackage = new STFSPackage(BundleFile);
             if (!xPackage.ParseSuccess)
@@ -514,19 +602,21 @@ namespace Nautilus
                 return;
             }
 
+            Parser.ReadDTA(xPackage);
+
             var xent = xPackage.GetFile("/songs/songs.dta");
             if (xent != null)
             {
-                if (xent.Replace(newDTA))
+                if (File.Exists(newDTA) && xent.Replace(newDTA))
                 {
                     Log("Bundled DTA file successfully");
                 }
             }
 
-            xent = xPackage.GetFile("/songs/" + Path.GetFileNameWithoutExtension(orig_midi) + "/" + Path.GetFileName(orig_midi));
+            xent = xPackage.GetFile("/songs/" + Parser.Songs[0].InternalName + "/" + Parser.Songs[0].InternalName + ".mid");
             if (xent != null)
             {
-                if (xent.Replace(newMIDI))
+                if (File.Exists(newMIDI) && xent.Replace(newMIDI))
                 {
                     Log("Bundled MIDI file successfully");
                 }
@@ -570,7 +660,7 @@ namespace Nautilus
                     success = false;
                 }
             }
-            
+
             if (success)
             {
                 Log("Trying to sign CON file");
@@ -586,11 +676,15 @@ namespace Nautilus
             }
 
             Log(success ? "Your files were bundled successfully!" : "Something went wrong along the way, sorry!");
-            
+        }
+
+        private void backgroundWorker1_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            Log("Creating the bundled file");
+            doBundleFiles();
             if (!cleanUpAfterBundlingFiles.Checked) return;
             Log("Cleaning up");
-            CleanUp();
-            
+            CleanUp();            
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
@@ -616,32 +710,32 @@ namespace Nautilus
 
             if (Path.GetExtension(file[0]).ToLowerInvariant() == ".mid")
             {
-                if (UpgradeMidis.Contains(file[0]))
+                if (UpgradeMIDIs.Contains(file[0]))
                 {
                     DisplayConflict(file[0], "an upgrade MIDI");
                     return;
                 }
                 SongInstruments.Clear();
                 lstSong.Items.Clear();
-                orig_con = "";
-                orig_midi = file[0];
-                Log("Received MIDI file " + Path.GetFileName(orig_midi));
+                originalCON = "";
+                originalMIDI = file[0];
+                Log("Received MIDI file " + Path.GetFileName(originalMIDI));
             }
             else if (VariousFunctions.ReadFileType(file[0]) == XboxFileType.STFS)
             {
                 SongInstruments.Clear();
-                orig_con = file[0];
-                Log("Received CON file " + Path.GetFileName(orig_con) + ", searching for MIDI to extract");
-                orig_midi = ExtractMIDI(file[0], false);
-                if (string.IsNullOrWhiteSpace(orig_midi) || !File.Exists(orig_midi))
+                originalCON = file[0];
+                Log("Received CON file " + Path.GetFileName(originalCON) + ", searching for MIDI to extract");
+                originalMIDI = ExtractMIDI(file[0], false);
+                if (string.IsNullOrWhiteSpace(originalMIDI) || !File.Exists(originalMIDI))
                 {
-                    orig_con = "";
-                    orig_midi = "";
+                    originalCON = "";
+                    originalMIDI = "";
                     return;
                 }
                 lstSong.Items.Clear();
-                Log("Extracted MIDI file " + Path.GetFileName(orig_midi));
-                lstSong.Items.Add("CON File: " + Path.GetFileName(orig_con));
+                Log("Extracted MIDI file " + Path.GetFileName(originalMIDI));
+                lstSong.Items.Add("CON File: " + Path.GetFileName(originalCON));
                 lstSong.Items.Add("DTA File: songs.dta");
                 lstSong.Items.Add("Song ID: " + songID);
                 lstSong.Items.Add("Internal Name: " + song_int_name);
@@ -652,9 +746,9 @@ namespace Nautilus
                 return;
             }
 
-            lstSong.Items.Add("MIDI File: " + Path.GetFileName(orig_midi));
+            lstSong.Items.Add("MIDI File: " + Path.GetFileName(originalMIDI));
             Log("Reading MIDI file for contents...");
-            ReadMIDIForContents(orig_midi, lstSong, "..........");
+            ReadMIDIForContents(originalMIDI, lstSong, "..........");
 
             Log("Ready");
             ValidateBundleButton();
@@ -860,12 +954,12 @@ namespace Nautilus
 
                 if (isUpgrade)
                 {
-                    newupgdta = dta;
-                    ReadUpgDTA(newupgdta);
+                    newUpgradeDTA = dta;
+                    ReadUpgradeDTA(newUpgradeDTA);
                 }
                 else
                 {
-                    orig_dta = dta;
+                    originalDTA = dta;
                 }
             }
             catch (Exception ex)
@@ -898,12 +992,12 @@ namespace Nautilus
                 var midi = "";
                 if (Path.GetExtension(file).ToLowerInvariant() == ".mid")
                 {
-                    if (orig_midi == file)
+                    if (originalMIDI == file)
                     {
                         DisplayConflict(file, "the original MIDI");
                         return;
                     }
-                    if (UpgradeMidis.Contains(file))
+                    if (UpgradeMIDIs.Contains(file))
                     {
                         DisplayConflict(file, "an upgrade MIDI");
                         return;
@@ -928,9 +1022,9 @@ namespace Nautilus
                         continue;
                     }
                     UpgradeCON = file;
-                    UpgradeMidis.Clear();
+                    UpgradeMIDIs.Clear();
                     UpgradeInstruments.Clear();
-                    newsongdta = "";
+                    newSongDTA = "";
                     Log("Extracted MIDI file " + Path.GetFileName(midi));
                     lstUpgrades.Items.Clear();
                     lstUpgrades.Items.Add("CON File: " + Path.GetFileName(file));
@@ -942,7 +1036,7 @@ namespace Nautilus
                 {
                     case "songs.dta":
                     case "upgrades.dta":
-                        if (string.IsNullOrWhiteSpace(orig_con))
+                        if (string.IsNullOrWhiteSpace(originalCON))
                         {
                             MessageBox.Show("You must add the original CON on the left before you can bundle DTA files", Text,
                                             MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
@@ -952,24 +1046,24 @@ namespace Nautilus
                         {
                             lstUpgrades.Items.Clear();
                         }
-                        ReadUpgDTA(file);
+                        ReadUpgradeDTA(file);
                         switch (Path.GetFileName(file))
                         {
                             case "songs.dta":
-                                if (!string.IsNullOrWhiteSpace(newsongdta))
+                                if (!string.IsNullOrWhiteSpace(newSongDTA))
                                 {
-                                    if (!WantToReplace("replacement songs.dta", newsongdta, file)) return;
+                                    if (!WantToReplace("replacement songs.dta", newSongDTA, file)) return;
                                 }
-                                newsongdta = file;
+                                newSongDTA = file;
                                 lstUpgrades.Items.Add("Song DTA File: " + Path.GetFileName(file));
                                 lstUpgrades.Items.Add("Song ID: " + upgradeID);
                                 break;
                             case "upgrades.dta":
-                                if (!string.IsNullOrWhiteSpace(newupgdta))
+                                if (!string.IsNullOrWhiteSpace(newUpgradeDTA))
                                 {
-                                    if (!WantToReplace("upgrades.dta", newupgdta, file)) return;
+                                    if (!WantToReplace("upgrades.dta", newUpgradeDTA, file)) return;
                                 }
-                                newupgdta = file;
+                                newUpgradeDTA = file;
                                 lstUpgrades.Items.Add("Upgrade DTA File: " + Path.GetFileName(file));
                                 lstUpgrades.Items.Add("Upgrade ID: " + upgradeID);
                                 break;
@@ -982,7 +1076,7 @@ namespace Nautilus
 
                 if (string.IsNullOrWhiteSpace(midi)) continue;
                 lstUpgrades.Items.Add("MIDI File: " + Path.GetFileName(midi));
-                UpgradeMidis.Add(midi);
+                UpgradeMIDIs.Add(midi);
                 Log("Reading MIDI file for contents...");
                 ReadMIDIForContents(midi, lstUpgrades, "..........");
             }
@@ -1037,6 +1131,176 @@ namespace Nautilus
                     break;
             }
             TopMost = picPin.Tag.ToString() == "pinned";
+        }
+
+        private void batchBundle_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("This feature will batch bundle files assuming you have them organized as follows:\n\n" +
+                "One main folder with subfolders for each song -> each subfolder must contain the original CON file and" +
+                " any upgrade files (xxxx_plus.mid, songs.dta, upgrades.dta) that you want to bundle\n\n" +
+                "Click OK to start, click Cancel to go back", "Batch Bundle", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) != DialogResult.OK)
+            {
+                return;
+            }
+
+            var ofd = new FolderPicker
+            {
+                InputPath = Environment.CurrentDirectory,
+                Title = "Select folder where your source files are",
+            };
+            var bundleFolder = "";
+
+            if (ofd.ShowDialog(IntPtr.Zero) == true)
+            {
+                bundleFolder = ofd.ResultPath;
+            }
+            else
+            {
+                return;
+            }
+
+            batchBundleFiles = new List<string>();
+            var files = Directory.GetFiles(bundleFolder, "*.*", SearchOption.AllDirectories);
+            
+            foreach (var file in files)
+            {
+                if (VariousFunctions.ReadFileType(file) == XboxFileType.STFS)
+                {
+                    batchBundleFiles.Add(file);
+                }
+            }
+            if (!batchBundleFiles.Any())
+            {
+                Log("Did not find any CON files in that folder, aborting...");
+                return;
+            }
+            Log("Found " + batchBundleFiles.Count() + " CON files, starting batch bundle process");
+
+            isBatchBundle = true;
+            EnableDisable(false);
+            backgroundWorker2.RunWorkerAsync();
+        }
+
+        private void backgroundWorker2_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            foreach (var conFile in batchBundleFiles)
+            {
+                ClearVariables();
+
+                Log("Processing file '" + Path.GetFileName(conFile) + "'");
+                var folder = Path.GetDirectoryName(conFile) + "\\";
+                var xPackage = new STFSPackage(conFile);
+                if (!xPackage.ParseSuccess)
+                {
+                    Log("Failed to parse that file, skipping...");
+                    continue;
+                }
+                Parser.ReadDTA(xPackage);
+
+                originalDTA = folder + Parser.Songs[0].InternalName + ".dta";
+                var xDTA = xPackage.GetFile("songs/songs.dta");
+                if (xDTA == null)
+                {
+                    Log("Could not find the DTA file in that CON file, skipping...");
+                    xPackage.CloseIO();
+                    continue;
+                }
+                if (!xDTA.ExtractToFile(originalDTA))
+                {
+                    Log("Failed to extract DTA file from the CON file, skipping...");
+                    xPackage.CloseIO();
+                    continue;
+                }
+                Log("Found and extracted DTA file successfully");
+                
+                var xMIDI = xPackage.GetFile("songs/" + Parser.Songs[0].InternalName + "/" + Parser.Songs[0].InternalName + ".mid");
+                if (xMIDI == null)
+                {
+                    Log("Could not find the MIDI file in that CON file, skipping...");
+                    xPackage.CloseIO();
+                    continue;
+                }
+                originalMIDI = folder + Parser.Songs[0].InternalName + ".mid";
+                if (!xMIDI.ExtractToFile(originalMIDI))
+                {
+                    Log("Failed to extract MIDI file from the CON file, skipping...");
+                    xPackage.CloseIO();
+                    continue;
+                }
+                Log("Found and extracted MIDI file successfully");
+                xPackage.CloseIO();
+
+                var midiFiles = Directory.GetFiles(folder, "*.mid", SearchOption.TopDirectoryOnly);
+                var upgradeMIDI = "";
+                if (midiFiles.Any())
+                {
+                    foreach (var midi in midiFiles)
+                    {
+                        if (midi.EndsWith("_plus.mid"))
+                        {
+                            upgradeMIDI = midi;
+                            break;
+                        }
+                    }
+                    Log("Found upgrade MIDI file '" + Path.GetFileName(upgradeMIDI) + "'");
+                }
+                else
+                {
+                    Log("No upgrade MIDI file found");
+                }
+                UpgradeMIDIs.Clear();
+                UpgradeMIDIs.Add(upgradeMIDI);
+
+                originalDTA = folder + "songs.dta";
+                if (File.Exists(originalDTA))
+                {
+                    Log("Found upgrade songs.dta file");
+                }
+                else
+                {
+                    Log("No upgrade songs.dta file found");
+                }
+
+                newUpgradeDTA = folder + "upgrades.dta";
+                if (File.Exists(newUpgradeDTA))
+                {
+                    Log("Found upgrades.dta file");
+                    ReadUpgradeDTA(newUpgradeDTA);
+                }
+                else
+                {
+                    Log("No upgrades.dta file found");
+                }
+
+                originalCON = conFile;
+                ProcessUpgradeFiles();
+                doBundleFiles();
+
+                //cleanup
+                var DTAs = Directory.GetFiles(folder, "*.dta", SearchOption.TopDirectoryOnly);
+                foreach (var dta in DTAs)
+                {
+                    if (Path.GetFileName(dta) != "songs.dta" && Path.GetFileName(dta) != "upgrades.dta")
+                    {
+                        Tools.DeleteFile(dta);
+                    }
+                }
+                var MIDIs = Directory.GetFiles(folder, "*.mid", SearchOption.TopDirectoryOnly);
+                foreach (var midi in MIDIs)
+                {
+                    if (!midi.Contains("plus.mid"))
+                    {
+                        Tools.DeleteFile(midi);
+                    }
+                }
+            }
+        }
+
+        private void backgroundWorker2_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            Log("Batch process completed");
+            isBatchBundle = false;
+            EnableDisable(true);
         }
     }
 }

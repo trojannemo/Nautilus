@@ -37,6 +37,7 @@
             this.btnReset = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.batchBundle = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trackOverwritingOptions = new System.Windows.Forms.ToolStripMenuItem();
             this.overwriteExistingTrack = new System.Windows.Forms.ToolStripMenuItem();
@@ -54,6 +55,7 @@
             this.lstUpgrades = new System.Windows.Forms.ListBox();
             this.lblUpgrades = new System.Windows.Forms.Label();
             this.picPin = new System.Windows.Forms.PictureBox();
+            this.backgroundWorker2 = new System.ComponentModel.BackgroundWorker();
             this.contextMenuStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
@@ -127,6 +129,7 @@
             // 
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.batchBundle,
             this.optionsToolStripMenuItem,
             this.helpToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -134,6 +137,13 @@
             this.menuStrip1.Size = new System.Drawing.Size(551, 24);
             this.menuStrip1.TabIndex = 16;
             this.menuStrip1.Text = "menuStrip1";
+            // 
+            // batchBundle
+            // 
+            this.batchBundle.Name = "batchBundle";
+            this.batchBundle.Size = new System.Drawing.Size(89, 20);
+            this.batchBundle.Text = "Batch Bundle";
+            this.batchBundle.Click += new System.EventHandler(this.batchBundle_Click);
             // 
             // optionsToolStripMenuItem
             // 
@@ -314,6 +324,13 @@
             this.picPin.Tag = "unpinned";
             this.picPin.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picPin_MouseClick);
             // 
+            // backgroundWorker2
+            // 
+            this.backgroundWorker2.WorkerReportsProgress = true;
+            this.backgroundWorker2.WorkerSupportsCancellation = true;
+            this.backgroundWorker2.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker2_DoWork);
+            this.backgroundWorker2.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker2_RunWorkerCompleted);
+            // 
             // ProUpgradeBundler
             // 
             this.AllowDrop = true;
@@ -376,5 +393,7 @@
         private System.Windows.Forms.PictureBox picPin;
         private System.Windows.Forms.ToolStripMenuItem showSongIDPrompt;
         private System.Windows.Forms.ToolStripMenuItem useUpgradeID;
+        private System.Windows.Forms.ToolStripMenuItem batchBundle;
+        private System.ComponentModel.BackgroundWorker backgroundWorker2;
     }
 }

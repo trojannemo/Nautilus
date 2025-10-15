@@ -195,7 +195,7 @@
         /J/N1yfkyCcN1Mj8nI2MoSsx1BbwwSbYIw4KNdc6YjdPbd0jdnHS1D/iSA8No79jArXNjtjLSc/kiF39
         LMz/+vf5Xd/+mUv973jXIC3zf3xirY44MMTM4oi9/fX/jndx1fy7Nj8fo78+PYN1/64feAJD4ARwh3Xm
         73xMBUDh5QN6kbv169/jEuwa/ruW0/DHRwR6unsEc6lBVbYrmkvXDyeK5pIUlxAH/wJe6C8XcWEYbgAA
-        AAlwSFlzAAALEgAACxIB0t1+/AAACLlJREFUWEfNmFds1VUcx48hkqCRB32ovgI+QwipMsretIwyS9mU
+        AAlwSFlzAAALEAAACxABrSO9dQAACLlJREFUWEfNmFds1VUcx48hkqCRB32ovgI+QwipMsretIwyS9mU
         DWWPsmkLlLL3KENktcowVPYQQcCAgKEI+GCCAXxpIBGDUR44fj8/em4utxeEguPhl/Nf55zP+f7GOfe6
         7Bkz4lru7Nluwdy5blxmpsuaONFNnTTJjR01yt7xfH5OznNtXna2y583j3GqaIysYYMGnZUV6zpz8vjx
         H8ycOtXNnj7dzZo2zb4bmpHhmjdt6jokJz9l5cCCxQPkOgwYDyra6Dt3zhz6XsocPtwPycgwGzxwoB80
@@ -235,4 +235,7 @@
         iJ9Up5KpPUG5WPtPABVvPbRLZHxYo4ZLSEgw5VRk/yeAy9xfDHmeI32tzEkAAAAASUVORK5CYII=
 </value>
   </data>
+  <metadata name="backgroundWorker2.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>536, 17</value>
+  </metadata>
 </root>

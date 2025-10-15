@@ -2776,6 +2776,7 @@ namespace Nautilus
 
         public bool Master { get; set; }
         public bool DoNotExport { get; set; }
+        public bool IsSpecial { get; set; }
         public bool RB3Version { get; set; }
         public bool Karaoke { get; set; }
         public bool Multitrack { get; set; }
@@ -2862,6 +2863,7 @@ namespace Nautilus
             GuidePitch = (decimal)-3.0;
             Master = false;
             DoNotExport = false;
+            IsSpecial = false;
             RB3Version = false;
             Karaoke = false;
             Multitrack = false;

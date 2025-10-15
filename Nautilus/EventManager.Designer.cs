@@ -241,7 +241,7 @@
             this.lblNowPlayingBand.Name = "lblNowPlayingBand";
             this.lblNowPlayingBand.Size = new System.Drawing.Size(590, 60);
             this.lblNowPlayingBand.TabIndex = 22;
-            this.lblNowPlayingBand.Text = "BAND NAME";
+            this.lblNowPlayingBand.Text = "PERFORMER";
             this.lblNowPlayingBand.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblNowPlayingBand.UseMnemonic = false;
             // 
@@ -386,7 +386,7 @@
             this.lblNowPlayingSong.Name = "lblNowPlayingSong";
             this.lblNowPlayingSong.Size = new System.Drawing.Size(590, 58);
             this.lblNowPlayingSong.TabIndex = 23;
-            this.lblNowPlayingSong.Text = "SONG NAME";
+            this.lblNowPlayingSong.Text = "SONG TITLE";
             this.lblNowPlayingSong.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblNowPlayingSong.UseMnemonic = false;
             // 
@@ -484,7 +484,7 @@
             this.lblAddSong.Name = "lblAddSong";
             this.lblAddSong.Size = new System.Drawing.Size(300, 21);
             this.lblAddSong.TabIndex = 13;
-            this.lblAddSong.Text = "Song";
+            this.lblAddSong.Text = "Song Title";
             this.lblAddSong.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lstSearch
@@ -562,7 +562,7 @@
             this.lblAddBand.Name = "lblAddBand";
             this.lblAddBand.Size = new System.Drawing.Size(300, 21);
             this.lblAddBand.TabIndex = 2;
-            this.lblAddBand.Text = "Band";
+            this.lblAddBand.Text = "Performer";
             this.lblAddBand.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // ToolsToolStripMenuItem

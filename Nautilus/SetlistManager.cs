@@ -58,6 +58,7 @@ namespace Nautilus
         private bool findIDConflict;
         private bool findShortnameConflict;
         private bool findDoNotExport;
+        private bool findSongsMarkedSpecial;
         private bool doBlitzImport;
         private bool isBlitzCache;
         private bool isLocked;
@@ -2450,6 +2451,7 @@ namespace Nautilus
                 }
 
                 if (findDoNotExport && !song.DoNotExport) continue;
+                if (findSongsMarkedSpecial && !song.IsSpecial) continue;
                 if (!PassesFilters(song)) continue;
 
                 filteredSongs.Add(song);
@@ -2980,6 +2982,7 @@ namespace Nautilus
             findExactDup = false;
             findUnsupported = false;
             findDoNotExport = false;
+            findSongsMarkedSpecial = false;
             findFileConflict = false;
             findIDConflict = false;
             findShortnameConflict = false;
@@ -3529,6 +3532,7 @@ namespace Nautilus
             var index = Convert.ToInt16(lstSongs.SelectedIndices[0]);
             if (index == -1) return;
             dONOTPRINT.Checked = Songs[index].DoNotExport;
+            markAsSpecial.Checked = Songs[index].IsSpecial;
             openLinkInBrowser.Enabled = !string.IsNullOrWhiteSpace(Songs[index].SongLink);
         }
 
@@ -3784,6 +3788,7 @@ namespace Nautilus
         private void findDuplicatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             findPossDup = true;
+            findSongsMarkedSpecial = false;
             findExactDup = false;
             findUnsupported = false;
             findDoNotExport = false;
@@ -3850,6 +3855,7 @@ namespace Nautilus
         private void findExactDuplicatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             findPossDup = false;
+            findSongsMarkedSpecial = false;
             findExactDup = true;
             findUnsupported = false;
             findDoNotExport = false;
@@ -3904,6 +3910,7 @@ namespace Nautilus
         private void findUnsupportedCharacters_Click(object sender, EventArgs e)
         {
             findUnsupported = true;
+            findSongsMarkedSpecial = false;
             findPossDup = false;
             findExactDup = false;
             findDoNotExport = false;
@@ -4004,6 +4011,7 @@ namespace Nautilus
         private void findSongsMarkedDoNotExport_Click(object sender, EventArgs e)
         {
             findDoNotExport = true;
+            findSongsMarkedSpecial = false;
             findPossDup = false;
             findExactDup = false;
             findUnsupported = false;
@@ -5169,6 +5177,9 @@ namespace Nautilus
             if (MessageBox.Show(message, AppName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
 
             findPossDup = false;
+            findSongsMarkedSpecial = false;
+            findSongsMarkedSpecial = false;
+            findSongsMarkedSpecial = false;
             findExactDup = false;
             findUnsupported = false;
             findDoNotExport = false;
@@ -5251,6 +5262,7 @@ namespace Nautilus
             findAndLabelBlitzSongs.Enabled = enabled;
             findUnsupportedCharacters.Enabled = enabled;
             findSongsMarkedDoNotExport.Enabled = enabled;
+            findSongsMarkedSpecialTool.Enabled = enabled;
             findPossibleFileConflicts.Enabled = enabled && !modeRB4.Checked;
             findIDConflicts.Enabled = enabled && !modeRB4.Checked;
             findShortnameConflicts.Enabled = enabled && !modeRB4.Checked;
@@ -5443,6 +5455,37 @@ namespace Nautilus
             var help = new HelpForm(artist + " - " + title + " Song Lyrics", 
                 LyricsData.Lyrics.Replace("\n\n", "\n").Replace("\n", Environment.NewLine), false);
             help.ShowDialog();
+        }
+
+        private void findSongsMarkedSpecialTool_Click(object sender, EventArgs e)
+        {
+            findDoNotExport = false;
+            findSongsMarkedSpecial = true;
+            findPossDup = false;
+            findExactDup = false;
+            findUnsupported = false;
+            findFileConflict = false;
+            findIDConflict = false;
+            findShortnameConflict = false;
+            LoadSongs();
+        }
+
+        private void markAsSpecial_Click(object sender, EventArgs e)
+        {
+            if (isLocked)
+            {
+                DoUnlockWarning();
+                return;
+            }
+            foreach (int index in lstSongs.SelectedIndices.Cast<int>().Where(index => index != -1))
+            {
+                Songs[index].IsSpecial = markAsSpecial.Checked;
+            }
+            //SaveSetlist(ActiveSetlistPath); disabled for now
+            if (findSongsMarkedSpecial)
+            {
+                LoadSongs();
+            }
         }
     }
 

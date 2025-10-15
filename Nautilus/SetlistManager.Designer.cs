@@ -218,15 +218,16 @@
             this.lstSongs = new System.Windows.Forms.ListView();
             this.colArtist = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colSong = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colMaster = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colAlbum = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colYear = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colTrack = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colMaster = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colGenre = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colVParts = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.colGender = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colLength = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colRating = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colGender = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colSource = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colGuitar = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.colBass = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -304,6 +305,7 @@
             this.findExactDuplicates = new System.Windows.Forms.ToolStripMenuItem();
             this.findUnsupportedCharacters = new System.Windows.Forms.ToolStripMenuItem();
             this.findSongsMarkedDoNotExport = new System.Windows.Forms.ToolStripMenuItem();
+            this.findSongsMarkedSpecialTool = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem15 = new System.Windows.Forms.ToolStripSeparator();
             this.findPossibleFileConflicts = new System.Windows.Forms.ToolStripMenuItem();
             this.findShortnameConflicts = new System.Windows.Forms.ToolStripMenuItem();
@@ -355,7 +357,7 @@
             this.youtubeTmr = new System.Windows.Forms.Timer(this.components);
             this.lyricsTmr = new System.Windows.Forms.Timer(this.components);
             this.picGame = new System.Windows.Forms.PictureBox();
-            this.colDate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.markAsSpecial = new System.Windows.Forms.ToolStripMenuItem();
             this.tabHolder.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             this.tabSetlist.SuspendLayout();
@@ -988,6 +990,7 @@
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dONOTPRINT,
+            this.markAsSpecial,
             this.deleteSelectedToolStrip,
             this.contextSeparator0,
             this.openLinkInBrowser,
@@ -1003,7 +1006,7 @@
             this.alternateColor,
             this.backgroundColor});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(203, 286);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(203, 330);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // dONOTPRINT
@@ -3148,17 +3151,16 @@
             this.colSong.Text = "Song";
             this.colSong.Width = 114;
             // 
-            // colMaster
-            // 
-            this.colMaster.DisplayIndex = 2;
-            this.colMaster.Text = "Master";
-            this.colMaster.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.colMaster.Width = 44;
-            // 
             // colAlbum
             // 
             this.colAlbum.Text = "Album";
             this.colAlbum.Width = 106;
+            // 
+            // colDate
+            // 
+            this.colDate.Text = "Date Added";
+            this.colDate.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.colDate.Width = 85;
             // 
             // colYear
             // 
@@ -3174,27 +3176,24 @@
             this.colTrack.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.colTrack.Width = 32;
             // 
+            // colMaster
+            // 
+            this.colMaster.Text = "Master";
+            this.colMaster.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.colMaster.Width = 44;
+            // 
             // colGenre
             // 
-            this.colGenre.DisplayIndex = 6;
             this.colGenre.Text = "Genre";
             this.colGenre.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.colGenre.Width = 90;
             // 
             // colVParts
             // 
-            this.colVParts.DisplayIndex = 7;
             this.colVParts.Tag = "";
             this.colVParts.Text = "V. #";
             this.colVParts.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.colVParts.Width = 32;
-            // 
-            // colGender
-            // 
-            this.colGender.DisplayIndex = 8;
-            this.colGender.Text = "Singer";
-            this.colGender.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.colGender.Width = 48;
             // 
             // colLength
             // 
@@ -3209,16 +3208,20 @@
             this.colRating.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.colRating.Width = 44;
             // 
+            // colGender
+            // 
+            this.colGender.Text = "Singer";
+            this.colGender.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.colGender.Width = 48;
+            // 
             // colSource
             // 
-            this.colSource.DisplayIndex = 11;
             this.colSource.Text = "Source";
             this.colSource.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.colSource.Width = 48;
             // 
             // colGuitar
             // 
-            this.colGuitar.DisplayIndex = 12;
             this.colGuitar.Tag = "Difficulty";
             this.colGuitar.Text = "Guitar";
             this.colGuitar.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -3226,7 +3229,6 @@
             // 
             // colBass
             // 
-            this.colBass.DisplayIndex = 13;
             this.colBass.Tag = "Difficulty";
             this.colBass.Text = "Bass";
             this.colBass.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -3234,7 +3236,6 @@
             // 
             // colDrums
             // 
-            this.colDrums.DisplayIndex = 14;
             this.colDrums.Tag = "Difficulty";
             this.colDrums.Text = "Drums";
             this.colDrums.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -3242,7 +3243,6 @@
             // 
             // colVocals
             // 
-            this.colVocals.DisplayIndex = 15;
             this.colVocals.Tag = "Difficulty";
             this.colVocals.Text = "Vocals";
             this.colVocals.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -3250,7 +3250,6 @@
             // 
             // colKeys
             // 
-            this.colKeys.DisplayIndex = 16;
             this.colKeys.Tag = "Difficulty";
             this.colKeys.Text = "Keys";
             this.colKeys.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -3258,7 +3257,6 @@
             // 
             // colBand
             // 
-            this.colBand.DisplayIndex = 17;
             this.colBand.Tag = "Difficulty";
             this.colBand.Text = "Band";
             this.colBand.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -3266,7 +3264,6 @@
             // 
             // colPGuitar
             // 
-            this.colPGuitar.DisplayIndex = 18;
             this.colPGuitar.Tag = "Difficulty";
             this.colPGuitar.Text = "Pro Guitar";
             this.colPGuitar.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -3274,7 +3271,6 @@
             // 
             // colPBass
             // 
-            this.colPBass.DisplayIndex = 19;
             this.colPBass.Tag = "Difficulty";
             this.colPBass.Text = "Pro Bass";
             this.colPBass.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -3282,7 +3278,6 @@
             // 
             // colPKeys
             // 
-            this.colPKeys.DisplayIndex = 20;
             this.colPKeys.Tag = "Difficulty";
             this.colPKeys.Text = "Pro Keys";
             this.colPKeys.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
@@ -3290,13 +3285,11 @@
             // 
             // colLink
             // 
-            this.colLink.DisplayIndex = 21;
             this.colLink.Text = "Link";
             this.colLink.Width = 100;
             // 
             // colListIndex
             // 
-            this.colListIndex.DisplayIndex = 22;
             this.colListIndex.Width = 0;
             // 
             // lblSelected
@@ -3849,6 +3842,7 @@
             this.findExactDuplicates,
             this.findUnsupportedCharacters,
             this.findSongsMarkedDoNotExport,
+            this.findSongsMarkedSpecialTool,
             this.toolStripMenuItem15,
             this.findPossibleFileConflicts,
             this.findShortnameConflicts,
@@ -3910,6 +3904,15 @@
             this.findSongsMarkedDoNotExport.Size = new System.Drawing.Size(254, 22);
             this.findSongsMarkedDoNotExport.Text = "Find songs marked DoNotExport";
             this.findSongsMarkedDoNotExport.Click += new System.EventHandler(this.findSongsMarkedDoNotExport_Click);
+            // 
+            // findSongsMarkedSpecialTool
+            // 
+            this.findSongsMarkedSpecialTool.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.findSongsMarkedSpecialTool.Enabled = false;
+            this.findSongsMarkedSpecialTool.Name = "findSongsMarkedSpecialTool";
+            this.findSongsMarkedSpecialTool.Size = new System.Drawing.Size(254, 22);
+            this.findSongsMarkedSpecialTool.Text = "Find songs marked Special";
+            this.findSongsMarkedSpecialTool.Click += new System.EventHandler(this.findSongsMarkedSpecialTool_Click);
             // 
             // toolStripMenuItem15
             // 
@@ -4318,11 +4321,14 @@
             this.picGame.TabIndex = 65;
             this.picGame.TabStop = false;
             // 
-            // colDate
+            // markAsSpecial
             // 
-            this.colDate.Text = "Date Added";
-            this.colDate.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.colDate.Width = 85;
+            this.markAsSpecial.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.markAsSpecial.CheckOnClick = true;
+            this.markAsSpecial.Name = "markAsSpecial";
+            this.markAsSpecial.Size = new System.Drawing.Size(202, 22);
+            this.markAsSpecial.Text = "Mark as Special";
+            this.markAsSpecial.Click += new System.EventHandler(this.markAsSpecial_Click);
             // 
             // SetlistManager
             // 
@@ -4728,5 +4734,7 @@
         private System.Windows.Forms.ColumnHeader colListIndex;
         private System.Windows.Forms.CheckBox chkNoVocals;
         private System.Windows.Forms.ColumnHeader colDate;
+        private System.Windows.Forms.ToolStripMenuItem findSongsMarkedSpecialTool;
+        private System.Windows.Forms.ToolStripMenuItem markAsSpecial;
     }
 }

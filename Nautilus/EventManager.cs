@@ -47,6 +47,7 @@ namespace Nautilus
         private readonly TimeSpan defaultLength = new TimeSpan(0, 0, 4, 0);
         private const string defaultLengthString = "est. 4:00";
         private readonly TimeSpan defaultDelay = new TimeSpan(0, 0, 1, 0);
+        private readonly DateTime C3rapture = new DateTime(2013, 4, 9, 10, 0, 0);
 
         public EventManager(MainForm xParent = null)
         {
@@ -287,6 +288,11 @@ namespace Nautilus
             e.Cancel = true;
         }
 
+        private static string RemoveControlCharsFromString(string line)
+        {
+            return new string(line.Where(c => !char.IsControl(c)).ToArray());
+        }
+
         private string ActiveConsole;
         private string ActiveSetlist;
         private int CachePackages;
@@ -305,7 +311,8 @@ namespace Nautilus
                 string format;
                 if (isLoading)
                 {
-                    ActiveSetlist = Tools.GetConfigString(sr.ReadLine());
+                    ActiveSetlist = Tools.GetConfigString(sr.ReadLine());                    
+                    Text = "Setlist Manager - " + ActiveSetlist;
                     ActiveConsole = Tools.GetConfigString(sr.ReadLine());
                     songcount = Convert.ToInt16(Tools.GetConfigString(sr.ReadLine()));
                     CachePackages = Convert.ToInt16(Tools.GetConfigString(sr.ReadLine()));
@@ -332,19 +339,23 @@ namespace Nautilus
                         //all Setlist Manager cache formats
                         line = sr.ReadLine();
                         linenum++;
-                        SongsGrabbed[index].Artist = Tools.GetConfigString(line);
+                        SongsGrabbed[index].Artist = RemoveControlCharsFromString(Tools.GetConfigString(line));
 
                         line = sr.ReadLine();
                         linenum++;
-                        SongsGrabbed[index].Name = Tools.GetConfigString(line);
+                        SongsGrabbed[index].Name = RemoveControlCharsFromString(Tools.GetConfigString(line));
 
                         line = sr.ReadLine();
                         linenum++;
-                        SongsGrabbed[index].Album = Tools.GetConfigString(line);
+                        SongsGrabbed[index].Album = RemoveControlCharsFromString(Tools.GetConfigString(line));
 
                         line = sr.ReadLine();
                         linenum++;
-                        SongsGrabbed[index].TrackNumber = Convert.ToInt16(Tools.GetConfigString(line));
+                        SongsGrabbed[index].TrackNumber = Convert.ToInt32(Tools.GetConfigString(line));
+                        if (SongsGrabbed[index].TrackNumber == 65535) //Clone Hero bug???
+                        {
+                            SongsGrabbed[index].TrackNumber = 1;
+                        }
 
                         line = sr.ReadLine();
                         linenum++;
@@ -353,12 +364,12 @@ namespace Nautilus
                         line = sr.ReadLine();
                         linenum++;
                         var year = Convert.ToInt16(Tools.GetConfigString(line));
-                        SongsGrabbed[index].YearRecorded = year < 0 || year > 2020 ? 0 : year;
+                        SongsGrabbed[index].YearRecorded = year < 0 || year > 2100 ? 0 : year;
 
                         line = sr.ReadLine();
                         linenum++;
                         year = Convert.ToInt16(Tools.GetConfigString(line));
-                        SongsGrabbed[index].YearReleased = year < 0 || year > 2020 ? 0 : year;
+                        SongsGrabbed[index].YearReleased = year < 0 || year > 2100 ? 0 : year;
 
                         line = sr.ReadLine();
                         linenum++;
@@ -432,7 +443,7 @@ namespace Nautilus
                             SongsGrabbed[index].Source = "dlc";
                         }
 
-                        if (!format.Contains("2") && !format.Contains("3") && !format.Contains("4") && !format.Contains("5")) continue;
+                        if (!format.Contains("2") && !format.Contains("3") && !format.Contains("4") && !format.Contains("5") && !format.Contains("6")) continue;
                         //Setlist Manager cache format 2-4, both RB3 and Blitz
                         line = sr.ReadLine();
                         linenum++;
@@ -474,13 +485,13 @@ namespace Nautilus
                             SongsGrabbed[index].DrumBank = Tools.GetConfigString(line);
                         }
 
-                        if (!format.Contains("3") && !format.Contains("4") && !format.Contains("5")) continue;
+                        if (!format.Contains("3") && !format.Contains("4") && !format.Contains("5") && !format.Contains("6")) continue;
                         //Setlist Manager cache format 3-4, both RB3 and Blitz
                         line = sr.ReadLine();
                         linenum++;
                         SongsGrabbed[index].DoNotExport = line.Contains("True");
 
-                        if (!format.Contains("4") && !format.Contains("5")) continue;
+                        if (!format.Contains("4") && !format.Contains("5") && !format.Contains("6")) continue;
                         if (!format.ToLowerInvariant().Contains("blitz"))
                         {
                             //Setlist Manager cache format 4-5, only RB3
@@ -494,11 +505,28 @@ namespace Nautilus
                             SongsGrabbed[index].ProGuitarTuning = Tools.GetConfigString(line);
                         }
 
-                        if (!format.Contains("5")) continue;
+                        if (!format.Contains("5") && !format.Contains("6")) continue;
                         //Setlist Manager cache format 5, RB3 and Blitz
                         line = sr.ReadLine();
                         linenum++;
                         SongsGrabbed[index].SongLink = Tools.GetConfigString(line);
+
+                        if (!format.Contains("6"))
+                        {
+                            SongsGrabbed[index].DateAdded = C3rapture;
+                            continue;
+                        }
+                        line = sr.ReadLine();
+                        linenum++;
+                        string dateText = Tools.GetConfigString(line);
+                        if (DateTime.TryParse(dateText, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedDate))
+                        {
+                            SongsGrabbed[index].DateAdded = parsedDate;
+                        }
+                        else
+                        {
+                            SongsGrabbed[index].DateAdded = C3rapture;
+                        }
 
                         //add further checks for newer cache versions here
                     }
@@ -517,7 +545,7 @@ namespace Nautilus
                         }
                     }
                 }
-                sr.Dispose();
+                sr.Dispose();                
             }
             catch (Exception ex)
             {

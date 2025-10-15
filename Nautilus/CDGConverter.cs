@@ -1764,7 +1764,7 @@ namespace Nautilus
                     bucket.Add(s);
 
                     string lyric = (s.Lyric ?? "").Trim();
-                    bool endsWithDash = lyric.EndsWith("-");
+                    bool endsWithDash = lyric.Replace("#", "").Replace("^", "").Replace("$", "").EndsWith("-");
                     bool isSustain = lyric == "+";
 
                     bool nextIsSustain = (i + 1 < phraseSyllables.Count && phraseSyllables[i + 1].Lyric == "+");
@@ -1778,7 +1778,7 @@ namespace Nautilus
 
                 // Visible text for the word (no + or -; replace tie with space)
                 string wordText = string.Join("", bucket.Select(b =>
-                    (b.Lyric ?? "").Replace("+", "").Replace("-", "").Replace("‿", " ")))
+                    (b.Lyric ?? "").Replace("#", "").Replace("^", "").Replace("$", "").Replace("+", "").Replace("-", "").Replace("‿", " ")))
                     .Trim();
 
                 if (wordText.Length == 0)
