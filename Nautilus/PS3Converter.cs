@@ -2279,7 +2279,7 @@ namespace Nautilus
 
         private void pS3Fixer_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("\"The Linos Special\"\n\nThis tool will check for the total amount of audio channels and do the following:\n\nScenario 1: If equal to or less than 12 channels, will only apply the PS3 mogg patch (if necessary)\n\nScenario 2: If over 12 channels but less than or equal to 16 channels, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nScenario 3: If more than 16 channels will downmix the drums, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nAs requested, it will now also fix alphanumeric and default song_ids under all scenarios", Text, MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("\"The Linos Special\"\n\nThis tool will check for the total amount of audio channels and do the following:\n\nScenario 1: If equal to or less than 12 channels, will only apply the PS3 mogg patch (if necessary)\n\nScenario 2: If over 12 channels but less than or equal to 16 channels, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nScenario 3: If more than 16 channels will downmix the drums, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nAs requested, it will now also fix alphanumeric and default song_ids under all scenarios", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
             var ofd = new FolderPicker
             {
                 Title = "Select the folder where your CON files are",
