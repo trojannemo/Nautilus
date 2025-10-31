@@ -486,7 +486,7 @@ namespace Nautilus
                                     }
                                     else if (line.Contains("song_id") && chkSongID.Checked)
                                     {
-                                        if (!Parser.IsNumericID(line)) //only if not already a numeric ID
+                                        if (!Parser.IsNumericID(line) || ((Parser.GetSongID(line).StartsWith("1000") && Parser.GetSongID(line).Length == 10))) //only if not already a numeric ID or it has the default 1000 MAGMA C3 Author ID
                                         {
                                             var origID = Parser.GetSongID(line);
                                             line = ";ORIG_ID=" + origID;
@@ -1131,19 +1131,19 @@ namespace Nautilus
                     if (line.Contains("song_id") && !line.Contains(";ORIG_ID="))
                     {
                         var origID = Parser.GetSongID(line);
-                        if (!Parser.IsNumericID(line)) //only if not already a numeric ID
+                        if (!Parser.IsNumericID(line) || (Parser.GetSongID(line).StartsWith("1000") && Parser.GetSongID(line).Length == 10)) //only if not already a numeric ID or it has the default 1000 MAGMA C3 Author ID
                         {                            
                             newline = ";ORIG_ID=" + origID;
                             sw.WriteLine(newline);
                             var corrector = new SongIDCorrector();
                             var newID = corrector.ShortnameToSongID(Parser.GetSongID(line));
                             newline = "   ('song_id' " + newID + ")";
-                            Log($"Song has alphanumeric ID: {origID} - replacing with numeric ID: {newID}");
+                            Log($"Song has an incorrect ID: {origID} - replacing with a correct ID: {newID}");
                             counter++;                            
                         }
                         else
                         {
-                            Log($"This song already has a numeric ID: {origID} - leaving the song ID alone");                            
+                            Log($"This song already has a correct ID: {origID} - leaving the song ID alone");
                         }
                     }
                     if (newline.Trim() != "")
@@ -2279,7 +2279,7 @@ namespace Nautilus
 
         private void pS3Fixer_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("\"The Linos Special\"\n\nThis tool will check for the total amount of audio channels and do the following:\n\nScenario 1: If equal to or less than 12 channels, will only apply the PS3 mogg patch (if necessary)\n\nScenario 2: If over 12 channels but less than or equal to 16 channels, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nScenario 3: If more than 16 channels will downmix the drums, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nAs requested, it will now also apply the alphanumeric song_id fix under all scenarios", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("\"The Linos Special\"\n\nThis tool will check for the total amount of audio channels and do the following:\n\nScenario 1: If equal to or less than 12 channels, will only apply the PS3 mogg patch (if necessary)\n\nScenario 2: If over 12 channels but less than or equal to 16 channels, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nScenario 3: If more than 16 channels will downmix the drums, will re-encode the mogg with quality 3 and apply the PS3 mogg patch (if necessary)\n\nAs requested, it will now also fix alphanumeric and default song_ids under all scenarios", Text, MessageBoxButtons.OK, MessageBoxIcon.Information)
             var ofd = new FolderPicker
             {
                 Title = "Select the folder where your CON files are",

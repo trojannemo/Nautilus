@@ -324,7 +324,7 @@ namespace Nautilus
                                                 }
                                                 else if (line.Contains("song_id") && !line.Contains(";ORIG_ID=") && !line.Trim().StartsWith(";") && chkSongID.Checked)
                                                 {
-                                                    if (!Parser.IsNumericID(line) || chkForceNumericOverride.Checked || ((Parser.GetSongID(line).StartsWith("1000") && Parser.GetSongID(line).Length == 10))) //only if not already a numeric ID or forced or it has the default 1000 MAGMA C3 Author ID
+                                                    if (!Parser.IsNumericID(line) || chkForceNumericOverride.Checked || ((chkDefAutID.Checked && Parser.GetSongID(line).StartsWith("1000") && Parser.GetSongID(line).Length == 10))) //only if not already a numeric ID or forced or it has the default 1000 MAGMA C3 Author ID
                                                     {
                                                         var origID = Parser.GetSongID(line);
                                                         sw.WriteLine(";ORIG_ID=" + origID);
