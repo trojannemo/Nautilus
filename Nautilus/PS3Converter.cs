@@ -1154,7 +1154,7 @@ namespace Nautilus
                 sw.Dispose();
                 if (!hide_message)
                 {
-                    MessageBox.Show("Process completed without any errors\nReplaced IDs for " + counter + (counter == 1 ? " song" : " songs") + "\n\nOnly custom songs without numeric IDs were edited", Text, MessageBoxButtons.OK,
+                    MessageBox.Show("Process completed without any errors\nReplaced IDs for " + counter + (counter == 1 ? " song" : " songs") + "\n\nOnly custom songs without numeric IDs and default author IDs were edited", Text, MessageBoxButtons.OK,
                                 MessageBoxIcon.Information);
                 }
             }

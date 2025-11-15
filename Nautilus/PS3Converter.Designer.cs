@@ -322,14 +322,14 @@
             this.batchChangeIDsToNumeric});
             this.numericIDOptionsToolStripMenuItem.Name = "numericIDOptionsToolStripMenuItem";
             this.numericIDOptionsToolStripMenuItem.Size = new System.Drawing.Size(124, 20);
-            this.numericIDOptionsToolStripMenuItem.Text = "Numeric ID Options";
+            this.numericIDOptionsToolStripMenuItem.Text = "Song ID Options";
             // 
             // batchChangeIDsToNumeric
             // 
             this.batchChangeIDsToNumeric.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.batchChangeIDsToNumeric.Name = "batchChangeIDsToNumeric";
             this.batchChangeIDsToNumeric.Size = new System.Drawing.Size(193, 22);
-            this.batchChangeIDsToNumeric.Text = "Batch replace song IDs";
+            this.batchChangeIDsToNumeric.Text = "Batch correct song IDs";
             this.batchChangeIDsToNumeric.Click += new System.EventHandler(this.batchChangeIDsToNumeric_Click);
             // 
             // optionsToolStripMenuItem
