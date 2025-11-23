@@ -72,7 +72,7 @@ namespace Nautilus
             inputDir = Application.StartupPath + "\\input\\";
             CurrentThumbs = 10;
 
-            fileEncoding = new UTF8Encoding(false);
+            fileEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
             fileEncodingString = "utf8";
 
             intFiles = 0;
@@ -1665,7 +1665,7 @@ namespace Nautilus
             aNSIToolStripMenuItem.Checked = false;
             uTF8ToolStripMenuItem.Checked = true;
 
-            fileEncoding = new UTF8Encoding(false);
+            fileEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
             fileEncodingString = "utf8";
         }
 

@@ -11,6 +11,7 @@ using Nautilus.x360;
 using NAudio.Midi;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Rocksmith2014PsarcLib.Psarc.Models.Sng;
 
 namespace Nautilus
 {
@@ -157,8 +158,8 @@ namespace Nautilus
             {
                 return;
             }
-
-            var sr = new StreamReader(dta, Encoding.Default);
+            var encoding = Parser.DetectEncoding(originalDTA);
+            var sr = new StreamReader(dta, encoding);
             // read one line at a time until the end
             while (sr.Peek() >= 0)
             {
@@ -381,10 +382,12 @@ namespace Nautilus
             if (!string.IsNullOrWhiteSpace(newUpgradeDTA) && File.Exists(newUpgradeDTA))
             {
                 Log("Merging upgrades.dta information into songs.dta file");
-                var sr = new StreamReader(originalDTA, Encoding.Default);
-                var sw = new StreamWriter(newDTA, false, Encoding.Default);
+                var encoding = Parser.DetectEncoding(originalDTA);
+                var sr = new StreamReader(originalDTA, encoding);
+                var sw = new StreamWriter(newDTA, false, new UTF8Encoding(false, false));
                 
-                var doneFormat = false;                
+                var doneFormat = false;
+                var formatLine = "";
                 while (sr.Peek() > 0)
                 {
                     var line = sr.ReadLine();
@@ -400,20 +403,30 @@ namespace Nautilus
                                 if (line.Contains("bass") && !line.Contains("real_bass"))
                                 {
                                     sw.WriteLine(line);
-                                    sw.WriteLine(probassdiff);
+                                    if (!string.IsNullOrEmpty(probassdiff))
+                                    {
+                                        sw.WriteLine(probassdiff);
+                                    }
                                     line = "";
                                 }
                                 else if (line.Contains("guitar") && !line.Contains("real_guitar"))
                                 {
                                     sw.WriteLine(line);
-                                    sw.WriteLine(proguitardiff);
+                                    if (!string.IsNullOrEmpty(proguitardiff))
+                                    {
+                                        sw.WriteLine(proguitardiff);
+                                    }
                                     line = "";
                                 }
                                 else if (line.Contains("real_guitar") || line.Contains("real_bass"))
                                 {
                                     line = "";
                                 }
-                                if (!string.IsNullOrWhiteSpace(line))
+                                if (!string.IsNullOrEmpty(line) && !line.Contains("format"))
+                                {
+                                    sw.WriteLine(line);
+                                }
+                                /*if (!string.IsNullOrWhiteSpace(line))
                                 {
                                     //avoid duplicating format line, not sure why it happens but this avoids it
                                     if (line.Contains("format") && !doneFormat)
@@ -425,8 +438,12 @@ namespace Nautilus
                                     {
                                         sw.WriteLine(line);
                                     }
-                                }
+                                }*/
                             }
+                        }
+                        if (line.Contains("latin1"))
+                        {
+                            line = line.Replace("latin1", "utf8");
                         }
                         if (string.IsNullOrWhiteSpace(line)) continue;
                         if (line.Contains("real_guitar") || line.Contains("real_bass"))
@@ -466,10 +483,12 @@ namespace Nautilus
                     if (!string.IsNullOrWhiteSpace(line))
                     {
                         //avoid duplicating format line, not sure why it happens but this avoids it
-                        if (line.Contains("format") && !doneFormat)
+                        //if (line.Contains("format") && !doneFormat)
+                        if (line.Contains("format") && !line.Equals(formatLine))
                         {
                             sw.WriteLine(line);
-                            doneFormat = true;
+                            //doneFormat = true;
+                            formatLine = line;
                         }
                         else if (!line.Contains("format"))
                         {
@@ -479,8 +498,11 @@ namespace Nautilus
                 }
                 sr.Dispose();
                 sw.Dispose();
-                var edited = InsertTuningsAboveRank(File.ReadAllText(newDTA), proguitartuning, probasstuning);
-                File.WriteAllText(newDTA, edited, Encoding.Default);
+                if (!string.IsNullOrEmpty(proguitartuning) || !string.IsNullOrEmpty(probasstuning))
+                {
+                    var edited = InsertTuningsAboveRank(File.ReadAllText(newDTA), proguitartuning, probasstuning);
+                    File.WriteAllText(newDTA, edited, new UTF8Encoding(false, false));
+                }
                 if (File.Exists(newDTA))
                 {
                     Log("Merged DTA information successfully");
@@ -496,9 +518,9 @@ namespace Nautilus
                 Tools.DeleteFile(newDTA);
                 File.Copy(originalDTA, newDTA);
             }
+            var vocals = harm3 ? 3 : (harm2 ? 2 : (harm1) ? 1 : 0);
             if (!isBatchBundle)
-            {
-                var vocals = harm3 ? 3 : (harm2 ? 2 : (harm1) ? 1 : 0);
+            {                
                 if (showSongIDPrompt.Checked)
                 {
                     var popup = new PasswordUnlocker(songID == NA || useUpgradeID.Checked ? upgradeID : songID);
@@ -510,16 +532,71 @@ namespace Nautilus
                     {
                         songID = newID;
                     }
-                }
-                else if (useUpgradeID.Checked)
-                {
-                    songID = upgradeID;
-                }
-                Tools.ReplaceSongID(newDTA, songID, vocals.ToString(CultureInfo.InvariantCulture));
+                }              
             }
+            if (useUpgradeID.Checked)
+            {
+                songID = upgradeID;
+            }
+            Tools.ReplaceSongID(newDTA, songID, vocals.ToString(CultureInfo.InvariantCulture));
         }
 
         public static string InsertTuningsAboveRank(string dtaText, string guitarTuning, string bassTuning)
+        {
+            if (string.IsNullOrEmpty(dtaText))
+                return dtaText;
+
+            // Preserve original newline style
+            var nl = dtaText.Contains("\r\n") ? "\r\n" : "\n";
+
+            // Normalize provided lines to avoid embedded newlines duplicating spacing
+            string Normalize(string s) => s?.TrimEnd('\r', '\n');
+
+            var lines = new[]
+            {
+        Normalize(guitarTuning),
+        Normalize(bassTuning)
+    }
+            .Where(s => s != null)
+            .ToArray();
+
+            if (lines.Length == 0)
+                return dtaText; // nothing to insert
+
+            var insertion = string.Join(nl, lines) + nl;
+
+            // 1) Find 'rank' (prefer the quoted form, then fallback)
+            int rankIdx = dtaText.IndexOf("'rank'", StringComparison.Ordinal);
+            if (rankIdx < 0)
+                rankIdx = dtaText.IndexOf("rank", StringComparison.Ordinal);
+
+            if (rankIdx < 0)
+                return dtaText; // no rank found at all
+
+            // 2) Find the '(' that starts that S-expression
+            int openIdx = dtaText.LastIndexOf('(', rankIdx);
+            if (openIdx < 0)
+                return dtaText; // weird, but be safe
+
+            // 3) Find the start of the line that contains that '('
+            int lineStart;
+            if (nl == "\r\n")
+            {
+                int nIdx = dtaText.LastIndexOf("\r\n", openIdx, openIdx + 1);
+                lineStart = nIdx >= 0 ? nIdx + 2 : 0;
+            }
+            else
+            {
+                int nIdx = dtaText.LastIndexOf('\n', openIdx);
+                lineStart = nIdx >= 0 ? nIdx + 1 : 0;
+            }
+
+            // 4) Insert the tunings before that line
+            string result = dtaText.Insert(lineStart, insertion);
+            return result;
+        }
+
+        public static string InsertTuningsAboveRankOLD(string dtaText, string guitarTuning, string bassTuning)
         {
             if (string.IsNullOrEmpty(dtaText)) return dtaText;
 
@@ -542,8 +619,7 @@ namespace Nautilus
 
             var insertion = string.Join(nl, lines) + nl;
 
-            // Match "(" line that starts the rank list, whether "rank" is on same or next line
-            var pattern = @"(?m)^[ \t]*\(\s*(?:'rank'|rank)\b";
+            var pattern = @"(?m)^[ \t]*\(\s*(?:\r?\n[ \t]*)?(?:'rank'|rank)\b";
 
             bool inserted = false;
             string result = Regex.Replace(dtaText, pattern, m =>
@@ -881,7 +957,8 @@ namespace Nautilus
                 var artists = 0;
                 var songName = "";
 
-                var sr = new StreamReader(dta, Parser.GetDTAEncoding(Parser.DTA));
+                var encoding = Parser.DetectEncoding(dta);
+                var sr = new StreamReader(dta, encoding);
                 // read one line at a time until the end
                 while (sr.Peek() >= 0)
                 {

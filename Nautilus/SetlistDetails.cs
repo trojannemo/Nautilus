@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Text;
 
 namespace Nautilus
 {
@@ -114,7 +115,7 @@ namespace Nautilus
             
             Tools.DeleteFile(sfd.FileName);
 
-            var sw = new StreamWriter(sfd.FileName, false, System.Text.Encoding.UTF8);
+            var sw = new StreamWriter(sfd.FileName, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             try
             {
                 for (var i = 0; i < lstStats.Items.Count; i++)

@@ -59,19 +59,13 @@ namespace Nautilus
             }
         }
 
-        public Encoding GetDTAEncoding(byte[] xDTA)
-        {
-            var utf8 = new StreamReader(new MemoryStream(xDTA)).ReadToEnd().ToLowerInvariant().Contains("utf8");
-            return utf8 ? Encoding.UTF8 : Encoding.Default;
-        }
-
         public bool WriteDTAToFile(string dtaOUT)
         {
             if (DTA == null || DTA.Length == 0) return false;
             Tools.DeleteFile(dtaOUT);
             try
             {
-                var encoding = GetDTAEncoding(DTA);
+                var encoding = DetectEncoding(DTA);
                 var sw = new StreamWriter(dtaOUT, false, encoding);
                 var sr = new StreamReader(new MemoryStream(DTA), encoding);
                 sw.Write(sr.ReadToEnd());
@@ -630,7 +624,8 @@ namespace Nautilus
                             if (line.Trim().StartsWith(";;", StringComparison.Ordinal)) continue; //skip commented out lines
                             if (string.IsNullOrWhiteSpace(line)) continue; //don't want empty lines
 
-                            if (line.Contains("("))
+                            var inQuotes = line.TrimStart().StartsWith("\"");                            
+                            if (!inQuotes && line.Contains("("))
                             {
                                 open++;
                             }
@@ -2308,6 +2303,39 @@ namespace Nautilus
             return start;
         }
 
+        public Encoding DetectEncoding(byte[] bytes)
+        {
+            // 1. BOM detection
+            if (bytes.Length >= 3 &&
+                bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
+                return new UTF8Encoding(true);
+
+            if (bytes.Length >= 2 &&
+                bytes[0] == 0xFF && bytes[1] == 0xFE)
+                return Encoding.Unicode;
+
+            if (bytes.Length >= 2 &&
+                bytes[0] == 0xFE && bytes[1] == 0xFF)
+                return Encoding.BigEndianUnicode;
+
+            // 2. Test UTF-8 (no BOM)
+            try
+            {
+                var utf8 = new UTF8Encoding(false, true);
+                utf8.GetString(bytes);
+                return utf8;
+            }
+            catch { }
+
+            // 3. Fallback to ANSI / Windows-1252
+            return Encoding.GetEncoding(1252);
+        }
+
+        public Encoding DetectEncoding(string path)
+        {
+            return DetectEncoding(File.ReadAllBytes(path));            
+        }
+
         /// <summary>
         /// Parses DTA file and populates the song entries to DTAEntries
         /// </summary>
@@ -2320,7 +2348,8 @@ namespace Nautilus
             {
                 //DTAEntries = new List<SongEntry>();
                 DTAEntries = new List<List<string>>();
-                sr = new StreamReader(new MemoryStream(xDTA), GetDTAEncoding(xDTA));
+                var encoding = DetectEncoding(xDTA);
+                sr = new StreamReader(new MemoryStream(xDTA), encoding);
                 var open = 0;
                 var closed = 0;
                 var counter = 0;
@@ -2346,11 +2375,12 @@ namespace Nautilus
                         closed = 0;
                         continue;
                     }
-                    if (line.Contains(")"))
+                    var inQuotes = line.TrimStart().StartsWith("\"") || line.TrimEnd().EndsWith("\"");
+                    if (!inQuotes && line.Contains(")"))
                     {
                         closed = closed + line.Count(x => x == ')'); //rather than add +1, count how many instances in the string
-                    }
-                    if (line.Contains("("))
+                    }                    
+                    if (!inQuotes && line.Contains("("))
                     {
                         open = open + line.Count(x => x == '('); //rather than add +1, count how many instances in the string
                     }

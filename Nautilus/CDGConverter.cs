@@ -11,6 +11,7 @@ using System.Drawing.Text;
 using System.Drawing.Imaging;
 using Un4seen.Bass;
 using System.Runtime.InteropServices;
+using System.Drawing.Drawing2D;
 
 namespace Nautilus
 {
@@ -35,6 +36,7 @@ namespace Nautilus
         private List<LyricPhrase> Harm2Phrases;
         private List<LyricPhrase> Harm3Phrases;
         private List<string> inputFiles;
+        private string customColor = "";
         private string backgroundColor = "";
         private string textColor1 = "";
         private string highlightColor1 = "";
@@ -42,6 +44,7 @@ namespace Nautilus
         private string highlightColor2 = "";
         private string textColor3 = "";
         private string highlightColor3 = "";
+        private string strokeColor = "";
         private int fileCounter = 0;
         private int successCounter = 0;
         private int failureCounter = 0;
@@ -62,7 +65,6 @@ namespace Nautilus
         private byte[] albumArtX;
         private int totalFrames;
         private double songDuration;
-        private bool useBackgroundOverride;
         private Image BackgroundOverride = null;
         private Image KaraokeLogo = null;
         private bool do4KResolution = false;
@@ -82,6 +84,14 @@ namespace Nautilus
         private string videoFilter = "";
         private bool doEnableHighlightAnimation = true;
         private double syncOffsetMs = 0.0;
+        private bool isLoading = false;
+        private bool enablePreview = false;
+        private bool enableCDGStroke = true;
+        private bool enableMP4Stroke = false;
+        private bool enableTitleShadows = false;
+        private bool solidColorBackground = true;
+        private bool staticImageBackground = false;
+        private bool animatedVideoBackground = false;
 
         List<string> karaokeColorHexes = new List<string>
         {
@@ -100,7 +110,8 @@ namespace Nautilus
             "#008888", //Teal
             "#88FF00", //Lime
             "#000088", //Navy
-            "#884400"  //Brown
+            "#884400", //Brown
+            "#545454", //Dark Gray
         };
 
         public CDGConverter()
@@ -143,7 +154,7 @@ namespace Nautilus
             sw.WriteLine("Text3BaseColorIndex=" + cboTextColor3.SelectedIndex.ToString());
             sw.WriteLine("Text3HighlightColorIndex=" + cboTextHighlight3.SelectedIndex.ToString());
             sw.WriteLine("FontIndex=" + cboFont.SelectedIndex.ToString());
-            sw.WriteLine("UseOverridePNG=" + (chkOverrideBackground.Checked ? "True" : "False"));
+            sw.WriteLine("StaticImageBackground=" + (staticImageBackgroundToolStripMenuItem.Checked ? "True" : "False"));
             sw.WriteLine("RemoveVocals=" + (radioRemove.Checked ? "True" : "False"));
             sw.WriteLine("KeepVocals=" + (radioKeep.Checked ? "True" : "False"));
             sw.WriteLine("KeepTOML=" + (keeptomlFileToolStripMenuItem.Checked ? "True" : "False"));
@@ -176,12 +187,22 @@ namespace Nautilus
             sw.WriteLine("FPS60=" + (SixtyFPS.Checked ? "True" : "False"));
             sw.WriteLine("DoHighlightLeadAnimation=" + (enableHighlightAnimation.Checked ? "True" : "False"));
             sw.WriteLine("AudioVideoOffset=" + syncOffsetMs);
+            sw.WriteLine("StrokeColorIndex=" + cboStroke.SelectedIndex.ToString());
+            sw.WriteLine("CustomColor=" + customColor);
+            sw.WriteLine("EnableRenderingPreview=" + (showRenderingPreview.Checked ? "True" : "False"));
+            sw.WriteLine("EnableCDGStroke=" + (enableCDGStrokeToolStripMenuItem.Checked ? "True" : "False"));
+            sw.WriteLine("EnableMP4Stroke=" + (enableMP4StrokeToolStripMenuItem.Checked ? "True" : "False"));
+            sw.WriteLine("EnableTitleCardShadows=" + (enableMP4TitleCardShadows.Checked ? "True" : "False"));
+            sw.WriteLine("SolidColorBackground=" + (solidColorToolStripMenuItem.Checked ? "True" : "False"));
+            sw.WriteLine("AnimatedBackground=" + (animatedBackgroundToolStripMenuItem.Checked ? "True" : "False"));
+            sw.WriteLine("NoHighlightDelay=" + (noDelayToolStripMenuItem.Checked ? "True" : "False"));
             sw.Dispose();
         }
 
         private void LoadConfig()
         {
             if (!File.Exists(configFile)) return;
+            isLoading = true;
             var sr = new StreamReader(configFile);
             try
             {
@@ -193,7 +214,7 @@ namespace Nautilus
                 cboTextColor3.SelectedIndex = Convert.ToInt16(Tools.GetConfigString(sr.ReadLine()));
                 cboTextHighlight3.SelectedIndex = Convert.ToInt16(Tools.GetConfigString(sr.ReadLine()));
                 cboFont.SelectedIndex = Convert.ToInt16(Tools.GetConfigString(sr.ReadLine()));
-                chkOverrideBackground.Checked = sr.ReadLine().Contains("True");
+                staticImageBackgroundToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
                 radioRemove.Checked = sr.ReadLine().Contains("True");
                 radioKeep.Checked = sr.ReadLine().Contains("True");
                 keeptomlFileToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
@@ -226,15 +247,39 @@ namespace Nautilus
                 SixtyFPS.Checked = sr.ReadLine().Contains("True");
                 enableHighlightAnimation.Checked = sr.ReadLine().Contains("True");
                 syncOffsetMs = Convert.ToDouble(Tools.GetConfigString(sr.ReadLine()));
+                cboStroke.SelectedIndex = Convert.ToInt16(Tools.GetConfigString(sr.ReadLine()));
+                customColor = Tools.GetConfigString(sr.ReadLine());
+                showRenderingPreview.Checked = sr.ReadLine().Contains("True");
+                enableCDGStrokeToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
+                enableMP4StrokeToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
+                enableMP4TitleCardShadows.Checked = sr.ReadLine().Contains("True");
+                solidColorToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
+                animatedBackgroundToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
+                noDelayToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
+                UpdateTextParents();
                 ModeSanityCheck();
+                if (cboBackground.SelectedIndex == cboBackground.Items.Count - 1)
+                {
+                    if (string.IsNullOrEmpty(customColor))
+                    {
+                        cboBackground.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        var backColor = ColorTranslator.FromHtml(customColor);
+                        UpdateBackgroundColors(backColor);
+                    }
+                }
             }
             catch 
             {
                 sr.Dispose();
-                Tools.DeleteFile(configFile);
+                //Tools.DeleteFile(configFile);
+                isLoading = false;
                 return;
             }
             sr.Dispose();
+            isLoading = false;
         }
 
         private void CDGConverter_DragEnter(object sender, DragEventArgs e)
@@ -271,13 +316,22 @@ namespace Nautilus
                 return;
             }
             inputFiles = files.ToList();
-            backgroundColor = karaokeColorHexes[cboBackground.SelectedIndex];
+            if (cboBackground.SelectedIndex < cboBackground.Items.Count - 1)
+            {
+                backgroundColor = karaokeColorHexes[cboBackground.SelectedIndex];
+            }
+            else
+            {
+                backgroundColor = customColor;
+            }            
+            strokeColor = karaokeColorHexes[cboStroke.SelectedIndex];
             textColor1 = karaokeColorHexes[cboTextColor1.SelectedIndex];
             highlightColor1 = karaokeColorHexes[cboTextHighlight1.SelectedIndex];
             textColor2 = karaokeColorHexes[cboTextColor2.SelectedIndex];
             highlightColor2 = karaokeColorHexes[cboTextHighlight2.SelectedIndex];
             textColor3 = karaokeColorHexes[cboTextColor3.SelectedIndex];
             highlightColor3 = karaokeColorHexes[cboTextHighlight3.SelectedIndex];
+            strokeColor = karaokeColorHexes[cboStroke.SelectedIndex];
             doKeepTOML = keeptomlFileToolStripMenuItem.Checked;
             doSoloVocals = radioSoloVocals.Checked;
             doHarm2 = radioHarm2.Checked;
@@ -288,10 +342,16 @@ namespace Nautilus
             doMP4 = chkMP4.Checked;
             doKeepWAV = keepwavFileToolStripMenuItem.Checked;
             do4KResolution = HigherRes.Checked;
+            enablePreview = showRenderingPreview.Checked;
+            enableCDGStroke = enableCDGStrokeToolStripMenuItem.Checked;
+            enableMP4Stroke = enableMP4StrokeToolStripMenuItem.Checked;
+            enableTitleShadows = enableMP4TitleCardShadows.Checked;
             var remove = "drums|bass|guitar|keys|backing|NOcrowd";
             var keep = "allstems|NOcrowd";
             vocalOption = radioRemove.Checked ? remove : keep;
-            useBackgroundOverride = chkOverrideBackground.Checked;
+            solidColorBackground = solidColorToolStripMenuItem.Checked;
+            staticImageBackground = staticImageBackgroundToolStripMenuItem.Checked;
+            animatedVideoBackground = animatedBackgroundToolStripMenuItem.Checked;
             try
             {
                 BackgroundOverride = Image.FromFile(Application.StartupPath + "\\bin\\images\\background.png");
@@ -308,7 +368,11 @@ namespace Nautilus
             {
                 KaraokeLogo = null;
             }
-            if (quarterSecondDelay.Checked)
+            if (noDelayToolStripMenuItem.Checked)
+            {
+                highlightDelay = 0;
+            }
+            else if (quarterSecondDelay.Checked)
             {
                 highlightDelay = 250;
             }
@@ -415,12 +479,12 @@ namespace Nautilus
             grpHarm1.Enabled = enable;
             grpHarm2.Enabled = enable;
             grpHarm3.Enabled = enable;
-            cboBackground.Enabled = enable;
-            chkOverrideBackground.Enabled = enable && chkMP4.Checked;
+            cboBackground.Enabled = enable;            
             cboFont.Enabled = enable;
             lblFontQuestion.Enabled = enable;
-            lblBackgroundQuestion.Enabled = enable;
             btnCancel.Visible = !enable;
+            cboStroke.Enabled = enable;
+            lblStrokeQuestion.Enabled = enable;
         }
 
         private string CleanString(string str)
@@ -524,16 +588,16 @@ namespace Nautilus
             var title = CleanString(Parser.Songs[0].Artist).Replace("feat.", "ft.").Replace("featuring", "ft.") + " - " + CleanString(Parser.Songs[0].Name).Replace("feat.", "ft.").Replace("featuring", "ft.");
             Log("Song " + fileCounter + " is '" + title + "'");
 
-            var folder = Path.GetDirectoryName(file) + "\\Karaoke\\" + title + "\\";
+            var folder = Path.GetDirectoryName(file) + "\\Karaoke\\" + title.Replace("?", "") + "\\";
             if (!Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
             }
-            var wav = folder + title + ".wav";
-            var mp3 = folder + title + ".mp3";
-            var cdg = folder + title + ".cdg";
-            var toml = folder + title + ".toml";
-            var mp4 = folder + title + "-" + (do4KResolution ? "4K" : "1080P") + frameRate + ".mp4";
+            var wav = folder + title.Replace("?", "") + ".wav";
+            var mp3 = folder + title.Replace("?", "") + ".mp3";
+            var cdg = folder + title.Replace("?", "") + ".cdg";
+            var toml = folder + title.Replace("?", "") + ".toml";
+            var mp4 = folder + title.Replace("?", "") + "-" + (do4KResolution ? "4K" : "1080P") + frameRate + ".mp4";
             try
             {
                 ActiveFontName = cboFont.Text.Split('|')[0].Trim();
@@ -670,6 +734,7 @@ namespace Nautilus
                     }
                 }
             }
+            
             if (Parser.Songs[0].VocalParts > 1)
             {
                 foreach (var lyric in Harm1Lyrics)
@@ -682,7 +747,8 @@ namespace Nautilus
                             break;
                         }
                     }
-                }
+                }               
+
                 foreach (var lyric in Harm2Lyrics)
                 {
                     foreach (var note in Harm2Notes)
@@ -693,7 +759,8 @@ namespace Nautilus
                             break;
                         }
                     }
-                }
+                }                
+
                 foreach (var lyric in Harm3Lyrics)
                 {
                     foreach (var note in Harm3Notes)
@@ -704,7 +771,7 @@ namespace Nautilus
                             break;
                         }
                     }
-                }
+                }                
             }
 
             try
@@ -1001,33 +1068,33 @@ namespace Nautilus
             sw.WriteLine("border = \"" + backgroundColor + "\""); //match the background for now
             sw.WriteLine("highlight_bandwidth = 1");
             sw.WriteLine("draw_bandwidth = 1");
-            sw.WriteLine("stroke_width = 0");
+            sw.WriteLine("stroke_width = 1");
             sw.WriteLine("");
             sw.WriteLine("font = '" + ActiveFont + "'");
             sw.WriteLine("font_size = 18"); //hardcoded
             sw.WriteLine("");                                       
             sw.WriteLine("[[singers]]"); //always must have atleast one, this is lead/harm1
             sw.WriteLine("active_fill = \"" + highlightColor1 + "\"");
-            sw.WriteLine("active_stroke = \"" + highlightColor1 + "\""); //match the highlight color
-            sw.WriteLine("inactive_fill = \"" + textColor1 + "\""); //
-            sw.WriteLine("inactive_stroke = \"" + textColor1 + "\""); //match the inactive color
+            sw.WriteLine("active_stroke = \"" + (enableCDGStroke ? strokeColor : highlightColor1) + "\""); 
+            sw.WriteLine("inactive_fill = \"" + textColor1 + "\""); 
+            sw.WriteLine("inactive_stroke = \"" + (enableCDGStroke ? strokeColor : textColor1) + "\"");
             if ((doHarm2 || doHarm3) && Harm2Lyrics.Any())
             {
                 sw.WriteLine("");
                 sw.WriteLine("[[singers]]"); //harm2
                 sw.WriteLine("active_fill = \"" + highlightColor2 + "\"");
-                sw.WriteLine("active_stroke = \"" + highlightColor2 + "\""); //match the highlight color
-                sw.WriteLine("inactive_fill = \"" + textColor2 + "\""); //
-                sw.WriteLine("inactive_stroke = \"" + textColor2 + "\""); //match the inactive color
+                sw.WriteLine("active_stroke = \"" + (enableCDGStroke ? strokeColor : highlightColor2) + "\"");
+                sw.WriteLine("inactive_fill = \"" + textColor2 + "\"");
+                sw.WriteLine("inactive_stroke = \"" + (enableCDGStroke ? strokeColor : textColor2) + "\"");
             }
             if (doHarm3 && Harm3Lyrics.Any())
             {
                 sw.WriteLine("");
                 sw.WriteLine("[[singers]]"); //harm3
                 sw.WriteLine("active_fill = \"" + highlightColor3 + "\"");
-                sw.WriteLine("active_stroke = \"" + highlightColor3 + "\""); //match the highlight color
-                sw.WriteLine("inactive_fill = \"" + textColor3 + "\""); //
-                sw.WriteLine("inactive_stroke = \"" + textColor3 + "\""); //match the inactive color
+                sw.WriteLine("active_stroke = \"" + (enableCDGStroke ? strokeColor : highlightColor3) + "\"");
+                sw.WriteLine("inactive_fill = \"" + textColor3 + "\""); 
+                sw.WriteLine("inactive_stroke = \"" + (enableCDGStroke ? strokeColor : textColor3) + "\"");
             }
             sw.WriteLine("");
             sw.WriteLine("[[lyrics]]"); //must always have one, this is lead/harm1
@@ -1502,18 +1569,39 @@ namespace Nautilus
 
         private void cboBackground_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Color backColor = GetColorFromIndex(cboBackground.SelectedIndex);
+            Color backColor;
+
+            if (cboBackground.SelectedIndex < cboBackground.Items.Count - 1) //not the last "custom" option
+            {
+                backColor = GetColorFromIndex(cboBackground.SelectedIndex);                
+            }
+            else if (isLoading)
+            {
+                return;
+            }
+            else
+            {
+                colorPicker.ShowDialog();
+                backColor = colorPicker.Color;
+                customColor = ColorTranslator.ToHtml(backColor);
+            }
+
+            UpdateBackgroundColors(backColor);            
+        }
+
+        private void UpdateBackgroundColors(Color backColor)
+        {
             picBackground1.BackColor = backColor;
-            lblTextHighlight1.BackColor = backColor;
-            lblTextColor1.BackColor = backColor;
-            
+            lblTextHighlight1.BackColor = Color.Transparent;// backColor;
+            lblTextColor1.BackColor = Color.Transparent;// backColor;
+
             picBackground2.BackColor = backColor;
-            lblTextHighlight2.BackColor = backColor;
-            lblTextColor2.BackColor = backColor;
-            
+            lblTextHighlight2.BackColor = Color.Transparent;// backColor;
+            lblTextColor2.BackColor = Color.Transparent;// backColor;
+
             picBackground3.BackColor = backColor;
-            lblTextHighlight3.BackColor = backColor;
-            lblTextColor3.BackColor = backColor;
+            lblTextHighlight3.BackColor = Color.Transparent;// backColor;
+            lblTextColor3.BackColor = Color.Transparent;// backColor;
         }
 
         private Color GetColorFromIndex(int index)
@@ -1962,27 +2050,86 @@ namespace Nautilus
             return "🎵 Key: " + key + tonality;
         }
 
-        private void DrawCenteredLine(Graphics g, string text, int resolutionX, int y, float maxFontSize, int offset = 0)
-        {            
-            var baseFont = new Font(ActiveFontName, 16f);
-            float scaledFontSize = GetScaledFontSize(g, text, baseFont, maxFontSize, resolutionX - offset);
-            Font font = null;
-
-            try
+        private void DrawCenteredLine(
+    Graphics g,
+    string text,
+    int resolutionX,
+    int y,
+    float maxFontSize,
+    int offset = 0,
+    int shadowOffsetX = 1,
+    int shadowOffsetY = 1,
+    int shadowBlur = 5,
+    float shadowOpacity = 0.20f
+)
+        {
+            using (var baseFont = new Font(ActiveFontName, 16f))
             {
-                font = new Font(ActiveFontName, scaledFontSize);
-                var size = TextRenderer.MeasureText(g, text, font);
-                int x = (resolutionX + offset - size.Width) / 2;
-                TextRenderer.DrawText(g, text, font, new Point(x, y), ColorTranslator.FromHtml(textColor1), Color.Transparent);                
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error on frame: text='{text}' | scaledFontSize={scaledFontSize} | maxFontSize={maxFontSize} | Exception={ex.Message}\n");
-            }
-            baseFont.Dispose();
-            font.Dispose();
-        }               
+                float scaledFontSize = GetScaledFontSize(g, text, baseFont, maxFontSize, resolutionX - offset);
 
+                using (var font = new Font(ActiveFontName, scaledFontSize))
+                {
+                    // measure for centering
+                    var size = TextRenderer.MeasureText(g, text, font);
+                    int x = (resolutionX + offset - size.Width) / 2;
+
+                    Color textColor = ColorTranslator.FromHtml(textColor1);
+                                        
+                    g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+
+                    if (enableTitleShadows)
+                    {
+                        // Create an offscreen bitmap for blur
+                        using (Bitmap shadowBmp = new Bitmap(size.Width + shadowBlur * 2, size.Height + shadowBlur * 2))
+                        using (Graphics shadowG = Graphics.FromImage(shadowBmp))
+                        {
+                            shadowG.Clear(Color.Transparent);
+                            shadowG.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+
+                            // Shadow color (same shape as text)
+                            using (Brush shadowBrush = new SolidBrush(Color.FromArgb((int)(255 * shadowOpacity), 0, 0, 0)))
+                            {
+                                shadowG.DrawString(text, font, shadowBrush, shadowBlur, shadowBlur);
+                            }
+
+                            // Apply a simple blur approximation by redrawing the bitmap slightly offset
+                            for (int dx = -shadowBlur; dx <= shadowBlur; dx++)
+                            {
+                                for (int dy = -shadowBlur; dy <= shadowBlur; dy++)
+                                {
+                                    if (dx == 0 && dy == 0) continue;
+                                    float weight = 1f - (float)Math.Sqrt(dx * dx + dy * dy) / shadowBlur;
+                                    if (weight <= 0) continue;
+
+                                    using (var tempBrush = new TextureBrush(shadowBmp))
+                                    {
+                                        ColorMatrix cm = new ColorMatrix
+                                        {
+                                            Matrix33 = weight * 0.2f // blur transparency falloff
+                                        };
+                                        using (ImageAttributes ia = new ImageAttributes())
+                                        {
+                                            ia.SetColorMatrix(cm, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                                            g.DrawImage(shadowBmp,
+                                                new Rectangle(x + shadowOffsetX + dx, y + shadowOffsetY + dy,
+                                                              shadowBmp.Width, shadowBmp.Height),
+                                                0, 0, shadowBmp.Width, shadowBmp.Height,
+                                                GraphicsUnit.Pixel, ia);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                                        
+                    using (var brush = new SolidBrush(textColor))
+                    {
+                        g.DrawString(text, font, brush, x, y);
+                    }
+                }
+            }
+        }
+                
         public double AverageBPM()
         {
             var total_bpm = 0.0;
@@ -2098,17 +2245,16 @@ namespace Nautilus
                 return;
             }
 
-            var jpgEncoder = GetEncoder(ImageFormat.Jpeg);
-            var encoderParams = new EncoderParameters(1);
-            encoderParams.Param[0] = new EncoderParameter(Encoder.Quality, do4KResolution ? 100L : 90L); // Adjust quality (70–100)
             var AvgBPM = AverageBPM();
             const int spawnFrequency = 30;
             var noteCounter = spawnFrequency;
             int resolutionX = do4KResolution ? 3840 : 1920;
-            int resolutionY = do4KResolution ? 2160 : 1080;
+            int resolutionY = do4KResolution ? 2160 : 1080;            
             int multiplier = do4KResolution ? 2 : 1;
             double vertOffset = 0;
-            
+
+            var lyricsRawPath = Path.GetDirectoryName(outputVideoPath) + "\\lyrics_raw.mp4";
+            var tempVideoPath = animatedVideoBackground ?  lyricsRawPath : outputVideoPath;
             Log("Resolution: " + resolutionX + "*" + resolutionY);
             Log($"Frame rate: {frameRate} FPS");
             Log("Average BPM: " + (int)(AvgBPM + 0.5));
@@ -2116,61 +2262,66 @@ namespace Nautilus
 
             //ffmpeg stuff
             int byteCount = resolutionX * resolutionY * 3;
+            var videoQuality = animatedVideoBackground ? "-crf 0 -pix_fmt yuv444p" : "-crf 18 -pix_fmt yuv420p";
             byte[] rawBuffer = new byte[byteCount];
             var ffmpeg = new Process();
             ffmpeg.StartInfo.FileName = ffmpegPath;
-            ffmpeg.StartInfo.Arguments = $"-y -f rawvideo -pixel_format bgr24 -video_size {resolutionX}x{resolutionY} -framerate {frameRate} " +
-                $"-i - -i \"{audioFilePath}\"{videoFilter} -c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest \"{outputVideoPath}\"";
+            ffmpeg.StartInfo.Arguments =
+                $"-y " +
+                $"-f rawvideo -pixel_format bgr24 -video_size {resolutionX}x{resolutionY} -framerate {frameRate} " +
+                $"-i - " +
+                $"-i \"{audioFilePath}\"{videoFilter} " +
+                $"-c:v libx264 -preset veryfast {videoQuality} " +
+                $"-c:a aac -b:a 192k -shortest \"{tempVideoPath}\"";
             ffmpeg.StartInfo.UseShellExecute = false;
             ffmpeg.StartInfo.RedirectStandardInput = true;
             ffmpeg.StartInfo.CreateNoWindow = true;
             ffmpeg.Start();
             var ffmpegStream = ffmpeg.StandardInput.BaseStream;
 
-            Image album_cover = null;
-            if (File.Exists(artFilePath))
-            {
-                album_cover = Image.FromFile(artFilePath);
-            }
+            Bitmap coverBitmap = null;
             int coverWidth = 512 * multiplier;
             int coverHeight = 512 * multiplier;
-            //render cover for use in parallel processing
-            Bitmap renderedCover = new Bitmap(coverWidth, coverHeight);
-            using (Graphics g = Graphics.FromImage(renderedCover))
-            {
-                g.DrawImage(album_cover, 0, 0, coverWidth, coverHeight);
-            }
-            byte[] coverData = null;
-            if (album_cover != null)
-            {
-                Rectangle coverRect = new Rectangle(0, 0, coverWidth, coverHeight);
-                coverData = new byte[coverWidth * coverHeight * 4]; // 32bpp ARGB
-                BitmapData coverBmpData = renderedCover.LockBits(coverRect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-                Marshal.Copy(coverBmpData.Scan0, coverData, 0, coverData.Length);
-                renderedCover.UnlockBits(coverBmpData);
-                renderedCover.Dispose();
-            }
 
+            if (File.Exists(artFilePath))
+            {
+                using (var src = Image.FromFile(artFilePath))
+                {
+                    coverBitmap = new Bitmap(coverWidth, coverHeight, PixelFormat.Format32bppArgb);
+                    using (Graphics g = Graphics.FromImage(coverBitmap))
+                    {
+                        g.DrawImage(src, 0, 0, coverWidth, coverHeight);
+                    }
+                }
+            }
+            
             //render background for use in parallel processing
-            Bitmap renderedBackground = new Bitmap(resolutionX, resolutionY);
+            Bitmap renderedBackground = new Bitmap(resolutionX, resolutionY, PixelFormat.Format24bppRgb);
             using (Graphics g = Graphics.FromImage(renderedBackground))
             {
-                g.Clear(ColorTranslator.FromHtml(backgroundColor));
-                if (useBackgroundOverride && BackgroundOverride != null)
+                if (animatedVideoBackground)
+                {
+                    g.Clear(Color.FromArgb(0, 255, 0)); //green key color
+                }
+                else
+                {
+                    g.Clear(ColorTranslator.FromHtml(backgroundColor));
+                }
+                if (staticImageBackground && BackgroundOverride != null)
                 {
                     g.DrawImage(BackgroundOverride, 0, 0, resolutionX, resolutionY);
                 }
             }
 
             // Copy pixel data to raw byte buffer
-            var bgData = new byte[resolutionX * resolutionY * 4]; // 32bppArgb = 4 bytes per pixel
+            var bgData = new byte[resolutionX * resolutionY * 3];
             var rect = new Rectangle(0, 0, resolutionX, resolutionY);
-            var bmpData = renderedBackground.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            var bmpData = renderedBackground.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
             Marshal.Copy(bmpData.Scan0, bgData, 0, bgData.Length);
             renderedBackground.UnlockBits(bmpData);
-            renderedBackground.Dispose();
+            renderedBackground.Dispose();                    
 
-            byte[] logoData = null;
+            Bitmap logoBitmap = null;
             int logoWidth = 0;
             int logoHeight = 0;
 
@@ -2179,29 +2330,30 @@ namespace Nautilus
                 logoWidth = KaraokeLogo.Width * multiplier;
                 logoHeight = KaraokeLogo.Height * multiplier;
 
-                //render logo for use in parallel processing
-                Bitmap renderedLogo = new Bitmap(logoWidth, logoHeight);
-                using (Graphics g = Graphics.FromImage(renderedLogo))
+                logoBitmap = new Bitmap(logoWidth, logoHeight, PixelFormat.Format32bppArgb);
+                using (Graphics g = Graphics.FromImage(logoBitmap))
                 {
                     g.DrawImage(KaraokeLogo, 0, 0, logoWidth, logoHeight);
                 }
-
-                Rectangle logoRect = new Rectangle(0, 0, logoWidth, logoHeight);
-                logoData = new byte[logoWidth * logoHeight * 4]; // 32bpp ARGB
-                BitmapData logoBmpData = renderedLogo.LockBits(logoRect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-                Marshal.Copy(logoBmpData.Scan0, logoData, 0, logoData.Length);
-                renderedLogo.UnlockBits(logoBmpData);
-                renderedLogo.Dispose();
             }
-                        
-            this.Invoke(new Action(() =>
+
+            Bitmap bmp = new Bitmap(resolutionX, resolutionY, PixelFormat.Format24bppRgb);
+            Graphics graphics = Graphics.FromImage(bmp);
+            // Optional: set these once
+            graphics.SmoothingMode = SmoothingMode.HighQuality;
+            graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+
+            if (enablePreview)
             {
-                picPreview.Image = null;
-                picPreview.Width = 288;
-                picPreview.Height = 162;
-                picPreview.Visible = true;
-                lblFrames.Visible = true;
-            }));            
+                this.Invoke(new Action(() =>
+                {
+                    picPreview.Image = null;
+                    picPreview.Width = 288;
+                    picPreview.Height = 162;
+                    picPreview.Visible = true;
+                    lblFrames.Visible = true;
+                }));
+            }
             for (var frame = 0; frame < totalFrames; frame++)
             {
                 if (cancelProcess) { break; }
@@ -2211,15 +2363,17 @@ namespace Nautilus
                     double frameDuration = 1.0 / frameRate;
                     double time = frame * frameDuration * 1000.0;
                     double adjustedTime = Math.Max(0, time - syncOffsetMs);
-                    Bitmap bmp = new Bitmap(resolutionX, resolutionY, PixelFormat.Format32bppArgb);
-
+                    
                     rect = new Rectangle(0, 0, resolutionX, resolutionY);
-                    bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                    bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
                     Marshal.Copy(bgData, 0, bmpData.Scan0, bgData.Length);
-                    bmp.UnlockBits(bmpData);
+                    bmp.UnlockBits(bmpData);                                       
 
-                    using (Graphics graphics = Graphics.FromImage(bmp))
+                    using (graphics = Graphics.FromImage(bmp))
                     {
+                        graphics.ResetTransform();
+                        graphics.ResetClip();
+
                         LyricPhrase actualNextLineHarmony = null;
                         LyricPhrase actualLastLineHarmony = null;
                         LyricPhrase currentLineLead = null;
@@ -2418,7 +2572,7 @@ namespace Nautilus
                             var title = "\"" + Parser.Songs[0].Name.Replace("&", "&&").Replace("feat.", "ft.").Replace("featuring", "ft.") + "\"";
                             var artist = Parser.Songs[0].Artist.Replace("&", "&&").Replace("feat.", "ft.").Replace("featuring", "ft.");
                             var album = Parser.Songs[0].Album.Replace("&", "&&");
-                            var bpm = AvgBPM == 0 ? "" : "🎚️ Tempo: " + Math.Round(AvgBPM, 0, MidpointRounding.AwayFromZero) + " BPM";
+                            var bpm = AvgBPM == 0 ? "" : "Tempo: " + Math.Round(AvgBPM, 0, MidpointRounding.AwayFromZero) + " BPM";
                             var parts = 1;
                             if ((doHarm2 || doHarm3) && Harm2Lyrics.Any())
                             {
@@ -2428,31 +2582,40 @@ namespace Nautilus
                             {
                                 parts++;
                             }
-                            var vocalParts = "🎙️ Vocals: " + ((doHarm2 || doHarm3) && Harm2Lyrics.Any() ? parts + "-part harmony" : "Solo");
+                            var vocalParts = "Vocals: " + ((doHarm2 || doHarm3) && Harm2Lyrics.Any() ? parts + "-part harmony" : "Solo");
                             var charter = Parser.Songs[0].ChartAuthor.Replace("&", "&&");
                             var songKey = "";//GetSongKey(); - need to add detection of official HMX stuff vs customs before this is usable
                             var genre = Parser.doGenre(Parser.Songs[0].Genre).Replace("&", "&&");
                             if (!string.IsNullOrEmpty(genre))
                             {
-                                genre = "🎧 Genre: " + genre;
+                                genre = "Genre: " + genre;
                             }
 
                             var offset = 0;
-                            if (album_cover != null)
+                            /*if (album_cover != null)
                             {
                                 int artSize = 512 * multiplier;
                                 int spacer = 100 * multiplier;
-                                using (Bitmap coverBmp = new Bitmap(coverWidth, coverHeight, PixelFormat.Format32bppArgb))
+                                using (Bitmap coverBmp = new Bitmap(coverWidth, coverHeight, PixelFormat.Format24bppRgb))
                                 {
                                     var coverRect = new Rectangle(0, 0, coverWidth, coverHeight);
-                                    var coverBmpData = coverBmp.LockBits(coverRect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                                    var coverBmpData = coverBmp.LockBits(coverRect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
                                     Marshal.Copy(coverData, 0, coverBmpData.Scan0, coverData.Length);
                                     coverBmp.UnlockBits(coverBmpData);
                                     graphics.DrawImage(coverBmp, spacer, (resolutionY - artSize) / 2, artSize, artSize);
                                 }
                                 offset = artSize + (int)(1.5 * spacer);
+                            }*/
+                            if (coverBitmap != null)
+                            {
+                                int artSize = 512 * multiplier;
+                                int spacer = 100 * multiplier;
+
+                                graphics.DrawImage(coverBitmap, spacer, (resolutionY - artSize) / 2, artSize, artSize);
+
+                                offset = artSize + (int)(1.5 * spacer);
                             }
-                                
+
                             // 1–3: Title, Artist, Album (same as now)
                             DrawCenteredLine(graphics, title, resolutionX, lineHeight * 3, 72f * multiplier, offset);
                             DrawCenteredLine(graphics, artist, resolutionX, lineHeight * 4, 60f * multiplier, offset);
@@ -2551,10 +2714,16 @@ namespace Nautilus
                                 string widestLine = (line1Text.Length > line2Text.Length) ? line1Text : line2Text;
                                 float scaledFontSize = GetScaledFontSize(graphics, widestLine, baseFont, 100f * multiplier, resolutionX);
                                 var displayFont = new Font(baseFont.FontFamily, scaledFontSize);
-                                                                
-                                Size size = TextRenderer.MeasureText(graphics, line1Text.Replace("‿", " "), displayFont);
-                                int posX = (resolutionX - size.Width) / 2;
-                                
+
+                                //Size size = TextRenderer.MeasureText(graphics, line1Text.Replace("‿", " "), displayFont);
+                                //int posX = (resolutionX - size.Width) / 2;
+                                SizeF sizeF = graphics.MeasureString(line1Text.Replace("‿", " "), displayFont, int.MaxValue);
+                                float textWidth = sizeF.Width;
+
+                                // center horizontally
+                                float posXf = (resolutionX - textWidth) / 2f;
+                                int posX = (int)Math.Round(posXf);  // snap to pixels if you like
+
                                 double firstLyricTime = GetFirstLyricStart(lyricsLead, currentLineLead.PhraseStart, currentLineLead.PhraseEnd);
                                 double lastLyricTime = lastLineLead != null
                                     ? GetLastLyricEnd(lyricsLead, lastLineLead.PhraseStart, lastLineLead.PhraseEnd)
@@ -2631,8 +2800,14 @@ namespace Nautilus
                                 float scaledFontSize = GetScaledFontSize(graphics, widestLine, baseFont, 100f * multiplier, resolutionX);
                                 var displayFont = new Font(baseFont.FontFamily, scaledFontSize);
 
-                                Size size = TextRenderer.MeasureText(graphics, line3Text.Replace("‿", " "), displayFont);
-                                int posX = (resolutionX - size.Width) / 2;
+                                //Size size = TextRenderer.MeasureText(graphics, line3Text.Replace("‿", " "), displayFont);
+                                //int posX = (resolutionX - size.Width) / 2;
+                                SizeF sizeF = graphics.MeasureString(line3Text.Replace("‿", " "), displayFont, int.MaxValue);
+                                float textWidth = sizeF.Width;
+
+                                // center horizontally
+                                float posXf = (resolutionX - textWidth) / 2f;
+                                int posX = (int)Math.Round(posXf);  // snap to pixels if you like
 
                                 double firstLyricTime = GetFirstLyricStart(lyricsLead, nextLineLead.PhraseStart, nextLineLead.PhraseEnd);
                                 double lastLyricTime = lastLineLead != null
@@ -2711,8 +2886,14 @@ namespace Nautilus
                             float scaledFontSize = GetScaledFontSize(graphics, widestLine, baseFont, 100f * multiplier, resolutionX);
                             var displayFont = new Font(baseFont.FontFamily, scaledFontSize);
 
-                            Size size = TextRenderer.MeasureText(graphics, line1Text.Replace("‿", " "), displayFont);
-                            int posX = (resolutionX - size.Width) / 2;
+                            //Size size = TextRenderer.MeasureText(graphics, line1Text.Replace("‿", " "), displayFont);
+                            //int posX = (resolutionX - size.Width) / 2;
+                            SizeF sizeF = graphics.MeasureString(line1Text.Replace("‿", " "), displayFont, int.MaxValue);
+                            float textWidth = sizeF.Width;
+
+                            // center horizontally
+                            float posXf = (resolutionX - textWidth) / 2f;
+                            int posX = (int)Math.Round(posXf);  // snap to pixels if you like
 
                             double firstLyricTime = GetFirstLyricStart(Harm2Lyrics, currentLineHarm2.PhraseStart, currentLineHarm2.PhraseEnd);
                             double lastLyricTime = lastLineHarm2 != null
@@ -2790,9 +2971,15 @@ namespace Nautilus
                             float scaledFontSize = GetScaledFontSize(graphics, widestLine, baseFont, 100f * multiplier, resolutionX);
                             var displayFont = new Font(baseFont.FontFamily, scaledFontSize);
 
-                            Size size = TextRenderer.MeasureText(graphics, line1Text.Replace("‿", " "), displayFont);
-                            int posX = (resolutionX - size.Width) / 2;
-                                
+                            //Size size = TextRenderer.MeasureText(graphics, line1Text.Replace("‿", " "), displayFont);
+                            //int posX = (resolutionX - size.Width) / 2;
+                            SizeF sizeF = graphics.MeasureString(line1Text.Replace("‿", " "), displayFont, int.MaxValue);
+                            float textWidth = sizeF.Width;
+
+                            // center horizontally
+                            float posXf = (resolutionX - textWidth) / 2f;
+                            int posX = (int)Math.Round(posXf);  // snap to pixels if you like
+                                                                // 
                             double firstLyricTime = GetFirstLyricStart(Harm3Lyrics, currentLineHarm3.PhraseStart, currentLineHarm3.PhraseEnd);
                             double lastLyricTime = lastLineHarm3 != null
                                 ? GetLastLyricEnd(Harm3Lyrics, lastLineHarm3.PhraseStart, lastLineHarm3.PhraseEnd)
@@ -2848,13 +3035,14 @@ namespace Nautilus
                             goto DoSaveFrame;
                         }
 
+                        /*
                         if (time > phrasesLead.Last().PhraseEnd && KaraokeLogo != null)
                         {
                             lineHeight = resolutionY / 11;
-                            using (Bitmap logoBmp = new Bitmap(logoWidth, logoHeight, PixelFormat.Format32bppArgb))
+                            using (Bitmap logoBmp = new Bitmap(logoWidth, logoHeight, PixelFormat.Format24bppRgb))
                             {
                                 var logoRect = new Rectangle(0, 0, logoWidth, logoHeight);
-                                var logoBmpData = logoBmp.LockBits(logoRect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                                var logoBmpData = logoBmp.LockBits(logoRect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
                                 Marshal.Copy(logoData, 0, logoBmpData.Scan0, logoData.Length);
                                 logoBmp.UnlockBits(logoBmpData);
 
@@ -2864,6 +3052,20 @@ namespace Nautilus
                                 graphics.DrawImage(logoBmp, logoX, logoY, logoWidth, logoHeight);
                             }
                             DrawCenteredLine(graphics, "Created with Nautilus | www.nemosnautilus.com", resolutionX, lineHeight * 10, 24f * multiplier);
+                            goto DoSaveFrame;
+                        }*/
+                        if (time > phrasesLead.Last().PhraseEnd && logoBitmap != null)
+                        {
+                            lineHeight = resolutionY / 11;
+
+                            int logoX = (resolutionX - logoWidth) / 2;
+                            int logoY = (resolutionY - logoHeight) / 2;
+
+                            graphics.DrawImage(logoBitmap, logoX, logoY, logoWidth, logoHeight);
+
+                            DrawCenteredLine(graphics, "Created with Nautilus | www.nemosnautilus.com",
+                                             resolutionX, lineHeight * 10, 24f * multiplier);
+
                             goto DoSaveFrame;
                         }
 
@@ -2947,22 +3149,23 @@ namespace Nautilus
                         BitmapToBGR24IntoBuffer(bmp, rawBuffer);
                         ffmpegStream.Write(rawBuffer, 0, byteCount);
 
-                        if (frame % 10 == 0) //show only every 10 frames
+                        if (enablePreview)
                         {
-                            try //try to display preview but screw it if any frame fails just skip it
+                            if (frame % 10 == 0) //show only every 10 frames
                             {
-                                var preview = (Bitmap)bmp.Clone();
-                                this.Invoke(new Action(() =>
+                                try //try to display preview but screw it if any frame fails just skip it
                                 {
-                                    picPreview.Image?.Dispose();
-                                    picPreview.Image = preview;
-                                    lblFrames.Text = frame + "/" + totalFrames;
-                                }));
+                                    var preview = (Bitmap)bmp.Clone();
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        picPreview.Image?.Dispose();
+                                        picPreview.Image = preview;
+                                        lblFrames.Text = frame + "/" + totalFrames;
+                                    }));
+                                }
+                                catch { }
                             }
-                            catch { }
-                        }
-
-                        bmp.Dispose();
+                        }                        
                     }
                 }
                 catch (Exception ex)
@@ -2972,6 +3175,10 @@ namespace Nautilus
                     //MessageBox.Show(message, "Rendering Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+
+            bmp?.Dispose();
+            coverBitmap?.Dispose();
+            logoBitmap?.Dispose();
 
             ffmpegStream.Flush();
             ffmpegStream.Close();
@@ -2983,7 +3190,93 @@ namespace Nautilus
                 picPreview.Visible = false;
                 lblFrames.Visible = false;
             }));
-            album_cover?.Dispose();
+
+            string backgroundPath = Application.StartupPath + "\\bin\\images\\background.mp4";
+            if (animatedVideoBackground && File.Exists(backgroundPath) && !cancelProcess)
+            {
+                string bgRawPath = Path.GetDirectoryName(outputVideoPath) + "\\bg_raw.mp4";
+                if (!cancelProcess)
+                {
+                    Log("Syncing background video to lyrics video ... stand by");                    
+                    string prepArgs =
+                        $"-y " +
+                        $"-stream_loop -1 -i \"{backgroundPath}\" " +
+                        $"-filter_complex \"[0:v]" +
+                            $"scale={resolutionX}:{resolutionY}," +
+                            $"fps={frameRate},format=yuv420p[v]\" " +
+                        $"-map \"[v]\" " +
+                        $"-t {songDuration.ToString(System.Globalization.CultureInfo.InvariantCulture)} " +
+                        $"-c:v libx264 -preset veryfast -crf 18 -an " +
+                        $"\"{bgRawPath}\"";
+
+                    var ffmpegPrep = new Process();
+                    ffmpegPrep.StartInfo.FileName = ffmpegPath;
+                    ffmpegPrep.StartInfo.Arguments = prepArgs;
+                    ffmpegPrep.StartInfo.UseShellExecute = false;
+                    ffmpegPrep.StartInfo.RedirectStandardInput = false;
+                    ffmpegPrep.StartInfo.RedirectStandardOutput = true;
+                    ffmpegPrep.StartInfo.RedirectStandardError = true;
+                    ffmpegPrep.StartInfo.CreateNoWindow = true;
+                    ffmpegPrep.Start();
+                    // Read stderr (blocking until process exits)
+                    string prepStderr = ffmpegPrep.StandardError.ReadToEnd();
+                    ffmpegPrep.WaitForExit();
+
+                    /*Log($"Background prep exit code: {ffmpegPrep.ExitCode}");
+                    if (ffmpegPrep.ExitCode != 0)
+                    {
+                        Log("Background prep ffmpeg stderr:");
+                        Log(prepStderr);
+                        return; // bail out, don't try to mix
+                    }*/
+
+                    Log("Background video is ready");
+                }
+
+                if (!cancelProcess)
+                {
+                    Log("Combining lyrics video with background video ... stand by");
+
+                    string mixArgs =
+                        $"-y " +
+                        $"-i \"{bgRawPath}\" " +        // background video [0:v]
+                        $"-i \"{lyricsRawPath}\" " +    // lyrics-only video with green background [1:v][1:a]
+                        $"-filter_complex " +
+                        "\"[1:v]" +                            
+                            "colorkey=0x00FF00:0.2:0.05[fg];" +                    // tweak similarity/blend as needed
+                        "[0:v][fg]overlay=0:0:format=auto[v]\" " +
+                        "-map \"[v]\" " +               // final composited video
+                        "-map 1:a " +                   // audio track from lyrics_raw.mp4
+                        "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p " +
+                        "-c:a aac -b:a 192k -shortest " +
+                        $"\"{outputVideoPath}\"";
+                    var ffmpegMix = new Process();
+                    ffmpegMix.StartInfo.FileName = ffmpegPath;
+                    ffmpegMix.StartInfo.Arguments = mixArgs;
+                    ffmpegMix.StartInfo.UseShellExecute = false;
+                    ffmpegMix.StartInfo.RedirectStandardInput = false;
+                    ffmpegMix.StartInfo.RedirectStandardOutput = true;
+                    ffmpegMix.StartInfo.RedirectStandardError = true;
+                    ffmpegMix.StartInfo.CreateNoWindow = true;
+                    ffmpegMix.Start();
+                    string mixStderr = ffmpegMix.StandardError.ReadToEnd();
+                    ffmpegMix.WaitForExit();
+
+                    /*Log($"Mix exit code: {ffmpegMix.ExitCode}");
+                    if (ffmpegMix.ExitCode != 0)
+                    {
+                        Log("Mix ffmpeg stderr:");
+                        Log(mixStderr);
+                        return;
+                    }*/
+                    Log("Your animated karaoke video is ready");
+                }
+
+                Tools.DeleteFile(lyricsRawPath);
+                Tools.DeleteFile(bgRawPath);
+            }
+            
+            //album_cover?.Dispose();
             Tools.DeleteFile(artFilePath);//delete temp album art
 
             if(cancelProcess)
@@ -3006,6 +3299,7 @@ namespace Nautilus
             try
             {
                 int byteCount = Math.Abs(bmpData.Stride) * bmp.Height;
+
                 if (byteCount > buffer.Length)
                     throw new ArgumentException("Buffer size is too small for bitmap data");
 
@@ -3015,13 +3309,7 @@ namespace Nautilus
             {
                 bmp.UnlockBits(bmpData);
             }
-        }
-
-        private static ImageCodecInfo GetEncoder(ImageFormat format)
-        {
-            return ImageCodecInfo.GetImageDecoders()
-                .FirstOrDefault(codec => codec.FormatID == format.Guid);
-        }        
+        }   
 
         public string ProcessLine(string line)
         {
@@ -3056,7 +3344,7 @@ namespace Nautilus
                 if (string.IsNullOrEmpty(line))
                 return preferedFont.Size; // Avoid divide-by-zero or nonsense scaling
 
-            double maxWidth = frameWidth * 0.95;
+            double maxWidth = frameWidth * 0.85;
             SizeF measuredSize = g.MeasureString(line, preferedFont);
 
             if (measuredSize.Width <= 0)
@@ -3087,12 +3375,16 @@ namespace Nautilus
                 MessageBox.Show("You must select at least one rendering format", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 chkMP4.Checked = true;
             }
-            chkOverrideBackground.Enabled = chkMP4.Checked;
+            staticImageBackgroundToolStripMenuItem.Enabled = chkMP4.Checked;
+            solidColorToolStripMenuItem.Enabled = chkMP4.Checked;
+            animatedBackgroundToolStripMenuItem.Enabled = chkMP4.Checked;
             mP4FrameRateToolStripMenuItem.Enabled = chkMP4.Checked;
             mP4ResolutionToolStripMenuItem.Enabled = chkMP4.Checked;
+            mP4BackgroundToolStripMenuItem.Enabled = chkMP4.Checked;
             highlightDelayToolStripMenuItem.Enabled = chkMP4.Checked;
             keeptomlFileToolStripMenuItem.Enabled = chkCDG.Checked;
             cDGMP3ModeToolStripMenuItem.Enabled = chkCDG.Checked;
+            //cboStroke.Enabled = chkCDG.Checked;
             if (!chkCDG.Checked)
             {
                 keeptomlFileToolStripMenuItem.Checked = false;
@@ -3108,7 +3400,8 @@ namespace Nautilus
                 " process them\r\n\r\nOutput files are in a 'Karaoke' folder in the same directory as the source file(s)\r\n\r\nThis tool wraps around the" +
                 " cdgmaker Python application by Josiah Winslow (https://github.com/WinslowJosiah/cdgmaker) made to work as an executable on Windows after " +
                 "many modifications by me\r\n\r\nI'm still learning all the ins and outs of the original Python application so if I missed " +
-                "something let me know so I can try to address it in a future update" + "\r\n\r\nOptions are limited but also self explanatory\r\n\r\nEnjoy!";
+                "something let me know so I can try to address it in a future update\r\n\r\nYou can also generate Youtube-style videos of your karaoke song(s) in mp4" +
+                " format\r\n\r\nOptions are plenty and mostly self explanatory\r\n\r\nEnjoy!";
             var helper = new HelpForm(Text + " - Help", message, false, false);
             helper.ShowDialog();
         }
@@ -3128,9 +3421,8 @@ namespace Nautilus
         private void lblBackgroundQuestion_MouseClick(object sender, MouseEventArgs e)
         {
             const string message = "If enabled and using the MP4 format, this will use the background.png image located in the \\bin\\images\\ folder\n\n" +
-                "The image can be any resolution you want (but I recommend 1080P or higher) and transparency is supported, so you can get creative with your background\n\n" +
-                "Image must be in PNG format\n\nIf using a transparent PNG, the Background Color will be seen through, so you can play with both to achieve a custom look";
-            MessageBox.Show(message, "Backround", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                "The image can be any resolution you want (but I recommend 1080P or higher) and image must be in PNG format";
+            MessageBox.Show(message, "Background", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void lblPartsQuestion_MouseClick(object sender, MouseEventArgs e)
@@ -3189,6 +3481,7 @@ namespace Nautilus
 
         private void CheckUncheckDelay(object sender)
         {
+            noDelayToolStripMenuItem.Checked = false;
             quarterSecondDelay.Checked = false;
             halfSecondDelay.Checked = false;
             threeQuarterSecondDelay.Checked = false;
@@ -3355,7 +3648,13 @@ namespace Nautilus
             public string Lyric { get; set; }
             public double Start { get; set; }
             public double End { get; set; }
+
+            // Used for drawing:
             public float Width { get; set; }
+
+            // Optional: where this syllable starts, in pixels, from the left of the line.
+            // Not strictly required for your current highlight logic, but useful for debugging.
+            public float OffsetX { get; set; }
         }
 
         public static List<MergedSyllable> MergeSyllables(List<KaraokeLyric> syllables)
@@ -3419,7 +3718,7 @@ namespace Nautilus
 
             return merged;
         }
-
+        
         public List<MergedSyllable> BuildSyllablePixelMap(List<MergedSyllable> syllables, Font font, Graphics g)
         {
             foreach (var syllable in syllables)
@@ -3431,7 +3730,8 @@ namespace Nautilus
                 }
                 else
                 {
-                    Size size = TextRenderer.MeasureText(g, visibleText, font);
+                    //SizeF size = TextRenderer.MeasureText(g, visibleText, font);
+                    SizeF size = g.MeasureString(visibleText, font);
                     syllable.Width = size.Width;
                 }
             }
@@ -3463,7 +3763,6 @@ namespace Nautilus
 
             return total;
         }
-
 
         private void DrawHighlightAnimation(Graphics g, Font f, double lyricStart, int x, int y, Color color, double time)
         {
@@ -3573,7 +3872,7 @@ namespace Nautilus
                 words.Add(currentWord);
 
             return ProcessLine(string.Join(" ", words)).Replace(" -", "-");
-        }
+        }              
 
         public string ReconstructPhraseTextFromSyllables(List<MergedSyllable> phraseSyllables)
         {
@@ -3625,6 +3924,50 @@ namespace Nautilus
             return string.Join(" ", words).Replace("‿", " ");
         }
 
+        private void DrawTextWithStroke(Graphics g, string text, Font font, Point pos, Color fill, Color stroke, int strokeWidth)
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+
+            if (enableMP4Stroke)
+            {
+                using (var strokeBrush = new SolidBrush(stroke))
+                {
+                    // Draw radial stroke (fills circle)
+                    for (int dx = -strokeWidth; dx <= strokeWidth; dx++)
+                    {
+                        for (int dy = -strokeWidth; dy <= strokeWidth; dy++)
+                        {
+                            if (dx * dx + dy * dy <= strokeWidth * strokeWidth)
+                            {
+                                g.DrawString(text, font, strokeBrush, pos.X + dx, pos.Y + dy);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Draw main fill
+            using (var fillBrush = new SolidBrush(fill))
+            {
+                g.DrawString(text, font, fillBrush, pos);
+            }
+            /*var intPos = new Point(
+            (int)Math.Round((double)pos.X),
+            (int)Math.Round((double)pos.Y));
+
+            TextRenderer.DrawText(
+                g,
+                text,
+                font,
+                intPos,
+                fill,                 // foreground color
+                Color.Transparent,    // background
+                TextFormatFlags.NoPadding | TextFormatFlags.NoClipping);*/
+        }
+
         public void DrawSyllableAccurateLine(
             Graphics g,
             List<KaraokeLyric> syllablesForThisLine,
@@ -3640,37 +3983,63 @@ namespace Nautilus
 
             var merged = MergeSustainedSyllables(syllablesForThisLine);
 
-            //string displayText = string.Join(" ", merged.Select(m => m.Lyric));
-            //displayText = ProcessLine(displayText).Replace("‿", " ").Replace(" -", "-");
-            //string displayText = BuildRawLineText(merged);
             string displayText = ReconstructPhraseTextFromSyllables(merged);
 
-            Size visualSize = TextRenderer.MeasureText(g, displayText, font);
-            int posX = (resolutionX - visualSize.Width) / 2;
+            SizeF visualSizeF = g.MeasureString(displayText, font);            
+            
+            //const TextFormatFlags FormatFlags = TextFormatFlags.NoPadding | TextFormatFlags.NoClipping;
+
+            // Measure using TextRenderer instead of g.MeasureString
+            //Size visualSizeF = TextRenderer.MeasureText(g, displayText, font, new Size(int.MaxValue, int.MaxValue), FormatFlags);
+
+            int textWidth = (int)Math.Ceiling((double)visualSizeF.Width);
+            int textHeight = (int)Math.Ceiling((double)visualSizeF.Height);
+
+            int posX = (resolutionX - textWidth) / 2;
 
             var pixelmap = BuildSyllablePixelMap(merged, font, g);
 
             float highlightWidth = GetHighlightedPixelWidth(pixelmap, adjustedTime);
 
-            // Draw base
-            TextRenderer.DrawText(g, displayText, font, new Point(posX, y),
-                ColorTranslator.FromHtml(baseColor), Color.Transparent);
+            highlightWidth = Math.Max(0f, Math.Min(highlightWidth, textWidth));
 
-            // Draw highlight layer
-            using (Bitmap bmp = new Bitmap(visualSize.Width, visualSize.Height))
+            Color baseCol = ColorTranslator.FromHtml(baseColor);
+            Color highlightCol = ColorTranslator.FromHtml(highlightColor);
+            Color strokeCol = ColorTranslator.FromHtml(strokeColor);
+
+            DrawTextWithStroke(
+                g,
+                displayText,
+                font,
+                new Point(posX, y),
+                baseCol,
+                strokeCol,
+                3
+            );
+
+            //using (Bitmap bmp = new Bitmap(visualSize.Width, visualSize.Height))
+            using (Bitmap bmp = new Bitmap(textWidth, textHeight))
+            using (Graphics gBmp = Graphics.FromImage(bmp))
             {
-                using (Graphics gBmp = Graphics.FromImage(bmp))
-                {
-                    gBmp.Clear(Color.Transparent);
-                    TextRenderer.DrawText(gBmp, displayText, font, new Point(0, 0),
-                        ColorTranslator.FromHtml(highlightColor), Color.Transparent);
+                gBmp.Clear(Color.Transparent);
 
-                    Rectangle src = new Rectangle(0, 0, (int)highlightWidth, bmp.Height);
-                    Rectangle dest = new Rectangle(posX, y, (int)highlightWidth, bmp.Height);
+                // Draw stroked highlight into bitmap
+                DrawTextWithStroke(
+                    gBmp,
+                    displayText,
+                    font,
+                    new Point(0, 0),
+                    highlightCol,
+                    strokeCol,
+                    3
+                );
 
-                    g.DrawImage(bmp, dest, src, GraphicsUnit.Pixel);
-                }
-            }
+                // Slice highlight region
+                Rectangle src = new Rectangle(0, 0, (int)highlightWidth, bmp.Height);
+                Rectangle dest = new Rectangle(posX, y, (int)highlightWidth, bmp.Height);
+
+                g.DrawImage(bmp, dest, src, GraphicsUnit.Pixel);
+            }            
         }
 
 
@@ -3713,6 +4082,126 @@ namespace Nautilus
             FifteenFPS.Checked = false;
             ThirtyFPS.Checked = false;
             SixtyFPS.Checked = true;
+        }
+
+        private void lblStrokeQuestion_MouseClick(object sender, MouseEventArgs e)
+        {
+            const string message = "Color of the outline for the words. Black is best.\b\bOnly applies to CDG+MP3 format (for now)";
+            MessageBox.Show(message, "Stroke", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }               
+
+        private void enableCDGStrokeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cboStroke.Enabled = enableCDGStrokeToolStripMenuItem.Checked || enableMP4StrokeToolStripMenuItem.Checked;
+        }
+
+        private void solidColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            solidColorToolStripMenuItem.Checked = true;
+            animatedBackgroundToolStripMenuItem.Checked = false;
+            staticImageBackgroundToolStripMenuItem.Checked = false;
+
+            enableMP4TitleCardShadows.Enabled = true;
+
+            UpdateTextParents();
+        }
+
+        private void staticImageBackgroundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var background = Application.StartupPath + "\\bin\\images\\background.png";
+            if (!File.Exists(background))
+            {
+                MessageBox.Show("Background image is missing", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                solidColorToolStripMenuItem.Checked = true;
+                staticImageBackgroundToolStripMenuItem.Checked = false;
+                animatedBackgroundToolStripMenuItem.Checked = false;
+                return;
+            }
+
+            solidColorToolStripMenuItem.Checked = false;
+            animatedBackgroundToolStripMenuItem.Checked = false;
+            staticImageBackgroundToolStripMenuItem.Checked = true;
+
+            enableMP4TitleCardShadows.Enabled = true;
+            
+            var bg = Image.FromFile(background);
+            picBackground1.Image = bg;
+            lblTextHighlight1.Parent = picBackground1;
+            lblTextHighlight1.BackColor = Color.Transparent;
+            lblTextHighlight1.Location = new Point(0, 43);
+            lblTextColor1.Parent = picBackground1;
+            lblTextColor1.BackColor = Color.Transparent;
+            lblTextColor1.Location = new Point(0, 12);
+
+            picBackground2.Image = bg;
+            lblTextHighlight2.Parent = picBackground2;
+            lblTextHighlight2.BackColor = Color.Transparent;
+            lblTextHighlight2.Location = new Point(0, 43);
+            lblTextColor2.Parent = picBackground2;
+            lblTextColor2.BackColor = Color.Transparent;
+            lblTextColor2.Location = new Point(0, 12);
+
+            picBackground3.Image = bg;
+            lblTextHighlight3.Parent = picBackground3;
+            lblTextHighlight3.BackColor = Color.Transparent;
+            lblTextHighlight3.Location = new Point(0, 43);
+            lblTextColor3.Parent = picBackground3;
+            lblTextColor3.BackColor = Color.Transparent;
+            lblTextColor3.Location = new Point(0, 12);
+        }
+
+        private void animatedBackgroundToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var background = Application.StartupPath + "\\bin\\images\\background.mp4";
+            if (!File.Exists(background))
+            {
+                MessageBox.Show("Background video is missing", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                solidColorToolStripMenuItem.Checked = true;
+                staticImageBackgroundToolStripMenuItem.Checked = false;
+                animatedBackgroundToolStripMenuItem.Checked = false;
+                return;                
+            }
+
+            solidColorToolStripMenuItem.Checked = false;
+            animatedBackgroundToolStripMenuItem.Checked = true;
+            staticImageBackgroundToolStripMenuItem.Checked = false;
+            enableMP4TitleCardShadows.Enabled = false;
+            enableMP4TitleCardShadows.Checked = false;
+            enableMP4StrokeToolStripMenuItem.Checked = true;
+            
+            UpdateTextParents();
+        }
+
+        private void UpdateTextParents()
+        {         
+            picBackground1.Image = null;
+            lblTextHighlight1.Parent = picBackground1;
+            lblTextHighlight1.BackColor = Color.Transparent;
+            lblTextHighlight1.Location = new Point(0, 43);
+            lblTextColor1.Parent = picBackground1;
+            lblTextColor1.BackColor = Color.Transparent;
+            lblTextColor1.Location = new Point(0, 12);
+
+            picBackground2.Image = null;
+            lblTextHighlight2.Parent = picBackground2;
+            lblTextHighlight2.BackColor = Color.Transparent;
+            lblTextHighlight2.Location = new Point(0, 43);
+            lblTextColor2.Parent = picBackground2;
+            lblTextColor2.BackColor = Color.Transparent;
+            lblTextColor2.Location = new Point(0, 12);
+
+            picBackground3.Image = null;
+            lblTextHighlight3.Parent = picBackground3;
+            lblTextHighlight3.BackColor = Color.Transparent;
+            lblTextHighlight3.Location = new Point(0, 43);
+            lblTextColor3.Parent = picBackground3;
+            lblTextColor3.BackColor = Color.Transparent;
+            lblTextColor3.Location = new Point(0, 12);
+        }
+
+        private void noDelayToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CheckUncheckDelay(sender);
         }
     }
 

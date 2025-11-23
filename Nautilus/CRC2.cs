@@ -43,7 +43,7 @@ namespace Nautilus
 
         public uint ShortnameToSongID(string shortname)
         {
-            byte[] buffer = Encoding.UTF8.GetBytes(shortname);
+            byte[] buffer = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(shortname);
             // run a CRC32 sum over the whole length of the string
             uint checksum = crc32(buffer);
             // move it around a bit just to make things more consistent

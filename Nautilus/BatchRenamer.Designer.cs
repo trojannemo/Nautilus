@@ -58,6 +58,7 @@
             this.tryToSortFiles = new System.Windows.Forms.ToolStripMenuItem();
             this.tryDetailedSubsorting = new System.Windows.Forms.ToolStripMenuItem();
             this.separateXonlySongs = new System.Windows.Forms.ToolStripMenuItem();
+            this.sortByAuthor = new System.Windows.Forms.ToolStripMenuItem();
             this.otherOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteOlderCopies = new System.Windows.Forms.ToolStripMenuItem();
             this.deleteExactCopiesONLY = new System.Windows.Forms.ToolStripMenuItem();
@@ -65,7 +66,7 @@
             this.picWorking = new System.Windows.Forms.PictureBox();
             this.folderScanner = new System.ComponentModel.BackgroundWorker();
             this.PhaseShiftRenamer = new System.ComponentModel.BackgroundWorker();
-            this.sortByAuthor = new System.Windows.Forms.ToolStripMenuItem();
+            this.ezloDQMode = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -144,13 +145,13 @@
             this.exportLogFileToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.ShowImageMargin = false;
-            this.contextMenuStrip1.Size = new System.Drawing.Size(123, 26);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(122, 26);
             // 
             // exportLogFileToolStripMenuItem
             // 
             this.exportLogFileToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.exportLogFileToolStripMenuItem.Name = "exportLogFileToolStripMenuItem";
-            this.exportLogFileToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.exportLogFileToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
             this.exportLogFileToolStripMenuItem.Text = "Export log file";
             this.exportLogFileToolStripMenuItem.Click += new System.EventHandler(this.exportLogFileToolStripMenuItem_Click);
             // 
@@ -224,6 +225,7 @@
             this.renameFiles.CheckState = System.Windows.Forms.CheckState.Checked;
             this.renameFiles.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.renameInternalName,
+            this.ezloDQMode,
             this.renameTheArtistSong,
             this.renameArtistTheSong,
             this.renameSongTheArtist,
@@ -239,7 +241,7 @@
             // 
             this.renameInternalName.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameInternalName.Name = "renameInternalName";
-            this.renameInternalName.Size = new System.Drawing.Size(195, 22);
+            this.renameInternalName.Size = new System.Drawing.Size(246, 22);
             this.renameInternalName.Text = "InternalName";
             this.renameInternalName.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -249,7 +251,7 @@
             this.renameTheArtistSong.Checked = true;
             this.renameTheArtistSong.CheckState = System.Windows.Forms.CheckState.Checked;
             this.renameTheArtistSong.Name = "renameTheArtistSong";
-            this.renameTheArtistSong.Size = new System.Drawing.Size(195, 22);
+            this.renameTheArtistSong.Size = new System.Drawing.Size(246, 22);
             this.renameTheArtistSong.Text = "The Artist - Song";
             this.renameTheArtistSong.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -257,7 +259,7 @@
             // 
             this.renameArtistTheSong.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameArtistTheSong.Name = "renameArtistTheSong";
-            this.renameArtistTheSong.Size = new System.Drawing.Size(195, 22);
+            this.renameArtistTheSong.Size = new System.Drawing.Size(246, 22);
             this.renameArtistTheSong.Text = "Artist, The - Song";
             this.renameArtistTheSong.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -265,7 +267,7 @@
             // 
             this.renameSongTheArtist.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameSongTheArtist.Name = "renameSongTheArtist";
-            this.renameSongTheArtist.Size = new System.Drawing.Size(195, 22);
+            this.renameSongTheArtist.Size = new System.Drawing.Size(246, 22);
             this.renameSongTheArtist.Text = "Song - The Artist";
             this.renameSongTheArtist.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -273,7 +275,7 @@
             // 
             this.renameSongArtistThe.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameSongArtistThe.Name = "renameSongArtistThe";
-            this.renameSongArtistThe.Size = new System.Drawing.Size(195, 22);
+            this.renameSongArtistThe.Size = new System.Drawing.Size(246, 22);
             this.renameSongArtistThe.Text = "Song - Artist, The";
             this.renameSongArtistThe.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -281,7 +283,7 @@
             // 
             this.renameYearArtist.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameYearArtist.Name = "renameYearArtist";
-            this.renameYearArtist.Size = new System.Drawing.Size(195, 22);
+            this.renameYearArtist.Size = new System.Drawing.Size(246, 22);
             this.renameYearArtist.Text = "(Year) The Artist - Song";
             this.renameYearArtist.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -289,7 +291,7 @@
             // 
             this.renameYearSong.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.renameYearSong.Name = "renameYearSong";
-            this.renameYearSong.Size = new System.Drawing.Size(195, 22);
+            this.renameYearSong.Size = new System.Drawing.Size(246, 22);
             this.renameYearSong.Text = "(Year) Song - The Artist";
             this.renameYearSong.Click += new System.EventHandler(this.internalName_Click);
             // 
@@ -358,7 +360,7 @@
             this.tryToSortFiles.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.tryToSortFiles.CheckOnClick = true;
             this.tryToSortFiles.Name = "tryToSortFiles";
-            this.tryToSortFiles.Size = new System.Drawing.Size(214, 22);
+            this.tryToSortFiles.Size = new System.Drawing.Size(215, 22);
             this.tryToSortFiles.Text = "Try to sort files by source";
             this.tryToSortFiles.Click += new System.EventHandler(this.sortFilesToolStripMenuItem_Click);
             // 
@@ -370,7 +372,7 @@
             this.separateXonlySongs});
             this.tryDetailedSubsorting.Enabled = false;
             this.tryDetailedSubsorting.Name = "tryDetailedSubsorting";
-            this.tryDetailedSubsorting.Size = new System.Drawing.Size(214, 22);
+            this.tryDetailedSubsorting.Size = new System.Drawing.Size(215, 22);
             this.tryDetailedSubsorting.Text = "Try detailed sub-sorting";
             this.tryDetailedSubsorting.Click += new System.EventHandler(this.tryDetailedSubsortingToolStripMenuItem_Click);
             // 
@@ -384,6 +386,15 @@
             this.separateXonlySongs.Name = "separateXonlySongs";
             this.separateXonlySongs.Size = new System.Drawing.Size(191, 22);
             this.separateXonlySongs.Text = "Separate X-only songs";
+            // 
+            // sortByAuthor
+            // 
+            this.sortByAuthor.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.sortByAuthor.CheckOnClick = true;
+            this.sortByAuthor.Name = "sortByAuthor";
+            this.sortByAuthor.Size = new System.Drawing.Size(215, 22);
+            this.sortByAuthor.Text = "Try to sort songs by author";
+            this.sortByAuthor.Click += new System.EventHandler(this.sortByAuthor_Click);
             // 
             // otherOptionsToolStripMenuItem
             // 
@@ -399,7 +410,7 @@
             this.deleteOlderCopies.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.deleteOlderCopies.CheckOnClick = true;
             this.deleteOlderCopies.Name = "deleteOlderCopies";
-            this.deleteOlderCopies.Size = new System.Drawing.Size(208, 22);
+            this.deleteOlderCopies.Size = new System.Drawing.Size(207, 22);
             this.deleteOlderCopies.Text = "Delete older copies";
             this.deleteOlderCopies.Click += new System.EventHandler(this.deleteOlderCopiesToolStripMenuItem_Click);
             // 
@@ -408,7 +419,7 @@
             this.deleteExactCopiesONLY.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.deleteExactCopiesONLY.CheckOnClick = true;
             this.deleteExactCopiesONLY.Name = "deleteExactCopiesONLY";
-            this.deleteExactCopiesONLY.Size = new System.Drawing.Size(208, 22);
+            this.deleteExactCopiesONLY.Size = new System.Drawing.Size(207, 22);
             this.deleteExactCopiesONLY.Text = "Delete exact copies ONLY";
             this.deleteExactCopiesONLY.Click += new System.EventHandler(this.deleteExactCopiesONLYToolStripMenuItem_Click);
             // 
@@ -444,14 +455,13 @@
             this.PhaseShiftRenamer.DoWork += new System.ComponentModel.DoWorkEventHandler(this.PhaseShiftRenamer_DoWork);
             this.PhaseShiftRenamer.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.PhaseShiftRenamer_RunWorkerCompleted);
             // 
-            // sortByAuthor
+            // ezloDQMode
             // 
-            this.sortByAuthor.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.sortByAuthor.CheckOnClick = true;
-            this.sortByAuthor.Name = "sortByAuthor";
-            this.sortByAuthor.Size = new System.Drawing.Size(214, 22);
-            this.sortByAuthor.Text = "Try to sort songs by author";
-            this.sortByAuthor.Click += new System.EventHandler(this.sortByAuthor_Click);
+            this.ezloDQMode.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.ezloDQMode.Name = "ezloDQMode";
+            this.ezloDQMode.Size = new System.Drawing.Size(246, 22);
+            this.ezloDQMode.Text = "InternalName (The Artist - Song)";
+            this.ezloDQMode.Click += new System.EventHandler(this.internalName_Click);
             // 
             // BatchRenamer
             // 
@@ -528,5 +538,6 @@
         private System.Windows.Forms.ToolStripMenuItem renameYearArtist;
         private System.Windows.Forms.ToolStripMenuItem renameYearSong;
         private System.Windows.Forms.ToolStripMenuItem sortByAuthor;
+        private System.Windows.Forms.ToolStripMenuItem ezloDQMode;
     }
 }

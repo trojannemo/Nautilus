@@ -1128,7 +1128,7 @@ namespace Nautilus
                 foreach (var line in lines)
                 {
                     var newline = line;
-                    if (line.Contains("song_id") && !line.Contains(";ORIG_ID="))
+                    if (line.Contains("song_id") && !line.Contains(";ORIG_ID=") && !line.TrimStart().StartsWith(";"))
                     {
                         var origID = Parser.GetSongID(line);
                         if (!Parser.IsNumericID(line) || (Parser.GetSongID(line).StartsWith("1000") && Parser.GetSongID(line).Length == 10)) //only if not already a numeric ID or it has the default 1000 MAGMA C3 Author ID

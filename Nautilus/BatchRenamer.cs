@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using Nautilus.Properties;
 using Nautilus.x360;
+using DocumentFormat.OpenXml.Office2010.Drawing;
 
 namespace Nautilus
 {
@@ -281,10 +282,14 @@ namespace Nautilus
             return sort;
         }
 
-        private string arrangeName(string song, string artist, int year)
+        private string arrangeName(string song, string artist, int year, string internalName)
         {
             var arranged = "";
-            if (renameYearArtist.Checked && year > 0)
+            if (ezloDQMode.Checked)
+            {
+                arranged = internalName + " (" + artist + " - " + song + ")";
+            }
+            else if (renameYearArtist.Checked && year > 0)
             {
                 arranged = "(" + year + ") " + artist + " - " + song;
             }
@@ -457,7 +462,7 @@ namespace Nautilus
                         {
                             artist = Tools.CleanString(artist, true);
 
-                            rename = arrangeName(song, artist, 0);
+                            rename = arrangeName(song, artist, 0, "");
                         }
                         else
                         {
@@ -488,7 +493,7 @@ namespace Nautilus
             }
             if (megasusMod)
             {
-                rename = arrangeName(song, song, 0);
+                rename = arrangeName(song, song, 0, "");
             }
             rename = rename.Replace(".", "").Trim();
             if (string.IsNullOrWhiteSpace(rename))
@@ -561,7 +566,7 @@ namespace Nautilus
             string rename;
             if (Parser.Songs.Count == 1) //if single song, packs will have values > 1
             {
-                rename = arrangeName(name, artist, year);
+                rename = arrangeName(name, artist, year, internalName);
                 if (replaceSpacesWithUnderscores.Checked)
                 {
                     rename = rename.Replace(" ", "_");
@@ -1219,7 +1224,7 @@ namespace Nautilus
                 sr.Dispose();
                 if (string.IsNullOrWhiteSpace(Artist) || string.IsNullOrWhiteSpace(Song)) continue;
                 Log("Song #" + (i + 1) + " is '" + Artist + " - " + Song + "'");
-                var new_name = arrangeName(Song, Artist, 0);
+                var new_name = arrangeName(Song, Artist, 0, "");
                 if (normalizeFeaturedArtists.Checked)
                 {
                     new_name = Tools.FixFeaturedArtist(new_name);
@@ -1325,6 +1330,7 @@ namespace Nautilus
             renameSongArtistThe.Checked = false;
             renameYearArtist.Checked = false;
             renameYearSong.Checked = false;
+            ezloDQMode.Checked = false;
             ((ToolStripMenuItem) sender).Checked = true;
         }
 

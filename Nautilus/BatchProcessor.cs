@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using Nautilus.Properties;
 using Nautilus.x360;
+using System.Text;
 
 namespace Nautilus
 {
@@ -665,7 +666,7 @@ namespace Nautilus
                     Log("Duplicate DTA file found: " + newDTA);
                     Tools.DeleteFile(newDTA);
                 }
-                var sw = new StreamWriter(newDTA, false, System.Text.Encoding.UTF8);
+                var sw = new StreamWriter(newDTA, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
                 foreach (var line in song.DTALines)
                 {
                     if (line.Contains("latin1"))

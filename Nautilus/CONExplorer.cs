@@ -1332,7 +1332,7 @@ namespace Nautilus
                 {
                     try
                     {
-                        File.Copy(sourcePath, saveDialog.FileName, true);
+                        File.Copy(sourcePath, saveDialog.FileName.TrimEnd('.', ' '), true); //avoid reported issues of trailing periods
                         Log($"File saved successfully: {saveDialog.FileName}");
                     }
                     catch (Exception ex)

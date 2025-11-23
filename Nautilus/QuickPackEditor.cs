@@ -978,7 +978,7 @@ namespace Nautilus
             foreach (var song in Songs)
             {
                 var path = Path.GetDirectoryName(DTAPath) + "\\" + song.Artist + " - " + song.Name + ".dta";
-                var sw = new StreamWriter(path, false, Encoding.UTF8);
+                var sw = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
                 foreach (var line in song.DTALines)
                 {
                     if (line.Contains("#ifndef kControllerRealGuitar") || line.Contains("#endif")) continue;
@@ -1083,10 +1083,10 @@ namespace Nautilus
                         repackaged = new CreateSTFS();
                         repackaged.AddFolder("songs");
 
-                        var sw = new StreamWriter(tempdta, false, Encoding.UTF8);
+                        var sw = new StreamWriter(tempdta, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
                         foreach (var line in song.DTALines)
                         {
-                            if (line.Contains("#ifndef kControllerRealGuitar") || line.Contains("#endif")) continue;
+                            if (line.Contains("#ifndef kControllerRealGuitar") || (line.Contains("#endif") && !line.Contains("CUSTOMSOURCE"))) continue;
                             if (line.Contains("latin1"))
                             {
                                 sw.WriteLine(line.Replace("latin1", "utf8"));
@@ -1545,7 +1545,7 @@ namespace Nautilus
             dtaEntry = Convert.ToInt16(selection.Substring(index1 + 2, index2 - index1 - 2));
 
             File.Delete(tempDTA);
-            var sw = new StreamWriter(tempDTA, false, System.Text.Encoding.UTF8);
+            var sw = new StreamWriter(tempDTA, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             foreach (var line in Parser.Songs[dtaEntry - 1].DTALines)
             {
                 if (line.Contains("latin1"))

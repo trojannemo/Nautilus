@@ -1829,10 +1829,10 @@ namespace Nautilus
 
         public void ReplaceSongID(string dta, string newID, string vocals = "", string existingID = "")
         {
-            var sr = new StreamReader(dta);
-            var utf8 = sr.ReadToEnd().ToLowerInvariant().Contains("utf8");
-            sr.Dispose();
-            sr = new StreamReader(dta, utf8 ? Encoding.UTF8 : Encoding.Default);
+            var songHasSongID = false;
+            var Parser = new DTAParser();
+            var encoding = Parser.DetectEncoding(dta);
+            var sr = new StreamReader(dta, encoding);
             var lines = new List<string>();
             while (sr.Peek() >= 0)
             {
@@ -1844,7 +1844,7 @@ namespace Nautilus
             }
             sr.Dispose();
             var doVocals = !string.IsNullOrWhiteSpace(vocals) && vocals != "0";
-            var sw = new StreamWriter(dta, false, utf8 ? Encoding.UTF8 : Encoding.Default);
+            var sw = new StreamWriter(dta, false, new UTF8Encoding(false, false));
             for (var i = 0; i < lines.Count; i++)
             {
                 var line = lines[i];
@@ -1853,10 +1853,20 @@ namespace Nautilus
                     sw.WriteLine(line.Replace(existingID, newID));
                     continue;
                 }*/
-                if (line.Contains("song_id") && !line.Trim().StartsWith(";"))
+                if (line.Contains("song_id"))
+                {
+                    songHasSongID = true;
+                }
+                if (line.Contains("song_id") && !line.Trim().StartsWith(";") && !line.Contains(newID)) //avoid adding extra line with duplicate ID
                 {
                     sw.WriteLine(";" + line.Trim());
                     sw.WriteLine("   ('song_id' " + newID + ")");
+                    continue;
+                }
+                if (line.Contains("latin1"))
+                {
+                    line = line.Replace("latin1", "utf8");
+                    sw.WriteLine(line);
                     continue;
                 }
                 if (line.Contains("vocal_parts") && doVocals) continue;
@@ -1869,6 +1879,33 @@ namespace Nautilus
                 sw.WriteLine(line);
             }
             sw.Dispose();
+
+            if (!songHasSongID) //do it again this time to manually insert song_ID that isn't there
+            {
+                sr = new StreamReader(dta, encoding);
+                lines = new List<string>();
+                while (sr.Peek() >= 0)
+                {
+                    var line = sr.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        lines.Add(line);
+                    }
+                }
+                sr.Dispose();
+                sw = new StreamWriter(dta, false, new UTF8Encoding(false, false));
+                for (var i = 0; i < lines.Count; i++)
+                {
+                    var line = lines[i];
+                    if (line.Contains("(format") || line.Contains("'format'") && !songHasSongID)
+                    {
+                        sw.WriteLine("   ('song_id' " + newID + ")");
+                        songHasSongID = true;
+                    }
+                    sw.WriteLine(line);
+                }
+                sw.Dispose();
+            }
         }
 
         /// <summary>
@@ -2816,7 +2853,7 @@ namespace Nautilus
                 }
 
                 // Encode the string as bytes
-                byte[] bandNameBytes = Encoding.UTF8.GetBytes(bName);
+                byte[] bandNameBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(bName);
 
                 // Create a zero-filled byte array of full length
                 byte[] bandPaddedBytes = new byte[BAND_LENGTH];
@@ -2848,7 +2885,7 @@ namespace Nautilus
                     {
                         var name = SaveFileCharNames[c];
                         string charName = name.Length > NAME_LENGTH ? name.Substring(0, NAME_LENGTH) : name;
-                        byte[] nameBytes = Encoding.UTF8.GetBytes(charName);
+                        byte[] nameBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(charName);
 
                         // Build 24-byte null-padded buffer
                         byte[] paddedBytes = new byte[NAME_LENGTH];
@@ -3066,7 +3103,7 @@ namespace Nautilus
                 var nameBytes = new byte[BAND_LENGTH];
                 nameStream.Read(nameBytes, 0, BAND_LENGTH);
                 nameStream.Dispose();
-                SaveFileBandName = Encoding.UTF8.GetString(nameBytes).Replace("\0", "").Trim();
+                SaveFileBandName = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(nameBytes).Replace("\0", "").Trim();
                 actualBandOffset = (isPS3 ? BAND_OFFSET + PS3_OFFSET : BAND_OFFSET) + (nameBytes[0] == 0x00 ? 1 : 0); //to account for shifted PS3 files
 
                 //get character names
@@ -3079,7 +3116,7 @@ namespace Nautilus
                     nameBytes = new byte[NAME_LENGTH];
                     nameStream.Read(nameBytes, 0, NAME_LENGTH);
                     nameStream.Dispose();
-                    var name = Encoding.UTF8.GetString(nameBytes).Replace("\0","").Trim();
+                    var name = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(nameBytes).Replace("\0","").Trim();
                                                             
                     if (string.IsNullOrWhiteSpace(name)) break;
 
@@ -3292,7 +3329,7 @@ namespace Nautilus
                     var name_bytes = new byte[24];
                     name_stream.Read(name_bytes, 0, 24);
                     name_stream.Dispose();
-                    SaveFileBandName = Encoding.UTF8.GetString(name_bytes).Replace("\0", "").Trim();
+                    SaveFileBandName = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(name_bytes).Replace("\0", "").Trim();
 
                     //if there's no band name, continue, otherwise stop here
                     if (SaveFileBandName != "") break;
@@ -3327,7 +3364,7 @@ namespace Nautilus
                         name_stream.Read(name_bytes, 0, 24);
                         name_stream.Dispose();
 
-                        var name = Encoding.UTF8.GetString(name_bytes).Replace("\0", "").Trim();
+                        var name = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(name_bytes).Replace("\0", "").Trim();
 
                         i = i + CHAR_SIZE;
 
@@ -3827,7 +3864,7 @@ namespace Nautilus
                 return text;
             }
             text = text.ToLower().Replace("/", "\\");
-            byte[] textBytes = Encoding.UTF8.GetBytes(text);
+            byte[] textBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(text);
 
             return GenQBKey(textBytes);
         }

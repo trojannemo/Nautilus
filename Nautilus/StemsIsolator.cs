@@ -803,7 +803,7 @@ namespace Nautilus
                     Log("Can't work with packs for now ... please try a single song");
                     return false;
                 }
-                var encoding = Parser.GetDTAEncoding(xDTA);
+                var encoding = Parser.DetectEncoding(xDTA);
                 var sr = new StreamReader(new MemoryStream(xDTA), encoding);
                 var sw = new StreamWriter(Application.StartupPath + "\\bin\\template.dta", false, encoding);
                 while (sr.Peek() > 0)

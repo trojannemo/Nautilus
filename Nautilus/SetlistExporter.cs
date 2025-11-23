@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Windows.Forms;
 using PdfFileWriter;
 
@@ -1375,7 +1376,7 @@ namespace Nautilus
         private bool ExportJSON()
         {
             Tools.DeleteFile(export_path);
-            var sw = new StreamWriter(export_path, false, System.Text.Encoding.UTF8);
+            var sw = new StreamWriter(export_path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             var del = ",";
             var i = 0;
             try
@@ -1461,7 +1462,7 @@ namespace Nautilus
         private bool ExportCSV()
         {
             Tools.DeleteFile(export_path);
-            var sw = new StreamWriter(export_path, false, System.Text.Encoding.UTF8);
+            var sw = new StreamWriter(export_path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             var del = radioTab.Checked ? "\t" : ",";
             try
             {

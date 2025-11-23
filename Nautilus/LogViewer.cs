@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using Nautilus.Properties;
 
@@ -168,7 +169,7 @@ namespace Nautilus
                 return;
             }
             
-            var sw = new StreamWriter(sfd.FileName, false, System.Text.Encoding.UTF8);
+            var sw = new StreamWriter(sfd.FileName, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
             try
             {
                 sw.WriteLine("\"Band\",\"Song\",\"Artist\",\"Performed?\",\"Time Added\",\"Start Time\",\"Stop Time\",\"Skipped?\",\"Deleted?");
