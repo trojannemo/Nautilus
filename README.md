@@ -1,14 +1,14 @@
 # Nautilus
-Developed by Nemo between 2013 and present time (as of this writing, February 24, 2024).
+Developed by Nemo between 2013 and present time (as of this edit, November 24, 2025).
 
 Initially a tool suite to create, edit and work with Rock Band files, now it works with some files from other rhythm games.
 Check out the many buttons and see if it'll do what you need. Most features have a Help document but unfortunately I haven't kept up with updating them. Hopefully whoever starts working on this updates the Help documents.
 
 If you're going to just download and compile without much or any editing to the source code, please make sure to download everything in the /bin/ and /res/ folders and put it in the appropriate folders wherever your executable is. These are all the dependencies, third-party tools and assets Nautilus expects to have access to.
 
-Nautilus is written in C# using .NET Framework 4.8.1 and using Visual Studio 2022 Community Edition. For best results make sure you use the same.
+Nautilus is written in C# using .NET Framework 4.8.0 and using Visual Studio 2022 Community Edition. For best results make sure you use the same.
 
-If you have technical questions or want to discuss Nautilus with me, I can be found in most Rock Band related Discord servers under the same username. Send me a message and let's talk.
+If you have technical questions or want to discuss Nautilus with me, I can be found in most Rock Band related Discord servers under the same username. **I also have my own Discord server called "Nemo's Nautilus"** - send me a message and let's talk.
 
 Nautilus wouldn't be possible without the groundwork and assistance of others, so let's get into it.
 
@@ -55,4 +55,4 @@ Onyxite and everyone working on LibForge now<br>
 https://github.com/mtolly/LibForge<br>
 Dark for themethod3 (iykyk)<br>
 <br>
-Thanks to everyone else who helped along the way
+Thanks to everyone else who helped along the way and special thanks to those few that have begun contributing to the code!
