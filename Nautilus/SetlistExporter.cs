@@ -1376,7 +1376,7 @@ namespace Nautilus
         private bool ExportJSON()
         {
             Tools.DeleteFile(export_path);
-            var sw = new StreamWriter(export_path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sw = new StreamWriter(export_path, false, new UTF8Encoding(false, false));
             var del = ",";
             var i = 0;
             try
@@ -1462,7 +1462,7 @@ namespace Nautilus
         private bool ExportCSV()
         {
             Tools.DeleteFile(export_path);
-            var sw = new StreamWriter(export_path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sw = new StreamWriter(export_path, false, new UTF8Encoding(false, false));
             var del = radioTab.Checked ? "\t" : ",";
             try
             {

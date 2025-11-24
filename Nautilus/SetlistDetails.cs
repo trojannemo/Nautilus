@@ -115,7 +115,7 @@ namespace Nautilus
             
             Tools.DeleteFile(sfd.FileName);
 
-            var sw = new StreamWriter(sfd.FileName, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sw = new StreamWriter(sfd.FileName, false, new UTF8Encoding(false, false));
             try
             {
                 for (var i = 0; i < lstStats.Items.Count; i++)

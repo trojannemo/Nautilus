@@ -150,8 +150,9 @@ namespace Nautilus
 
         private void addStem(string stem, int tracknumber)
         {
-            var sr = new StreamReader(Application.StartupPath + "\\bin\\template.dta", Encoding.Default);
-            var sw = new StreamWriter(Application.StartupPath + "\\bin\\songs.dta", true, Encoding.Default);
+            var encoding = Parser.DetectEncoding(Application.StartupPath + "\\bin\\template.dta");
+            var sr = new StreamReader(Application.StartupPath + "\\bin\\template.dta", encoding);
+            var sw = new StreamWriter(Application.StartupPath + "\\bin\\songs.dta", true, new UTF8Encoding(false, false));
             var brackets = 0;
 
             while (sr.Peek() >= 0)
@@ -358,7 +359,7 @@ namespace Nautilus
             var dta = Application.StartupPath + "\\bin\\songs.dta";
             var template = Application.StartupPath + "\\bin\\template.dta";
             //this will create it if it's not there, overwrite with blank if already there
-            var sw = new StreamWriter(dta, false, Encoding.Default);
+            var sw = new StreamWriter(dta, false, new UTF8Encoding(false, false));
             sw.Dispose();
             //make a second copy of the file
             var newpackage = Path.GetFileName(txtFile.Text).Replace(" ", "");

@@ -544,6 +544,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AudioConverterGUI.resx">
       <DependentUpon>AudioConverterGUI.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="BatchProcessor.resx">
       <DependentUpon>BatchProcessor.cs</DependentUpon>

@@ -666,7 +666,7 @@ namespace Nautilus
                     Log("Duplicate DTA file found: " + newDTA);
                     Tools.DeleteFile(newDTA);
                 }
-                var sw = new StreamWriter(newDTA, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                var sw = new StreamWriter(newDTA, false, new UTF8Encoding(false, false));
                 foreach (var line in song.DTALines)
                 {
                     if (line.Contains("latin1"))

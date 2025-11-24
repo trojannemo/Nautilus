@@ -806,7 +806,7 @@ namespace Nautilus
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //game id
                     var length = BytesToInt(buffer);
-                    AllSongs[index].Source = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length));
+                    AllSongs[index].Source = new UTF8Encoding(false, false).GetString(br.ReadBytes(length));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //preview start in milliseconds
                     Array.Reverse(buffer);
@@ -818,14 +818,14 @@ namespace Nautilus
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //short name
                     length = BytesToInt(buffer);
-                    AllSongs[index].ShortName = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length));
+                    AllSongs[index].ShortName = new UTF8Encoding(false, false).GetString(br.ReadBytes(length));
 
                     br.ReadBytes(8); //skip unknown stuff
                     br.ReadBytes(4 + length); //short name length + string again, skip
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //file path length
                     length = BytesToInt(buffer);
-                    var path = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length));
+                    var path = new UTF8Encoding(false, false).GetString(br.ReadBytes(length));
                     AllSongs[index].FilePath = path;
 
                     br.ReadBytes(4); //skip unknown stuff
@@ -893,7 +893,7 @@ namespace Nautilus
                         {
                             buffer = Arrange4Bytes(br.ReadBytes(4)); //instrument name
                             length = BytesToInt(buffer);
-                            var instrument = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length));
+                            var instrument = new UTF8Encoding(false, false).GetString(br.ReadBytes(length));
                             buffer = Arrange4Bytes(br.ReadBytes(4)); //instrument rank
                             Array.Reverse(buffer);
                             var diff = Convert.ToInt16(BitConverter.ToSingle(buffer, 0));
@@ -933,11 +933,11 @@ namespace Nautilus
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //song name
                     length = BytesToInt(buffer);
-                    AllSongs[index].Name = Parser.GetSongName(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length)));
+                    AllSongs[index].Name = Parser.GetSongName(new UTF8Encoding(false, false).GetString(br.ReadBytes(length)));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //artist / band name
                     length = BytesToInt(buffer);
-                    AllSongs[index].Artist = Parser.GetArtistName(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length)));
+                    AllSongs[index].Artist = Parser.GetArtistName(new UTF8Encoding(false, false).GetString(br.ReadBytes(length)));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //album name
                     length = BytesToInt(buffer);
@@ -952,7 +952,7 @@ namespace Nautilus
                     }
                     else
                     {
-                        AllSongs[index].Album = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length));
+                        AllSongs[index].Album = new UTF8Encoding(false, false).GetString(br.ReadBytes(length));
                         if (!doBlitzImport)
                         {
                             buffer = Arrange4Bytes(br.ReadBytes(4)); //track number
@@ -965,7 +965,7 @@ namespace Nautilus
                     {
                         buffer = Arrange4Bytes(br.ReadBytes(4)); //genre
                         length = BytesToInt(buffer);
-                        AllSongs[index].Genre = Parser.doGenre(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length)));
+                        AllSongs[index].Genre = Parser.doGenre(new UTF8Encoding(false, false).GetString(br.ReadBytes(length)));
 
                         buffer = Arrange4Bytes(br.ReadBytes(4)); //year recorded
                         AllSongs[index].YearRecorded = BytesToInt(buffer);
@@ -990,7 +990,7 @@ namespace Nautilus
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //genre
                     length = BytesToInt(buffer);
-                    AllSongs[index].Genre = Parser.doGenre(new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length)));
+                    AllSongs[index].Genre = Parser.doGenre(new UTF8Encoding(false, false).GetString(br.ReadBytes(length)));
 
                     br.ReadBytes(8); //skip unknown stuff
 
@@ -1000,7 +1000,7 @@ namespace Nautilus
                     {
                         buffer = Arrange4Bytes(br.ReadBytes(4)); //instrument name
                         length = BytesToInt(buffer);
-                        var instrument = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length));
+                        var instrument = new UTF8Encoding(false, false).GetString(br.ReadBytes(length));
                         buffer = Arrange4Bytes(br.ReadBytes(4)); //instrument rank
                         Array.Reverse(buffer);
                         var diff = Convert.ToInt16(BitConverter.ToSingle(buffer, 0));
@@ -1051,11 +1051,11 @@ namespace Nautilus
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //bank (vocal percussion)
                     length = BytesToInt(buffer);
-                    AllSongs[index].PercussionBank = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length));
+                    AllSongs[index].PercussionBank = new UTF8Encoding(false, false).GetString(br.ReadBytes(length));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //drum_bank
                     length = BytesToInt(buffer);
-                    AllSongs[index].DrumBank = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length));
+                    AllSongs[index].DrumBank = new UTF8Encoding(false, false).GetString(br.ReadBytes(length));
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //vocal tonic note
                     AllSongs[index].TonicNote = BytesToInt(buffer);
@@ -1075,7 +1075,7 @@ namespace Nautilus
 
                     buffer = Arrange4Bytes(br.ReadBytes(4)); //vocal gender
                     length = BytesToInt(buffer);
-                    AllSongs[index].Gender = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(br.ReadBytes(length)).ToLowerInvariant().Contains("female") ? "Female" : "Male";
+                    AllSongs[index].Gender = new UTF8Encoding(false, false).GetString(br.ReadBytes(length)).ToLowerInvariant().Contains("female") ? "Female" : "Male";
                     AllSongs[index].DateAdded = DateTime.Now;
 
                     br.ReadBytes(24); //skip guitar tuning;
@@ -1128,7 +1128,7 @@ namespace Nautilus
 
             try
             {
-                var sw = new StreamWriter(file, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                var sw = new StreamWriter(file, false, new UTF8Encoding(false, false));
                 sw.WriteLine("SetlistName=" + ActiveSetlist);
                 sw.WriteLine("Console=" + ActiveConsole);
                 sw.WriteLine("SongCount=" + SongsToSave.Count);
@@ -1628,7 +1628,7 @@ namespace Nautilus
 
             var line = "";
             var linenum = 5;
-            var sr = new StreamReader(file, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sr = new StreamReader(file, new UTF8Encoding(false, false));
             try
             {
                 int songcount;
@@ -3453,7 +3453,7 @@ namespace Nautilus
             ActiveSetlist = newName;
             var setlist = File.ReadAllLines(fileName);
             setlist[0] = "SetlistName=" + newName;
-            var sw = new StreamWriter(fileName, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sw = new StreamWriter(fileName, false, new UTF8Encoding(false, false));
             foreach (var line in setlist)
             {
                 sw.WriteLine(line);
@@ -4042,7 +4042,7 @@ namespace Nautilus
             }
             var name = "Unnamed " + console + " Setlist"; 
             var file = setlist_folder + name.Replace(" ", "") + DateTime.Now.Year + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second + ".setlist";
-            var sw = new StreamWriter(file, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sw = new StreamWriter(file, false, new UTF8Encoding(false, false));
             sw.WriteLine("SetlistName=" + name);
             sw.WriteLine("Console=" + console);
             sw.WriteLine("SongCount=" + 0);
@@ -4527,7 +4527,7 @@ namespace Nautilus
                             MessageBoxIcon.Question) != DialogResult.Yes) return;
             
             var new_songs = new List<SongData>();
-            var sr = new StreamReader(xml, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sr = new StreamReader(xml, new UTF8Encoding(false, false));
             var xmlLines = new List<string>();
             while (sr.Peek() >= 0)
             {
@@ -4826,7 +4826,7 @@ namespace Nautilus
                         sfd.ShowDialog();
                         if (!string.IsNullOrEmpty(sfd.FileName))
                         {
-                            var sw = new StreamWriter(sfd.FileName, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                            var sw = new StreamWriter(sfd.FileName, false, new UTF8Encoding(false, false));
                             foreach (var song in uniqueSongs)
                             {
                                 sw.WriteLine(song.Artist + " - " + song.Name);

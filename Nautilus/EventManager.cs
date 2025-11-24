@@ -305,7 +305,7 @@ namespace Nautilus
 
             var line = "";
             var linenum = 5;
-            var sr = new StreamReader(file, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sr = new StreamReader(file, new UTF8Encoding(false, false));
             try
             {
                 int songcount;
@@ -1592,7 +1592,7 @@ doExit:
             var filename = EventsFolder + DateTime.Now.Year + DateTime.Now.Month + DateTime.Now.Day + DateTime.Now.Hour +
                            DateTime.Now.Minute + DateTime.Now.Second + ".log";
 
-            var sw = new StreamWriter(filename, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sw = new StreamWriter(filename, false, new UTF8Encoding(false, false));
             sw.WriteLine(logheader);
             sw.WriteLine("LogDate=" + CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(DateTime.Now.Month) + " " + DateTime.Now.Day + ", " + DateTime.Now.Year);
             sw.WriteLine("TotalPerformances=" + Performances.Count);

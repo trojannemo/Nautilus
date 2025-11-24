@@ -1546,8 +1546,9 @@ namespace Nautilus
                 var didKeys = false;
                 var pastRank = false;
                 var finalDTA = dta.Replace("songs.dta", "_final_songs.dta");
-                var sr = new StreamReader(dta, Encoding.Default);
-                var sw = new StreamWriter(finalDTA, false, Encoding.Default);
+                var encoding = Parser.DetectEncoding(dta);
+                var sr = new StreamReader(dta, encoding);
+                var sw = new StreamWriter(finalDTA, false, new UTF8Encoding(false, false));
                 try
                 {
                     while (sr.Peek() >= 0)

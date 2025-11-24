@@ -169,7 +169,7 @@ namespace Nautilus
                 return;
             }
             
-            var sw = new StreamWriter(sfd.FileName, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sw = new StreamWriter(sfd.FileName, false, new UTF8Encoding(false, false));
             try
             {
                 sw.WriteLine("\"Band\",\"Song\",\"Artist\",\"Performed?\",\"Time Added\",\"Start Time\",\"Stop Time\",\"Skipped?\",\"Deleted?");

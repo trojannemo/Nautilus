@@ -2853,7 +2853,7 @@ namespace Nautilus
                 }
 
                 // Encode the string as bytes
-                byte[] bandNameBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(bName);
+                byte[] bandNameBytes = new UTF8Encoding(false, false).GetBytes(bName);
 
                 // Create a zero-filled byte array of full length
                 byte[] bandPaddedBytes = new byte[BAND_LENGTH];
@@ -2885,7 +2885,7 @@ namespace Nautilus
                     {
                         var name = SaveFileCharNames[c];
                         string charName = name.Length > NAME_LENGTH ? name.Substring(0, NAME_LENGTH) : name;
-                        byte[] nameBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(charName);
+                        byte[] nameBytes = new UTF8Encoding(false, false).GetBytes(charName);
 
                         // Build 24-byte null-padded buffer
                         byte[] paddedBytes = new byte[NAME_LENGTH];
@@ -3103,7 +3103,7 @@ namespace Nautilus
                 var nameBytes = new byte[BAND_LENGTH];
                 nameStream.Read(nameBytes, 0, BAND_LENGTH);
                 nameStream.Dispose();
-                SaveFileBandName = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(nameBytes).Replace("\0", "").Trim();
+                SaveFileBandName = new UTF8Encoding(false, false).GetString(nameBytes).Replace("\0", "").Trim();
                 actualBandOffset = (isPS3 ? BAND_OFFSET + PS3_OFFSET : BAND_OFFSET) + (nameBytes[0] == 0x00 ? 1 : 0); //to account for shifted PS3 files
 
                 //get character names
@@ -3116,7 +3116,7 @@ namespace Nautilus
                     nameBytes = new byte[NAME_LENGTH];
                     nameStream.Read(nameBytes, 0, NAME_LENGTH);
                     nameStream.Dispose();
-                    var name = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(nameBytes).Replace("\0","").Trim();
+                    var name = new UTF8Encoding(false, false).GetString(nameBytes).Replace("\0","").Trim();
                                                             
                     if (string.IsNullOrWhiteSpace(name)) break;
 
@@ -3329,7 +3329,7 @@ namespace Nautilus
                     var name_bytes = new byte[24];
                     name_stream.Read(name_bytes, 0, 24);
                     name_stream.Dispose();
-                    SaveFileBandName = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(name_bytes).Replace("\0", "").Trim();
+                    SaveFileBandName = new UTF8Encoding(false, false).GetString(name_bytes).Replace("\0", "").Trim();
 
                     //if there's no band name, continue, otherwise stop here
                     if (SaveFileBandName != "") break;
@@ -3364,7 +3364,7 @@ namespace Nautilus
                         name_stream.Read(name_bytes, 0, 24);
                         name_stream.Dispose();
 
-                        var name = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetString(name_bytes).Replace("\0", "").Trim();
+                        var name = new UTF8Encoding(false, false).GetString(name_bytes).Replace("\0", "").Trim();
 
                         i = i + CHAR_SIZE;
 
@@ -3664,7 +3664,7 @@ namespace Nautilus
             // Use input string to calculate MD5 hash
             using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
             {
-                byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+                byte[] inputBytes = Encoding.ASCII.GetBytes(input);
                 byte[] hashBytes = md5.ComputeHash(inputBytes);
 
                 return BitConverter.ToString(hashBytes).Replace("-", "");
@@ -3864,7 +3864,7 @@ namespace Nautilus
                 return text;
             }
             text = text.ToLower().Replace("/", "\\");
-            byte[] textBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(text);
+            byte[] textBytes = new UTF8Encoding(false, false).GetBytes(text);
 
             return GenQBKey(textBytes);
         }

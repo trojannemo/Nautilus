@@ -468,7 +468,7 @@ namespace Nautilus
             }
 
             Log("Creating new songs.dta file");
-            var sw = new StreamWriter(dta, false, Encoding.Default);
+            var sw = new StreamWriter(dta, false, new UTF8Encoding(false, false));
             foreach (var line in from object item in lstSongs.Items let index = (item.ToString().IndexOf("[#", StringComparison.Ordinal) + 2) 
                                  let index2 = item.ToString().IndexOf("]", index, StringComparison.Ordinal) select (Convert.ToInt16(item.ToString().Substring(index, index2 - index)) -1)
                                  into number from line in Songs[number].DTALines select line)
@@ -978,7 +978,7 @@ namespace Nautilus
             foreach (var song in Songs)
             {
                 var path = Path.GetDirectoryName(DTAPath) + "\\" + song.Artist + " - " + song.Name + ".dta";
-                var sw = new StreamWriter(path, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                var sw = new StreamWriter(path, false, new UTF8Encoding(false, false));
                 foreach (var line in song.DTALines)
                 {
                     if (line.Contains("#ifndef kControllerRealGuitar") || line.Contains("#endif")) continue;
@@ -1083,7 +1083,7 @@ namespace Nautilus
                         repackaged = new CreateSTFS();
                         repackaged.AddFolder("songs");
 
-                        var sw = new StreamWriter(tempdta, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                        var sw = new StreamWriter(tempdta, false, new UTF8Encoding(false, false));
                         foreach (var line in song.DTALines)
                         {
                             if (line.Contains("#ifndef kControllerRealGuitar") || (line.Contains("#endif") && !line.Contains("CUSTOMSOURCE"))) continue;
@@ -1545,7 +1545,7 @@ namespace Nautilus
             dtaEntry = Convert.ToInt16(selection.Substring(index1 + 2, index2 - index1 - 2));
 
             File.Delete(tempDTA);
-            var sw = new StreamWriter(tempDTA, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+            var sw = new StreamWriter(tempDTA, false, new UTF8Encoding(false, false));
             foreach (var line in Parser.Songs[dtaEntry - 1].DTALines)
             {
                 if (line.Contains("latin1"))

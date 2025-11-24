@@ -267,7 +267,7 @@ namespace Nautilus
                         Log("Read DTA file " + name + " successfully");
                     }
                     DTARead++;
-                    using (var reader = new StreamReader(ftpStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)))
+                    using (var reader = new StreamReader(ftpStream, new UTF8Encoding(false, false)))
                     {
                         var songinfo = reader.ReadToEnd();
                         sb.Append(songinfo);
@@ -332,7 +332,7 @@ namespace Nautilus
                 }
                 try
                 {
-                    using (var outfile = new StreamWriter(filepath, false, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)))
+                    using (var outfile = new StreamWriter(filepath, false, new UTF8Encoding(false, false)))
                     {
                         outfile.Write(sb.ToString());
                     }
