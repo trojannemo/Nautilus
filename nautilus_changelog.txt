@@ -25,7 +25,7 @@ BATCH PROCESSOR
 - Added check box option to force overwriting the existing song ID with a new numeric ID even if the existing ID was already numeric
 - Merged PR from Aloquendiar that adds feature to further correct Default author IDs on songs with Magma-created numeric IDs that would still cause collision
 
-UPGRADE BUNDLER - NOT FINISHED FIXING
+UPGRADE BUNDLER
 - Added Batch Bundle option - click on it and read the instructions - as requested by EzloDQ
 - Several bug fixes to issues found while adding the Batch Bundle option - thanks to EzloDQ for the thorough testing
 
@@ -3067,3 +3067,4 @@ ALBUM ART CONVERTER (NEW!)
 - converts from png_xbox -> bmp and bmp -> png_xbox
 ----one or multiple files at a time
 ----option to delete original files
+
