@@ -6,6 +6,11 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+vNightly (in source code, NOT in current release!)
+
+VOLUME NORMALIZER
+- A new option has been added to work in an "album mode". When this is enabled, all songs in a folder will be analysed first, and an average offset calculated. Then, this average offset will be applied to all the songs in the folder. If you have multiple songs from an album, and want to preserve the dynamics across the album, but still normalise the album against the rest of your library, this will allow you to do so.
+
 v5.6.0
 
 ROCK BAND TO KARAOKE CONVERTER

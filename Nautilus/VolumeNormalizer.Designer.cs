@@ -35,6 +35,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btnBegin = new System.Windows.Forms.Button();
             this.picPin = new System.Windows.Forms.PictureBox();
+            this.chkAlbumMode = new System.Windows.Forms.CheckBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chkRestore = new System.Windows.Forms.ToolStripMenuItem();
@@ -59,6 +60,7 @@
             this.lblTargetVolume = new System.Windows.Forms.Label();
             this.radioDoNotRender = new System.Windows.Forms.RadioButton();
             this.radioAllowRender = new System.Windows.Forms.RadioButton();
+            this.lblResetVolEnabled = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -137,6 +139,19 @@
             this.toolTip1.SetToolTip(this.picPin, "Click to pin on top");
             this.picPin.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picPin_MouseClick);
             // 
+            // chkAlbumMode
+            // 
+            this.chkAlbumMode.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.chkAlbumMode.AutoSize = true;
+            this.chkAlbumMode.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkAlbumMode.Location = new System.Drawing.Point(213, 34);
+            this.chkAlbumMode.Name = "chkAlbumMode";
+            this.chkAlbumMode.Size = new System.Drawing.Size(394, 29);
+            this.chkAlbumMode.TabIndex = 73;
+            this.chkAlbumMode.Text = "Adjust all CONs equally (album mode)";
+            this.chkAlbumMode.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.chkAlbumMode.UseVisualStyleBackColor = true;
+            // 
             // menuStrip1
             // 
             this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
@@ -169,6 +184,7 @@
             this.chkRestore.Name = "chkRestore";
             this.chkRestore.Size = new System.Drawing.Size(234, 22);
             this.chkRestore.Text = "Restore Original Volumes";
+            this.chkRestore.Click += new System.EventHandler(this.chkRestore_Click);
             // 
             // toolStripSeparator1
             // 
@@ -414,12 +430,26 @@
             this.radioAllowRender.Text = "Allow re-rendering audio";
             this.radioAllowRender.UseVisualStyleBackColor = true;
             // 
+            // lblResetVolEnabled
+            // 
+            this.lblResetVolEnabled.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.lblResetVolEnabled.AutoSize = true;
+            this.lblResetVolEnabled.ForeColor = System.Drawing.Color.Red;
+            this.lblResetVolEnabled.Location = new System.Drawing.Point(213, 175);
+            this.lblResetVolEnabled.Name = "lblResetVolEnabled";
+            this.lblResetVolEnabled.Size = new System.Drawing.Size(339, 25);
+            this.lblResetVolEnabled.TabIndex = 74;
+            this.lblResetVolEnabled.Text = "Restore Original Volumes enabled";
+            this.lblResetVolEnabled.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblResetVolEnabled.Visible = false;
+            // 
             // VolumeNormalizer
             // 
             this.AllowDrop = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ClientSize = new System.Drawing.Size(592, 356);
+            this.Controls.Add(this.chkAlbumMode);
             this.Controls.Add(this.grpMogg);
             this.Controls.Add(this.picPin);
             this.Controls.Add(this.picWorking);
@@ -430,8 +460,10 @@
             this.Controls.Add(this.btnBegin);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.lstLog);
+            this.Controls.Add(this.lblResetVolEnabled);
             this.DoubleBuffered = true;
             this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(608, 395);
             this.Name = "VolumeNormalizer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Volume Normalizer";
@@ -485,5 +517,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem chkVerboseOutput;
         public System.Windows.Forms.ListBox lstLog;
+        private System.Windows.Forms.CheckBox chkAlbumMode;
+        private System.Windows.Forms.Label lblResetVolEnabled;
     }
 }

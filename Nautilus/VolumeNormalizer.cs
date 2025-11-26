@@ -48,9 +48,11 @@ namespace Nautilus
         private double dBAverage = 0.0;
 
         // Our target loudness that we want. Normally -6.4 dB.
+        // This is always overridden when starting a job to the value of numTargetValue (default -2.0).
         private double targetDB = -6.4;
+        // The 83 RB3 songs average at a reported 2.36dB.
 
-        // The threshold in which we do normalization.
+        // The threshold below which no normalization is performed. If the absolute value of the difference between the current average volume and the target volume is less than this threshold, no changes are made.
         private double thresholdDB = 0.4;
 
 
@@ -88,6 +90,8 @@ namespace Nautilus
             toolTip1.SetToolTip(btnRefresh, "Click to refresh if the contents of the folder have changed");
             toolTip1.SetToolTip(txtFolder, "This is the working directory");
             toolTip1.SetToolTip(lstLog, "This is the application log. Right click to export");
+            toolTip1.SetToolTip(numThresholdValue, "Songs that are within this amount of the target volume will not be changed");
+            toolTip1.SetToolTip(chkAlbumMode, "Calculate the average adjustment needed to bring the average volume level of all songs to the target volume, then apply that adjustment to all songs.\n\nThis helps maintain the dynamic range of a collection of songs, such as an album, when applying a volume offset.");
         }
 
         private void Log(string message)
@@ -114,6 +118,7 @@ namespace Nautilus
 
         private void InitAudio()
         {
+
             if (!BassInit && Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_DEFAULT, IntPtr.Zero))
             {
                 BassInit = true;
@@ -130,10 +135,10 @@ namespace Nautilus
             
             var numValues = Parser.Songs[0].OriginalAttenuationValues.Split(new char[0], StringSplitOptions.RemoveEmptyEntries).Length;
 
-            DebugLog($"Audio Channels: {channel_info.chans}");
-            DebugLog($"Values: {numValues}");
-            DebugLog($"{Parser.Songs[0].AttenuationValues}");
-            DebugLog($"{Parser.Songs[0].OriginalAttenuationValues}");
+            DebugLog($"MOGG Audio Channels Count: {channel_info.chans}");
+            DebugLog($"DTA Channel Value Count: {numValues}");
+            DebugLog($"Current Vols: {Parser.Songs[0].AttenuationValues}");
+            DebugLog($"Original Vols: {Parser.Songs[0].OriginalAttenuationValues}");
 
             if (channel_info.chans != numValues)
             {
@@ -337,7 +342,7 @@ namespace Nautilus
             }
         }
 
-        private void AdjustAudio()
+        private void CalculateVolumeOffset()
         {
             DebugLog($"Finding volume level to reach target of {targetDB}...");
 
@@ -346,6 +351,7 @@ namespace Nautilus
                 var matrix = GetChannelMatrix_VolumeAdjust(Parser.Songs[0], channel_info.chans, "allstems");
                 BassMix.BASS_Mixer_ChannelSetMatrix(BassStream, matrix);
 
+                Log("CalculateVolumeOffset(): calculating average after matrix applied");
                 dBAverage = CalculateVolumeAverage();
                 double dBDistance = double.Parse(FormatDB(Math.Abs(dBAverage - targetDB)));
 
@@ -368,6 +374,168 @@ namespace Nautilus
             }
 
             Log($"Target volume {targetDB} dB found at {volumeOffset}.");
+        }
+
+        private void ApplyOffset(string file, double calculatedOffset = -999)
+        {
+            bool fixedOffset = (calculatedOffset != -999);
+            double attenuationOffset;
+            if (calculatedOffset == -999)
+            {
+                attenuationOffset = dBAverage - targetDB;
+            } else
+            {
+                attenuationOffset = -calculatedOffset;
+            }
+
+
+            // Strip most of the decimal places, because we don't need to be *that* precise.
+            attenuationOffset = double.Parse(FormatDB(attenuationOffset), CultureInfo.InvariantCulture);
+            volumeOffset = -attenuationOffset;
+
+            Log($"Average dB of {(fixedOffset ? "album": "song MOGG")} is: {FormatDB(dBAverage)} dB, {FormatDB(attenuationOffset)} dB away from the target dB of: {targetDB} dB.");
+
+            // Get Attenuation values
+            var values = Parser.Songs[0].OriginalAttenuationValues.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
+            double highestVolume = -64.0;
+
+            DebugLog("Original Values: (checking if we need to re-render audio)");
+            DebugLog($"{Parser.Songs[0].OriginalAttenuationValues}");
+
+            // We want to know how far we can increase the volume before we need to
+            // re-render the audio.
+            DebugLog("highestVolume check");
+            foreach (var value in values)
+            {
+                double parsedValue = double.Parse(value, CultureInfo.InvariantCulture);
+                DebugLog($"Value: {value}, {parsedValue}");
+
+                if (parsedValue > highestVolume)
+                {
+                    DebugLog($"Higher than: {highestVolume}");
+                    highestVolume = parsedValue;
+                }
+            }
+
+            double attenuationRange = 0 - highestVolume;
+            DebugLog($"Highest Channel Volume is {highestVolume}, range is {attenuationRange}.");
+
+            if (!fixedOffset) CalculateVolumeOffset();
+
+            if (volumeOffset > 0)
+            {
+                DebugLog("Song needs to be louder...");
+
+                if (Math.Abs(attenuationOffset) < thresholdDB)
+                {
+                    Log("Song is within threshold, skipping audio re-render.");
+                }
+                else
+                {
+                    if (volumeOffset < attenuationRange)
+                    {
+                        Log("Song is within limits, adjusting...");
+                    }
+                    else
+                    {
+                        if (radioAllowRender.Checked)
+                        {
+                            if (chkBackupAudio.Checked)
+                            {
+                                var BackupLocation = Tools.CurrentFolder + "\\Backup Audio\\";
+                                var BackupFile = BackupLocation + $"{Parser.Songs[0].InternalName}_{audioHash.Substring(0, 8)}.moggbackup";
+
+                                if (!Directory.Exists(BackupLocation))
+                                {
+                                    Directory.CreateDirectory(BackupLocation);
+                                }
+
+                                if (!File.Exists(BackupFile))
+                                {
+                                    Log("Backing up original mogg...");
+                                    File.Copy(Path.GetTempPath() + "mogg", BackupFile);
+                                }
+                                else
+                                {
+                                    Log("Backup Audio already exists, skipping backup.");
+                                }
+
+                            }
+
+                            Log("Rendering new audio file...");
+                            audioModified = true;
+
+                            Bass.BASS_ChannelSetPosition(BassStream, Bass.BASS_ChannelSeconds2Bytes(BassStream, 0));
+                            Bass.BASS_ChannelSetPosition(BassMixer, Bass.BASS_ChannelSeconds2Bytes(BassMixer, 0));
+                            BassMix.BASS_Mixer_ChannelSetPosition(BassMixer, Bass.BASS_ChannelSeconds2Bytes(BassMixer, 0));
+
+                            var newVolume = (float)Utils.DBToLevel(Convert.ToDouble(volumeOffset), 1.0);
+
+                            BASS_FX_VOLUME_PARAM volume = new BASS_FX_VOLUME_PARAM(newVolume, 1, 0, 0);
+                            var fxVolumeHandle = Bass.BASS_ChannelSetFX(BassStream, BASSFXType.BASS_FX_VOLUME, 0);
+                            Bass.BASS_FXSetParameters(fxVolumeHandle, volume);
+
+                            string fileToTest = Path.GetTempPath() + "\\" + "ogg_adjust";
+                            BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassStream, "-q 5", BASSEncode.BASS_ENCODE_AUTOFREE, fileToTest);
+
+                            while (true)
+                            {
+                                var buffer = new byte[20000];
+                                var c = Bass.BASS_ChannelGetData(BassStream, buffer, buffer.Length);
+                                if (c <= 0) break;
+                            }
+
+                            BassEnc.BASS_Encode_Stop(BassStream);
+
+                            Log("Adding MOGG header...");
+                            if (Tools.MakeMogg(fileToTest, Path.GetTempPath() + "\\" + "mogg_adjust"))
+                            {
+                                Log("Success");
+                            }
+                            else
+                            {
+                                throw new Exception("Failed");
+                            }
+
+                        }
+                        else
+                        {
+                            Log("Audio not allowed to be re-rendered, adjusting as far as possible...");
+                            volumeOffset = attenuationRange;
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                DebugLog("Song needs to be quieter, applying DTA modification");
+            }
+
+
+            attenuationValues = "";
+
+            DebugLog($"values Length: {values.Length}");
+
+            foreach (var value in values)
+            {
+                double preFinal = double.Parse(value, CultureInfo.InvariantCulture) + volumeOffset;
+
+                if (audioModified)
+                {
+                    preFinal = 0.0;
+                }
+
+                attenuationValues += FormatDB(preFinal) + " ";
+                DebugLog($"Modifying original value: {value} to {FormatDB(preFinal)}");
+            }
+
+            // Trim the white space off the end of the string.
+            attenuationValues = attenuationValues.Trim();
+
+            CleanUp();
+            WriteDTA();
+            WriteCON(file);
         }
 
         private double CalculateVolumeAverage()
@@ -470,6 +638,7 @@ namespace Nautilus
                 int indexOfEnd = 0;
                 bool valuesExist = false;
                 bool hashExists = false;
+                bool hasNormalizedAsAlbum = false;
 
                 int indexToWrite = 0;
                 int lastClose = 0;
@@ -491,6 +660,12 @@ namespace Nautilus
                     {
                         hashExists = true;
                     }
+
+                    if (item.Contains(";NormalizedAsAlbum="))
+                    {
+                        hasNormalizedAsAlbum = true;
+                    }
+                        
                 }
 
                 // Go through all of the lines of the DTA
@@ -562,8 +737,17 @@ namespace Nautilus
                 {
                     dtaLinesNew.Insert(indexToWrite, ";VolumeNormalizerAudioHash=" + audioHash);
                 }
+                if (!hasNormalizedAsAlbum)
+                {
+                    dtaLinesNew.Insert(indexToWrite, ";NormalizedAsAlbum=" + (chkAlbumMode.Checked ? "1" : "0"));
+                } else
+                {
+                    int idx = dtaLinesNew.FindIndex(x => x.StartsWith(";NormalizedAsAlbum="));
+                    dtaLinesNew.RemoveAt(idx);
+                    dtaLinesNew.Insert(idx, ";NormalizedAsAlbum=" + (chkAlbumMode.Checked ? "1" : "0"));
+                }
 
-                streamReader.Close();
+                    streamReader.Close();
             }
 
             // Actually output the file.
@@ -582,7 +766,7 @@ namespace Nautilus
         {
             var counter = 0;
             var success = 0;
-            List<double> dBLevels = new List<double>();
+            Dictionary<string, double> dBSongLevels = new Dictionary<string, double>();
 
             foreach (var file in inputFiles.Where(File.Exists).TakeWhile(file => !backgroundWorker1.CancellationPending))
             {
@@ -641,171 +825,21 @@ namespace Nautilus
                         }
 
 
-                        
+                        Log("ProcessFiles(): calculating MOGG average");
                         InitAudio();
                         dBAverage = CalculateVolumeAverage();
 
 
-                        if (chkAnalyzerMode.Checked == false)
+                        if (chkAnalyzerMode.Checked == false && chkAlbumMode.Checked == false)
                         {
-                            double attenuationOffset = dBAverage - targetDB;
-
-                            // Strip most of the decimal places, because we don't need to be *that* precise.
-                            attenuationOffset = double.Parse(FormatDB(attenuationOffset), CultureInfo.InvariantCulture);
-                            volumeOffset = -attenuationOffset;
-
-                            Log($"Average dB of song is: {FormatDB(dBAverage)} dB, {FormatDB(attenuationOffset)} dB away from the target dB of: {targetDB} dB.");
-
-                            // Get Attenuation values
-                            var values = Parser.Songs[0].OriginalAttenuationValues.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
-                            double highestVolume = -64.0;
-
-                            DebugLog("Values");
-                            DebugLog($"{Parser.Songs[0].OriginalAttenuationValues}");
-
-                            // We want to know how far we can increase the volume before we need to
-                            // re-render the audio.
-                            DebugLog("highestVolume check");
-                            foreach (var value in values)
-                            {
-                                double parsedValue = double.Parse(value, CultureInfo.InvariantCulture);
-                                DebugLog($"Value: {value}, {parsedValue}");
-
-                                if (parsedValue > highestVolume)
-                                {
-                                    DebugLog($"Higher than: {highestVolume}");
-                                    highestVolume = parsedValue;
-                                }
-                            }
-
-                            double attenuationRange = 0 - highestVolume;
-                            DebugLog($"Highest Volume is {highestVolume}, range is {attenuationRange}.");
-
-                            AdjustAudio();
-
-                            if (volumeOffset > 0)
-                            {
-                                DebugLog("Song needs to be louder...");
-
-                                if (Math.Abs(attenuationOffset) < thresholdDB)
-                                {
-                                    Log("Song is within threshold, skipping audio re-render.");
-                                }
-                                else
-                                {
-                                    if (volumeOffset < attenuationRange)
-                                    {
-                                        Log("Song is within limits, adjusting...");
-                                    }
-                                    else
-                                    {
-                                        if (radioAllowRender.Checked)
-                                        {
-                                            if (chkBackupAudio.Checked)
-                                            {
-                                                var BackupLocation = Tools.CurrentFolder + "\\Backup Audio\\";
-                                                var BackupFile = BackupLocation + $"{Parser.Songs[0].InternalName}_{audioHash.Substring(0, 8)}.moggbackup";
-
-                                                if (!Directory.Exists(BackupLocation))
-                                                {
-                                                    Directory.CreateDirectory(BackupLocation);
-                                                }
-
-                                                if (!File.Exists(BackupFile))
-                                                {
-                                                    Log("Backing up original mogg...");
-                                                    File.Copy(Path.GetTempPath() + "mogg", BackupFile);
-                                                }
-                                                else
-                                                {
-                                                    Log("Backup Audio already exists, skipping backup.");
-                                                }
-
-                                            }
-
-                                            Log("Rendering new audio file...");
-                                            audioModified = true;
-
-                                            Bass.BASS_ChannelSetPosition(BassStream, Bass.BASS_ChannelSeconds2Bytes(BassStream, 0));
-                                            Bass.BASS_ChannelSetPosition(BassMixer, Bass.BASS_ChannelSeconds2Bytes(BassMixer, 0));
-                                            BassMix.BASS_Mixer_ChannelSetPosition(BassMixer, Bass.BASS_ChannelSeconds2Bytes(BassMixer, 0));
-
-                                            var newVolume = (float)Utils.DBToLevel(Convert.ToDouble(volumeOffset), 1.0);
-
-                                            BASS_FX_VOLUME_PARAM volume = new BASS_FX_VOLUME_PARAM(newVolume, 1, 0, 0);
-                                            var fxVolumeHandle = Bass.BASS_ChannelSetFX(BassStream, BASSFXType.BASS_FX_VOLUME, 0);
-                                            Bass.BASS_FXSetParameters(fxVolumeHandle, volume);
-
-                                            string fileToTest = Path.GetTempPath() + "\\" + "ogg_adjust";
-                                            BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassStream, "-q 5", BASSEncode.BASS_ENCODE_AUTOFREE, fileToTest);
-
-                                            while (true)
-                                            {
-                                                var buffer = new byte[20000];
-                                                var c = Bass.BASS_ChannelGetData(BassStream, buffer, buffer.Length);
-                                                if (c <= 0) break;
-                                            }
-
-                                            BassEnc.BASS_Encode_Stop(BassStream);
-
-                                            Log("Adding MOGG header...");
-                                            if (Tools.MakeMogg(fileToTest, Path.GetTempPath() + "\\" + "mogg_adjust"))
-                                            {
-                                                Log("Success");
-                                            }
-                                            else
-                                            {
-                                                throw new Exception("Failed");
-                                            }
-
-                                        }
-                                        else
-                                        {
-                                            Log("Audio not allowed to be re-rendered, adjusting as far as possible...");
-                                            volumeOffset = attenuationRange;
-                                        }
-                                    }
-                                }
-
-                            }
-                            else
-                            {
-                                DebugLog("Song is too loud...");
-                            }
-
-
-                            attenuationValues = "";
-
-                            DebugLog($"values Length: {values.Length}");
-
-                            foreach (var value in values)
-                            {
-                                DebugLog($"{value}");
-                                double preFinal = double.Parse(value, CultureInfo.InvariantCulture) + volumeOffset;
-
-                                if (audioModified)
-                                {
-                                    preFinal = 0.0;
-                                }
-
-                                attenuationValues += FormatDB(preFinal) + " ";
-                            }
-
-                            // Trim the white space off the end of the string.
-                            attenuationValues = attenuationValues.Trim();
-
+                            ApplyOffset(file);
                         }
                         else
                         {
                             Log($"Average dB of song is: {FormatDB(dBAverage)} dB.");
-                            dBLevels.Add(dBAverage);
+                            dBSongLevels.Add(file, dBAverage);
+                            CleanUp();
                         }
-
-                        CleanUp();
-
-                        WriteDTA();
-
-                        WriteCON(file);
 
                         success++;
 
@@ -842,12 +876,52 @@ namespace Nautilus
             Log("");
             Log($"Successfully processed {success} of {counter} files");
 
-            if (chkAnalyzerMode.Checked)
+            if (success > 0 && (chkAnalyzerMode.Checked || chkAlbumMode.Checked))
             {
-                Log($"Average dB of {success} files is: {FormatDB(dBLevels.Average())} dB.");
+                Log($"Average dB of {success} files is: {FormatDB(dBSongLevels.Values.Average())} dB.");
             }
 
             Log("");
+
+            if (success > 0 && (chkAlbumMode.Checked && !chkAnalyzerMode.Checked))
+            {
+                counter = 0;
+                success = 0;
+                double averageOffset = targetDB - dBSongLevels.Values.Average();
+                Log($"Now applying offset of {FormatDB(averageOffset)} dB to all files...");
+
+                foreach (var file in dBSongLevels.Keys.Where(File.Exists).TakeWhile(file => !backgroundWorker1.CancellationPending))
+                {
+                    try
+                    {
+                        counter++;
+                        // this should never be true, because we already checked its validity on the first pass where we got this song's volume
+                        // if it failed, it should never have had the opportunity to be added to dBSongLevels
+                        if (VariousFunctions.ReadFileType(file) != XboxFileType.STFS) continue;
+
+                        Parser.ExtractDTA(file);
+                        Parser.ReadDTA(Parser.DTA);
+
+                        Log("");
+                        Log($" - Song #{counter} is: {Parser.Songs[0].Artist} - {Parser.Songs[0].Name}");
+
+                        ApplyOffset(file, averageOffset);
+                        success++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log("There was a problem accessing that file");
+                        Log("The error says: " + ex.Message);
+                        if (Bass.BASS_ErrorGetCode() != BASSError.BASS_OK)
+                        {
+                            Log("BASS.NET Error:\n" + Bass.BASS_ErrorGetCode());
+                        }
+                        CleanUp();
+                    }
+                }
+
+                Log($"Successfully applied album volume offset to {success} of {counter} files");
+            }
 
             CleanUp();
             return true;
@@ -961,8 +1035,9 @@ namespace Nautilus
                 for (int i = 0; i < volumes.Length; i++)
                 {
                     volumes[i] = (double.Parse(volumes[i], CultureInfo.InvariantCulture) + volumeOffset).ToString("F", CultureInfo.InvariantCulture);
-                    DebugLog($"{i}: {volumes[i]}");
+                    //DebugLog($"{i}: {volumes[i]}");
                 }
+                DebugLog($"Testing using DTA vals: {string.Join(" ", volumes)}");
             }
             catch { }
             string[] pans = new string[song.ChannelsTotal];
@@ -978,6 +1053,7 @@ namespace Nautilus
 
             //technically we could do each channel, but Magma only allows us to specify volume per track, 
             //so both channels should have same volume, let's save a tiny bit of processing power
+            //level in this case refers to a linear scale, rather than the dB value (logarithmic)
             float vol;
             try
             {
@@ -1043,6 +1119,7 @@ namespace Nautilus
             var ArrangedChannels = moggSplitter.ArrangeStreamChannels(inputChans, isOgg);
             if (song.ChannelsDrums > 0 && (stems.Contains("drums") || stems.Contains("allstems")))
             {
+                DebugLog("Modifying drums vols");
                 //for drums it's a bit tricky because of the possible combinations
                 switch (song.ChannelsDrums)
                 {
@@ -1085,26 +1162,31 @@ namespace Nautilus
             //var channel = song.ChannelsDrums;
             if (song.ChannelsBass > 0 && (stems.Contains("bass") || stems.Contains("allstems")))
             {
+                DebugLog("Modifying bass vols");
                 matrix = DoVolumeAdjust(song, matrix, ArrangedChannels, song.ChannelsBass, song.ChannelsBassStart);//channel);
             }
             //channel = channel + song.ChannelsBass;
             if (song.ChannelsGuitar > 0 && (stems.Contains("guitar") || stems.Contains("allstems")))
             {
+                DebugLog("Modifying guitar vols");
                 matrix = DoVolumeAdjust(song, matrix, ArrangedChannels, song.ChannelsGuitar, song.ChannelsGuitarStart);//channel);
             }
             //channel = channel + song.ChannelsGuitar;
             if (song.ChannelsVocals > 0 && (stems.Contains("vocals") || stems.Contains("allstems")))
             {
+                DebugLog("Modifying vocals vols");
                 matrix = DoVolumeAdjust(song, matrix, ArrangedChannels, song.ChannelsVocals, song.ChannelsVocalsStart);//channel);
             }
             //channel = channel + song.ChannelsVocals;
             if (song.ChannelsKeys > 0 && (stems.Contains("keys") || stems.Contains("allstems")))
             {
+                DebugLog("Modifying keys vols");
                 matrix = DoVolumeAdjust(song, matrix, ArrangedChannels, song.ChannelsKeys, song.ChannelsKeysStart);//channel);
             }
             //channel = channel + song.ChannelsKeys;
             if (song.ChannelsCrowd > 0 && !stems.Contains("NOcrowd") && (stems.Contains("crowd") || stems.Contains("allstems")))
             {
+                DebugLog("Modifying crowd vols");
                 matrix = DoVolumeAdjust(song, matrix, ArrangedChannels, song.ChannelsCrowd, song.ChannelsCrowdStart);//channel);
             }
             //channel = channel + song.ChannelsCrowd;
@@ -1113,6 +1195,7 @@ namespace Nautilus
                 var backing = song.ChannelsTotal - song.ChannelsBass - song.ChannelsDrums - song.ChannelsGuitar - song.ChannelsKeys - song.ChannelsVocals - song.ChannelsCrowd;
                 if (backing > 0) //backing not required 
                 {
+                    DebugLog("Modifying backing vols");
                     if (song.ChannelsCrowdStart + song.ChannelsCrowd == song.ChannelsTotal) //crowd channels are last
                     {
                         matrix = DoVolumeAdjust(song, matrix, ArrangedChannels, backing, song.ChannelsCrowdStart - backing);//channel);                        
@@ -1168,7 +1251,7 @@ namespace Nautilus
                     if (!inputFiles.Any())
                     {
                         Log("Did not find any CON files ... try a different directory");
-                        Log("You can also drag and drop CON files here");
+                        Log("You can also drag and drop CON files or a folder containing CON files here");
                         Log("Ready");
                         btnBegin.Visible = false;
                         btnRefresh.Visible = true;
@@ -1225,7 +1308,11 @@ namespace Nautilus
             {
                 btnReset.PerformClick();
             }
-            if (VariousFunctions.ReadFileType(files[0]) == XboxFileType.STFS)
+            if (Directory.Exists(files[0])) {
+                txtFolder.Text = Path.GetFullPath(files[0]);
+                Tools.CurrentFolder = txtFolder.Text;
+            } 
+            else if (VariousFunctions.ReadFileType(files[0]) == XboxFileType.STFS)
             {
                 txtFolder.Text = Path.GetDirectoryName(files[0]);
                 Tools.CurrentFolder = txtFolder.Text;
@@ -1250,6 +1337,7 @@ namespace Nautilus
 
         private void btnReset_Click(object sender, EventArgs e)
         {
+            lstLog.Items.Clear();
             Log("Resetting...");
             inputFiles.Clear();
             EnableDisable(true);
@@ -1257,8 +1345,10 @@ namespace Nautilus
             btnBegin.Enabled = true;
             btnReset.Visible = false;
             btnFolder.Enabled = true;
+            chkAlbumMode.Enabled = !chkRestore.Checked;
             btnRefresh.Enabled = true;
             btnRefresh.PerformClick();
+            lblResetVolEnabled.Visible = chkRestore.Checked;
         }
 
         private void EnableDisable(bool enabled)
@@ -1268,6 +1358,7 @@ namespace Nautilus
             menuStrip1.Enabled = enabled;
             txtFolder.Enabled = enabled;
             picWorking.Visible = !enabled;
+            lblResetVolEnabled.Visible = enabled && chkRestore.Checked;
             lstLog.Cursor = enabled ? Cursors.Default : Cursors.WaitCursor;
             Cursor = lstLog.Cursor;
             chkRestore.Enabled = enabled;
@@ -1275,6 +1366,14 @@ namespace Nautilus
             radioDoNotRender.Enabled = enabled;
             numTargetValue.Enabled = enabled;
             numThresholdValue.Enabled = enabled;
+            if (chkRestore.Checked)
+            {
+                chkAlbumMode.Enabled = false;
+            }
+            else
+            {
+                chkAlbumMode.Enabled = enabled;
+            }
         }
 
         private void btnBegin_Click(object sender, EventArgs e)
@@ -1349,6 +1448,8 @@ namespace Nautilus
         {
             btnRefresh.Left = txtFolder.Left + txtFolder.Width - btnRefresh.Width;
             btnBegin.Left = txtFolder.Left + txtFolder.Width - btnBegin.Width;
+            chkAlbumMode.Left = Math.Max((int)(txtFolder.Left + (txtFolder.Width / 2) - (chkAlbumMode.Width / 2)), (int)(txtFolder.Left + btnFolder.Width + 8));
+            lblResetVolEnabled.Left = txtFolder.Left + (txtFolder.Width / 2) - (lblResetVolEnabled.Width / 2);
             picWorking.Left = (Width / 2) - (picWorking.Width / 2);
         }
 
@@ -1366,7 +1467,7 @@ namespace Nautilus
         private void VolumeNormalizerPrep_Shown(object sender, EventArgs e)
         {
             Log("Welcome to " + Text);
-            Log("Drag and drop the CON /LIVE file(s) to be processed here");
+            Log("Drag and drop the CON / LIVE file(s) to be processed here");
             Log("Or click 'Change Input Folder' to select the files");
             Log("Ready to begin");
             txtFolder.Text = inputDir;
@@ -1389,6 +1490,7 @@ namespace Nautilus
             btnReset.Enabled = true;
             btnReset.Visible = true;
             picWorking.Visible = false;
+            lblResetVolEnabled.Visible = chkRestore.Checked;
             lstLog.Cursor = Cursors.Default;
             Cursor = lstLog.Cursor;
             toolTip1.SetToolTip(btnBegin, "Click to begin");
@@ -1427,8 +1529,20 @@ namespace Nautilus
             }
         }
 
-        #endregion
+        private void chkRestore_Click(object sender, EventArgs e)
+        {
+            if (chkRestore.Checked)
+            {
+                chkAlbumMode.Checked = false;
+                chkAlbumMode.Enabled = false;
+            } else
+            {
+                chkAlbumMode.Enabled = true;
+            }
+            lblResetVolEnabled.Visible = chkRestore.Checked;
+        }
 
+        #endregion
     }
 
 }
