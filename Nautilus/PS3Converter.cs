@@ -492,7 +492,7 @@ namespace Nautilus
                                             line = ";ORIG_ID=" + origID;
                                             sw.WriteLine(line);
                                             var corrector = new SongIDCorrector();
-                                            line = "   ('song_id' " + corrector.ShortnameToSongID(origID) + ")";
+                                            line = "   ('song_id' " + corrector.ShortnameToSongID(Parser.Songs[0].InternalName) + ")";
                                         }
                                     }
                                     if (line.Trim() != "")
@@ -1136,7 +1136,7 @@ namespace Nautilus
                             newline = ";ORIG_ID=" + origID;
                             sw.WriteLine(newline);
                             var corrector = new SongIDCorrector();
-                            var newID = corrector.ShortnameToSongID(Parser.GetSongID(line));
+                            var newID = corrector.ShortnameToSongID(Parser.Songs[0].InternalName);
                             newline = "   ('song_id' " + newID + ")";
                             Log($"Song has an incorrect ID: {origID} - replacing with a correct ID: {newID}");
                             counter++;                            

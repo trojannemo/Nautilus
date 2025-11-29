@@ -598,7 +598,7 @@ namespace Nautilus
             FileRenamer.RunWorkerAsync();
         }
 
-        private static string CleanForXbox(string input)
+        private static string CleanForXbox(string input, bool trim = true)
         {
             var destfile = input;
             if (string.IsNullOrWhiteSpace(destfile)) return input;
@@ -648,7 +648,7 @@ namespace Nautilus
             {
                 destfile = destfile.Substring(0, destfile.Length - 1);
             }
-            if (destfile.Length > 42)
+            if (destfile.Length > 42 && trim)
             {
                 destfile = destfile.Substring(0, 42).Trim();
             }
@@ -873,13 +873,18 @@ namespace Nautilus
                                                 newName = Tools.FixFeaturedArtist(newName); //adjust featured artists
                                             }
 
-                                            if (!ignoreXboxFilesystemLimitations.Checked)
+                                            if (fullNameNoAccents.Checked)
                                             {
-                                                newName = CleanForXbox(newName);
+                                                newName = CleanForXbox(newName, false);
+                                                newfile = Path.GetDirectoryName(sourceFile) + "\\" + sort + newName;
+                                            }
+                                            else if (ignoreXboxFilesystemLimitations.Checked)
+                                            {
                                                 newfile = Path.GetDirectoryName(sourceFile) + "\\" + sort + newName;
                                             }
                                             else
                                             {
+                                                newName = CleanForXbox(newName);
                                                 newfile = Path.GetDirectoryName(sourceFile) + "\\" + sort + newName;
                                             }
 
@@ -1341,6 +1346,16 @@ namespace Nautilus
                 tryToSortFiles.Checked = false;
                 tryDetailedSubsorting.Enabled = false;
             }
+        }
+
+        private void ignoreXboxFilesystemLimitations_Click(object sender, EventArgs e)
+        {
+            fullNameNoAccents.Checked = false;
+        }
+
+        private void fullNameNoAccents_Click(object sender, EventArgs e)
+        {
+            ignoreXboxFilesystemLimitations.Checked = false;
         }
     }
 }

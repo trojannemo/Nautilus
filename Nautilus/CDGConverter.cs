@@ -12,6 +12,7 @@ using System.Drawing.Imaging;
 using Un4seen.Bass;
 using System.Runtime.InteropServices;
 using System.Drawing.Drawing2D;
+using DocumentFormat.OpenXml.Office2010.PowerPoint;
 
 namespace Nautilus
 {
@@ -269,6 +270,11 @@ namespace Nautilus
                         var backColor = ColorTranslator.FromHtml(customColor);
                         UpdateBackgroundColors(backColor);
                     }
+                }
+                if (animatedBackgroundToolStripMenuItem.Checked)
+                {
+                    enableMP4TitleCardShadows.Checked = false;
+                    enableMP4TitleCardShadows.Enabled = false;
                 }
             }
             catch 
@@ -1068,7 +1074,7 @@ namespace Nautilus
             sw.WriteLine("border = \"" + backgroundColor + "\""); //match the background for now
             sw.WriteLine("highlight_bandwidth = 1");
             sw.WriteLine("draw_bandwidth = 1");
-            sw.WriteLine("stroke_width = 1");
+            sw.WriteLine("stroke_width = " + (enableCDGStroke ? "1" : "0"));
             sw.WriteLine("");
             sw.WriteLine("font = '" + ActiveFont + "'");
             sw.WriteLine("font_size = 18"); //hardcoded
@@ -2069,14 +2075,14 @@ namespace Nautilus
 
                 using (var font = new Font(ActiveFontName, scaledFontSize))
                 {
+                    ApplyTextRenderingSettings(g);
+                    
                     // measure for centering
                     var size = TextRenderer.MeasureText(g, text, font);
                     int x = (resolutionX + offset - size.Width) / 2;
 
-                    Color textColor = ColorTranslator.FromHtml(textColor1);
-                                        
-                    g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-
+                    Color textColor = ColorTranslator.FromHtml(textColor1);                                      
+                    
                     if (enableTitleShadows)
                     {
                         // Create an offscreen bitmap for blur
@@ -2120,12 +2126,33 @@ namespace Nautilus
                                 }
                             }
                         }
+
+                        using (var brush = new SolidBrush(textColor))
+                        {
+                            g.DrawString(text, font, brush, x, y);
+                        }
                     }
-                                        
-                    using (var brush = new SolidBrush(textColor))
+                    else if (enableMP4Stroke)
+                    {                        
+                        Color strokeCol = ColorTranslator.FromHtml(strokeColor);
+
+                        DrawTextWithStroke(
+                            g,
+                            text,
+                            font,
+                            new Point(x, y),
+                            textColor,
+                            strokeCol,
+                            2
+                        );
+                    }
+                    else
                     {
-                        g.DrawString(text, font, brush, x, y);
-                    }
+                        using (var brush = new SolidBrush(textColor))
+                        {
+                            g.DrawString(text, font, brush, x, y);
+                        }
+                    }                                      
                 }
             }
         }
@@ -3718,8 +3745,70 @@ namespace Nautilus
 
             return merged;
         }
-        
-        public List<MergedSyllable> BuildSyllablePixelMap(List<MergedSyllable> syllables, Font font, Graphics g)
+
+        public List<MergedSyllable> BuildSyllablePixelMap(
+            List<MergedSyllable> syllables,
+            Font font,
+            Graphics g,
+            string displayText,
+            float totalTextWidth)
+        {
+            ApplyTextRenderingSettings(g);
+
+            int searchIndex = 0;
+            float prevPrefixWidth = 0f;
+
+            foreach (var syllable in syllables)
+            {
+                string visible = GetVisibleTextForSyllable(syllable);
+
+                if (string.IsNullOrWhiteSpace(visible))
+                {
+                    syllable.Width = 0f;
+                    continue;
+                }
+
+                // Find this syllable's visible text in the final display string,
+                // starting from where the last one left off.
+                int idx = displayText.IndexOf(visible, searchIndex, StringComparison.Ordinal);
+                if (idx < 0)
+                {
+                    // Fallback: if we can’t find it (weird cleaning / markers),
+                    // at least measure it in isolation so we don't crash.
+                    SizeF sizeFallback = g.MeasureString(visible, font);
+                    syllable.Width = sizeFallback.Width;
+                    continue;
+                }
+
+                int endIdx = idx + visible.Length;
+
+                // Measure prefix up to the end of this syllable in the final string
+                string prefixText = displayText.Substring(0, endIdx);
+                SizeF prefixSize = g.MeasureString(prefixText, font);
+                float prefixWidth = prefixSize.Width;
+
+                syllable.Width = prefixWidth - prevPrefixWidth;
+
+                prevPrefixWidth = prefixWidth;
+                searchIndex = endIdx;
+            }
+
+            // Optional but recommended: normalize widths so they sum exactly
+            // to the measured total text width.
+            float sumWidths = syllables.Sum(s => s.Width);
+            if (sumWidths > 0.1f && Math.Abs(sumWidths - totalTextWidth) > 0.5f)
+            {
+                float scale = totalTextWidth / sumWidths;
+                foreach (var s in syllables)
+                {
+                    s.Width *= scale;
+                }
+            }
+
+            return syllables;
+        }
+
+        public List<MergedSyllable> BuildSyllablePixelMap1(List<MergedSyllable> syllables, Font font, Graphics g)
         {
             foreach (var syllable in syllables)
             {
@@ -3872,7 +3961,15 @@ namespace Nautilus
                 words.Add(currentWord);
 
             return ProcessLine(string.Join(" ", words)).Replace(" -", "-");
-        }              
+        }
+
+        private static void ApplyTextRenderingSettings(Graphics g)
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+        }
 
         public string ReconstructPhraseTextFromSyllables(List<MergedSyllable> phraseSyllables)
         {
@@ -3926,10 +4023,7 @@ namespace Nautilus
 
         private void DrawTextWithStroke(Graphics g, string text, Font font, Point pos, Color fill, Color stroke, int strokeWidth)
         {
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+            ApplyTextRenderingSettings(g);
 
             if (enableMP4Stroke)
             {
@@ -3954,18 +4048,15 @@ namespace Nautilus
             {
                 g.DrawString(text, font, fillBrush, pos);
             }
-            /*var intPos = new Point(
-            (int)Math.Round((double)pos.X),
-            (int)Math.Round((double)pos.Y));
+        }
 
-            TextRenderer.DrawText(
-                g,
-                text,
-                font,
-                intPos,
-                fill,                 // foreground color
-                Color.Transparent,    // background
-                TextFormatFlags.NoPadding | TextFormatFlags.NoClipping);*/
+        private string GetVisibleTextForSyllable(MergedSyllable s)
+        {
+            // Make this mirror the logic in ReconstructPhraseTextFromSyllables
+            // as closely as possible.
+            var raw = s.Lyric?.Trim() ?? string.Empty;
+            var clean = CleanSyllable(raw);
+            return clean.Replace("‿", " ");
         }
 
         public void DrawSyllableAccurateLine(
@@ -3979,25 +4070,22 @@ namespace Nautilus
             double adjustedTime)
         {
             if (syllablesForThisLine.Count == 0)
-                return;
+                return;                       
 
             var merged = MergeSustainedSyllables(syllablesForThisLine);
 
             string displayText = ReconstructPhraseTextFromSyllables(merged);
 
+            ApplyTextRenderingSettings(g);
+
             SizeF visualSizeF = g.MeasureString(displayText, font);            
             
-            //const TextFormatFlags FormatFlags = TextFormatFlags.NoPadding | TextFormatFlags.NoClipping;
-
-            // Measure using TextRenderer instead of g.MeasureString
-            //Size visualSizeF = TextRenderer.MeasureText(g, displayText, font, new Size(int.MaxValue, int.MaxValue), FormatFlags);
-
             int textWidth = (int)Math.Ceiling((double)visualSizeF.Width);
             int textHeight = (int)Math.Ceiling((double)visualSizeF.Height);
 
             int posX = (resolutionX - textWidth) / 2;
 
-            var pixelmap = BuildSyllablePixelMap(merged, font, g);
+            var pixelmap = BuildSyllablePixelMap(merged, font, g, displayText, textWidth);
 
             float highlightWidth = GetHighlightedPixelWidth(pixelmap, adjustedTime);
 
@@ -4038,7 +4126,10 @@ namespace Nautilus
                 Rectangle src = new Rectangle(0, 0, (int)highlightWidth, bmp.Height);
                 Rectangle dest = new Rectangle(posX, y, (int)highlightWidth, bmp.Height);
 
-                g.DrawImage(bmp, dest, src, GraphicsUnit.Pixel);
+                if (src.Width > 0)
+                {
+                    g.DrawImage(bmp, dest, src, GraphicsUnit.Pixel);
+                }
             }            
         }
 

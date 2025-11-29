@@ -82,7 +82,12 @@
             this.FifteenFPS = new System.Windows.Forms.ToolStripMenuItem();
             this.ThirtyFPS = new System.Windows.Forms.ToolStripMenuItem();
             this.SixtyFPS = new System.Windows.Forms.ToolStripMenuItem();
+            this.mP4BackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.solidColorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.staticImageBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.animatedBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.highlightDelayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.noDelayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.quarterSecondDelay = new System.Windows.Forms.ToolStripMenuItem();
             this.halfSecondDelay = new System.Windows.Forms.ToolStripMenuItem();
             this.threeQuarterSecondDelay = new System.Windows.Forms.ToolStripMenuItem();
@@ -108,6 +113,11 @@
             this.keeptomlFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.keepwavFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripSeparator();
+            this.enableCDGStrokeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.enableMP4StrokeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
+            this.enableMP4TitleCardShadows = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
             this.showRenderingPreview = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -123,16 +133,6 @@
             this.label7 = new System.Windows.Forms.Label();
             this.lblStrokeQuestion = new System.Windows.Forms.Label();
             this.colorPicker = new System.Windows.Forms.ColorDialog();
-            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
-            this.enableCDGStrokeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.enableMP4StrokeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.enableMP4TitleCardShadows = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
-            this.mP4BackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.solidColorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.staticImageBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.animatedBackgroundToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.noDelayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grpAudioOptions.SuspendLayout();
             this.grpHarm1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picBackground1)).BeginInit();
@@ -864,6 +864,43 @@
             this.SixtyFPS.Text = "60 FPS (smoother, slower to render)";
             this.SixtyFPS.Click += new System.EventHandler(this.SixtyFPS_Click);
             // 
+            // mP4BackgroundToolStripMenuItem
+            // 
+            this.mP4BackgroundToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.mP4BackgroundToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.solidColorToolStripMenuItem,
+            this.staticImageBackgroundToolStripMenuItem,
+            this.animatedBackgroundToolStripMenuItem});
+            this.mP4BackgroundToolStripMenuItem.Name = "mP4BackgroundToolStripMenuItem";
+            this.mP4BackgroundToolStripMenuItem.Size = new System.Drawing.Size(279, 22);
+            this.mP4BackgroundToolStripMenuItem.Text = "MP4 background";
+            // 
+            // solidColorToolStripMenuItem
+            // 
+            this.solidColorToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.solidColorToolStripMenuItem.Checked = true;
+            this.solidColorToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.solidColorToolStripMenuItem.Name = "solidColorToolStripMenuItem";
+            this.solidColorToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.solidColorToolStripMenuItem.Text = "Solid color";
+            this.solidColorToolStripMenuItem.Click += new System.EventHandler(this.solidColorToolStripMenuItem_Click);
+            // 
+            // staticImageBackgroundToolStripMenuItem
+            // 
+            this.staticImageBackgroundToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.staticImageBackgroundToolStripMenuItem.Name = "staticImageBackgroundToolStripMenuItem";
+            this.staticImageBackgroundToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.staticImageBackgroundToolStripMenuItem.Text = "Static image (background.png)";
+            this.staticImageBackgroundToolStripMenuItem.Click += new System.EventHandler(this.staticImageBackgroundToolStripMenuItem_Click);
+            // 
+            // animatedBackgroundToolStripMenuItem
+            // 
+            this.animatedBackgroundToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.animatedBackgroundToolStripMenuItem.Name = "animatedBackgroundToolStripMenuItem";
+            this.animatedBackgroundToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
+            this.animatedBackgroundToolStripMenuItem.Text = "Animated (background.mp4)";
+            this.animatedBackgroundToolStripMenuItem.Click += new System.EventHandler(this.animatedBackgroundToolStripMenuItem_Click);
+            // 
             // highlightDelayToolStripMenuItem
             // 
             this.highlightDelayToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
@@ -883,11 +920,19 @@
             this.highlightDelayToolStripMenuItem.Size = new System.Drawing.Size(279, 22);
             this.highlightDelayToolStripMenuItem.Text = "MP4 highlighting";
             // 
+            // noDelayToolStripMenuItem
+            // 
+            this.noDelayToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.noDelayToolStripMenuItem.Name = "noDelayToolStripMenuItem";
+            this.noDelayToolStripMenuItem.Size = new System.Drawing.Size(263, 22);
+            this.noDelayToolStripMenuItem.Text = "No delay";
+            this.noDelayToolStripMenuItem.Click += new System.EventHandler(this.noDelayToolStripMenuItem_Click);
+            // 
             // quarterSecondDelay
             // 
             this.quarterSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.quarterSecondDelay.Name = "quarterSecondDelay";
-            this.quarterSecondDelay.Size = new System.Drawing.Size(217, 22);
+            this.quarterSecondDelay.Size = new System.Drawing.Size(263, 22);
             this.quarterSecondDelay.Text = "0.25 second delay";
             this.quarterSecondDelay.Click += new System.EventHandler(this.quarterSecondDelay_Click);
             // 
@@ -895,7 +940,7 @@
             // 
             this.halfSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.halfSecondDelay.Name = "halfSecondDelay";
-            this.halfSecondDelay.Size = new System.Drawing.Size(217, 22);
+            this.halfSecondDelay.Size = new System.Drawing.Size(263, 22);
             this.halfSecondDelay.Text = "0.5 second delay";
             this.halfSecondDelay.Click += new System.EventHandler(this.halfSecondDelay_Click);
             // 
@@ -903,17 +948,15 @@
             // 
             this.threeQuarterSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.threeQuarterSecondDelay.Name = "threeQuarterSecondDelay";
-            this.threeQuarterSecondDelay.Size = new System.Drawing.Size(217, 22);
+            this.threeQuarterSecondDelay.Size = new System.Drawing.Size(263, 22);
             this.threeQuarterSecondDelay.Text = "0.75 second delay";
             this.threeQuarterSecondDelay.Click += new System.EventHandler(this.threeQuarterSecondDelay_Click);
             // 
             // wholeSecondDelay
             // 
             this.wholeSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.wholeSecondDelay.Checked = true;
-            this.wholeSecondDelay.CheckState = System.Windows.Forms.CheckState.Checked;
             this.wholeSecondDelay.Name = "wholeSecondDelay";
-            this.wholeSecondDelay.Size = new System.Drawing.Size(217, 22);
+            this.wholeSecondDelay.Size = new System.Drawing.Size(263, 22);
             this.wholeSecondDelay.Text = "1 second delay";
             this.wholeSecondDelay.Click += new System.EventHandler(this.wholeSecondDelay_Click);
             // 
@@ -921,15 +964,17 @@
             // 
             this.OneTwentyFiveDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.OneTwentyFiveDelay.Name = "OneTwentyFiveDelay";
-            this.OneTwentyFiveDelay.Size = new System.Drawing.Size(217, 22);
+            this.OneTwentyFiveDelay.Size = new System.Drawing.Size(263, 22);
             this.OneTwentyFiveDelay.Text = "1.25 second delay";
             this.OneTwentyFiveDelay.Click += new System.EventHandler(this.OneTwentyFiveDelay_Click);
             // 
             // OneFiftyDelay
             // 
             this.OneFiftyDelay.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.OneFiftyDelay.Checked = true;
+            this.OneFiftyDelay.CheckState = System.Windows.Forms.CheckState.Checked;
             this.OneFiftyDelay.Name = "OneFiftyDelay";
-            this.OneFiftyDelay.Size = new System.Drawing.Size(217, 22);
+            this.OneFiftyDelay.Size = new System.Drawing.Size(263, 22);
             this.OneFiftyDelay.Text = "1.5 second delay";
             this.OneFiftyDelay.Click += new System.EventHandler(this.OneFiftyDelay_Click);
             // 
@@ -937,7 +982,7 @@
             // 
             this.OneSeventyFiveDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.OneSeventyFiveDelay.Name = "OneSeventyFiveDelay";
-            this.OneSeventyFiveDelay.Size = new System.Drawing.Size(217, 22);
+            this.OneSeventyFiveDelay.Size = new System.Drawing.Size(263, 22);
             this.OneSeventyFiveDelay.Text = "1.75 second delay";
             this.OneSeventyFiveDelay.Click += new System.EventHandler(this.OneSeventyFiveDelay_Click);
             // 
@@ -945,7 +990,7 @@
             // 
             this.TwoSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.TwoSecondDelay.Name = "TwoSecondDelay";
-            this.TwoSecondDelay.Size = new System.Drawing.Size(217, 22);
+            this.TwoSecondDelay.Size = new System.Drawing.Size(263, 22);
             this.TwoSecondDelay.Text = "2 second delay";
             this.TwoSecondDelay.Click += new System.EventHandler(this.TwoSecondDelay_Click);
             // 
@@ -1047,7 +1092,7 @@
             // 
             this.pageMode.BackColor = System.Drawing.Color.WhiteSmoke;
             this.pageMode.Name = "pageMode";
-            this.pageMode.Size = new System.Drawing.Size(180, 22);
+            this.pageMode.Size = new System.Drawing.Size(150, 22);
             this.pageMode.Text = "Page mode";
             this.pageMode.Click += new System.EventHandler(this.pageMode_Click);
             // 
@@ -1057,7 +1102,7 @@
             this.delayedMode.Checked = true;
             this.delayedMode.CheckState = System.Windows.Forms.CheckState.Checked;
             this.delayedMode.Name = "delayedMode";
-            this.delayedMode.Size = new System.Drawing.Size(180, 22);
+            this.delayedMode.Size = new System.Drawing.Size(150, 22);
             this.delayedMode.Text = "Delayed mode";
             this.delayedMode.Click += new System.EventHandler(this.delayedMode_Click);
             // 
@@ -1065,7 +1110,7 @@
             // 
             this.eagerMode.BackColor = System.Drawing.Color.WhiteSmoke;
             this.eagerMode.Name = "eagerMode";
-            this.eagerMode.Size = new System.Drawing.Size(180, 22);
+            this.eagerMode.Size = new System.Drawing.Size(150, 22);
             this.eagerMode.Text = "Eager mode";
             this.eagerMode.Click += new System.EventHandler(this.eagerMode_Click);
             // 
@@ -1096,6 +1141,44 @@
             this.toolStripMenuItem3.Name = "toolStripMenuItem3";
             this.toolStripMenuItem3.Size = new System.Drawing.Size(276, 6);
             // 
+            // enableCDGStrokeToolStripMenuItem
+            // 
+            this.enableCDGStrokeToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.enableCDGStrokeToolStripMenuItem.Checked = true;
+            this.enableCDGStrokeToolStripMenuItem.CheckOnClick = true;
+            this.enableCDGStrokeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.enableCDGStrokeToolStripMenuItem.Name = "enableCDGStrokeToolStripMenuItem";
+            this.enableCDGStrokeToolStripMenuItem.Size = new System.Drawing.Size(279, 22);
+            this.enableCDGStrokeToolStripMenuItem.Text = "Enable CDG stroke";
+            this.enableCDGStrokeToolStripMenuItem.Click += new System.EventHandler(this.enableCDGStrokeToolStripMenuItem_Click);
+            // 
+            // enableMP4StrokeToolStripMenuItem
+            // 
+            this.enableMP4StrokeToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.enableMP4StrokeToolStripMenuItem.CheckOnClick = true;
+            this.enableMP4StrokeToolStripMenuItem.Name = "enableMP4StrokeToolStripMenuItem";
+            this.enableMP4StrokeToolStripMenuItem.Size = new System.Drawing.Size(279, 22);
+            this.enableMP4StrokeToolStripMenuItem.Text = "Enable MP4 stroke (slower)";
+            this.enableMP4StrokeToolStripMenuItem.Click += new System.EventHandler(this.enableCDGStrokeToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItem4
+            // 
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(276, 6);
+            // 
+            // enableMP4TitleCardShadows
+            // 
+            this.enableMP4TitleCardShadows.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.enableMP4TitleCardShadows.CheckOnClick = true;
+            this.enableMP4TitleCardShadows.Name = "enableMP4TitleCardShadows";
+            this.enableMP4TitleCardShadows.Size = new System.Drawing.Size(279, 22);
+            this.enableMP4TitleCardShadows.Text = "Enable MP4 title card shadows (slower)";
+            // 
+            // toolStripMenuItem5
+            // 
+            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
+            this.toolStripMenuItem5.Size = new System.Drawing.Size(276, 6);
+            // 
             // showRenderingPreview
             // 
             this.showRenderingPreview.BackColor = System.Drawing.Color.WhiteSmoke;
@@ -1115,7 +1198,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.aboutToolStripMenuItem.Text = "&About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -1252,89 +1335,6 @@
             this.lblStrokeQuestion.TabIndex = 90;
             this.lblStrokeQuestion.Text = "?";
             this.lblStrokeQuestion.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lblStrokeQuestion_MouseClick);
-            // 
-            // toolStripMenuItem4
-            // 
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(276, 6);
-            // 
-            // enableCDGStrokeToolStripMenuItem
-            // 
-            this.enableCDGStrokeToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.enableCDGStrokeToolStripMenuItem.Checked = true;
-            this.enableCDGStrokeToolStripMenuItem.CheckOnClick = true;
-            this.enableCDGStrokeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.enableCDGStrokeToolStripMenuItem.Name = "enableCDGStrokeToolStripMenuItem";
-            this.enableCDGStrokeToolStripMenuItem.Size = new System.Drawing.Size(279, 22);
-            this.enableCDGStrokeToolStripMenuItem.Text = "Enable CDG stroke";
-            this.enableCDGStrokeToolStripMenuItem.Click += new System.EventHandler(this.enableCDGStrokeToolStripMenuItem_Click);
-            // 
-            // enableMP4StrokeToolStripMenuItem
-            // 
-            this.enableMP4StrokeToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.enableMP4StrokeToolStripMenuItem.CheckOnClick = true;
-            this.enableMP4StrokeToolStripMenuItem.Name = "enableMP4StrokeToolStripMenuItem";
-            this.enableMP4StrokeToolStripMenuItem.Size = new System.Drawing.Size(279, 22);
-            this.enableMP4StrokeToolStripMenuItem.Text = "Enable MP4 stroke (slower)";
-            this.enableMP4StrokeToolStripMenuItem.Click += new System.EventHandler(this.enableCDGStrokeToolStripMenuItem_Click);
-            // 
-            // enableMP4TitleCardShadows
-            // 
-            this.enableMP4TitleCardShadows.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.enableMP4TitleCardShadows.CheckOnClick = true;
-            this.enableMP4TitleCardShadows.Name = "enableMP4TitleCardShadows";
-            this.enableMP4TitleCardShadows.Size = new System.Drawing.Size(279, 22);
-            this.enableMP4TitleCardShadows.Text = "Enable MP4 title card shadows (slower)";
-            // 
-            // toolStripMenuItem5
-            // 
-            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(276, 6);
-            // 
-            // mP4BackgroundToolStripMenuItem
-            // 
-            this.mP4BackgroundToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.mP4BackgroundToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.solidColorToolStripMenuItem,
-            this.staticImageBackgroundToolStripMenuItem,
-            this.animatedBackgroundToolStripMenuItem});
-            this.mP4BackgroundToolStripMenuItem.Name = "mP4BackgroundToolStripMenuItem";
-            this.mP4BackgroundToolStripMenuItem.Size = new System.Drawing.Size(279, 22);
-            this.mP4BackgroundToolStripMenuItem.Text = "MP4 background";
-            // 
-            // solidColorToolStripMenuItem
-            // 
-            this.solidColorToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.solidColorToolStripMenuItem.Checked = true;
-            this.solidColorToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.solidColorToolStripMenuItem.Name = "solidColorToolStripMenuItem";
-            this.solidColorToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
-            this.solidColorToolStripMenuItem.Text = "Solid color";
-            this.solidColorToolStripMenuItem.Click += new System.EventHandler(this.solidColorToolStripMenuItem_Click);
-            // 
-            // staticImageBackgroundToolStripMenuItem
-            // 
-            this.staticImageBackgroundToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.staticImageBackgroundToolStripMenuItem.Name = "staticImageBackgroundToolStripMenuItem";
-            this.staticImageBackgroundToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
-            this.staticImageBackgroundToolStripMenuItem.Text = "Static image (background.png)";
-            this.staticImageBackgroundToolStripMenuItem.Click += new System.EventHandler(this.staticImageBackgroundToolStripMenuItem_Click);
-            // 
-            // animatedBackgroundToolStripMenuItem
-            // 
-            this.animatedBackgroundToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.animatedBackgroundToolStripMenuItem.Name = "animatedBackgroundToolStripMenuItem";
-            this.animatedBackgroundToolStripMenuItem.Size = new System.Drawing.Size(238, 22);
-            this.animatedBackgroundToolStripMenuItem.Text = "Animated (background.mp4)";
-            this.animatedBackgroundToolStripMenuItem.Click += new System.EventHandler(this.animatedBackgroundToolStripMenuItem_Click);
-            // 
-            // noDelayToolStripMenuItem
-            // 
-            this.noDelayToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.noDelayToolStripMenuItem.Name = "noDelayToolStripMenuItem";
-            this.noDelayToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
-            this.noDelayToolStripMenuItem.Text = "No delay";
-            this.noDelayToolStripMenuItem.Click += new System.EventHandler(this.noDelayToolStripMenuItem_Click);
             // 
             // CDGConverter
             // 

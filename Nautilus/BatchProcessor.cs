@@ -330,7 +330,7 @@ namespace Nautilus
                                                         var origID = Parser.GetSongID(line);
                                                         sw.WriteLine(";ORIG_ID=" + origID);
                                                         var corrector = new SongIDCorrector();
-                                                        line = "   ('song_id' " + corrector.ShortnameToSongID(origID) + ")";
+                                                        line = "   ('song_id' " + corrector.ShortnameToSongID(Parser.Songs[0].InternalName) + ")";
                                                         sw.WriteLine(line);
                                                         line = sr.ReadLine();
                                                     }

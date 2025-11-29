@@ -42,6 +42,7 @@
             this.renamingOptionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.renameFiles = new System.Windows.Forms.ToolStripMenuItem();
             this.renameInternalName = new System.Windows.Forms.ToolStripMenuItem();
+            this.ezloDQMode = new System.Windows.Forms.ToolStripMenuItem();
             this.renameTheArtistSong = new System.Windows.Forms.ToolStripMenuItem();
             this.renameArtistTheSong = new System.Windows.Forms.ToolStripMenuItem();
             this.renameSongTheArtist = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,7 +67,7 @@
             this.picWorking = new System.Windows.Forms.PictureBox();
             this.folderScanner = new System.ComponentModel.BackgroundWorker();
             this.PhaseShiftRenamer = new System.ComponentModel.BackgroundWorker();
-            this.ezloDQMode = new System.Windows.Forms.ToolStripMenuItem();
+            this.fullNameNoAccents = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -211,6 +212,7 @@
             this.removeSpacesFromFileName,
             this.replaceSpacesWithUnderscores,
             this.ignoreXboxFilesystemLimitations,
+            this.fullNameNoAccents,
             this.toolStripMenuItem1,
             this.batchRenamePhaseShift});
             this.renamingOptionsToolStripMenuItem.Name = "renamingOptionsToolStripMenuItem";
@@ -233,7 +235,7 @@
             this.renameYearArtist,
             this.renameYearSong});
             this.renameFiles.Name = "renameFiles";
-            this.renameFiles.Size = new System.Drawing.Size(266, 22);
+            this.renameFiles.Size = new System.Drawing.Size(299, 22);
             this.renameFiles.Text = "Rename files";
             this.renameFiles.Click += new System.EventHandler(this.renameFilesToolStripMenuItem_Click);
             // 
@@ -244,6 +246,14 @@
             this.renameInternalName.Size = new System.Drawing.Size(246, 22);
             this.renameInternalName.Text = "InternalName";
             this.renameInternalName.Click += new System.EventHandler(this.internalName_Click);
+            // 
+            // ezloDQMode
+            // 
+            this.ezloDQMode.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.ezloDQMode.Name = "ezloDQMode";
+            this.ezloDQMode.Size = new System.Drawing.Size(246, 22);
+            this.ezloDQMode.Text = "InternalName (The Artist - Song)";
+            this.ezloDQMode.Click += new System.EventHandler(this.internalName_Click);
             // 
             // renameTheArtistSong
             // 
@@ -302,7 +312,7 @@
             this.normalizeFeaturedArtists.CheckOnClick = true;
             this.normalizeFeaturedArtists.CheckState = System.Windows.Forms.CheckState.Checked;
             this.normalizeFeaturedArtists.Name = "normalizeFeaturedArtists";
-            this.normalizeFeaturedArtists.Size = new System.Drawing.Size(266, 22);
+            this.normalizeFeaturedArtists.Size = new System.Drawing.Size(299, 22);
             this.normalizeFeaturedArtists.Text = "Normalize featured artists to \'ft.\'";
             // 
             // removeSpacesFromFileName
@@ -310,7 +320,7 @@
             this.removeSpacesFromFileName.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.removeSpacesFromFileName.CheckOnClick = true;
             this.removeSpacesFromFileName.Name = "removeSpacesFromFileName";
-            this.removeSpacesFromFileName.Size = new System.Drawing.Size(266, 22);
+            this.removeSpacesFromFileName.Size = new System.Drawing.Size(299, 22);
             this.removeSpacesFromFileName.Text = "Remove spaces from file names";
             this.removeSpacesFromFileName.Click += new System.EventHandler(this.removeSpacesFromFileNameToolStripMenuItem_Click);
             // 
@@ -319,7 +329,7 @@
             this.replaceSpacesWithUnderscores.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.replaceSpacesWithUnderscores.CheckOnClick = true;
             this.replaceSpacesWithUnderscores.Name = "replaceSpacesWithUnderscores";
-            this.replaceSpacesWithUnderscores.Size = new System.Drawing.Size(266, 22);
+            this.replaceSpacesWithUnderscores.Size = new System.Drawing.Size(299, 22);
             this.replaceSpacesWithUnderscores.Text = "Replace spaces with underscores";
             this.replaceSpacesWithUnderscores.Click += new System.EventHandler(this.replaceSpacesWithUnderscoresToolStripMenuItem_Click);
             // 
@@ -328,20 +338,21 @@
             this.ignoreXboxFilesystemLimitations.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.ignoreXboxFilesystemLimitations.CheckOnClick = true;
             this.ignoreXboxFilesystemLimitations.Name = "ignoreXboxFilesystemLimitations";
-            this.ignoreXboxFilesystemLimitations.Size = new System.Drawing.Size(266, 22);
+            this.ignoreXboxFilesystemLimitations.Size = new System.Drawing.Size(299, 22);
             this.ignoreXboxFilesystemLimitations.Text = "Ignore Xbox file system limitations";
+            this.ignoreXboxFilesystemLimitations.Click += new System.EventHandler(this.ignoreXboxFilesystemLimitations_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(263, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(296, 6);
             // 
             // batchRenamePhaseShift
             // 
             this.batchRenamePhaseShift.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.batchRenamePhaseShift.Name = "batchRenamePhaseShift";
             this.batchRenamePhaseShift.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.batchRenamePhaseShift.Size = new System.Drawing.Size(266, 22);
+            this.batchRenamePhaseShift.Size = new System.Drawing.Size(299, 22);
             this.batchRenamePhaseShift.Text = "Batch rename Phase Shift folders";
             this.batchRenamePhaseShift.Click += new System.EventHandler(this.batchRenamePhaseShift_Click);
             // 
@@ -455,13 +466,14 @@
             this.PhaseShiftRenamer.DoWork += new System.ComponentModel.DoWorkEventHandler(this.PhaseShiftRenamer_DoWork);
             this.PhaseShiftRenamer.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.PhaseShiftRenamer_RunWorkerCompleted);
             // 
-            // ezloDQMode
+            // fullNameNoAccents
             // 
-            this.ezloDQMode.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.ezloDQMode.Name = "ezloDQMode";
-            this.ezloDQMode.Size = new System.Drawing.Size(246, 22);
-            this.ezloDQMode.Text = "InternalName (The Artist - Song)";
-            this.ezloDQMode.Click += new System.EventHandler(this.internalName_Click);
+            this.fullNameNoAccents.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.fullNameNoAccents.CheckOnClick = true;
+            this.fullNameNoAccents.Name = "fullNameNoAccents";
+            this.fullNameNoAccents.Size = new System.Drawing.Size(299, 22);
+            this.fullNameNoAccents.Text = "Full name, no accents or special characters";
+            this.fullNameNoAccents.Click += new System.EventHandler(this.fullNameNoAccents_Click);
             // 
             // BatchRenamer
             // 
@@ -539,5 +551,6 @@
         private System.Windows.Forms.ToolStripMenuItem renameYearSong;
         private System.Windows.Forms.ToolStripMenuItem sortByAuthor;
         private System.Windows.Forms.ToolStripMenuItem ezloDQMode;
+        private System.Windows.Forms.ToolStripMenuItem fullNameNoAccents;
     }
 }
