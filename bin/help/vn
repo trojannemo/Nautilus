@@ -6,3 +6,5 @@ This operation will modify the volume levels of the song, as well as write the o
 
 OPTIONS
 'Restore Original Volumes' will read the original volume levels in the DTA, and restore them to their original state. This operation will also write the original volumes to the DTA if the DTA has not been modified.
+'Analyzer Mode' will simply report the volume of each song, without modifying the DTA to update these volumes. It effectively acts as a 'read-only' mode. Note that 'Restore Original Volumes' will take precedence over this option.
+'Adjust all CONs equally (album mode)' will calculate an average volume change to apply to all songs in the folder, and then apply that singular value to all songs. This allows albums to maintain dynamic range within themselves, while still being generally brought into line with the rest of your library. Note that this cannot be applied when the option 'Restore Original Volumes' is selected. If 'Analyzer Mode' is selected, this will have no effect beyond calculating and displaying an average volume offset.

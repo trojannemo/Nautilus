@@ -6,6 +6,65 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+vNightly (in source code, NOT in current release!)
+
+VOLUME NORMALIZER
+- A new option has been added to work in an "album mode". When this is enabled, all songs in a folder will be analysed first, and an average offset calculated. Then, this average offset will be applied to all the songs in the folder. If you have multiple songs from an album, and want to preserve the dynamics across the album, but still normalise the album against the rest of your library, this will allow you to do so.
+
+v5.6.0
+
+ROCK BAND TO KARAOKE CONVERTER
+- Almost complete rewrite of the CDG creation code - now is based on Python application CDGMaker (by Josiah Winslow) instead of the prior F# application CDGSharp.CLI - this new code base allows me to introduce three part harmonies when converting to CDG+MP3 format, customizable intro and outro images, and leaves the door open for future enhancements. It's not perfect, but it's a great improvement from the initial release of the tool
+- Added option to render to MP4 1080P or 4K karaoke video - I prefer this option as it looks significantly better than the CDG+MP3 way - check out all the options - this doesn't rely on external programs beyond ffmpeg for rendering the video. It's all drawn/designed by me, which is a pain but it allows creative freedom so you have lots of options on how to customize your karaoke video - still needs polishing but I wanted to get this out there to get feedback
+- MP4 karaoke video allows for a solid background color, a static image (background.png in /bin/images) or a looping video (background.mp4 in /bin/images) - one of each is provided but you can use your own by replacing the images or video with whatever you want to use
+- Added ability to select custom background color (any color pretty much) - color choice persists from use to use until you change it
+- Both CDG and MP4 processes allow for use of strokes and you can choose the color of the stroke
+
+SETLIST MANAGER
+- Added ability to import .playlist files from cPlayer
+- Fixed broken ability to edit song details in the setlist
+- Added ability to mark selected song(s) as "Special" - and can now also filter to only return songs marked as Special - I used it to mark and filter a 4000+ song setlist to 185 Spanish songs - but you can use this for anything you like
+
+BATCH PROCESSOR
+- Added option to sort songs by the language tag added with Magma: C3 Roks Edition or Magma: Rok On Edition
+- Added check box option to force overwriting the existing song ID with a new numeric ID even if the existing ID was already numeric
+- Merged PR from Aloquendiar that adds feature to further correct Default author IDs on songs with Magma-created numeric IDs that would still cause collision
+
+UPGRADE BUNDLER
+- Added Batch Bundle option - click on it and read the instructions - as requested by EzloDQ
+- Several bug fixes to issues found while adding the Batch Bundle option - thanks to EzloDQ for the thorough testing
+
+QUICK PACK EDITOR
+- Modified behavior so now it will dePACK song files that don't come with .png_xbox or .milo_xbox files inside to allow it to work with older song files
+- Fixed bug where when dePACKing a pack with songs that had CUSTOMSOURCE origins, the dePACKed songs would lose the custom origin
+
+PACK CREATOR
+- Fixed behavior bug where when changing the encoding it might eat the extra/final closing bracket which would then break the song and all songs that followed it in the pack due to the missing closing bracket
+
+QUICK DTA EDITOR
+- Added option to select Notepad++ or regular Notepad to open DTA files
+
+WII CONVERTER
+- Fixed bug where cores for guitar were being set as -1 when they are supposed to be 1
+
+PS3 CONVERTER
+- Merged PR from Aloquendiar that should finally fixs "default ID fix" during One-Click Batch PS3 Fixer (thanks) - This applies the default MAGMA ID alongside the alphanumeric fix when running files through the One-Click Batch PS3 Fixer in the PS3 Converter, also corrects the minor error of a missing line in the batch processor 
+- Fixed bug where if the song had a commented out original ID, it would end up with two numeric IDs on the same DTA file
+
+BATCH RENAMER
+- Added feature requested by EzloDQ to enable renaming to "InternalName (The Artist - Song)" format
+
+CON EXPLORER
+- Attempted hot fix for reported issue with WINE where files extract with an extra period after the extension - let me now if this fixes it
+
+DTA PARSER
+- Hotfix for the Modest Metric - Black Sheep (Brie Larson Vocal Version) song that was missing a closing bracket in the album title - going forward this shouldn't be a problem with other songs either
+
+GENERAL
+- All instances of using Encoding UTF-8 are now specifically set to UTF-8 without BOM (this should avoid some broken characters and crashes on Xbox - let me know if it makes things worse)
+
+---
+
 v5.5.1
 
 SAVE FILE IMAGE EDITOR
@@ -3013,3 +3072,4 @@ ALBUM ART CONVERTER (NEW!)
 - converts from png_xbox -> bmp and bmp -> png_xbox
 ----one or multiple files at a time
 ----option to delete original files
+
