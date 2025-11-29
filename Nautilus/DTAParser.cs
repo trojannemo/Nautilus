@@ -1226,6 +1226,10 @@ namespace Nautilus
                             {
                                 song.VNAudioHash = line.Replace(";VolumeNormalizerAudioHash=", "").Trim();
                             }
+                            else if (line.Contains(";NormalizedAsAlbum="))
+                            {
+                                song.NormalizedAsAlbum = (line.Replace(";NormalizedAsAlbum=", "").Trim() == "0") ? false : true;
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -2823,6 +2827,7 @@ namespace Nautilus
         public bool HasSongIDError { get; set; }
         public string VNAudioHash { get; set; }
         public double BPM { get; set; }
+        public bool NormalizedAsAlbum { get; set; }
 
         public DateTime DateAdded { get; set; }
 
@@ -2920,6 +2925,7 @@ namespace Nautilus
             ChannelsVocalsStart = 0;
             ChannelsCrowdStart = 0;
             DateAdded = DateTime.Now;
+            NormalizedAsAlbum = false;
         }
 
         public string GetRating()
