@@ -3573,7 +3573,7 @@ namespace Nautilus
                     int i = -1;
                     try
                     {
-                        i = Convert.ToInt16(lstSongs.Items[index].SubItems[22].Text); //ListIndex
+                        i = Convert.ToInt16(lstSongs.Items[index].SubItems[23].Text); //ListIndex
                     }
                     catch { }
 
@@ -3606,7 +3606,7 @@ namespace Nautilus
                     int i = -1;
                     try
                     {
-                        i = Convert.ToInt16(lstSongs.Items[index].SubItems[22].Text); //ListIndex
+                        i = Convert.ToInt16(lstSongs.Items[index].SubItems[23].Text); //ListIndex
                     }
                     catch { }
 
