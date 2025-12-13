@@ -4,7 +4,7 @@
 
 This repository contains source code only.
 
-Required runtime binaries are available under Releases.
+Required runtime binaries are distributed under Releases.
 
 See BUILDING.md for compile instructions.
 
