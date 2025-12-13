@@ -1,9 +1,13 @@
 # Nautilus
 
 ⚠️ Important:
+
 This repository contains source code only.
+
 Required runtime binaries are available under Releases.
+
 See BUILDING.md for compile instructions.
+
 
 Developed by Nemo between 2013 and present time (as of this edit, December 13, 2025).
 
