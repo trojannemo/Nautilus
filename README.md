@@ -1,10 +1,20 @@
 # Nautilus
-Developed by Nemo between 2013 and present time (as of this edit, November 24, 2025).
 
-Initially a tool suite to create, edit and work with Rock Band files, now it works with some files from other rhythm games.
+⚠️ Important:
+
+This repository contains source code only.
+
+Required runtime binaries are distributed under Releases.
+
+See BUILDING.md for compile instructions.
+
+
+Developed by Nemo between 2013 and present time (as of this edit, December 13, 2025).
+
+Initially a tool suite to create, edit and work with Rock Band files, now it works with some files from other rhythm games as well.
 Check out the many buttons and see if it'll do what you need. Most features have a Help document but unfortunately I haven't kept up with updating them. Hopefully whoever starts working on this updates the Help documents.
 
-If you're going to just download and compile without much or any editing to the source code, please make sure to download everything in the /bin/ and /res/ folders and put it in the appropriate folders wherever your executable is. These are all the dependencies, third-party tools and assets Nautilus expects to have access to.
+If you're going to just download and compile without much or any editing to the source code, please make sure to follow the instructions on BUILDING.md. There are dependencies, third-party tools and assets Nautilus expects to have access to to function correctly.
 
 Nautilus is written in C# using .NET Framework 4.8.0 and using Visual Studio 2022 Community Edition. For best results make sure you use the same.
 
