@@ -1,68 +1,128 @@
-# Nautilus
+# ⚓ Nautilus
 
-⚠️ Important:
+---
 
-This repository contains source code only.
+## ⚠️ Important
 
-Required runtime binaries are distributed under Releases.
+This repository contains **source code only**.
 
-See BUILDING.md for compile instructions.
+Required runtime binaries are distributed under **Releases**.
 
+See **BUILDING.md** for compile instructions.
 
-Developed by Nemo between 2013 and present time (as of this edit, December 13, 2025).
+---
 
-Initially a tool suite to create, edit and work with Rock Band files, now it works with some files from other rhythm games as well.
-Check out the many buttons and see if it'll do what you need. Most features have a Help document but unfortunately I haven't kept up with updating them. Hopefully whoever starts working on this updates the Help documents.
+## About
 
-If you're going to just download and compile without much or any editing to the source code, please make sure to follow the instructions on BUILDING.md. There are dependencies, third-party tools and assets Nautilus expects to have access to to function correctly.
+**Nautilus** is a multi-tool suite originally created to **create, edit, and work with Rock Band files**. Over time, it has grown to support files from **other rhythm games** as well.
 
-Nautilus is written in C# using .NET Framework 4.8.0 and using Visual Studio 2022 Community Edition. For best results make sure you use the same.
+Development began in **2013** and continues to the present  
+(as of this edit, **December 13, 2025**).
 
-If you have technical questions or want to discuss Nautilus with me, I can be found in most Rock Band related Discord servers under the same username. **I also have my own Discord server called "Nemo's Nautilus"** - send me a message and let's talk.
+Nautilus has accumulated a large number of tools over the years — explore the interface and see if it does what you need. Most features include Help documentation; however, not all of it has been kept fully up to date. Contributions to documentation are always welcome.
 
-Nautilus wouldn't be possible without the groundwork and assistance of others, so let's get into it.
+---
 
+## Building Nautilus
+
+If you plan to compile Nautilus **without modifying the source code**, you **must** follow the instructions in **BUILDING.md**.
+
+Nautilus depends on:
+- External libraries
+- Third-party tools
+- Runtime assets
+
+All of these are required for correct operation.
+
+### Development Environment
+
+- **Language:** C#  
+- **Framework:** .NET Framework **4.8.0**  
+- **IDE:** Visual Studio **2022 Community Edition**
+
+For best results, use the same environment.
+
+---
+
+## Community & Support
+
+If you have technical questions or want to discuss Nautilus:
+
+- You can find me in most **Rock Band–related Discord servers** under the same username
+- I also run a dedicated Discord server:
+
+**“Nemo’s Nautilus”**
+
+Send me a message and let’s talk.
+
+---
+
+## Credits
+
+Nautilus would not be possible without the groundwork, tools, and assistance of many others.  
 Credit where credit is due:
 
-DJ Shepperd for original Le Fluffie & x360 library<br>
-xorloser for all his great tools and knowledge<br>
-raynebc for midishrink and help with MIDI files<br>
-Mark Heath for the NAudio.MIDI library:<br>
-http://naudio.codeplex.com/<br>
-Ian Luck for the BASS audio library:<br>
-http://www.un4seen.com/<br>
-Bernd Niedergesaess for the BASS.NET API:<br>
-http://bass.radio42.com/<br>
-StackOverflow0x for making Wii customs possible<br>
-TDCMark and AerialX for making PS3 customs possible<br>
-traflaz for code to search PS3's hard drive for songs<br>
-bluzer and AkiraNomuraBCN for their help with Phase Shift<br>
-pksage for doing the hard work with the RB3 song cache<br>
-Mike Gledhill for the CreateExcelFile library<br>
-Uzi Granot for the PDFFileWriter library<br>
-Nyxyxylyth for base album art and RBA converter code<br>
-Maxton for all his amazing contributions (RIP)<br>
-PikminGuts92 for MiloExtractor code and beta testing<br>
-PikminGuts92 (again) for his RBA Builder 2.0 code<br>
-https://github.com/PikminGuts92<br>
-C16 and AddyMills for excellent beta testing<br>
-FujiSkunk for working on the Tools while I was away<br>
-GeeForce11 for helping troubleshoot multiple audio bugs<br>
-SuperRiderTH for the Volume Normalizer tool code<br>
-https://github.com/SuperRiderTH/CON-Tools<br>
-StackOverflow0x (again) for MiloMod and Save Scores Viewer<br>
-LocalH/MHXScott for his mogg knowledge and help<br>
-Linos for all the help with troubleshooting<br>
-Lord Zedd\TehBanStick for RB3 Character Editor<br>
-Matthew Sitton for the SngFileFormat library<br>
-https://github.com/mdsitton/SngFileFormat<br>
-AddyMills (again) for helping me with GHWT:DE<br>
-https://github.com/AddyMills/GH-Toolkit-NET<br>
-jphn for figuring out the fix to PS3 looping songs<br>
-PikminGuts92 (again) for his songfuse tool<br>
-https://github.com/PikminGuts92/bfforever-rs<br>
-Onyxite and everyone working on LibForge now<br>
-https://github.com/mtolly/LibForge<br>
-Dark for themethod3 (iykyk)<br>
-<br>
-Thanks to everyone else who helped along the way and special thanks to those few that have begun contributing to the code!
+- **DJ Shepherd** — original *Le Fluffie* & x360 library  
+- **xorloser** — tools, research, and knowledge  
+- **raynebc** — *midishrink* and MIDI expertise  
+
+- **Mark Heath** — NAudio.MIDI  
+  http://naudio.codeplex.com/
+
+- **Ian Luck** — BASS audio library  
+  http://www.un4seen.com/
+
+- **Bernd Niedergesaess** — BASS.NET API  
+  http://bass.radio42.com/
+
+- **StackOverflow0x** — Wii customs support  
+- **TDCMark** & **AerialX** — PS3 customs support  
+- **traflaz** — PS3 HDD song search code  
+
+- **bluzer** & **AkiraNomuraBCN** — Phase Shift support  
+- **pksage** — RB3 song cache research  
+
+- **Mike Gledhill** — CreateExcelFile library  
+- **Uzi Granot** — PDFFileWriter library  
+
+- **Nyxyxylyth** — base album art & RBA converter code  
+
+- **Maxton** — countless contributions *(RIP)*  
+
+- **PikminGuts92** — MiloExtractor, RBA Builder 2.0, Songfuse  
+  https://github.com/PikminGuts92  
+  https://github.com/PikminGuts92/bfforever-rs  
+
+- **C16** & **AddyMills** — extensive beta testing  
+
+- **FujiSkunk** — tool development during my absence  
+
+- **GeeForce11** — audio bug troubleshooting  
+
+- **SuperRiderTH** — Volume Normalizer tool  
+  https://github.com/SuperRiderTH/CON-Tools  
+
+- **LocalH** / **MHXScott** — mogg file expertise  
+- **Linos** — troubleshooting support  
+
+- **Lord Zedd / TehBanStick** — RB3 Character Editor  
+
+- **Matthew Sitton** — SngFileFormat library  
+  https://github.com/mdsitton/SngFileFormat  
+
+- **AddyMills** — GHWT:DE support  
+  https://github.com/AddyMills/GH-Toolkit-NET  
+
+- **jphn** — PS3 looping song fix  
+
+- **Onyxite** & LibForge contributors  
+  https://github.com/mtolly/LibForge  
+
+- **Dark** — *themethod3* (iykyk)
+
+---
+
+## Final Thanks
+
+Thanks to everyone who helped along the way —  
+and **special thanks** to those who have begun contributing code directly to Nautilus.
