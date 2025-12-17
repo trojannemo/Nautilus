@@ -105,6 +105,9 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="MidiCS">
+      <HintPath>bin\Debug\bin\MidiCS.dll</HintPath>
+    </Reference>
     <Reference Include="NAudio.Midi">
       <HintPath>C:\Users\Yemil-PC\source\repos\cPlayerBright\cPlayerBright\CONPlayer\bin\Debug\NAudio.Midi.dll</HintPath>
     </Reference>
@@ -245,6 +248,7 @@
     </Compile>
     <Compile Include="FnFParser.cs" />
     <Compile Include="libForgeDTA.cs" />
+    <Compile Include="libForgeMidi.cs" />
     <Compile Include="libForgeTexture.cs" />
     <Compile Include="MIDIStuff.cs" />
     <Compile Include="MoggMaker.cs">

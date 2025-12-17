@@ -33,6 +33,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LibVLCSharp.Shared;
 using LibVLCSharp.WinForms;
+using LibForge.Midi;
+using MidiCS;
 
 namespace Nautilus
 {
@@ -1549,7 +1551,7 @@ namespace Nautilus
             picWorking.Visible = false;
 
         }
-
+          
         private void loadPS4Files(string file)
         {
             loadDefaults();
@@ -1595,6 +1597,27 @@ namespace Nautilus
             if (File.Exists(art))
             {
                 getImage(art);
+            }
+
+            var rb4midi = file.Replace(".songdta_ps4", ".rbmid_ps4");
+            var rb3midi = rb4midi.Replace(".rbmid_ps4", ".mid");
+            if (File.Exists(rb4midi))
+            {
+                using (var inStream = File.OpenRead(rb4midi))
+                {
+                    var rb4mid = RBMidReader.ReadStream(inStream);
+                    var rb3mid = RBMidConverter.ToMid(rb4mid);
+
+                    using (var outStream = File.Create(rb3midi))
+                    {
+                        MidiFileWriter.WriteSMF(rb3mid, outStream);
+                    }
+                }
+
+                if (File.Exists(rb3midi))
+                {
+                    ReadMidi(rb3midi);
+                }
             }
 
             var mogg = file.Replace(".songdta_ps4", ".mogg");
@@ -2759,7 +2782,7 @@ namespace Nautilus
                     ProKeysEnabled = false;
                 }
                 txtGenre.Text = Parser.Songs[0].Genre;
-                txtSubGenre.Text = Parser.Songs[0].SubGenre;
+                txtSubGenre.Text = Parser.Songs[0].SubGenre == null ? "" : Parser.Songs[0].SubGenre;
                 if (txtSubGenre.Text != txtGenre.Text && txtSubGenre.Text != "Other")
                 {
                     chkSubGenre.Checked = true;
@@ -2772,7 +2795,7 @@ namespace Nautilus
                 {
                     MessageBox.Show("There was an error:\n" + ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                author = Parser.Songs[0].ChartAuthor.Replace("&", "&&"); //fix for Nunchuk & Sygenysis
+                author = Parser.Songs[0].ChartAuthor == null ? "" : Parser.Songs[0].ChartAuthor.Replace("&", "&&"); //fix for Nunchuk & Sygenysis
 
                 if (Parser.Songs[0].DisableProKeys)
                 {
