@@ -12,6 +12,8 @@ namespace Nautilus.Texture
 {
     internal class TextureConverter
     {
+        public string TextureFormat = "DXT1";
+
         static int RGB565ToARGB(ushort input)
         {
             return Color.FromArgb(0xFF,
@@ -27,7 +29,7 @@ namespace Nautilus.Texture
                (((input.B * 0x1F / 0xFF) & 0x1F)));
         }
         // TODO: Decode DXT5 alpha channel
-        public static Bitmap ToBitmap(Texture t, int mipmap)
+        public Bitmap ToBitmap(Texture t, int mipmap)
         {
             var m = t.Mipmaps[mipmap];
             var output = new Bitmap(m.Width, m.Height, PixelFormat.Format32bppArgb);
@@ -38,6 +40,7 @@ namespace Nautilus.Texture
             }
             else if (m.Data.Length == imageData.Length)
             {
+                TextureFormat = "DXT5";
                 DecodeDXT(m, imageData, true);
             }
             else if (m.Data.Length == (imageData.Length / 2))

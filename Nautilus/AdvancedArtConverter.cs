@@ -1034,7 +1034,8 @@ namespace Nautilus
             Bitmap bitmap;
             using (var fileStream = new FileStream(image, FileMode.Open, FileAccess.Read))
             {
-                bitmap = TextureConverter.ToBitmap(TextureReader.ReadStream(fileStream), 0);
+                var converter = new TextureConverter();
+                bitmap = converter.ToBitmap(TextureReader.ReadStream(fileStream), 0);
             }                  
 
             if (chkPS4BMP.Checked)

@@ -618,7 +618,8 @@ namespace Nautilus
                     case ".png_ps4":
                         using (var fileStream = new FileStream(AlbumArt, FileMode.Open, FileAccess.Read))
                         {
-                            RESOURCE_ALBUM_ART = TextureConverter.ToBitmap(TextureReader.ReadStream(fileStream), 0);
+                            var converter = new TextureConverter();
+                            RESOURCE_ALBUM_ART = converter.ToBitmap(TextureReader.ReadStream(fileStream), 0);
                         }
                         imgMoved = true;
                         break;

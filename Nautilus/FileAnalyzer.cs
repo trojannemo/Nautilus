@@ -1,4 +1,12 @@
-﻿using System;
+﻿using LibForge.Midi;
+using Microsoft.VisualBasic;
+using MidiCS;
+using NAudio.Midi;
+using Nautilus.Properties;
+using Nautilus.Texture;
+using Nautilus.x360;
+using NautilusFREE;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -6,16 +14,10 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
-using Nautilus.Properties;
-using Nautilus.x360;
-using Microsoft.VisualBasic;
-using NAudio.Midi;
 using Un4seen.Bass;
 using Application = System.Windows.Forms.Application;
-using NautilusFREE;
-using System.Text;
-using System.Windows.Media.Animation;
 
 namespace Nautilus
 {
@@ -28,7 +30,7 @@ namespace Nautilus
         private string InputFile;
         private bool HaveFile;
         private readonly string argument;
-        MidiFile MIDIFile;
+        NAudio.Midi.MidiFile MIDIFile;
         private List<TempoEvent> TempoEvents;
         private List<TimeSignature> TimeSignatures;
         private List<LyricPhrase> LeadVocals;
@@ -418,13 +420,17 @@ namespace Nautilus
             
             for (var i = 0; i < files.Count(); i++)
             {
-                if (VariousFunctions.ReadFileType(files[i]) == XboxFileType.STFS || Path.GetExtension(files[i]).ToLowerInvariant() == ".mid")
+                if (VariousFunctions.ReadFileType(files[i]) == XboxFileType.STFS)
                 {
                     Log("Received file " + Path.GetFileName(files[i]));
                     filesToProcess.Add(files[i]);                    
                 }
                 else switch (Path.GetExtension(files[i]).ToLowerInvariant())
                 {
+                    case ".mid":
+                        Log("Received MIDI file " + Path.GetFileName(files[i]));
+                        filesToProcess.Add(files[i]);
+                        break;
                     case ".mogg":
                         Log("Received MOGG file " + Path.GetFileName(files[i]));
                         moggToProcess.Add(files[i]);
@@ -437,6 +443,10 @@ namespace Nautilus
                         Log("Received PNG_PS3 file " + Path.GetFileName(files[i]));
                         pngToProcess.Add(files[i]);
                         break;
+                    case ".png_ps4":
+                        Log("Received PNG_PS4 file " + Path.GetFileName(files[i]));
+                        pngToProcess.Add(files[i]);
+                        break;
                     case ".png_xbox":
                         Log("Received PNG_XBOX file " + Path.GetFileName(files[i]));
                         pngToProcess.Add(files[i]);
@@ -445,6 +455,10 @@ namespace Nautilus
                         Log("Received PS3 PKG file " + Path.GetFileName(files[i]));
                         filesToProcess.Add(files[i]);
                         break;
+                        case ".rbmid_ps4":
+                            Log("Received PS4 RBMID file " + Path.GetFileName(files[i]));
+                            filesToProcess.Add(files[i]);
+                            break;
                      default:
                         Log("Received invalid file " + Path.GetFileName(files[i]));
                         break;
@@ -598,7 +612,7 @@ namespace Nautilus
             {
                 if (ev.CommandCode != MidiCommandCode.MetaEvent) continue;
                 var signature = (MetaEvent)ev;
-                if (signature.MetaEventType != MetaEventType.TimeSignature) continue;
+                if (signature.MetaEventType != NAudio.Midi.MetaEventType.TimeSignature) continue;
                 //Track the time signature change
                 var index1 = signature.ToString().IndexOf(" ", signature.ToString().IndexOf("TimeSignature", StringComparison.Ordinal), StringComparison.Ordinal) + 1;
                 var index2 = signature.ToString().IndexOf("/", StringComparison.Ordinal);
@@ -630,7 +644,7 @@ namespace Nautilus
                 reldelta += ev.DeltaTime;
                 if (ev.CommandCode != MidiCommandCode.MetaEvent) continue;
                 var tempo = (MetaEvent)ev;
-                if (tempo.MetaEventType != MetaEventType.SetTempo) continue;
+                if (tempo.MetaEventType != NAudio.Midi.MetaEventType.SetTempo) continue;
                 var relativetime = (double)reldelta / TicksPerQuarter * (60000.0 / currentbpm);
                 var index1 = tempo.ToString().IndexOf("SetTempo", StringComparison.Ordinal) + 9;
                 var index2 = tempo.ToString().IndexOf("bpm", StringComparison.Ordinal);
@@ -1451,7 +1465,7 @@ namespace Nautilus
                         {
                             VocalsTalkies++;
                         }
-                        if ((vocal_event.MetaEventType == MetaEventType.Lyric || vocal_event.MetaEventType == MetaEventType.TextEvent) && 
+                        if ((vocal_event.MetaEventType == NAudio.Midi.MetaEventType.Lyric || vocal_event.MetaEventType == NAudio.Midi.MetaEventType.TextEvent) && 
                             !vocal_event.ToString().Contains("["))
                         {
                             var lyric = GetCleanMIDILyric(vocal_event.ToString());
@@ -1567,7 +1581,7 @@ namespace Nautilus
                         {
                             Harm1Talkies++;
                         }
-                        if ((vocal_event.MetaEventType == MetaEventType.Lyric || vocal_event.MetaEventType == MetaEventType.TextEvent) &&
+                        if ((vocal_event.MetaEventType == NAudio.Midi.MetaEventType.Lyric || vocal_event.MetaEventType == NAudio.Midi.MetaEventType.TextEvent) &&
                             !vocal_event.ToString().Contains("["))
                         {
                             var lyric = GetCleanMIDILyric(vocal_event.ToString());
@@ -1639,7 +1653,7 @@ namespace Nautilus
                         {
                             Harm2Talkies++;
                         }
-                        if ((vocal_event.MetaEventType == MetaEventType.Lyric || vocal_event.MetaEventType == MetaEventType.TextEvent) &&
+                        if ((vocal_event.MetaEventType == NAudio.Midi.MetaEventType.Lyric || vocal_event.MetaEventType == NAudio.Midi.MetaEventType.TextEvent) &&
                             !vocal_event.ToString().Contains("["))
                         {
                             var lyric = GetCleanMIDILyric(vocal_event.ToString());
@@ -1711,7 +1725,7 @@ namespace Nautilus
                         {
                             Harm3Talkies++;
                         }
-                        if ((vocal_event.MetaEventType == MetaEventType.Lyric || vocal_event.MetaEventType == MetaEventType.TextEvent) &&
+                        if ((vocal_event.MetaEventType == NAudio.Midi.MetaEventType.Lyric || vocal_event.MetaEventType == NAudio.Midi.MetaEventType.TextEvent) &&
                             !vocal_event.ToString().Contains("["))
                         {
                             var lyric = GetCleanMIDILyric(vocal_event.ToString());
@@ -2969,6 +2983,24 @@ namespace Nautilus
                 }
                 else switch (Path.GetExtension(file).ToLowerInvariant())
                 {
+                    case ".rbmid_ps4":
+                        InputFile = file;
+                            var tempMidi = Path.GetTempFileName() + ".mid";
+                            if (File.Exists(file))
+                            {
+                                using (var inStream = File.OpenRead(file))
+                                {
+                                    var rb4mid = RBMidReader.ReadStream(inStream);
+                                    var rb3mid = RBMidConverter.ToMid(rb4mid);
+
+                                    using (var outStream = File.Create(tempMidi))
+                                    {
+                                        MidiFileWriter.WriteSMF(rb3mid, outStream);
+                                    }
+                                }
+                            }
+                            AnalyzeMIDI(tempMidi, false, filesToProcess.Count == 1);
+                            break;
                     case ".mid":
                         InputFile = file;
                         AnalyzeMIDI(file, false, filesToProcess.Count == 1);
@@ -3001,7 +3033,28 @@ namespace Nautilus
             Log("Album Art File Size", fileSize.Length.ToString(CultureInfo.InvariantCulture) + " bytes (" + size + ")");
             var temp = Application.StartupPath + "\\bin\\temp.png";
             Tools.DeleteFile(temp);
-            if (!Tools.ConvertRBImage(art,temp,"png", false))
+            if (Path.GetExtension(art) == ".png_ps4")
+            {
+                Bitmap image = null;
+                var converter = new TextureConverter();
+                try
+                {
+                    using (var fileStream = new FileStream(art, FileMode.Open, FileAccess.Read))
+                    {
+                        image = converter.ToBitmap(TextureReader.ReadStream(fileStream), 0);
+                    }
+                }
+                catch
+                {
+                    Log("No more information available");
+                    return;
+                }                
+                Log("Album Art Dimensions", image.Width + "x" + image.Height);
+                Log("Album Art Format", converter.TextureFormat);
+                Log("Album Art Console", "PS4");
+                return;
+            }
+            else if (!Tools.ConvertRBImage(art, temp, "png", false))
             {
                 Log("No more information available");
                 return;
