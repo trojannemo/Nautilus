@@ -613,21 +613,37 @@ namespace Nautilus
                 if (ev.CommandCode != MidiCommandCode.MetaEvent) continue;
                 var signature = (MetaEvent)ev;
                 if (signature.MetaEventType != NAudio.Midi.MetaEventType.TimeSignature) continue;
-                //Track the time signature change
-                var index1 = signature.ToString().IndexOf(" ", signature.ToString().IndexOf("TimeSignature", StringComparison.Ordinal), StringComparison.Ordinal) + 1;
-                var index2 = signature.ToString().IndexOf("/", StringComparison.Ordinal);
-                var numerator = Convert.ToInt16(signature.ToString().Substring(index1, index2 - index1));
-                //Track the time signature change
-                index1 = signature.ToString().IndexOf("/", StringComparison.Ordinal) + 1;
-                index2 = signature.ToString().IndexOf(" ", signature.ToString().IndexOf("/", StringComparison.Ordinal), StringComparison.Ordinal);
-                var denominator = Convert.ToInt16(signature.ToString().Substring(index1, index2 - index1));
-                var time_sig = new TimeSignature
+                try
                 {
-                    AbsoluteTime = ev.AbsoluteTime,
-                    Numerator = numerator,
-                    Denominator = denominator
-                };
-                TimeSignatures.Add(time_sig);
+                    //Track the time signature change
+                    var index1 = signature.ToString().IndexOf(" ", signature.ToString().IndexOf("TimeSignature", StringComparison.Ordinal), StringComparison.Ordinal) + 1;
+                    var index2 = signature.ToString().IndexOf("/", StringComparison.Ordinal);
+                    var numerator = Convert.ToInt16(signature.ToString().Substring(index1, index2 - index1));
+                    //Track the time signature change
+                    index1 = signature.ToString().IndexOf("/", StringComparison.Ordinal) + 1;
+                    index2 = signature.ToString().IndexOf(" ", signature.ToString().IndexOf("/", StringComparison.Ordinal), StringComparison.Ordinal);
+                    int denominator;
+                    var split = signature.ToString().Substring(index1, index2 - index1);
+                    if (split == "Unknown") //for some Onyx x/1 time signatures
+                    {
+                        denominator = 1;
+                    }
+                    else
+                    {
+                        denominator = Convert.ToInt16(split);
+                    }
+                    var time_sig = new TimeSignature
+                    {
+                        AbsoluteTime = ev.AbsoluteTime,
+                        Numerator = numerator,
+                        Denominator = denominator
+                    };
+                    TimeSignatures.Add(time_sig);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error reading time signature event:\n" + ex.Message + "\n\nEvent:\n" + signature.ToString() + "\n\nWill skip this time signature event but this may cause other problems when processing the MIDI file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
