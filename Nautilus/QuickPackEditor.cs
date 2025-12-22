@@ -492,6 +492,13 @@ namespace Nautilus
                     sw.Dispose();
                 }
                 Log("New songs.dta file created successfully");
+                if (radioPack.Checked) //Carl Mylo's request to delete song folders too
+                {
+                    foreach (var t in removed)
+                    {                        
+                        Tools.SendtoTrash(Path.GetDirectoryName(DTAPath) + "\\" + Songs[t].InternalName, true);
+                    }
+                }
                 EndWorkers();
                 return;
             }
@@ -1378,7 +1385,8 @@ namespace Nautilus
         {
             radioDTA.Checked = true;
             radioPack.Checked = false;
-            radioPack.Enabled = false;
+            chkBackup.Checked = false;
+            chkBackup.Enabled = false;
             ContentImage.Enabled = false;
             PackageImage.Enabled = false;
             btnDePack.Visible = false;
