@@ -5603,6 +5603,20 @@ namespace Nautilus
             {
                 ReadMidi(midi[0]);
             }
+            else
+            {
+                var chart = Directory.GetFiles(outFolder, "*.chart");
+                if (chart.Count() > 0)
+                {
+                    var chartMid = ChartToRockBandMidi.ConvertChartToMidi(chart[0]);
+                    var chartMidPath = outFolder + "\\notes.mid";
+                    NAudio.Midi.MidiFile.Export(chartMidPath, chartMid);
+                    if (File.Exists(chartMidPath))
+                    {
+                        ReadMidi(chartMidPath);
+                    }
+                }
+            }    
             TryPlayCHVideo(outFolder);
             opusFiles = Directory.GetFiles(outFolder, "*.opus");
             oggFiles = Directory.GetFiles(outFolder, "*.ogg");

@@ -207,6 +207,7 @@
     <Compile Include="CDGConverter.Designer.cs">
       <DependentUpon>CDGConverter.cs</DependentUpon>
     </Compile>
+    <Compile Include="ChartToRockBandMidi.cs" />
     <Compile Include="CRC2.cs" />
     <Compile Include="BatchProcessor.cs">
       <SubType>Form</SubType>
