@@ -1,5 +1,7 @@
 # ⚓ Nautilus
 
+![Nautilus](https://nemosnautilus.com/nautilus/nautilusv550.png)
+
 ---
 
 ## ⚠️ Important
