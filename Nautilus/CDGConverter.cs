@@ -12,7 +12,6 @@ using System.Drawing.Imaging;
 using Un4seen.Bass;
 using System.Runtime.InteropServices;
 using System.Drawing.Drawing2D;
-using DocumentFormat.OpenXml.Office2010.PowerPoint;
 
 namespace Nautilus
 {
@@ -93,6 +92,7 @@ namespace Nautilus
         private bool solidColorBackground = true;
         private bool staticImageBackground = false;
         private bool animatedVideoBackground = false;
+        private bool displayTempo = true;
 
         List<string> karaokeColorHexes = new List<string>
         {
@@ -197,6 +197,7 @@ namespace Nautilus
             sw.WriteLine("SolidColorBackground=" + (solidColorToolStripMenuItem.Checked ? "True" : "False"));
             sw.WriteLine("AnimatedBackground=" + (animatedBackgroundToolStripMenuItem.Checked ? "True" : "False"));
             sw.WriteLine("NoHighlightDelay=" + (noDelayToolStripMenuItem.Checked ? "True" : "False"));
+            sw.WriteLine("DisplayTempoOnTitleCard=" + (displayTempoOnTitleCard.Checked ? "True" : "False"));
             sw.Dispose();
         }
 
@@ -257,6 +258,7 @@ namespace Nautilus
                 solidColorToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
                 animatedBackgroundToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
                 noDelayToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
+                displayTempoOnTitleCard.Checked = sr.ReadLine().Contains("True");
                 UpdateTextParents();
                 ModeSanityCheck();
                 if (cboBackground.SelectedIndex == cboBackground.Items.Count - 1)
@@ -469,6 +471,7 @@ namespace Nautilus
                 cdgMode = "delayed"; //default to this
             }
             doEnableHighlightAnimation = enableHighlightAnimation.Checked;
+            displayTempo = displayTempoOnTitleCard.Checked;
             EnableDisable(false);
             BatchTimerStart = DateTime.Now;
             Log("Batch processing start time is " + BatchTimerStart.ToString("hh:mm:ss tt"));
@@ -651,7 +654,18 @@ namespace Nautilus
                 return;
             }
             xFile = xPackage.GetFile("songs/" + Parser.Songs[0].InternalName + "/gen/" + Parser.Songs[0].InternalName + "_keep.png_xbox");
-            albumArtX = xFile.Extract();
+            if (xFile == null)
+            {
+                message = "No album art found in that file";
+                Log(message);
+                albumArtX = new byte[0];
+            }
+            else
+            {
+                albumArtX = xFile.Extract();
+                message = "Extracted album art successfully";
+                Log(message);
+            }
             xPackage.CloseIO();
                         
             var MIDIFile = Tools.NemoLoadMIDI(midi);
@@ -810,7 +824,7 @@ namespace Nautilus
             if (doMP4)
             {
                 var x = folder + "art.png_xbox";                
-                if (albumArtX.Length > 0)
+                if (albumArtX != null && albumArtX.Length > 0)
                 {
                     File.WriteAllBytes(x, albumArtX);
                     if (!Tools.ConvertRBImage(x, art, "jpg", true))
@@ -1064,7 +1078,16 @@ namespace Nautilus
 
             var sw = new StreamWriter(toml, false);
             sw.WriteLine("title = " + EscapeTomlString("\"" + Parser.Songs[0].Name.Replace("feat.", "ft.").Replace("featuring", "ft.") + "\""));
-            sw.WriteLine($"artist = '''{Parser.Songs[0].Artist.Replace("feat.", "ft.").Replace("featuring", "ft.")}\n\nTempo: {bpm} BPM'''");
+            var artist = $"artist = '''{Parser.Songs[0].Artist.Replace("feat.", "ft.").Replace("featuring", "ft.")}";
+            if (displayTempo)
+            {
+                artist = artist + "\\n\\nTempo: {bpm} BPM'''";
+            }
+            else
+            {
+                artist = artist + "'''";
+            }
+            sw.WriteLine(artist);
             sw.WriteLine("file = \"" + wav.Replace("\\", "\\\\") + "\"");
             sw.WriteLine("outname = \"" + cdg.Replace("\\", "\\\\") + "\"");
             sw.WriteLine("");
@@ -2660,8 +2683,10 @@ namespace Nautilus
                                 DrawCenteredLine(graphics, songKey, resolutionX, (int)(lineHeight * 8.4), 32f * multiplier, offset);
 
                             // 7: BPM
-                            if (!string.IsNullOrEmpty(bpm))
+                            if (!string.IsNullOrEmpty(bpm) && displayTempo)
+                            {
                                 DrawCenteredLine(graphics, bpm, resolutionX, (int)(lineHeight * (string.IsNullOrEmpty(songKey) ? 8.4 : 9.1)), 32f * multiplier, offset);
+                            }
                             goto DoSaveFrame;
                         }
 

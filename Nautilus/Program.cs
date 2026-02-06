@@ -165,11 +165,41 @@ namespace Nautilus
             }
             else if (argument.Contains("-analyzer"))
             {
-                Application.Run(new SongAnalyzer(""));
+                try
+                {
+                    var file = argument.Replace("-analyzer -", "").Replace("-analyzer", "").Trim();
+                    if (file != "")
+                    {
+                        if (File.Exists(file))
+                        {
+                            con = file;
+                        }
+                    }
+                }
+                catch
+                {
+                    con = "";
+                }
+                Application.Run(new SongAnalyzer(con));
             }
             else if (argument.Contains("-audioa"))
             {
-                Application.Run(new AudioAnalyzer(""));
+                try
+                {
+                    var file = argument.Replace("-audioa -", "").Replace("-audioa", "").Trim();
+                    if (file != "")
+                    {
+                        if (File.Exists(file))
+                        {
+                            con = file;
+                        }
+                    }
+                }
+                catch
+                {
+                    con = "";
+                }
+                Application.Run(new AudioAnalyzer(con));
             }
             else if (argument.Contains("-normalizer"))
             {

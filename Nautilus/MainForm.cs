@@ -2170,7 +2170,6 @@ namespace Nautilus
             activeForm = cdg;
             activeForms.Add(activeForm);
             cdg.Show();
-            //MessageBox.Show("This is just a placeholder for now...", "Nautilus", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 

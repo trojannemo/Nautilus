@@ -177,7 +177,7 @@ namespace Nautilus
         private VideoView videoView;
         private bool videoIsFullScreen = false;
 
-        public Visualizer(Color ButtonBackColor, Color ButtonTextColor, string con)
+        public Visualizer(Color ButtonBackColor, Color ButtonTextColor, string inFile)
         {
             InitializeComponent();
             Core.Initialize();
@@ -208,7 +208,7 @@ namespace Nautilus
             this.Controls.Add(videoView);
 
             intVocals = 1;
-            inputFile = con;
+            inputFile = inFile;
             config = Application.StartupPath + "\\bin\\config\\visualizer.config";
             Tools = new NemoTools();
             nautilus3 = new nTools();
@@ -309,20 +309,6 @@ namespace Nautilus
         {
             try
             {
-                /*foreach (var fontName in FontNames)
-                {
-                    using (var fontTester = new Font(fontName, 12, FontStyle.Regular, GraphicsUnit.Pixel))
-                    {
-                        if (fontTester.Name == fontName)
-                        {
-                            if (isMyriad)
-                            {
-                                ActiveFont = fontName;
-                            }
-                            return true;
-                        }                            
-                    }
-                }*/
                 using (InstalledFontCollection fonts = new InstalledFontCollection())
                 {
                     foreach (var fontName in FontNames)
@@ -845,12 +831,18 @@ namespace Nautilus
         {
             var files = (string[]) e.Data.GetData(DataFormats.FileDrop);
             Tools.CurrentFolder = Path.GetDirectoryName(files[0]);
+            HandleDragDrop(files[0]);
+        }
 
-            bool isFolder = File.GetAttributes(files[0]).HasFlag(FileAttributes.Directory);
-            if (isFolder) 
+        private void HandleDragDrop(string file)
+        {
+            if (string.IsNullOrEmpty(file)) return;
+
+            bool isFolder = File.GetAttributes(file).HasFlag(FileAttributes.Directory);
+            if (isFolder)
             {
                 //let's check if it's Fortnite Festival structure with more than just the preview.m4a file
-                var m4aFiles = Directory.GetFiles(files[0], "*.m4a", SearchOption.TopDirectoryOnly);
+                var m4aFiles = Directory.GetFiles(file, "*.m4a", SearchOption.TopDirectoryOnly);
                 foreach (var m4a in m4aFiles)
                 {
                     if (!Path.GetFileName(m4a).Equals("preview.m4a"))
@@ -862,107 +854,107 @@ namespace Nautilus
                     return;
                 }
                 //otherwise assume Yarg/PS3 folder structure
-                LoadYARGPS3Folder(files[0]);
+                LoadYARGPS3Folder(file);
                 return;
             }
-            
-            var ext = Path.GetExtension(files[0]).ToLowerInvariant();
+
+            var ext = Path.GetExtension(file).ToLowerInvariant();
             var exts = new List<string> { ".jpg", ".bmp", ".tif", ".dds", ".gif", ".tpl", ".png", ".jpeg", ".png_xbox", ".png_ps3", ".png_ps4", ".png_wii" };
             var isImage = exts.Contains(ext);
 
             if (isImage)
             {
-                getImage(files[0]);
+                getImage(file);
             }
             else
             {
                 try
                 {
-                    if (VariousFunctions.ReadFileType(files[0]) == XboxFileType.STFS)
+                    if (VariousFunctions.ReadFileType(file) == XboxFileType.STFS)
                     {
-                        var package = new STFSPackage(files[0]);
+                        var package = new STFSPackage(file);
                         if (!package.ParseSuccess) return;
                         if (package.Header.TitleID == (uint)1514538961)
-                        {                            
+                        {
                             package.CloseIO();
-                            ExtractPowerGig(files[0]);
+                            ExtractPowerGig(file);
                             return;
                         }
                         else if (package.Header.TitleID == (uint)1296435155)
                         {
                             package.CloseIO();
-                            ExtractBandFuse(files[0]);
+                            ExtractBandFuse(file);
                             return;
                         }
                         else if (package.Header.TitleID == 0x41560844)
                         {
                             package.CloseIO();
-                            ExtractPlayDJHero(files[0], false);
+                            ExtractPlayDJHero(file, false);
                             return;
                         }
                         else if (package.Header.TitleID == 0x4156087F)
                         {
                             package.CloseIO();
-                            ExtractPlayDJHero(files[0], true);
+                            ExtractPlayDJHero(file, true);
                             return;
                         }
                         else //assume Harmonix game
                         {
                             package.CloseIO();
                             loadDefaults();
-                            loadCON(files[0]);
+                            loadCON(file);
                         }
                     }
-                    else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".pkg")
+                    else if (Path.GetExtension(file.ToLowerInvariant()) == ".pkg")
                     {
-                        ExtractPKG(files[0]);
+                        ExtractPKG(file);
                     }
-                    else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".sng")
+                    else if (Path.GetExtension(file.ToLowerInvariant()) == ".sng")
                     {
-                        ExtractSNG(files[0]);
+                        ExtractSNG(file);
                     }
-                    else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".yargsong")
+                    else if (Path.GetExtension(file.ToLowerInvariant()) == ".yargsong")
                     {
-                        ExtractYARG(files[0]);
+                        ExtractYARG(file);
                     }
-                    else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".psarc")
+                    else if (Path.GetExtension(file.ToLowerInvariant()) == ".psarc")
                     {
-                        ExtractPsArc(files[0]);
+                        ExtractPsArc(file);
                     }
-                    else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".xml")
+                    else if (Path.GetExtension(file.ToLowerInvariant()) == ".xml")
                     {
-                        ExtractXMA(files[0]);
+                        ExtractXMA(file);
                     }
-                    else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".fnf")
+                    else if (Path.GetExtension(file.ToLowerInvariant()) == ".fnf")
                     {
-                        PlayFNFFolder(files[0]);
+                        PlayFNFFolder(file);
                     }
-                    else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".m4a")
+                    else if (Path.GetExtension(file.ToLowerInvariant()) == ".m4a")
                     {
-                        PlayFnFSong(files[0]);
+                        PlayFnFSong(file);
                     }
-                    else if (Path.GetExtension(files[0].ToLowerInvariant()) == ".songdta_ps4")
+                    else if (Path.GetExtension(file.ToLowerInvariant()) == ".songdta_ps4")
                     {
-                        loadPS4Files(files[0]);
+                        loadPS4Files(file);
                     }
-                    else if (Path.GetFileName(files[0]).ToLowerInvariant() == "song.ini")
+                    else if (Path.GetFileName(file).ToLowerInvariant() == "song.ini")
                     {
                         //check if it's GHWT:DE format
-                        if (Directory.Exists(Path.GetDirectoryName(files[0]) + "\\Content\\"))
+                        if (Directory.Exists(Path.GetDirectoryName(file) + "\\Content\\"))
                         {
-                            GHWTDE_INI_PATH = files[0];
+                            GHWTDE_INI_PATH = file;
                             PlayGHWTDEFolder();
                         }
                         else
                         {
-                            PlayCHFolder(Path.GetDirectoryName(files[0]));
+                            PlayCHFolder(Path.GetDirectoryName(file));
                         }
                     }
-                    else if (Path.GetFileName(files[0]).ToLowerInvariant() == "songs.dta")
+                    else if (Path.GetFileName(file).ToLowerInvariant() == "songs.dta")
                     {
-                        if (!Parser.ReadDTA(File.ReadAllBytes(files[0])) || !Parser.Songs.Any())
+                        if (!Parser.ReadDTA(File.ReadAllBytes(file)) || !Parser.Songs.Any())
                         {
-                            MessageBox.Show("Something went wrong reading that songs.dta file", Text,MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show("Something went wrong reading that songs.dta file", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
                         if (Parser.Songs.Count > 1)
@@ -976,7 +968,7 @@ namespace Nautilus
                     }
                     else
                     {
-                        MessageBox.Show("That's not a valid file to drag and drop here\nTry again", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        MessageBox.Show("That's not a valid file\nTry again", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     }
                 }
                 catch (Exception ex)
@@ -3624,61 +3616,7 @@ namespace Nautilus
             doImages();
             LoadConfig();
             Application.DoEvents();
-            CheckLoadFonts();
-
-            bool isFolder = !string.IsNullOrEmpty(inputFile) && File.GetAttributes(inputFile).HasFlag(FileAttributes.Directory);
-            if (isFolder) //assume Yarg/PS3 folder structure
-            {
-                LoadYARGPS3Folder(inputFile);
-                return;
-            }
-
-            if (Path.GetExtension(inputFile) == ".png_xbox" || Path.GetExtension(inputFile) == ".bmp") //coming from RBA Editor
-            {
-                getImage(inputFile);
-            }
-            else if (Path.GetFileName(inputFile) == "songs.dta" || Path.GetFileName(inputFile) == "songs.dta.raw") //coming from RBA Editor
-            {
-                loadDefaults();
-                Parser.ReadDTA(File.ReadAllBytes(inputFile));
-                loadDTA();
-            }
-            else
-            {
-                if (inputFile != "" && File.Exists(inputFile))
-                {
-                    try
-                    {
-                        switch(Path.GetExtension(inputFile))
-                        {
-                            case ".pkg":
-                                ExtractPKG(inputFile);
-                                break;
-                            case ".sng":
-                                ExtractSNG(inputFile);
-                                break;
-                            case ".yargsong":
-                                ExtractYARG(inputFile);
-                                break;
-                            case ".psarc":
-                                ExtractPsArc(inputFile);
-                                break;
-                            default:
-                                if (VariousFunctions.ReadFileType(inputFile) == XboxFileType.STFS)
-                                {
-                                    loadDefaults();
-                                    loadCON(inputFile);
-                                }
-                                break;
-                        }                        
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("There was an error accessing that file\nThe error says:\n" + ex.Message, Text,
-                                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
+            CheckLoadFonts();            
             
             var themes_folder = Application.StartupPath + "\\res\\vis_themes\\";
             switch (DateTime.Now.Month)
@@ -3760,21 +3698,27 @@ namespace Nautilus
                     break;
             }
             picVisualizer.Invalidate();
-            if (string.IsNullOrWhiteSpace(ThemeName)) return;
-            try
+
+
+            if (!string.IsNullOrWhiteSpace(ThemeName))
             {
-                picShowTheme.Image = Tools.NemoLoadImage(themes_folder + ThemeName + "_button.png");
-                picShowTheme.Visible = true;
-                UseOverlay = true;
-                picVisualizer.Invalidate();
+                try
+                {
+                    picShowTheme.Image = Tools.NemoLoadImage(themes_folder + ThemeName + "_button.png");
+                    picShowTheme.Visible = true;
+                    UseOverlay = true;
+                    picVisualizer.Invalidate();
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Error loading theme button image + " + ThemeName +
+                        "_button.png\nMake sure the files are named correctly and the files are in the res\\vis_themes\\ directory", Text,
+                        MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    ThemeName = "";
+                }
             }
-            catch (Exception)
-            {
-                MessageBox.Show("Error loading theme button image + " + ThemeName +
-                    "_button.png\nMake sure the files are named correctly and the files are in the res\\vis_themes\\ directory", Text,
-                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                ThemeName = "";
-            }
+
+            HandleDragDrop(inputFile);
         }
 
         private void GetLogo(string image_path)
@@ -6272,7 +6216,7 @@ namespace Nautilus
 
         private double GetCorrectedTime()
         {
-            return PlaybackSeconds - ((double)BassBuffer / 1000);// - ((double)PlayingSong.PSDelay / 1000);
+            return PlaybackSeconds - ((double)BassBuffer / 1000) - ((double)Parser.Songs[0].PSDelay / 1000);
         }
 
         private string GetMusicNotes()

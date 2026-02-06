@@ -133,6 +133,8 @@
             this.label7 = new System.Windows.Forms.Label();
             this.lblStrokeQuestion = new System.Windows.Forms.Label();
             this.colorPicker = new System.Windows.Forms.ColorDialog();
+            this.displayTempoOnTitleCard = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
             this.grpAudioOptions.SuspendLayout();
             this.grpHarm1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picBackground1)).BeginInit();
@@ -794,6 +796,8 @@
             this.toolStripMenuItem4,
             this.enableMP4TitleCardShadows,
             this.toolStripMenuItem5,
+            this.displayTempoOnTitleCard,
+            this.toolStripMenuItem6,
             this.showRenderingPreview});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(101, 20);
@@ -1198,7 +1202,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
             this.aboutToolStripMenuItem.Text = "&About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -1335,6 +1339,21 @@
             this.lblStrokeQuestion.TabIndex = 90;
             this.lblStrokeQuestion.Text = "?";
             this.lblStrokeQuestion.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lblStrokeQuestion_MouseClick);
+            // 
+            // displayTempoOnTitleCard
+            // 
+            this.displayTempoOnTitleCard.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.displayTempoOnTitleCard.Checked = true;
+            this.displayTempoOnTitleCard.CheckOnClick = true;
+            this.displayTempoOnTitleCard.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.displayTempoOnTitleCard.Name = "displayTempoOnTitleCard";
+            this.displayTempoOnTitleCard.Size = new System.Drawing.Size(279, 22);
+            this.displayTempoOnTitleCard.Text = "Display tempo on title card";
+            // 
+            // toolStripMenuItem6
+            // 
+            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(276, 6);
             // 
             // CDGConverter
             // 
@@ -1509,5 +1528,7 @@
         private System.Windows.Forms.ToolStripMenuItem staticImageBackgroundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem animatedBackgroundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem noDelayToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem displayTempoOnTitleCard;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
     }
 }
