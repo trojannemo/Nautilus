@@ -38,6 +38,7 @@ namespace Nautilus
         private PackageType filePackageType;
         const string AppName = "CON Explorer";
         private string internalName;
+        private string shortName;
 
         public CONExplorer(Color ButtonBackColor, Color ButtonTextColor, bool runningshortcut = false)
         {
@@ -1179,6 +1180,7 @@ namespace Nautilus
             activeDTA = xPackage.GetFile("songs/songs.dta");
             if (!isUpgrade)
             {
+                shortName = Parser.Songs[0].ShortName;
                 internalName = Parser.Songs[0].InternalName;
                 if (!string.IsNullOrWhiteSpace(internalName) && Parser.Songs.Count == 1)
                 {
@@ -1458,7 +1460,7 @@ namespace Nautilus
                 MessageBox.Show("Not possible with this file", Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
-            var popup = new PasswordUnlocker(lblSongID.Text, internalName);
+            var popup = new PasswordUnlocker(lblSongID.Text, shortName);
             popup.IDChanger();
             popup.ShowDialog();
             var newID = popup.EnteredText;

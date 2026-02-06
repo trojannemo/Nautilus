@@ -4,14 +4,14 @@ namespace Nautilus
 {
     public partial class PasswordUnlocker : Form
     {
-        public string _internalName;
+        public string _shortName;
         private string _origName;
 
         public PasswordUnlocker(string name = "", string internalName = "")
         {
             InitializeComponent();            
             txtPass.Text = name;
-            _internalName = internalName;
+            _shortName = internalName;
             _origName = name;
         }
 
@@ -62,13 +62,17 @@ namespace Nautilus
         private void btnGenerate_Click(object sender, System.EventArgs e)
         {
             string id = "";
-            if (string.IsNullOrEmpty(txtPass.Text))
+            if (!string.IsNullOrEmpty(_shortName))
             {
-                id = _internalName;
+                id = _shortName;
+            }
+            else if (!string.IsNullOrEmpty(txtPass.Text))
+            {
+                id = txtPass.Text;
             }
             else
             {
-                id = txtPass.Text.Trim();
+                return;
             }
             var corrector = new SongIDCorrector();
             txtPass.Text = corrector.ShortnameToSongID(id).ToString();
