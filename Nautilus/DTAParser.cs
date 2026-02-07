@@ -633,7 +633,7 @@ namespace Nautilus
                             {
                                 song.ShortName = line.Trim() == "(" ? entry[z + 1].Replace("'", "").Trim() : line.Replace("(", "").Replace("'", "").Trim();
                             }
-                            if (line.Contains("(name") && !(line.Contains(("songs/"))))
+                            if (line.Contains("(name") && !line.Contains("songs/"))
                             {
                                 if (!line.Contains(")"))
                                 {
@@ -642,7 +642,7 @@ namespace Nautilus
                                 }
                                 song.Name = GetSongName(line);
                             }
-                            else if (line.Contains("'name'") && !(line.Contains("songs/")))
+                            else if (line.Contains("'name'") && !line.Contains("songs/"))
                             {
                                 z++;
                                 line = entry[z];
@@ -686,17 +686,6 @@ namespace Nautilus
                             }
                             else if (line.Contains("(tracks"))
                             {
-                                /*for (var x = 0; x < entry.Count; x++)
-                                {
-                                    //if (line != null && line.Trim() != ")" && !line.Trim().Contains(")))"))
-                                    if (line == null || line.Trim() == ")" || line.Trim().Contains(")))"))
-                                    {
-                                        z--;
-                                        line = entry[z];
-                                        break;
-                                    }
-                                    
-                                }*/
                                 while (line != null && line.Trim() != ")" && !line.Trim().Contains(")))"))
                                 {
                                     if (line.ToLowerInvariant().Contains("bass") && !didBass)
@@ -2379,7 +2368,7 @@ namespace Nautilus
                         closed = 0;
                         continue;
                     }
-                    var inQuotes = line.TrimStart().StartsWith("\"") || line.TrimEnd().EndsWith("\"");
+                    var inQuotes = line.TrimStart().StartsWith("\"") && line.TrimEnd().EndsWith("\"");
                     if (!inQuotes && line.Contains(")"))
                     {
                         closed = closed + line.Count(x => x == ')'); //rather than add +1, count how many instances in the string
