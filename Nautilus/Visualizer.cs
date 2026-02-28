@@ -3616,8 +3616,8 @@ namespace Nautilus
             doImages();
             LoadConfig();
             Application.DoEvents();
-            CheckLoadFonts();            
-            
+            CheckLoadFonts();
+
             var themes_folder = Application.StartupPath + "\\res\\vis_themes\\";
             switch (DateTime.Now.Month)
             {
@@ -3699,7 +3699,6 @@ namespace Nautilus
             }
             picVisualizer.Invalidate();
 
-
             if (!string.IsNullOrWhiteSpace(ThemeName))
             {
                 try
@@ -3718,7 +3717,10 @@ namespace Nautilus
                 }
             }
 
-            HandleDragDrop(inputFile);
+            if (!string.IsNullOrEmpty(inputFile))
+            {
+                HandleDragDrop(inputFile);
+            }
         }
 
         private void GetLogo(string image_path)

@@ -791,7 +791,7 @@ namespace Nautilus
             bool success;
             try
             {
-                var signature = new RSAParams(Application.StartupPath + "\\bin\\KV.bin");
+                var signature = new RSAParams(Path.Combine(AppContext.BaseDirectory, "bin", "KV.bin"));
                 var bigpack = new STFSPackage(packfiles, signature, xOut);
                 var count1 = bigpack.xFileDirectory.Count;
                 bigpack.CloseIO();
@@ -817,9 +817,10 @@ namespace Nautilus
                     success = false;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                Log("There was an error building CON file");
+                Log("There was an error building that CON file");
+                MessageBox.Show("There was an error building that CON file:\n\n" + ex.Message + "\n\n" + ex.StackTrace, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 success = false;
             }
             return success;

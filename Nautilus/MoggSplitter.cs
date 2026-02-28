@@ -572,7 +572,7 @@ namespace Nautilus
             else
             {
                 BassEnc.BASS_Encode_Start(out_stream, file, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
-            }
+            }         
         }
 
         private float GetStemVolume(int curr_channel)
