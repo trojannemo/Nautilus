@@ -13,7 +13,7 @@ ROCK BAND TO KARAOKE CONVERTER
 - Added toggle option for Tempo being show on in the intro/title card
 
 VISUALIZER
-- NOW accepts ALL understood file formats as arguments for command line launching (i.e. connecting to cPlayer and and unannounced Clone Hero project)
+- NOW accepts ALL understood file formats as arguments for command line launching (i.e. connecting to cPlayer and unannounced Clone Hero project)
 - Fixed broken delay for Clone Hero and similar songs that use a delay value in the song.ini file
 
 AUDIO ANALYZER
@@ -3144,3 +3144,4 @@ ALBUM ART CONVERTER (NEW!)
 - converts from png_xbox -> bmp and bmp -> png_xbox
 ----one or multiple files at a time
 ----option to delete original files
+
