@@ -129,7 +129,7 @@ Credit where credit is due:
 
 - **Dark** — *themethod3* (iykyk)
 
-- **Josiah Winslow** - base CDGMaker Python code
+- **Josiah Winslow** - base CDGMaker Python code  
 https://github.com/WinslowJosiah/cdgmaker
 
 ---
