@@ -1,15 +1,87 @@
 Nautilus
 Developed by TrojanNemo
-© 2013-2025
+© 2013-2026
 (with contributions from many!)
 -------------------
 
 FEATURES / CHANGE LOG:
 
-vNightly (in source code, NOT in current release!)
+v5.6.3
+
+ROCK BAND TO KARAOKE CONVERTER
+- Fixed bug that would break compatibility with certain older RB1 era files (was assuming there would be album art in every file)
+- Added toggle option for Tempo being show on in the intro/title card
+
+VISUALIZER
+- NOW accepts ALL understood file formats as arguments for command line launching (i.e. connecting to cPlayer and unannounced Clone Hero project)
+- Fixed broken delay for Clone Hero and similar songs that use a delay value in the song.ini file
+
+AUDIO ANALYZER
+- Can now be launched from CLI argument and automatically load a CON file by using the arguments -audioa -file_path
+
+FILE ANALYZER
+- Can now be launched from CLI argument and automatically load a CON file by using the arguments -analyzer -file_path
+
+BATCH PROCESSOR
+- Now relies on the shortname instead of the internal name when generating unique numeric IDs (as intended)
+
+CON EXPLORER
+- Now relies on the shortname instead of the internal name when generating unique numeric IDs (as intended)
+
+PS3 CONVERTER
+- Now relies on the shortname instead of the internal name when generating unique numeric IDs (as intended)
+
+DTA PARSER
+- Fixed bug that would break compatibility with RB4-to-RB2 CON files ... should work fine everywhere in Nautilus now
+
+---
+
+v5.6.2
+
+VISUALIZER
+- Added support for playing back lyrics for PS4 RB4 songs
+- Fixed a few bugs that would result in errors when trying to visualize PS4 RB4 songs due to missing data in the songdta_ps4 file
+- Added (limited) support for reading .chart files from Clone Hero loose folders and Clone Hero .sng files and display lyrics like it does with MIDI files when present
+- Added (limited) support for reading all difficulties from .chart files so Visualizer can now determine if it's Expert-Only or not like it does with MIDI files
+
+FILE ANALYZER
+- Added support for analyzing .rbmid_ps4 files
+- Added support for analyzing .png_ps4 files
+- Added fix for reading atypical x/1 ("Unknown") time signature events when analyzing certain MIDI files that started life as .chart files
+
+QUICK PACK EDITOR
+- Enabled ability to delete song folders when editing PS3/RPCS3 songs.dta files as requested by Carl Mylo
+
+BATCH PROCESSOR
+- Fixed bug where DTA files were not being read correctly for the source encoding and were then not edited when saved as UTF8 - breaking special characters - should work fine now
+
+---
+
+v5.6.1
+
+BATCH PROCESSOR
+- Another attempt to finally squish the bug around unique song IDs not working well enough across songs that have conflicting numeric IDs - should work now
+
+PS3 CONVERTER
+- Another attempt to finally squish the bug around unique song IDs not working well enough across songs that have conflicting numeric IDs - should work now
+
+ROCK BAND TO KARAOKE CONVERTER
+- Improved highlighting behavior when using MP4 mode so it should no longer "go over" to the next syllable
+- Fixed bug where in CDG+MP3 mode even if you disabled stroke, it would leave it enabled but in the same color as the text, making the text look "chunky"
+
+BATCH RENAMER
+- Added option to bypass the Xbox file system character limit (i.e. for when storing/sorting on PC) but keeping the character type limitation (so no special characters, accents, etc) - as requested by EzloDQ
 
 VOLUME NORMALIZER
-- A new option has been added to work in an "album mode". When this is enabled, all songs in a folder will be analysed first, and an average offset calculated. Then, this average offset will be applied to all the songs in the folder. If you have multiple songs from an album, and want to preserve the dynamics across the album, but still normalise the album against the rest of your library, this will allow you to do so.
+- Merged PR by DragRedSim - this is a functionality addition which allows the Volume Normalizer to operate on multiple files by taking all files within a folder, analysing them, calculating the average volume offset, and then applying that offset to each file in turn. In this way, albums with a large dynamic range can be normalised into a user's library, but without losing the relative dynamic range across the album; quiet songs are still relatively quiet, and vice versa.
+
+FILE ANALYZER
+- Added feature to analyze drum charts for missing tom markers only without taking into account if it had/was missing pro drum animations - as requested by EzloDQ
+
+SETLIST MANAGER
+- Finally(?) fixed broken ability to delete songs from the Setlist that was not working due to the wrong index being used to identify the song behind the scenes
+
+---
 
 v5.6.0
 
