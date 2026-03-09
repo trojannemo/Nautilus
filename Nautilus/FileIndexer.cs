@@ -1,16 +1,15 @@
-﻿using System;
+﻿using Nautilus.Properties;
+using Nautilus.x360;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Nautilus.Properties;
-using Nautilus.x360;
 using Color = System.Drawing.Color;
-using Newtonsoft.Json;
-using System.Windows.Media;
-using System.Globalization;
 
 namespace Nautilus
 {
@@ -124,17 +123,19 @@ namespace Nautilus
                 sr.Dispose();
                 return;
             }
-            if (line.Contains("NewFormat"))
+            if (line.Contains("NewFormat") || line.Contains("Format2026"))
             {
                 var count = Convert.ToInt16(Tools.GetConfigString(sr.ReadLine()));
                 for (var i = 0; i < count; i++)
                 {
-                    var newSong = new SongIndex
+                    var newSong = new SongIndex();
+                    newSong.Name = Tools.GetConfigString(sr.ReadLine());
+                    newSong.SongID = Tools.GetConfigString(sr.ReadLine());
+                    newSong.Location = Tools.GetConfigString(sr.ReadLine());                    
+                    if (line.Contains("Format2026"))
                     {
-                        Name = Tools.GetConfigString(sr.ReadLine()),
-                        SongID = Tools.GetConfigString(sr.ReadLine()),
-                        Location = Tools.GetConfigString(sr.ReadLine())
-                    };
+                        newSong.InternalName = Tools.GetConfigString(sr.ReadLine());
+                    }
                     if (!File.Exists(newSong.Location) && !Directory.Exists(newSong.Location)) continue;
                     Songs.Add(newSong);
                 }
@@ -341,6 +342,7 @@ namespace Nautilus
                 var entry = new ListViewItem(song.Name);
                 entry.SubItems.Add(song.SongID);
                 entry.SubItems.Add(song.Location);
+                entry.SubItems.Add(song.InternalName);
                 lstSongs.Items.Add(entry);
                 if (!packages.Contains(song.Location))
                 {
@@ -375,32 +377,21 @@ namespace Nautilus
                         if (!Parser.ExtractDTA(file)) continue;
                         if (!Parser.ReadDTA(Parser.DTA) || !Parser.Songs.Any()) continue;
                     }
-                    
-                    foreach (var newEntry in Parser.Songs.Select(song => new SongIndex
+
+                    for (var i = 0; i < Parser.Songs.Count; i++)
                     {
-                        Name = song.Artist + " - " + song.Name,
-                        Location = PS3Mode ? Path.GetDirectoryName (file) : file,
-                        SongID = song.SongIdString
-                    }))
-                    {
-                        Songs.Add(newEntry);
-                    }
-                    foreach (var song in Parser.Songs)
-                    {
-                        origins.Add(song.Source + "\t" + file);
+                        var dtaSong = Parser.Songs[i];
+                        var song = new SongIndex();
+                        song.Name = dtaSong.Artist + " - " + dtaSong.Name;
+                        song.Location = PS3Mode ? Path.GetDirectoryName(file) + "\\" + dtaSong.InternalName + "\\": file;
+                        song.SongID = dtaSong.SongIdString;
+                        song.InternalName = dtaSong.InternalName;
+                        Songs.Add(song);
                     }
                 }
                 catch (Exception)
                 {}
             }
-
-            var sw = new StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\song_origins.csv", false);
-            foreach (var origin in origins)
-            {
-                sw.WriteLine(origin);
-            }
-            sw.Dispose();
-
             SaveIndex();
         }
 
@@ -409,13 +400,14 @@ namespace Nautilus
             if (!Songs.Any()) return;
             Tools.DeleteFile(Index);
             var sw = new StreamWriter(Index, false);
-            sw.WriteLine("NewFormat=True");
+            sw.WriteLine("Format2026=True");
             sw.WriteLine("IndexedCount=" + Songs.Count);
             foreach (var song in Songs)
             {
                 sw.WriteLine("SongName=" + song.Name);
                 sw.WriteLine("SongID=" + song.SongID);
                 sw.WriteLine("FileLocation=" + song.Location);
+                sw.WriteLine("InternalName=" + song.InternalName);
             }
             sw.Dispose();
         }
@@ -521,12 +513,12 @@ namespace Nautilus
             openFolder.Visible = visible;
             onlyShowOtherSongs.Visible = visible;
             exportDisplayedSongs.Visible = visible;
-            sendToMenu.Visible = visible;
+            sendToMenu.Visible = visible && !chkPS3.Checked;
             moveSelectedFiles.Visible = !chkPS3.Checked;
             SendToCONExplorer.Visible = !chkPS3.Checked;
             SendToMIDICleaner.Visible = !chkPS3.Checked;
             SendToSongAnalyzer.Visible = !chkPS3.Checked;
-            //SendToQuickPackEditor.Visible = !chkPS3.Checked;            
+            moveSelectedFiles.Visible = !chkPS3.Checked;
         }
 
         private void exportDisplayedSongs_Click(object sender, EventArgs e)
@@ -537,6 +529,7 @@ namespace Nautilus
                 InitialDirectory = Tools.CurrentFolder,
                 OverwritePrompt = true,
                 AddExtension = true,
+                FileName = "fileindex.csv",
                 Filter = "CSV Files (*.csv)|*csv"
             };
 
@@ -609,7 +602,7 @@ namespace Nautilus
 
         private void SendToMIDICleaner_Click(object sender, EventArgs e)
         {
-                        var handler = new MIDICleaner(lstSongs.SelectedItems[0].SubItems[2].Text, Color.FromArgb(230, 215, 0), Color.White);
+            var handler = new MIDICleaner(lstSongs.SelectedItems[0].SubItems[2].Text, Color.FromArgb(230, 215, 0), Color.White);
             handler.Show();
         }
 
@@ -857,12 +850,39 @@ namespace Nautilus
             {
                 var file = lstSongs.SelectedItems[i].SubItems[2].Text;
                 Tools.SendtoTrash(file, chkPS3.Checked);
+                var dtaPath = GetDTAPath(lstSongs.SelectedItems[i].SubItems[2].Text);
+                var dtaContents = Parser.ReadDTA(File.ReadAllBytes(dtaPath));
+                if (Parser.Songs.Count == 1) //if single song DTA - delete, pack - deal with below
+                {
+                    Tools.SendtoTrash(dtaPath, false);
+                }
                 indices.Add(lstSongs.SelectedItems[i].Index);
             }
-            if (indices.Count == 0) return;
+            if (indices.Count == 0) return;            
             indices.Reverse();
             for (var i = 0; i < indices.Count; i++ )
             {
+                if (chkPS3.Checked)
+                {
+                    var dtaPath = GetDTAPath(lstSongs.Items[indices[i]].SubItems[2].Text);
+                    var dtaSongs = Parser.ReadDTA(File.ReadAllBytes(dtaPath));
+                    var sw = new StreamWriter(dtaPath, false);
+                    for (var x = 0; x < Parser.Songs.Count; x++)
+                    {
+                        var currID = lstSongs.Items[indices[i]].SubItems[1].Text;
+                        var currInternal = lstSongs.Items[indices[i]].SubItems[3].Text;
+                        var newID = Parser.Songs[x].SongIdString;
+                        var newInternal = Parser.Songs[x].InternalName;
+
+                        //use combination of ID and internal name to match index entry to DTA entry
+                        if ((currID + "|" + currInternal).Equals(newID + "|" + newInternal)) continue;
+                        for (var j = 0; j < Parser.Songs[x].DTALines.Count; j++)
+                        {
+                            sw.WriteLine(Parser.Songs[x].DTALines[j]);
+                        }
+                    }
+                    sw.Dispose();
+                }
                 lstSongs.Items.RemoveAt(indices[i]);
             }
         }
@@ -886,10 +906,24 @@ namespace Nautilus
             filteringWorker.RunWorkerAsync();
         }
 
+        private string GetDTAPath(string folder)
+        {
+            var currentDir = new DirectoryInfo(folder);
+            var parentDir = currentDir.Parent.FullName;
+            return parentDir + "\\songs.dta";
+        }
+
         private void lstSongs_DoubleClick(object sender, EventArgs e)
         {
             if (!doubleclickToOpenInVisualizer.Checked) return;
-            OpenInVisualizer(lstSongs.SelectedItems[0].SubItems[2].Text);
+            if (chkPS3.Checked)
+            {
+                OpenInVisualizer(GetDTAPath(lstSongs.SelectedItems[0].SubItems[2].Text));
+            }
+            else
+            {
+                OpenInVisualizer(lstSongs.SelectedItems[0].SubItems[2].Text);
+            }
         }
 
         private void moveSelectedFiles_Click(object sender, EventArgs e)
@@ -980,5 +1014,6 @@ namespace Nautilus
         public string Name { get; set; }
         public string SongID { get; set; }
         public string Location { get; set; }
+        public string InternalName { get; set; }
     }
 }

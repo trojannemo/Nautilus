@@ -1081,7 +1081,7 @@ namespace Nautilus
             var artist = $"artist = '''{Parser.Songs[0].Artist.Replace("feat.", "ft.").Replace("featuring", "ft.")}";
             if (displayTempo)
             {
-                artist = artist + "\\n\\nTempo: {bpm} BPM'''";
+                artist = artist + $"\n\nTempo: {bpm} BPM'''";
             }
             else
             {

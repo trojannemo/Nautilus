@@ -479,11 +479,15 @@ namespace Nautilus
                                 var songid = song.InternalName;
 
                                 var name = Tools.CleanString(song.Name, true);
+                                //Log("Cleaned Name: " + name);
                                 var artist = Tools.CleanString(song.Artist, true);
+                                //Log("Cleaned Artist: " +  artist);
                                 songid = Tools.CleanString(songid, true);
-
+                                //Log("Cleaned SongID: " + songid);
                                 rename = arrangeName(name, artist, songid).Replace("!", "").Replace("'", "");
+                                //Log("Arranged Name: " + rename);
                                 rename = Tools.CleanString(rename, false);
+                                //Log("Cleaned Arranged Name: " + rename);
 
                                 if (chkDTA.Checked || extractToYARG.Checked && !FileExtractor.CancellationPending)
                                 {
@@ -682,6 +686,7 @@ namespace Nautilus
                     {
                         Log("Error processing file '" + Path.GetFileName(file) + "'");
                         Log("The error says: " + ex.Message);
+                        Log("Stack Trace: " + ex.StackTrace);
                         xPackage.CloseIO();
                     }
                 }

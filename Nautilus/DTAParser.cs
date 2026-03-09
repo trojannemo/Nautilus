@@ -640,7 +640,15 @@ namespace Nautilus
                                     z++;
                                     line = entry[z];                                    
                                 }
-                                song.Name = GetSongName(line);
+                                if (line.Contains("songs/") && !line.Contains("_short"))
+                                {
+                                    song.FilePath = GetSongPath(line);
+                                    song.InternalName = GetInternalName(line);
+                                }
+                                else
+                                {
+                                    song.Name = GetSongName(line);
+                                }
                             }
                             else if (line.Contains("'name'") && !line.Contains("songs/"))
                             {

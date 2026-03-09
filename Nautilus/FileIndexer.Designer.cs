@@ -75,6 +75,7 @@
             this.picPin = new System.Windows.Forms.PictureBox();
             this.filteringWorker = new System.ComponentModel.BackgroundWorker();
             this.chkPS3 = new System.Windows.Forms.CheckBox();
+            this.colInternalName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
@@ -108,7 +109,7 @@
             // 
             this.clearIndexedFilesToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.clearIndexedFilesToolStripMenuItem.Name = "clearIndexedFilesToolStripMenuItem";
-            this.clearIndexedFilesToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.clearIndexedFilesToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.clearIndexedFilesToolStripMenuItem.Text = "Clear indexed files";
             this.clearIndexedFilesToolStripMenuItem.Click += new System.EventHandler(this.clearIndexedFilesToolStripMenuItem_Click);
             // 
@@ -116,7 +117,7 @@
             // 
             this.exitToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(169, 22);
             this.exitToolStripMenuItem.Text = "E&xit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -127,7 +128,7 @@
             this.findSongsWithIDConflicts,
             this.findSongsWithDuplicateNames});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             this.toolsToolStripMenuItem.Text = "Tools";
             // 
             // findSongsWithoutWipeproofIDs
@@ -311,7 +312,8 @@
             this.lstSongs.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colSong,
             this.colSongID,
-            this.colLocation});
+            this.colLocation,
+            this.colInternalName});
             this.lstSongs.ContextMenuStrip = this.contextMenuStrip1;
             this.lstSongs.Enabled = false;
             this.lstSongs.FullRowSelect = true;
@@ -355,14 +357,14 @@
             this.sendToMenu});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.ShowImageMargin = false;
-            this.contextMenuStrip1.Size = new System.Drawing.Size(255, 158);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(254, 158);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // openFolder
             // 
             this.openFolder.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.openFolder.Name = "openFolder";
-            this.openFolder.Size = new System.Drawing.Size(254, 22);
+            this.openFolder.Size = new System.Drawing.Size(253, 22);
             this.openFolder.Text = "Open selected file in Windows Explorer";
             this.openFolder.Click += new System.EventHandler(this.openFolderThatContainsFileToolStripMenuItem_Click);
             // 
@@ -370,7 +372,7 @@
             // 
             this.onlyShowOtherSongs.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.onlyShowOtherSongs.Name = "onlyShowOtherSongs";
-            this.onlyShowOtherSongs.Size = new System.Drawing.Size(254, 22);
+            this.onlyShowOtherSongs.Size = new System.Drawing.Size(253, 22);
             this.onlyShowOtherSongs.Text = "Only show songs found in this file";
             this.onlyShowOtherSongs.Click += new System.EventHandler(this.onlyShowOtherSongs_Click);
             // 
@@ -378,14 +380,14 @@
             // 
             this.exportDisplayedSongs.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.exportDisplayedSongs.Name = "exportDisplayedSongs";
-            this.exportDisplayedSongs.Size = new System.Drawing.Size(254, 22);
+            this.exportDisplayedSongs.Size = new System.Drawing.Size(253, 22);
             this.exportDisplayedSongs.Text = "Export displayed songs to CSV";
             this.exportDisplayedSongs.Click += new System.EventHandler(this.exportDisplayedSongs_Click);
             // 
             // exportToJson
             // 
             this.exportToJson.Name = "exportToJson";
-            this.exportToJson.Size = new System.Drawing.Size(254, 22);
+            this.exportToJson.Size = new System.Drawing.Size(253, 22);
             this.exportToJson.Text = "Export displayed songs to Json";
             this.exportToJson.Click += new System.EventHandler(this.exportToJson_Click);
             // 
@@ -393,14 +395,14 @@
             // 
             this.deleteSelectedFileToolStripMenuItem.Name = "deleteSelectedFileToolStripMenuItem";
             this.deleteSelectedFileToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.Delete;
-            this.deleteSelectedFileToolStripMenuItem.Size = new System.Drawing.Size(254, 22);
+            this.deleteSelectedFileToolStripMenuItem.Size = new System.Drawing.Size(253, 22);
             this.deleteSelectedFileToolStripMenuItem.Text = "Delete selected file(s)";
             this.deleteSelectedFileToolStripMenuItem.Click += new System.EventHandler(this.deleteSelectedFileToolStripMenuItem_Click);
             // 
             // moveSelectedFiles
             // 
             this.moveSelectedFiles.Name = "moveSelectedFiles";
-            this.moveSelectedFiles.Size = new System.Drawing.Size(254, 22);
+            this.moveSelectedFiles.Size = new System.Drawing.Size(253, 22);
             this.moveSelectedFiles.Text = "Move selected file(s)";
             this.moveSelectedFiles.Click += new System.EventHandler(this.moveSelectedFiles_Click);
             // 
@@ -415,7 +417,7 @@
             this.SendToAudioAnalyzer,
             this.SendToQuickPackEditor});
             this.sendToMenu.Name = "sendToMenu";
-            this.sendToMenu.Size = new System.Drawing.Size(254, 22);
+            this.sendToMenu.Size = new System.Drawing.Size(253, 22);
             this.sendToMenu.Text = "Send selected file to...";
             // 
             // SendToCONExplorer
@@ -607,6 +609,11 @@
             this.chkPS3.Text = "PS3 Mode (check for songs.dta files)";
             this.chkPS3.UseVisualStyleBackColor = true;
             // 
+            // colInternalName
+            // 
+            this.colInternalName.Text = "Internal Name";
+            this.colInternalName.Width = 120;
+            // 
             // FileIndexer
             // 
             this.AllowDrop = true;
@@ -701,5 +708,6 @@
         private System.Windows.Forms.ToolStripMenuItem moveSelectedFiles;
         private System.Windows.Forms.ToolStripMenuItem exportToJson;
         private System.Windows.Forms.CheckBox chkPS3;
+        private System.Windows.Forms.ColumnHeader colInternalName;
     }
 }
