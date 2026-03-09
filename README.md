@@ -65,7 +65,9 @@ Nautilus would not be possible without the groundwork, tools, and assistance of 
 Credit where credit is due:
 
 - **DJ Shepherd** — original *Le Fluffie* & x360 library  
+
 - **xorloser** — tools, research, and knowledge  
+
 - **raynebc** — *midishrink* and MIDI expertise  
 
 - **Mark Heath** — NAudio.MIDI  
@@ -77,19 +79,23 @@ Credit where credit is due:
 - **Bernd Niedergesaess** — BASS.NET API  
   http://bass.radio42.com/
 
-- **StackOverflow0x** — Wii customs support  
+- **StackOverflow0x** — Wii customs support
+
 - **TDCMark** & **AerialX** — PS3 customs support  
+
 - **traflaz** — PS3 HDD song search code  
 
 - **bluzer** & **AkiraNomuraBCN** — Phase Shift support  
+
 - **pksage** — RB3 song cache research  
 
 - **Mike Gledhill** — CreateExcelFile library  
+
 - **Uzi Granot** — PDFFileWriter library  
 
 - **Nyxyxylyth** — base album art & RBA converter code  
 
-- **Maxton** — countless contributions *(RIP)*  
+- **Maxton** — countless contributions, too many to specify *(RIP)*  
 
 - **PikminGuts92** — MiloExtractor, RBA Builder 2.0, Songfuse  
   https://github.com/PikminGuts92  
@@ -105,6 +111,7 @@ Credit where credit is due:
   https://github.com/SuperRiderTH/CON-Tools  
 
 - **LocalH** / **MHXScott** — mogg file expertise  
+
 - **Linos** — troubleshooting support  
 
 - **Lord Zedd / TehBanStick** — RB3 Character Editor  
@@ -121,6 +128,9 @@ Credit where credit is due:
   https://github.com/mtolly/LibForge  
 
 - **Dark** — *themethod3* (iykyk)
+
+- **Josiah Winslow** - base CDGMaker Python code
+https://github.com/WinslowJosiah/cdgmaker
 
 ---
 
