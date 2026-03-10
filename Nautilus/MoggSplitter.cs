@@ -166,23 +166,23 @@ namespace Nautilus
                 {
                     case MoggSplitFormat.FLAC:
                         arg = "--compression-level-5 --fast -T \"COMMENT=Made by Nemo\"";
-                        BassEnc_Flac.BASS_Encode_FLAC_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, output);
+                        BassEnc_Flac.BASS_Encode_FLAC_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, output_file);
                         break;
                     case MoggSplitFormat.OPUS:
                         arg = "--vbr --music --comment COMMENT=\"Made by Nemo\"";
-                        BassEnc_Opus.BASS_Encode_OPUS_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_DEFAULT | BASSEncode.BASS_ENCODE_AUTOFREE, output);
+                        BassEnc_Opus.BASS_Encode_OPUS_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_DEFAULT | BASSEncode.BASS_ENCODE_AUTOFREE, output_file);
                         break;
                     case MoggSplitFormat.OGG:
                         arg = "-q 5 -c \"COMMENT=Made by Nemo\"";
-                        BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, output);
+                        BassEnc_Ogg.BASS_Encode_OGG_StartFile(BassMixer, arg, BASSEncode.BASS_ENCODE_AUTOFREE, output_file);
                         break;
                     case MoggSplitFormat.MP3:
                         arg = "-b 320 --add-id3v2 --ignore-tag-errors --tc \"Made by Nemo\"";
-                        BassEnc_Mp3.BASS_Encode_MP3_StartFile(BassMixer, arg, BASSEncode.BASS_UNICODE | BASSEncode.BASS_ENCODE_AUTOFREE, output);
+                        BassEnc_Mp3.BASS_Encode_MP3_StartFile(BassMixer, arg, BASSEncode.BASS_UNICODE | BASSEncode.BASS_ENCODE_AUTOFREE, output_file);
                         break;
                     default:
                     case MoggSplitFormat.WAV:
-                        BassEnc.BASS_Encode_Start(BassMixer, output, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
+                        BassEnc.BASS_Encode_Start(BassMixer, output_file, BASSEncode.BASS_ENCODE_PCM | BASSEncode.BASS_ENCODE_AUTOFREE, null, IntPtr.Zero);
                         break;
                 }
                 while (true)
@@ -375,7 +375,7 @@ namespace Nautilus
                         channels[5] = 4;
                         channels[6] = 3;
                         break;
-                    case 8:
+                    /*case 8:
                         channels[0] = 0;
                         channels[1] = 2;
                         channels[2] = 1;
@@ -384,7 +384,7 @@ namespace Nautilus
                         channels[5] = 7;
                         channels[6] = 5;
                         channels[7] = 3;
-                        break;
+                        break;*/
                     default:
                         goto DoAllChannels;
                 }
