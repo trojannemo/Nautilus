@@ -375,7 +375,7 @@ namespace Nautilus
                         channels[5] = 4;
                         channels[6] = 3;
                         break;
-                    /*case 8:
+                    case 8:
                         channels[0] = 0;
                         channels[1] = 2;
                         channels[2] = 1;
@@ -384,7 +384,7 @@ namespace Nautilus
                         channels[5] = 7;
                         channels[6] = 5;
                         channels[7] = 3;
-                        break;*/
+                        break;
                     default:
                         goto DoAllChannels;
                 }

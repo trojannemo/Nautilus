@@ -13,6 +13,7 @@ using Un4seen.Bass.AddOn.Flac;
 using System.Globalization;
 using Nautilus.Properties;
 using NautilusFREE;
+using System.Linq;
 
 namespace Nautilus
 {
@@ -320,7 +321,8 @@ namespace Nautilus
                 stream_info = Bass.BASS_ChannelGetInfo(BassStream);
                 if (stream_info.chans == 0) continue;
                 BassMix.BASS_Mixer_StreamAddChannel(BassMixer, BassStream, BASSFlag.BASS_MIXER_MATRIX);
-                var matrix = GetMatrix(currentChannel, stream_info.chans, isSilent);
+                //var matrix = GetMatrix(currentChannel, stream_info.chans, isSilent);
+                var matrix = GetMatrix(currentChannel, stream_info.chans, audioChannels, isSilent);
                 BassMix.BASS_Mixer_ChannelSetMatrix(BassStream, matrix);
                 currentChannel += isSilent? 2 : stream_info.chans;
                 BassStreams.Add(BassStream);
@@ -350,7 +352,7 @@ namespace Nautilus
                     Log("Failed");
                 }
             }
-        }
+        }       
 
         private void ClearBASS()
         {
@@ -364,7 +366,7 @@ namespace Nautilus
             BASS_INIT = false;
         }
 
-        private float[,] GetMatrix(int currentChannel, int channelCount, bool isSilent)
+        /*private float[,] GetMatrix(int currentChannel, int channelCount, bool isSilent)
         {
             var matrix = new float[audioChannels, channelCount];
             var vol = isSilent ? (float)0.0 : (float)1.0;
@@ -377,6 +379,27 @@ namespace Nautilus
                 matrix[currentChannel, 0] = vol;
                 matrix[currentChannel + 1, 1] = vol;
             }
+            return matrix;
+        }*/
+
+        private float[,] GetMatrix(int logicalStartChannel, int sourceChannelCount, int totalOutputChannels, bool isSilent)
+        {
+            var matrix = new float[totalOutputChannels, sourceChannelCount];
+            var vol = isSilent ? 0.0f : 1.0f;
+
+            var splitter = new MoggSplitter();
+            var map = splitter.ArrangeStreamChannels(totalOutputChannels, true);
+
+            for (int src = 0; src < sourceChannelCount; src++)
+            {
+                int logicalDest = logicalStartChannel + src;
+                if (logicalDest >= totalOutputChannels)
+                    break;
+
+                int physicalDest = map[logicalDest];
+                matrix[physicalDest, src] = vol;
+            }
+
             return matrix;
         }
 
