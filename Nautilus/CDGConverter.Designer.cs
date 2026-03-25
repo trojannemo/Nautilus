@@ -117,7 +117,8 @@
             this.enableMP4StrokeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripSeparator();
             this.enableMP4TitleCardShadows = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
+            this.displayTempoOnTitleCard = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
             this.showRenderingPreview = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -133,8 +134,8 @@
             this.label7 = new System.Windows.Forms.Label();
             this.lblStrokeQuestion = new System.Windows.Forms.Label();
             this.colorPicker = new System.Windows.Forms.ColorDialog();
-            this.displayTempoOnTitleCard = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
+            this.lblBackgroundQuestion = new System.Windows.Forms.Label();
+            this.displayAlbumArtOnTitleCard = new System.Windows.Forms.ToolStripMenuItem();
             this.grpAudioOptions.SuspendLayout();
             this.grpHarm1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picBackground1)).BeginInit();
@@ -794,9 +795,9 @@
             this.enableCDGStrokeToolStripMenuItem,
             this.enableMP4StrokeToolStripMenuItem,
             this.toolStripMenuItem4,
-            this.enableMP4TitleCardShadows,
-            this.toolStripMenuItem5,
+            this.displayAlbumArtOnTitleCard,
             this.displayTempoOnTitleCard,
+            this.enableMP4TitleCardShadows,
             this.toolStripMenuItem6,
             this.showRenderingPreview});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
@@ -819,7 +820,7 @@
             this.HighRes.Checked = true;
             this.HighRes.CheckState = System.Windows.Forms.CheckState.Checked;
             this.HighRes.Name = "HighRes";
-            this.HighRes.Size = new System.Drawing.Size(303, 22);
+            this.HighRes.Size = new System.Drawing.Size(294, 22);
             this.HighRes.Text = "1080P (very good quality, faster to render)";
             this.HighRes.Click += new System.EventHandler(this.HighRes_Click);
             // 
@@ -827,8 +828,8 @@
             // 
             this.HigherRes.BackColor = System.Drawing.Color.WhiteSmoke;
             this.HigherRes.Name = "HigherRes";
-            this.HigherRes.Size = new System.Drawing.Size(303, 22);
-            this.HigherRes.Text = "4K (higher quality, VERY SLOW TO RENDER)";
+            this.HigherRes.Size = new System.Drawing.Size(294, 22);
+            this.HigherRes.Text = "4K (higher quality, slower to render)";
             this.HigherRes.Click += new System.EventHandler(this.HigherRes_Click);
             // 
             // mP4FrameRateToolStripMenuItem
@@ -928,7 +929,7 @@
             // 
             this.noDelayToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
             this.noDelayToolStripMenuItem.Name = "noDelayToolStripMenuItem";
-            this.noDelayToolStripMenuItem.Size = new System.Drawing.Size(263, 22);
+            this.noDelayToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
             this.noDelayToolStripMenuItem.Text = "No delay";
             this.noDelayToolStripMenuItem.Click += new System.EventHandler(this.noDelayToolStripMenuItem_Click);
             // 
@@ -936,7 +937,7 @@
             // 
             this.quarterSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.quarterSecondDelay.Name = "quarterSecondDelay";
-            this.quarterSecondDelay.Size = new System.Drawing.Size(263, 22);
+            this.quarterSecondDelay.Size = new System.Drawing.Size(217, 22);
             this.quarterSecondDelay.Text = "0.25 second delay";
             this.quarterSecondDelay.Click += new System.EventHandler(this.quarterSecondDelay_Click);
             // 
@@ -944,7 +945,7 @@
             // 
             this.halfSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.halfSecondDelay.Name = "halfSecondDelay";
-            this.halfSecondDelay.Size = new System.Drawing.Size(263, 22);
+            this.halfSecondDelay.Size = new System.Drawing.Size(217, 22);
             this.halfSecondDelay.Text = "0.5 second delay";
             this.halfSecondDelay.Click += new System.EventHandler(this.halfSecondDelay_Click);
             // 
@@ -952,7 +953,7 @@
             // 
             this.threeQuarterSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.threeQuarterSecondDelay.Name = "threeQuarterSecondDelay";
-            this.threeQuarterSecondDelay.Size = new System.Drawing.Size(263, 22);
+            this.threeQuarterSecondDelay.Size = new System.Drawing.Size(217, 22);
             this.threeQuarterSecondDelay.Text = "0.75 second delay";
             this.threeQuarterSecondDelay.Click += new System.EventHandler(this.threeQuarterSecondDelay_Click);
             // 
@@ -960,7 +961,7 @@
             // 
             this.wholeSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.wholeSecondDelay.Name = "wholeSecondDelay";
-            this.wholeSecondDelay.Size = new System.Drawing.Size(263, 22);
+            this.wholeSecondDelay.Size = new System.Drawing.Size(217, 22);
             this.wholeSecondDelay.Text = "1 second delay";
             this.wholeSecondDelay.Click += new System.EventHandler(this.wholeSecondDelay_Click);
             // 
@@ -968,7 +969,7 @@
             // 
             this.OneTwentyFiveDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.OneTwentyFiveDelay.Name = "OneTwentyFiveDelay";
-            this.OneTwentyFiveDelay.Size = new System.Drawing.Size(263, 22);
+            this.OneTwentyFiveDelay.Size = new System.Drawing.Size(217, 22);
             this.OneTwentyFiveDelay.Text = "1.25 second delay";
             this.OneTwentyFiveDelay.Click += new System.EventHandler(this.OneTwentyFiveDelay_Click);
             // 
@@ -978,7 +979,7 @@
             this.OneFiftyDelay.Checked = true;
             this.OneFiftyDelay.CheckState = System.Windows.Forms.CheckState.Checked;
             this.OneFiftyDelay.Name = "OneFiftyDelay";
-            this.OneFiftyDelay.Size = new System.Drawing.Size(263, 22);
+            this.OneFiftyDelay.Size = new System.Drawing.Size(217, 22);
             this.OneFiftyDelay.Text = "1.5 second delay";
             this.OneFiftyDelay.Click += new System.EventHandler(this.OneFiftyDelay_Click);
             // 
@@ -986,7 +987,7 @@
             // 
             this.OneSeventyFiveDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.OneSeventyFiveDelay.Name = "OneSeventyFiveDelay";
-            this.OneSeventyFiveDelay.Size = new System.Drawing.Size(263, 22);
+            this.OneSeventyFiveDelay.Size = new System.Drawing.Size(217, 22);
             this.OneSeventyFiveDelay.Text = "1.75 second delay";
             this.OneSeventyFiveDelay.Click += new System.EventHandler(this.OneSeventyFiveDelay_Click);
             // 
@@ -994,22 +995,24 @@
             // 
             this.TwoSecondDelay.BackColor = System.Drawing.Color.WhiteSmoke;
             this.TwoSecondDelay.Name = "TwoSecondDelay";
-            this.TwoSecondDelay.Size = new System.Drawing.Size(263, 22);
+            this.TwoSecondDelay.Size = new System.Drawing.Size(217, 22);
             this.TwoSecondDelay.Text = "2 second delay";
             this.TwoSecondDelay.Click += new System.EventHandler(this.TwoSecondDelay_Click);
             // 
             // toolStripMenuItem2
             // 
             this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(260, 6);
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(214, 6);
             // 
             // enableHighlightAnimation
             // 
             this.enableHighlightAnimation.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.enableHighlightAnimation.Checked = true;
             this.enableHighlightAnimation.CheckOnClick = true;
+            this.enableHighlightAnimation.CheckState = System.Windows.Forms.CheckState.Checked;
             this.enableHighlightAnimation.Name = "enableHighlightAnimation";
-            this.enableHighlightAnimation.Size = new System.Drawing.Size(263, 22);
-            this.enableHighlightAnimation.Text = "Enable highlight animation (wonky)";
+            this.enableHighlightAnimation.Size = new System.Drawing.Size(217, 22);
+            this.enableHighlightAnimation.Text = "Enable highlight animation";
             // 
             // loadingBarOptionsToolStripMenuItem
             // 
@@ -1073,9 +1076,7 @@
             // enableAnimatedNotes
             // 
             this.enableAnimatedNotes.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.enableAnimatedNotes.Checked = true;
             this.enableAnimatedNotes.CheckOnClick = true;
-            this.enableAnimatedNotes.CheckState = System.Windows.Forms.CheckState.Checked;
             this.enableAnimatedNotes.Name = "enableAnimatedNotes";
             this.enableAnimatedNotes.Size = new System.Drawing.Size(255, 22);
             this.enableAnimatedNotes.Text = "Enable animated notes (MP4 only)";
@@ -1159,10 +1160,12 @@
             // enableMP4StrokeToolStripMenuItem
             // 
             this.enableMP4StrokeToolStripMenuItem.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.enableMP4StrokeToolStripMenuItem.Checked = true;
             this.enableMP4StrokeToolStripMenuItem.CheckOnClick = true;
+            this.enableMP4StrokeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.enableMP4StrokeToolStripMenuItem.Name = "enableMP4StrokeToolStripMenuItem";
             this.enableMP4StrokeToolStripMenuItem.Size = new System.Drawing.Size(279, 22);
-            this.enableMP4StrokeToolStripMenuItem.Text = "Enable MP4 stroke (slower)";
+            this.enableMP4StrokeToolStripMenuItem.Text = "Enable MP4 stroke";
             this.enableMP4StrokeToolStripMenuItem.Click += new System.EventHandler(this.enableCDGStrokeToolStripMenuItem_Click);
             // 
             // toolStripMenuItem4
@@ -1178,15 +1181,27 @@
             this.enableMP4TitleCardShadows.Size = new System.Drawing.Size(279, 22);
             this.enableMP4TitleCardShadows.Text = "Enable MP4 title card shadows (slower)";
             // 
-            // toolStripMenuItem5
+            // displayTempoOnTitleCard
             // 
-            this.toolStripMenuItem5.Name = "toolStripMenuItem5";
-            this.toolStripMenuItem5.Size = new System.Drawing.Size(276, 6);
+            this.displayTempoOnTitleCard.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.displayTempoOnTitleCard.Checked = true;
+            this.displayTempoOnTitleCard.CheckOnClick = true;
+            this.displayTempoOnTitleCard.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.displayTempoOnTitleCard.Name = "displayTempoOnTitleCard";
+            this.displayTempoOnTitleCard.Size = new System.Drawing.Size(279, 22);
+            this.displayTempoOnTitleCard.Text = "Display tempo on title card";
+            // 
+            // toolStripMenuItem6
+            // 
+            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
+            this.toolStripMenuItem6.Size = new System.Drawing.Size(276, 6);
             // 
             // showRenderingPreview
             // 
             this.showRenderingPreview.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.showRenderingPreview.Checked = true;
             this.showRenderingPreview.CheckOnClick = true;
+            this.showRenderingPreview.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showRenderingPreview.Name = "showRenderingPreview";
             this.showRenderingPreview.Size = new System.Drawing.Size(279, 22);
             this.showRenderingPreview.Text = "Show MP4 rendering preview";
@@ -1202,7 +1217,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.aboutToolStripMenuItem.Text = "&About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -1267,7 +1282,6 @@
             this.picPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picPreview.TabIndex = 85;
             this.picPreview.TabStop = false;
-            this.picPreview.Visible = false;
             // 
             // btnCancel
             // 
@@ -1340,20 +1354,27 @@
             this.lblStrokeQuestion.Text = "?";
             this.lblStrokeQuestion.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lblStrokeQuestion_MouseClick);
             // 
-            // displayTempoOnTitleCard
+            // lblBackgroundQuestion
             // 
-            this.displayTempoOnTitleCard.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.displayTempoOnTitleCard.Checked = true;
-            this.displayTempoOnTitleCard.CheckOnClick = true;
-            this.displayTempoOnTitleCard.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.displayTempoOnTitleCard.Name = "displayTempoOnTitleCard";
-            this.displayTempoOnTitleCard.Size = new System.Drawing.Size(279, 22);
-            this.displayTempoOnTitleCard.Text = "Display tempo on title card";
+            this.lblBackgroundQuestion.AutoSize = true;
+            this.lblBackgroundQuestion.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lblBackgroundQuestion.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblBackgroundQuestion.Location = new System.Drawing.Point(84, 123);
+            this.lblBackgroundQuestion.Name = "lblBackgroundQuestion";
+            this.lblBackgroundQuestion.Size = new System.Drawing.Size(15, 16);
+            this.lblBackgroundQuestion.TabIndex = 91;
+            this.lblBackgroundQuestion.Text = "?";
+            this.lblBackgroundQuestion.MouseClick += new System.Windows.Forms.MouseEventHandler(this.lblBackgroundQuestion_MouseClick);
             // 
-            // toolStripMenuItem6
+            // displayAlbumArtOnTitleCard
             // 
-            this.toolStripMenuItem6.Name = "toolStripMenuItem6";
-            this.toolStripMenuItem6.Size = new System.Drawing.Size(276, 6);
+            this.displayAlbumArtOnTitleCard.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.displayAlbumArtOnTitleCard.Checked = true;
+            this.displayAlbumArtOnTitleCard.CheckOnClick = true;
+            this.displayAlbumArtOnTitleCard.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.displayAlbumArtOnTitleCard.Name = "displayAlbumArtOnTitleCard";
+            this.displayAlbumArtOnTitleCard.Size = new System.Drawing.Size(279, 22);
+            this.displayAlbumArtOnTitleCard.Text = "Display album art on title card";
             // 
             // CDGConverter
             // 
@@ -1362,6 +1383,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.WhiteSmoke;
             this.ClientSize = new System.Drawing.Size(718, 590);
+            this.Controls.Add(this.lblBackgroundQuestion);
             this.Controls.Add(this.lblStrokeQuestion);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.cboStroke);
@@ -1522,7 +1544,6 @@
         private System.Windows.Forms.ToolStripMenuItem enableMP4StrokeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem4;
         private System.Windows.Forms.ToolStripMenuItem enableMP4TitleCardShadows;
-        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem5;
         private System.Windows.Forms.ToolStripMenuItem mP4BackgroundToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem solidColorToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem staticImageBackgroundToolStripMenuItem;
@@ -1530,5 +1551,7 @@
         private System.Windows.Forms.ToolStripMenuItem noDelayToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem displayTempoOnTitleCard;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
+        private System.Windows.Forms.Label lblBackgroundQuestion;
+        private System.Windows.Forms.ToolStripMenuItem displayAlbumArtOnTitleCard;
     }
 }

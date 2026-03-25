@@ -1,17 +1,18 @@
-﻿using NAudio.Midi;
+﻿using LibVLCSharp.Shared;
+using NAudio.Midi;
 using Nautilus.x360;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Windows.Forms;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Text;
-using System.Drawing.Imaging;
-using Un4seen.Bass;
-using System.Runtime.InteropServices;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Drawing.Text;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+using Un4seen.Bass;
 
 namespace Nautilus
 {
@@ -93,6 +94,11 @@ namespace Nautilus
         private bool staticImageBackground = false;
         private bool animatedVideoBackground = false;
         private bool displayTempo = true;
+        private bool displayAlbumArt = true;
+        private LibVLC _bgPreviewLibVLC;
+        private MediaPlayer _bgPreviewPlayer;
+        private string _customBackgroundVideoPath;
+        private LibVLCSharp.WinForms.VideoView videoPreview;
 
         List<string> karaokeColorHexes = new List<string>
         {
@@ -124,7 +130,104 @@ namespace Nautilus
             moggSplitter = new MoggSplitter();
             inputFiles = new List<string>();
             NewFile();
-            configFile = Application.StartupPath + "\\bin\\config\\karaoke.config";
+            configFile = Application.StartupPath + "\\bin\\config\\karaoke.config";            
+            InitializeBackgroundVideoView();
+            InitializeBackgroundPreview();
+            HookBackgroundPreviewLoop();
+        }
+
+        private void InitializeBackgroundVideoView()
+        {
+            videoPreview = new LibVLCSharp.WinForms.VideoView();
+            videoPreview.Name = "videoViewBackgroundPreview";
+            videoPreview.Visible = false;
+            videoPreview.Location = picPreview.Location;
+            videoPreview.Size = picPreview.Size;
+            videoPreview.Anchor = picPreview.Anchor;
+            videoPreview.BackColor = Color.Black;
+
+            this.Controls.Add(videoPreview);
+            videoPreview.BringToFront();
+        }
+
+        private void InitializeBackgroundPreview()
+        {
+            if (_bgPreviewLibVLC == null)
+            {
+                Core.Initialize();
+                _bgPreviewLibVLC = new LibVLC();
+            }
+
+            if (_bgPreviewPlayer == null)
+            {
+                _bgPreviewPlayer = new MediaPlayer(_bgPreviewLibVLC);
+                _bgPreviewPlayer.Mute = true;
+                videoPreview.MediaPlayer = _bgPreviewPlayer;
+            }
+        }
+
+        private void DroppedPreviewVideo(string videoPath)
+        {
+            InitializeBackgroundPreview();
+
+            _customBackgroundVideoPath = videoPath;
+
+            cboBackground.SelectedIndex = 0;//black
+            picPreview.Visible = false;
+            videoPreview.Visible = true;
+            solidColorToolStripMenuItem.Checked = false;
+            staticImageBackgroundToolStripMenuItem.Checked = false;
+            animatedBackgroundToolStripMenuItem.Checked = true;
+            picBackground1.Image = null;
+            picBackground2.Image = null;
+            picBackground3.Image = null;
+            animatedVideoBackground = true;
+            UpdateBackgroundColors(Color.Black);
+
+            try
+            {
+                var oldMedia = _bgPreviewPlayer.Media;
+                _bgPreviewPlayer.Media = null;
+
+                if (oldMedia != null)
+                {
+                    try { oldMedia.Dispose(); } catch { }
+                }
+
+                var media = new Media(_bgPreviewLibVLC, new Uri(videoPath));
+                _bgPreviewPlayer.Media = media;
+                _bgPreviewPlayer.Mute = true;
+                _bgPreviewPlayer.Play();
+            }
+            catch (Exception ex)
+            {
+                Log("Error previewing background video: " + ex.Message);
+            }
+        }
+
+        private void HookBackgroundPreviewLoop()
+        {
+            _bgPreviewPlayer.EndReached += (s, e) =>
+            {
+                try
+                {
+                    this.BeginInvoke(new Action(() =>
+                    {
+                        if (_bgPreviewPlayer != null && !string.IsNullOrEmpty(_customBackgroundVideoPath))
+                        {
+                            _bgPreviewPlayer.Stop();
+
+                            using (var media = new Media(_bgPreviewLibVLC, new Uri(_customBackgroundVideoPath)))
+                            {
+                                _bgPreviewPlayer.Media = media;
+                            }
+
+                            _bgPreviewPlayer.Play();
+                        }
+                    }));
+                }
+                catch { }
+            };
         }
 
         private void NewFile()
@@ -198,6 +301,7 @@ namespace Nautilus
             sw.WriteLine("AnimatedBackground=" + (animatedBackgroundToolStripMenuItem.Checked ? "True" : "False"));
             sw.WriteLine("NoHighlightDelay=" + (noDelayToolStripMenuItem.Checked ? "True" : "False"));
             sw.WriteLine("DisplayTempoOnTitleCard=" + (displayTempoOnTitleCard.Checked ? "True" : "False"));
+            sw.WriteLine("DisplayAlbumArtOnTitleCard=" + (displayAlbumArtOnTitleCard.Checked ? "True" : "False"));
             sw.Dispose();
         }
 
@@ -259,6 +363,7 @@ namespace Nautilus
                 animatedBackgroundToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
                 noDelayToolStripMenuItem.Checked = sr.ReadLine().Contains("True");
                 displayTempoOnTitleCard.Checked = sr.ReadLine().Contains("True");
+                displayAlbumArtOnTitleCard.Checked = sr.ReadLine().Contains("True");
                 UpdateTextParents();
                 ModeSanityCheck();
                 if (cboBackground.SelectedIndex == cboBackground.Items.Count - 1)
@@ -273,10 +378,24 @@ namespace Nautilus
                         UpdateBackgroundColors(backColor);
                     }
                 }
-                if (animatedBackgroundToolStripMenuItem.Checked)
+                if (staticImageBackgroundToolStripMenuItem.Checked)
                 {
-                    enableMP4TitleCardShadows.Checked = false;
-                    enableMP4TitleCardShadows.Enabled = false;
+                    var defaultImagePath = Application.StartupPath + "\\bin\\images\\background.png";
+                    if (File.Exists(defaultImagePath))
+                    {
+                        picPreview.Image = Image.FromFile(defaultImagePath);
+                        picBackground1.Image = picPreview.Image;
+                        picBackground2.Image = picPreview.Image;
+                        picBackground3.Image = picPreview.Image;
+                    }
+                }
+                else if (animatedBackgroundToolStripMenuItem.Checked)
+                {
+                    var defaultVideoPath = Application.StartupPath + "\\bin\\images\\background.mp4";
+                    if (File.Exists(defaultVideoPath))
+                    {
+                        DroppedPreviewVideo(defaultVideoPath);
+                    }
                 }
             }
             catch 
@@ -296,6 +415,7 @@ namespace Nautilus
                 e.Effect = DragDropEffects.All;
         }
 
+        private bool droppedImage = false;
         private void CDGConverter_DragDrop(object sender, DragEventArgs e)
         {
             if (picWorking.Visible || backgroundWorker1.IsBusy)
@@ -304,19 +424,46 @@ namespace Nautilus
                 return;
             }
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            if (Path.GetExtension(files[0]) == ".toml")
+            var ext = Path.GetExtension(files[0]);
+            switch (ext)
             {
-                Log("Received TOML file '" + files[0] + "' ... converting to CDG+MP3");
-                EnableDisable(false);
-                cdgOutput = "";
-                Application.DoEvents();
-                CreateCDG(files[0]);
-                Log("Completed manual TOML to CDG+MP3 attempt... see below:");
-                //Log(cdgOutput);               
-                EnableDisable(true);
-                cdgOutput = "";
-                return;
-            }    
+                case ".jpg":
+                case ".jpeg":
+                case ".png":
+                case ".bmp":
+                    BackgroundOverride = Image.FromFile(files[0]);
+                    solidColorToolStripMenuItem.Checked = false;
+                    animatedBackgroundToolStripMenuItem.Checked = false;
+                    staticImageBackgroundToolStripMenuItem.Checked = true;
+                    droppedImage = true;
+                    picPreview.Image = BackgroundOverride;
+                    picBackground1.Image = picPreview.Image;
+                    picBackground2.Image = picPreview.Image;
+                    picBackground3.Image = picPreview.Image;
+                    videoPreview.Visible = false;
+                    picPreview.Visible = true;
+                    animatedVideoBackground = false;
+                    return;
+                case ".mp4":
+                case ".mov":
+                case ".mkv":
+                case ".avi":
+                case ".wmv":
+                case ".webm":
+                    DroppedPreviewVideo(files[0]);
+                    return;                    
+                case ".toml":
+                    Log("Received TOML file '" + files[0] + "' ... converting to CDG+MP3");
+                    EnableDisable(false);
+                    cdgOutput = "";
+                    Application.DoEvents();
+                    CreateCDG(files[0]);
+                    Log("Completed manual TOML to CDG+MP3 attempt... see below:");
+                    //Log(cdgOutput);               
+                    EnableDisable(true);
+                    cdgOutput = "";
+                    return;
+            }
             if (VariousFunctions.ReadFileType(files[0]) != XboxFileType.STFS)
             {
                 Log("Received invalid file '" + files[0] + "' ... can't proceed");
@@ -360,13 +507,16 @@ namespace Nautilus
             solidColorBackground = solidColorToolStripMenuItem.Checked;
             staticImageBackground = staticImageBackgroundToolStripMenuItem.Checked;
             animatedVideoBackground = animatedBackgroundToolStripMenuItem.Checked;
-            try
+            if (!droppedImage || BackgroundOverride == null)
             {
-                BackgroundOverride = Image.FromFile(Application.StartupPath + "\\bin\\images\\background.png");
-            }
-            catch
-            {
-                BackgroundOverride = null;
+                try
+                {
+                    BackgroundOverride = Image.FromFile(Application.StartupPath + "\\bin\\images\\background.png");
+                }
+                catch
+                {
+                    BackgroundOverride = null;
+                }
             }
             try
             {
@@ -472,6 +622,7 @@ namespace Nautilus
             }
             doEnableHighlightAnimation = enableHighlightAnimation.Checked;
             displayTempo = displayTempoOnTitleCard.Checked;
+            displayAlbumArt = displayAlbumArtOnTitleCard.Checked;
             EnableDisable(false);
             BatchTimerStart = DateTime.Now;
             Log("Batch processing start time is " + BatchTimerStart.ToString("hh:mm:ss tt"));
@@ -607,14 +758,18 @@ namespace Nautilus
             var cdg = folder + title.Replace("?", "") + ".cdg";
             var toml = folder + title.Replace("?", "") + ".toml";
             var mp4 = folder + title.Replace("?", "") + "-" + (do4KResolution ? "4K" : "1080P") + frameRate + ".mp4";
-            try
+            
+            string selectedFont;
+            if (cboFont.InvokeRequired)
             {
-                ActiveFontName = cboFont.Text.Split('|')[0].Trim();
+                selectedFont = (string)cboFont.Invoke(new Func<string>(() => cboFont.Text));
             }
-            catch
+            else
             {
-                ActiveFontName = "Arial";
+                selectedFont = cboFont.Text;
             }
+            ActiveFontName = selectedFont.Split('|')[0].Trim();
+
             Log("Active Font Name = " + ActiveFontName);
             if (!moggSplitter.DownmixMogg(file, wav, MoggSplitter.MoggSplitFormat.WAV, vocalOption))
             {
@@ -653,18 +808,21 @@ namespace Nautilus
                 xPackage.CloseIO();
                 return;
             }
-            xFile = xPackage.GetFile("songs/" + Parser.Songs[0].InternalName + "/gen/" + Parser.Songs[0].InternalName + "_keep.png_xbox");
-            if (xFile == null)
+            if (displayAlbumArt)
             {
-                message = "No album art found in that file";
-                Log(message);
-                albumArtX = new byte[0];
-            }
-            else
-            {
-                albumArtX = xFile.Extract();
-                message = "Extracted album art successfully";
-                Log(message);
+                xFile = xPackage.GetFile("songs/" + Parser.Songs[0].InternalName + "/gen/" + Parser.Songs[0].InternalName + "_keep.png_xbox");
+                if (xFile == null)
+                {
+                    message = "No album art found in that file";
+                    Log(message);
+                    albumArtX = new byte[0];
+                }
+                else
+                {
+                    albumArtX = xFile.Extract();
+                    message = "Extracted album art successfully";
+                    Log(message);
+                }
             }
             xPackage.CloseIO();
                         
@@ -824,7 +982,7 @@ namespace Nautilus
             if (doMP4)
             {
                 var x = folder + "art.png_xbox";                
-                if (albumArtX != null && albumArtX.Length > 0)
+                if (albumArtX != null && albumArtX.Length > 0 && displayAlbumArt)
                 {
                     File.WriteAllBytes(x, albumArtX);
                     if (!Tools.ConvertRBImage(x, art, "jpg", true))
@@ -904,15 +1062,7 @@ namespace Nautilus
 
             if (lyricTimings.Count == 0)
                 return; // no sung content at all
-
-            // Handle gap before first sung line
-            /*if (lyricTimings[0].Start >= timeGap * 0.1)
-            {
-                int start = 0;
-                int end = lyricTimings[0].Start - paddingCs;
-                loadingLines.Add((0, BuildLoadingBlock(start, end, vocal_part, vocal_parts)));
-            }*/
-
+                        
             // Handle gaps between sung syllables
             for (int i = 0; i < lyricTimings.Count() - 1; i++)
             {
@@ -959,44 +1109,7 @@ namespace Nautilus
                
         private static List<TimedLyricLine> BuildLoadingBlock(int start, int end, int vocal_part, int vocal_parts)
         {
-            var lines = new List<TimedLyricLine>();
-
-            /*if (vocal_parts == 1) // Empty line (~)
-            {
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-            }
-            else
-            {
-                if (vocal_parts == 2)
-                {
-                    if (vocal_part == 1)
-                    {
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                    }
-                }
-                else
-                {
-                    if (vocal_part == 1 || vocal_part == 3)
-                    {
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                    }
-                }
-            }*/                
+            var lines = new List<TimedLyricLine>();                          
 
             if (vocal_parts == 1 || (vocal_parts > 1 && vocal_part == 2))
             {
@@ -1009,40 +1122,7 @@ namespace Nautilus
                     FormattedLine = $"{loadingBar}/"
                 });
             }
-
-            /*if (vocal_parts == 1) // Empty line (~)
-            {
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-            }
-            else
-            {
-                if (vocal_parts == 2)
-                {
-                    if (vocal_part == 2)
-                    {
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                    }
-                    lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                    lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                    lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                }
-                else
-                {
-                    if (vocal_part == 2)
-                    {
-                        lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                    }
-                    lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                    lines.Add(new TimedLyricLine { Syllables = new List<string> { "~" }, FormattedLine = "~" });
-                }
-            }*/
+            
             return lines;
         }
 
@@ -1415,7 +1495,7 @@ namespace Nautilus
 
         private string CleanSyllable(string s)
         {
-            return CleanString(s)                
+            return CleanString(s)
                 .Replace("-", "")
                 .Replace("=", "-")
                 .Replace("#", "")
@@ -1631,6 +1711,8 @@ namespace Nautilus
             picBackground3.BackColor = backColor;
             lblTextHighlight3.BackColor = Color.Transparent;// backColor;
             lblTextColor3.BackColor = Color.Transparent;// backColor;
+
+            picPreview.BackColor = backColor;
         }
 
         private Color GetColorFromIndex(int index)
@@ -1728,7 +1810,11 @@ namespace Nautilus
         {
             lstLog.Items.Clear();
             Log("Welcome to " + Text);
-            Log("Drag and drop one or multiple Rock Band song files here to get started");
+            Log("Choose your options or leave the defaults (recommended)");
+            Log("You can use a solid color background, a static image, or a video background");
+            Log("You can use the provided static image and video backgrounds");
+            Log("Or you can drag and drop any custom image or video that you want to use");
+            Log("When ready, drag and drop one or multiple Rock Band song files here to get started");
         }
 
         private void CDGConverter_Shown(object sender, EventArgs e)
@@ -1818,42 +1904,7 @@ namespace Nautilus
             const string message = "You can customize the font that the converter will use\n\nPut your preferred fonts in the \\bin\\fonts\\ folder and they will be displayed here\n\n"
                 + "Only .ttf font files are accepted";
             MessageBox.Show(message, "Fonts", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        public (string line1, string line2, int middlePoint) SplitLineEvenlyByCharacterMidpoint(string fullText, int middlePoint)
-        {
-            if (string.IsNullOrEmpty(fullText)) return ("", "", 0);
-            fullText = ProcessLine(fullText);//join syllables into whole words
-            var words = fullText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            if (words.Length == 0) return ("", "", 0);
-            if (words.Length == 1)
-            {
-                return (words[0], "", words[0].Length);
-            }
-
-            int totalLength = fullText.Replace(" ", "").Length;
-            int midpoint = middlePoint == 0 ? (int)((totalLength * 0.55) + 0.5) : middlePoint;
-
-            List<string> line1Words = new List<string>();
-            List<string> line2Words = new List<string>();
-
-            int charCount = 0;
-            foreach (var word in words)
-            {
-                int wordLength = word.Length;
-                if (charCount + wordLength <= midpoint && !line2Words.Any())
-                {
-                    line1Words.Add(word);
-                    charCount += wordLength;
-                }
-                else
-                {
-                    line2Words.Add(word);
-                }
-            }
-
-            return (string.Join(" ", line1Words), string.Join(" ", line2Words), midpoint);
-        }
+        }        
 
         public static (List<KaraokeLyric> line1, List<KaraokeLyric> line2)
         SplitSyllablesByPixelWidth(
@@ -1904,7 +1955,7 @@ namespace Nautilus
                     continue;
                 }
 
-                // Measure with the SAME API you render with
+                // Measure with the SAME API we render with
                 int w = TextRenderer.MeasureText(g, wordText, font).Width;
 
                 words.Add((bucket, wordText, w));
@@ -1953,68 +2004,7 @@ namespace Nautilus
             }
 
             return (line1, line2);
-        }
-
-
-        public static (List<KaraokeLyric> line1, List<KaraokeLyric> line2)
-        SplitSyllablesByCharacterMidpoint(List<KaraokeLyric> phraseSyllables, string visibleText, int midpoint)
-        {
-            if (phraseSyllables.Count == 0) return (new List<KaraokeLyric>(), new List<KaraokeLyric>());
-            if (phraseSyllables.Count == 1)
-                return (phraseSyllables, new List<KaraokeLyric>());
-
-            var line1 = new List<KaraokeLyric>();
-            var line2 = new List<KaraokeLyric>();
-
-            int totalChars = 0;
-            int currentLine = 1;
-            var currentWord = new List<KaraokeLyric>();
-
-            int i = 0;
-            while (i < phraseSyllables.Count)
-            {
-                currentWord.Clear();
-                bool wordContinues = true;
-
-                // Collect all syllables that belong to this word
-                while (i < phraseSyllables.Count && wordContinues)
-                {
-                    var s = phraseSyllables[i];
-                    currentWord.Add(s);
-
-                    string lyric = s.Lyric.Trim();
-                    bool endsWithDash = lyric.EndsWith("-");
-                    bool isSustain = lyric == "+";
-
-                    bool nextIsSustain = (i + 1 < phraseSyllables.Count && phraseSyllables[i + 1].Lyric == "+");
-
-                    // Word continues if it ends with dash, or is a + and next is +
-                    wordContinues = endsWithDash || isSustain || nextIsSustain;
-
-                    i++;
-                }
-
-                // Count actual visible characters in word
-                int wordLength = currentWord.Sum(s =>
-                    s.Lyric == "+" || s.Lyric == "-" ? 0 : s.Lyric.Replace("-", "").Replace("+", "").Length);
-
-                // Decide which line it goes on
-                if (currentLine == 1 && (totalChars + wordLength) > midpoint)
-                    currentLine = 2;
-
-                if (currentLine == 1)
-                {
-                    line1.AddRange(currentWord);
-                    totalChars += wordLength;
-                }
-                else
-                {
-                    line2.AddRange(currentWord);
-                }
-            }
-
-            return (line1, line2);
-        }
+        }       
 
         private string GetSongKey()
         {
@@ -2080,17 +2070,17 @@ namespace Nautilus
         }
 
         private void DrawCenteredLine(
-    Graphics g,
-    string text,
-    int resolutionX,
-    int y,
-    float maxFontSize,
-    int offset = 0,
-    int shadowOffsetX = 1,
-    int shadowOffsetY = 1,
-    int shadowBlur = 5,
-    float shadowOpacity = 0.20f
-)
+            Graphics g,
+            string text,
+            int resolutionX,
+            int y,
+            float maxFontSize,
+            int offset = 0,
+            int shadowOffsetX = 1,
+            int shadowOffsetY = 1,
+            int shadowBlur = 3,
+            float shadowOpacity = 0.20f
+            )
         {
             using (var baseFont = new Font(ActiveFontName, 16f))
             {
@@ -2155,7 +2145,7 @@ namespace Nautilus
                             g.DrawString(text, font, brush, x, y);
                         }
                     }
-                    else if (enableMP4Stroke)
+                    if (enableMP4Stroke)
                     {                        
                         Color strokeCol = ColorTranslator.FromHtml(strokeColor);
 
@@ -2270,6 +2260,7 @@ namespace Nautilus
                     activeNotes.RemoveAt(i);
             }
         }
+
         class AnimatedNote
         {
             public string Note;
@@ -2282,9 +2273,226 @@ namespace Nautilus
         private List<AnimatedNote> activeNotes = new List<AnimatedNote>();
         private Random rand = new Random();
 
+        private Bitmap GetTitleCard(string artFilePath)
+        {
+            var AvgBPM = AverageBPM();
+            int resolutionX = do4KResolution ? 3840 : 1920;
+            int resolutionY = do4KResolution ? 2160 : 1080;
+            int multiplier = do4KResolution ? 2 : 1;
+
+            Bitmap coverBitmap = null;
+            int coverWidth = 512 * multiplier;
+            int coverHeight = 512 * multiplier;
+
+            if (File.Exists(artFilePath) && displayAlbumArt)
+            {
+                using (var src = Image.FromFile(artFilePath))
+                {
+                    coverBitmap = new Bitmap(coverWidth, coverHeight, PixelFormat.Format32bppArgb);
+                    using (Graphics g = Graphics.FromImage(coverBitmap))
+                    {
+                        g.DrawImage(src, 0, 0, coverWidth, coverHeight);
+                    }
+                }
+            }
+
+            var lineHeight = resolutionY / 11;
+
+            var bmp = new Bitmap(resolutionX, resolutionY, PixelFormat.Format32bppArgb);
+
+            using (var graphics = Graphics.FromImage(bmp))
+            {
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+
+                if (animatedVideoBackground)
+                {
+                    graphics.Clear(Color.Transparent);
+                }
+                else
+                {
+                    graphics.Clear(ColorTranslator.FromHtml(backgroundColor));
+                }
+
+                if (staticImageBackground && BackgroundOverride != null)
+                {
+                    graphics.DrawImage(BackgroundOverride, 0, 0, resolutionX, resolutionY);
+                }
+
+                var title = "\"" + Parser.Songs[0].Name.Replace("&", "&&").Replace("feat.", "ft.").Replace("featuring", "ft.") + "\"";
+                var artist = Parser.Songs[0].Artist.Replace("&", "&&").Replace("feat.", "ft.").Replace("featuring", "ft.");
+                var album = Parser.Songs[0].Album.Replace("&", "&&");
+                var bpm = AvgBPM == 0 ? "" : "Tempo: " + Math.Round(AvgBPM, 0, MidpointRounding.AwayFromZero) + " BPM";
+
+                var parts = 1;
+                if ((doHarm2 || doHarm3) && Harm2Lyrics.Any()) parts++;
+                if (doHarm3 && Harm3Lyrics.Any()) parts++;
+
+                var vocalParts = "Vocals: " + ((doHarm2 || doHarm3) && Harm2Lyrics.Any() ? parts + "-part harmony" : "Solo");
+                var songKey = "";
+                var genre = Parser.doGenre(Parser.Songs[0].Genre).Replace("&", "&&");
+                if (!string.IsNullOrEmpty(genre))
+                {
+                    genre = "Genre: " + genre;
+                }
+
+                var offset = 0;
+
+                if (coverBitmap != null && displayAlbumArt)
+                {
+                    int artSize = 512 * multiplier;
+                    int spacer = 100 * multiplier;
+
+                    graphics.DrawImage(coverBitmap, spacer, (resolutionY - artSize) / 2, artSize, artSize);
+                    offset = artSize + (int)(1.5 * spacer);
+                }
+
+                DrawCenteredLine(graphics, title, resolutionX, lineHeight * 3, 72f * multiplier, offset);
+                DrawCenteredLine(graphics, artist, resolutionX, lineHeight * 4, 60f * multiplier, offset);
+                DrawCenteredLine(graphics, album, resolutionX, lineHeight * 5, 48f * multiplier, offset);
+
+                if (!string.IsNullOrEmpty(genre))
+                    DrawCenteredLine(graphics, genre, resolutionX, lineHeight * 7, 32f * multiplier, offset);
+
+                DrawCenteredLine(graphics, vocalParts, resolutionX, (int)(lineHeight * 7.7), 32f * multiplier, offset);
+
+                if (!string.IsNullOrEmpty(songKey))
+                    DrawCenteredLine(graphics, songKey, resolutionX, (int)(lineHeight * 8.4), 32f * multiplier, offset);
+
+                if (!string.IsNullOrEmpty(bpm) && displayTempo)
+                {
+                    DrawCenteredLine(graphics, bpm, resolutionX, (int)(lineHeight * (string.IsNullOrEmpty(songKey) ? 8.4 : 9.1)), 32f * multiplier, offset);
+                }
+            }
+
+            coverBitmap?.Dispose();
+            return bmp;
+        }
+
+        private Bitmap GetEndingCard()
+        {
+            int resolutionX = do4KResolution ? 3840 : 1920;
+            int resolutionY = do4KResolution ? 2160 : 1080;
+            int multiplier = do4KResolution ? 2 : 1;
+
+            var lineHeight = resolutionY / 11;
+
+            var bmp = new Bitmap(resolutionX, resolutionY, PixelFormat.Format32bppArgb);
+
+            using (var graphics = Graphics.FromImage(bmp))
+            {
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+
+                if (animatedVideoBackground)
+                {
+                    graphics.Clear(Color.Transparent);
+                }
+                else
+                {
+                    graphics.Clear(ColorTranslator.FromHtml(backgroundColor));
+                }
+
+                if (staticImageBackground && BackgroundOverride != null)
+                {
+                    graphics.DrawImage(BackgroundOverride, 0, 0, resolutionX, resolutionY);
+                }
+
+                Bitmap logoBitmap = null;
+                int logoWidth = 0;
+                int logoHeight = 0;
+
+                if (KaraokeLogo != null)
+                {
+                    logoWidth = KaraokeLogo.Width * multiplier;
+                    logoHeight = KaraokeLogo.Height * multiplier;
+
+                    logoBitmap = new Bitmap(logoWidth, logoHeight, PixelFormat.Format32bppArgb);
+                    using (Graphics g = Graphics.FromImage(logoBitmap))
+                    {
+                        g.DrawImage(KaraokeLogo, 0, 0, logoWidth, logoHeight);
+                    }
+                }
+
+                int logoX = (resolutionX - logoWidth) / 2;
+                int logoY = (resolutionY - logoHeight) / 2;
+
+                graphics.DrawImage(logoBitmap, logoX, logoY, logoWidth, logoHeight);
+
+                DrawCenteredLine(graphics, "Created with Nautilus | www.nemosnautilus.com",
+                                 resolutionX, lineHeight * 10, 24f * multiplier);
+            }
+
+            return bmp;
+        }
+
+        private Bitmap loadingBarBaseBmp;
+        private Bitmap loadingBarHighlightBmp;
+        private Size loadingBarSize;
+        private Font loadingBarFont;
+
+        private void PrepareLoadingBarAssets(int multiplier)
+        {
+            DisposeLoadingBarAssets();
+
+            loadingBarFont = new Font(ActiveFontName, 24f * multiplier);
+
+            loadingBarSize = TextRenderer.MeasureText(loadingBarXL, loadingBarFont);
+
+            loadingBarBaseBmp = new Bitmap(loadingBarSize.Width, loadingBarSize.Height, PixelFormat.Format32bppArgb);
+            loadingBarHighlightBmp = new Bitmap(loadingBarSize.Width, loadingBarSize.Height, PixelFormat.Format32bppArgb);
+
+            using (Graphics gBase = Graphics.FromImage(loadingBarBaseBmp))
+            {
+                gBase.Clear(Color.Transparent);
+                TextRenderer.DrawText(
+                    gBase,
+                    loadingBarXL,
+                    loadingBarFont,
+                    new Point(0, 0),
+                    ColorTranslator.FromHtml(textColor1),
+                    Color.Transparent);
+            }
+
+            using (Graphics gHi = Graphics.FromImage(loadingBarHighlightBmp))
+            {
+                gHi.Clear(Color.Transparent);
+                TextRenderer.DrawText(
+                    gHi,
+                    loadingBarXL,
+                    loadingBarFont,
+                    new Point(0, 0),
+                    ColorTranslator.FromHtml(highlightColor1),
+                    Color.Transparent);
+            }
+        }
+
+        private void DisposeLoadingBarAssets()
+        {
+            if (loadingBarBaseBmp != null)
+            {
+                loadingBarBaseBmp.Dispose();
+                loadingBarBaseBmp = null;
+            }
+
+            if (loadingBarHighlightBmp != null)
+            {
+                loadingBarHighlightBmp.Dispose();
+                loadingBarHighlightBmp = null;
+            }
+
+            if (loadingBarFont != null)
+            {
+                loadingBarFont.Dispose();
+                loadingBarFont = null;
+            }
+
+            loadingBarSize = Size.Empty;
+        }
+
         private void DoModernKaraoke(string folder, string artFilePath, string audioFilePath, string outputVideoPath)
         {
-            Log("Rendering using Nemo's Modern Karaoke MP4 format");
+            Log("Rendering using Nemo's Modern Karaoke MP4 v2 format");
             
             string ffmpegPath = Path.Combine(Application.StartupPath, "bin", "ffmpeg.exe");
             if (!File.Exists(ffmpegPath))
@@ -2304,54 +2512,115 @@ namespace Nautilus
             double vertOffset = 0;
 
             var lyricsRawPath = Path.GetDirectoryName(outputVideoPath) + "\\lyrics_raw.mp4";
+            var backgroundPath = (!string.IsNullOrEmpty(_customBackgroundVideoPath) && File.Exists(_customBackgroundVideoPath)) ? _customBackgroundVideoPath : Application.StartupPath + "\\bin\\images\\background.mp4";
             var tempVideoPath = animatedVideoBackground ?  lyricsRawPath : outputVideoPath;
             Log("Resolution: " + resolutionX + "*" + resolutionY);
             Log($"Frame rate: {frameRate} FPS");
             Log("Average BPM: " + (int)(AvgBPM + 0.5));
-            Log("Rendering " + totalFrames + " frames ... this will take a while");
+            Log("Rendering " + totalFrames + " frames ... stand by");
+
+
+            this.Invoke(new Action(() =>
+            {
+                videoPreview.Visible = false;
+                picPreview.Visible = true;
+            }));            
+
+            if (enablePreview)
+            {
+                this.Invoke(new Action(() =>
+                {
+                    picPreview.Image = null;
+                    picPreview.Width = 288;
+                    picPreview.Height = 162;
+                    lblFrames.Visible = true;
+                    lblFrames.Text = "Processing...";
+                }));
+            }
 
             //ffmpeg stuff
-            int byteCount = resolutionX * resolutionY * 3;
-            var videoQuality = animatedVideoBackground ? "-crf 0 -pix_fmt yuv444p" : "-crf 18 -pix_fmt yuv420p";
+            int byteCount = resolutionX * resolutionY * 4;
             byte[] rawBuffer = new byte[byteCount];
-            var ffmpeg = new Process();
+
+            Process ffmpeg = new Process();
             ffmpeg.StartInfo.FileName = ffmpegPath;
-            ffmpeg.StartInfo.Arguments =
-                $"-y " +
-                $"-f rawvideo -pixel_format bgr24 -video_size {resolutionX}x{resolutionY} -framerate {frameRate} " +
-                $"-i - " +
-                $"-i \"{audioFilePath}\"{videoFilter} " +
-                $"-c:v libx264 -preset veryfast {videoQuality} " +
-                $"-c:a aac -b:a 192k -shortest \"{tempVideoPath}\"";
             ffmpeg.StartInfo.UseShellExecute = false;
             ffmpeg.StartInfo.RedirectStandardInput = true;
             ffmpeg.StartInfo.CreateNoWindow = true;
+
+            string bgRawPath = Path.Combine(Path.GetDirectoryName(outputVideoPath) ?? "", "bg_raw.mp4");
+
+            if (animatedVideoBackground && File.Exists(backgroundPath))
+            {              
+                string prepArgs =
+                    $"-y " +
+                    $"-stream_loop -1 -i \"{backgroundPath}\" " +
+                    $"-filter_complex \"[0:v]" +
+                        $"scale={resolutionX}:{resolutionY}," +
+                        $"fps={frameRate},format=yuv420p[v]\" " +
+                    $"-map \"[v]\" " +
+                    $"-t {songDuration.ToString(System.Globalization.CultureInfo.InvariantCulture)} " +
+                    $"-c:v libx264 -preset veryfast -crf 18 -an " +
+                    $"\"{bgRawPath}\"";
+
+                using (var ffmpegPrep = new Process())
+                {
+                    ffmpegPrep.StartInfo.FileName = ffmpegPath;
+                    ffmpegPrep.StartInfo.Arguments = prepArgs;
+                    ffmpegPrep.StartInfo.UseShellExecute = false;
+                    ffmpegPrep.StartInfo.RedirectStandardOutput = true;
+                    ffmpegPrep.StartInfo.RedirectStandardError = true;
+                    ffmpegPrep.StartInfo.CreateNoWindow = true;
+                    ffmpegPrep.Start();
+
+                    string prepStderr = ffmpegPrep.StandardError.ReadToEnd();
+                    ffmpegPrep.WaitForExit();
+
+                    if (ffmpegPrep.ExitCode != 0)
+                    {
+                        throw new Exception("FFmpeg background prep failed:\n" + prepStderr);
+                    }
+                }
+
+                Log("Rendering composite karaoke video ... stand by");
+
+                ffmpeg.StartInfo.Arguments =
+                    $"-y " +
+                    $"-i \"{bgRawPath}\" " +
+                    $"-f rawvideo -pixel_format bgra -video_size {resolutionX}x{resolutionY} -framerate {frameRate} -i - " +
+                    $"-i \"{audioFilePath}\" " +
+                    $"-filter_complex \"[0:v][1:v]overlay=0:0:format=auto[v]\" " +
+                    $"-map \"[v]\" " +
+                    $"-map 2:a " +
+                    $"-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p " +
+                    $"-c:a aac -b:a 192k -shortest " +
+                    $"\"{outputVideoPath}\"";
+            }
+            else
+            {
+                Log("Rendering karaoke video ... stand by");
+
+                var videoQuality = "-crf 18 -pix_fmt yuv420p";
+
+                ffmpeg.StartInfo.Arguments =
+                    $"-y " +
+                    $"-f rawvideo -pixel_format bgra -video_size {resolutionX}x{resolutionY} -framerate {frameRate} " +
+                    $"-i - " +
+                    $"-i \"{audioFilePath}\"{videoFilter} " +
+                    $"-c:v libx264 -preset veryfast {videoQuality} " +
+                    $"-c:a aac -b:a 192k -shortest \"{outputVideoPath}\"";
+            }
+
             ffmpeg.Start();
             var ffmpegStream = ffmpeg.StandardInput.BaseStream;
 
-            Bitmap coverBitmap = null;
-            int coverWidth = 512 * multiplier;
-            int coverHeight = 512 * multiplier;
-
-            if (File.Exists(artFilePath))
-            {
-                using (var src = Image.FromFile(artFilePath))
-                {
-                    coverBitmap = new Bitmap(coverWidth, coverHeight, PixelFormat.Format32bppArgb);
-                    using (Graphics g = Graphics.FromImage(coverBitmap))
-                    {
-                        g.DrawImage(src, 0, 0, coverWidth, coverHeight);
-                    }
-                }
-            }
-            
             //render background for use in parallel processing
-            Bitmap renderedBackground = new Bitmap(resolutionX, resolutionY, PixelFormat.Format24bppRgb);
+            Bitmap renderedBackground = new Bitmap(resolutionX, resolutionY, PixelFormat.Format32bppArgb);
             using (Graphics g = Graphics.FromImage(renderedBackground))
             {
                 if (animatedVideoBackground)
                 {
-                    g.Clear(Color.FromArgb(0, 255, 0)); //green key color
+                    g.Clear(Color.Transparent);
                 }
                 else
                 {
@@ -2364,980 +2633,1249 @@ namespace Nautilus
             }
 
             // Copy pixel data to raw byte buffer
-            var bgData = new byte[resolutionX * resolutionY * 3];
+            var bgData = new byte[resolutionX * resolutionY * 4];
             var rect = new Rectangle(0, 0, resolutionX, resolutionY);
-            var bmpData = renderedBackground.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            var bmpData = renderedBackground.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             Marshal.Copy(bmpData.Scan0, bgData, 0, bgData.Length);
             renderedBackground.UnlockBits(bmpData);
-            renderedBackground.Dispose();                    
+            renderedBackground.Dispose();                
+                                
+            var prepBmp = new Bitmap(8, 8);
+            var prepGraphics = Graphics.FromImage(prepBmp);
+            ApplyTextRenderingSettings(prepGraphics);
+            var prepBaseFont = new Font(ActiveFontName, 48f, FontStyle.Bold);
+            var preparedLead = PrepareTrack(
+                            prepGraphics,
+                            VocalLyrics,
+                            VocalPhrases,
+                            prepBaseFont,
+                            resolutionX,
+                            textColor1,
+                            highlightColor1);
 
-            Bitmap logoBitmap = null;
-            int logoWidth = 0;
-            int logoHeight = 0;
+            var preparedHarm2 = PrepareTrack(
+                            prepGraphics,
+                            Harm2Lyrics,
+                            Harm2Phrases,
+                            prepBaseFont,
+                            resolutionX,
+                            textColor2,
+                            highlightColor2);
+            
+            var preparedHarm3 = PrepareTrack(
+                            prepGraphics,
+                            Harm3Lyrics,
+                            Harm3Phrases,
+                            prepBaseFont,
+                            resolutionX,
+                            textColor3,
+                            highlightColor3);
 
-            if (KaraokeLogo != null)
+            PrepareLoadingBarAssets(multiplier);
+
+            Bitmap titleCard = GetTitleCard(artFilePath);
+            Bitmap endingCard = GetEndingCard();
+
+            using (var bmp = new Bitmap(resolutionX, resolutionY, PixelFormat.Format32bppArgb))
             {
-                logoWidth = KaraokeLogo.Width * multiplier;
-                logoHeight = KaraokeLogo.Height * multiplier;
-
-                logoBitmap = new Bitmap(logoWidth, logoHeight, PixelFormat.Format32bppArgb);
-                using (Graphics g = Graphics.FromImage(logoBitmap))
+                using (var graphics = Graphics.FromImage(bmp))
                 {
-                    g.DrawImage(KaraokeLogo, 0, 0, logoWidth, logoHeight);
-                }
-            }
+                    graphics.SmoothingMode = SmoothingMode.HighQuality;
+                    graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
 
-            Bitmap bmp = new Bitmap(resolutionX, resolutionY, PixelFormat.Format24bppRgb);
-            Graphics graphics = Graphics.FromImage(bmp);
-            // Optional: set these once
-            graphics.SmoothingMode = SmoothingMode.HighQuality;
-            graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-
-            if (enablePreview)
-            {
-                this.Invoke(new Action(() =>
-                {
-                    picPreview.Image = null;
-                    picPreview.Width = 288;
-                    picPreview.Height = 162;
-                    picPreview.Visible = true;
-                    lblFrames.Visible = true;
-                }));
-            }
-            for (var frame = 0; frame < totalFrames; frame++)
-            {
-                if (cancelProcess) { break; }
-                try
-                {
-                    noteCounter++;
-                    double frameDuration = 1.0 / frameRate;
-                    double time = frame * frameDuration * 1000.0;
-                    double adjustedTime = Math.Max(0, time - syncOffsetMs);
-                    
-                    rect = new Rectangle(0, 0, resolutionX, resolutionY);
-                    bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
-                    Marshal.Copy(bgData, 0, bmpData.Scan0, bgData.Length);
-                    bmp.UnlockBits(bmpData);                                       
-
-                    using (graphics = Graphics.FromImage(bmp))
+                    for (var frame = 0; frame < totalFrames; frame++)
                     {
-                        graphics.ResetTransform();
-                        graphics.ResetClip();
-
-                        LyricPhrase actualNextLineHarmony = null;
-                        LyricPhrase actualLastLineHarmony = null;
-                        LyricPhrase currentLineLead = null;
-                        LyricPhrase nextLineLead = null;
-                        LyricPhrase lastLineLead = null;
-                        LyricPhrase actualLastLineLead = null;
-                        LyricPhrase actualNextLineLead = null;
-                        bool hasInlineGap = false;
-
-                        var phrasesLead = Harm2Lyrics.Any() && (doHarm2 || doHarm3) ? Harm1Phrases : VocalPhrases;
-                        var lyricsLead = Harm2Lyrics.Any() && (doHarm2 || doHarm3) ? Harm1Lyrics : VocalLyrics;
-
-                        if (phrasesLead == null || phrasesLead.Count == 0)
+                        if (cancelProcess) { break; }
+                        try
                         {
-                            phrasesLead = VocalPhrases;
-                            lyricsLead = VocalLyrics;
-                        }
-                                                
-                        double previewTime = time + highlightDelay;
-                        int lastPhraseIndex = 0;
-                        bool phrase2IsDup = false;
+                            noteCounter++;
+                            double frameDuration = 1.0 / frameRate;
+                            double time = frame * frameDuration * 1000.0;
+                            double adjustedTime = Math.Max(0, time - syncOffsetMs);
 
-                        for (var i = lastPhraseIndex; i < phrasesLead.Count(); i++)
-                        {                            
-                            i = lastPhraseIndex;
-                            if (i < 0) continue;
-                            if (i >= phrasesLead.Count()) break;
-                            lastLineLead = lastPhraseIndex > 0 ? phrasesLead[lastPhraseIndex - 1] : null;
-                            var phrase1 = phrasesLead[lastPhraseIndex];
-                            var phrase2 = phrase1; //for harmonies and when there's a gap, only show one phrase per page
-                            
-                            var harmonies = (doHarm2 || doHarm3) && Harm2Lyrics.Any();//there's no case of Harm3Lyrics without Harm2Lyrics
+                            rect = new Rectangle(0, 0, resolutionX, resolutionY);
+                            bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+                            Marshal.Copy(bgData, 0, bmpData.Scan0, bgData.Length);
+                            bmp.UnlockBits(bmpData);
 
-                            phrase2IsDup = false;
-                            if (lastPhraseIndex < phrasesLead.Count() - 1)
+                            graphics.ResetTransform();
+                            graphics.ResetClip();                                               
+
+                            LyricPhrase actualNextLineHarmony = null;
+                            LyricPhrase actualLastLineHarmony = null;
+                            LyricPhrase currentLineLead = null;
+                            LyricPhrase nextLineLead = null;
+                            LyricPhrase lastLineLead = null;
+                            LyricPhrase actualLastLineLead = null;
+                            LyricPhrase actualNextLineLead = null;
+                            bool hasInlineGap = false;
+
+                            var phrasesLead = Harm2Lyrics.Any() && (doHarm2 || doHarm3) ? Harm1Phrases : VocalPhrases;
+                            var lyricsLead = Harm2Lyrics.Any() && (doHarm2 || doHarm3) ? Harm1Lyrics : VocalLyrics;
+
+                            if (phrasesLead == null || phrasesLead.Count == 0)
                             {
-                                var currentIndex = lastPhraseIndex + 1;
-                                if (phrasesLead[currentIndex].PhraseStart - phrase1.PhraseEnd < timeGap && !harmonies)
+                                phrasesLead = VocalPhrases;
+                                lyricsLead = VocalLyrics;
+                            }
+
+                            // IMPORTANT: only phrases with displayable lyrics should participate
+                            // in lead phrase pairing / preview / loading-bar logic
+                            var drawablePhrasesLead = phrasesLead
+                                .Where(p => HasDisplayableLyrics(p.PhraseText))
+                                .ToList();
+
+                            double previewTime = adjustedTime + highlightDelay;
+                            int lastPhraseIndex = 0;
+                            bool phrase2IsDup = false;
+
+                            for (var i = lastPhraseIndex; i < drawablePhrasesLead.Count; i++)
+                            {
+                                i = lastPhraseIndex;
+                                if (i < 0) continue;
+                                if (i >= drawablePhrasesLead.Count) break;
+
+                                lastLineLead = lastPhraseIndex > 0 ? drawablePhrasesLead[lastPhraseIndex - 1] : null;
+                                var phrase1 = drawablePhrasesLead[lastPhraseIndex];
+                                var phrase2 = phrase1; // for harmonies and when there's a gap, only show one phrase per page
+
+                                var harmonies = (doHarm2 || doHarm3) && Harm2Lyrics.Any(); // there's no case of Harm3Lyrics without Harm2Lyrics
+
+                                phrase2IsDup = false;
+                                if (lastPhraseIndex < drawablePhrasesLead.Count - 1)
                                 {
-                                    phrase2 = phrasesLead[currentIndex];
-                                    currentIndex++;
+                                    var currentIndex = lastPhraseIndex + 1;
+                                    if (drawablePhrasesLead[currentIndex].PhraseStart - phrase1.PhraseEnd < timeGap && !harmonies)
+                                    {
+                                        phrase2 = drawablePhrasesLead[currentIndex];
+                                        currentIndex++;
+                                    }
+                                    else
+                                    {
+                                        phrase2IsDup = true;
+                                    }
+
+                                    if (phrase2.PhraseEnd <= time)
+                                    {
+                                        actualLastLineLead = phrase2; // whether phrase1 or phrase2 based on assignment above
+                                        if (currentIndex <= drawablePhrasesLead.Count - 1)
+                                        {
+                                            actualNextLineLead = drawablePhrasesLead[currentIndex];
+                                        }
+                                    }
                                 }
                                 else
                                 {
-                                    phrase2IsDup = true;
+                                    phrase2IsDup = true; // last phrase, must be null for nextLine
                                 }
-                                if (phrase2.PhraseEnd <= time)
+
+                                if (previewTime >= phrase1.PhraseStart && time < phrase2.PhraseEnd)
                                 {
-                                    actualLastLineLead = phrase2; //whether phrase1 or phrase2 based on assignment above
-                                    if (currentIndex <= phrasesLead.Count() - 1)
+                                    try
                                     {
-                                        actualNextLineLead = phrasesLead[currentIndex];
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                phrase2IsDup = true; //last phrase, must be null for nextLine;
-                            }                            
-                            if (previewTime >= phrase1.PhraseStart && time < phrase2.PhraseEnd)
-                            {
-                                try
-                                {
-                                    var gap = phrase2.PhraseStart - phrase1.PhraseEnd >= timeGap && !harmonies;
-                                    if (gap)
-                                    {
-                                        if (hasInlineGap && time > phrase1.PhraseEnd)
+                                        var gap = phrase2.PhraseStart - phrase1.PhraseEnd >= timeGap && !harmonies;
+                                        if (gap)
                                         {
-                                            currentLineLead = null;
-                                            nextLineLead = phrase2; ;
+                                            if (hasInlineGap && time > phrase1.PhraseEnd)
+                                            {
+                                                currentLineLead = null;
+                                                nextLineLead = phrase2;
+                                            }
+                                            else
+                                            {
+                                                currentLineLead = phrase1;
+                                                nextLineLead = null;
+                                                hasInlineGap = true;
+                                            }
+                                            vertOffset = 1.5;
                                         }
                                         else
                                         {
                                             currentLineLead = phrase1;
-                                            nextLineLead = null; 
-                                            hasInlineGap = true;
+                                            nextLineLead = phrase2IsDup ? null : phrase2;
+                                            hasInlineGap = false;
+                                            vertOffset = phrase2IsDup ? 1.5 : 0.0;
                                         }
-                                        vertOffset = 1.5;
                                     }
-                                    else
-                                    {
-                                        currentLineLead = phrase1;
-                                        nextLineLead = phrase2IsDup ? null : phrase2;
-                                        hasInlineGap = false;
-                                        vertOffset = phrase2IsDup ? 1.5 : 0.0;
-                                    }
-                                }
-                                catch { }
-                                break;
-                            }
-                            if (harmonies || phrase2IsDup)
-                            {
-                                lastPhraseIndex++;
-                            }
-                            else
-                            {
-                                lastPhraseIndex += 2;
-                            }  
-                        }
-                        if (actualNextLineLead == null)
-                        {
-                            actualNextLineLead = phrasesLead.FirstOrDefault(p => !string.IsNullOrEmpty(p.PhraseText) && p.PhraseStart > previewTime);
-                        }
-                        if (actualLastLineLead == null)
-                        {
-                            actualLastLineLead = phrasesLead.LastOrDefault(p => !string.IsNullOrEmpty(p.PhraseText) && p.PhraseEnd <= previewTime);
-                        }
-
-                        LyricPhrase currentLineHarm2 = null;
-                        LyricPhrase lastLineHarm2 = null;
-                        if (doHarm2 || doHarm3)
-                        {
-                            for (var i = 0; i < Harm2Phrases.Count(); i++)
-                            {
-                                var phrase = Harm2Phrases[i];
-                                lastLineHarm2 = i > 0 ? Harm2Phrases[i - 1] : null;
-                                
-                                if (phrase.PhraseEnd <= time)
-                                {
-                                    actualLastLineHarmony = Harm2Phrases[i];
-                                    if (i < Harm2Phrases.Count() - 1)
-                                    {
-                                        actualNextLineHarmony = Harm2Phrases[i + 1];
-                                    }
-                                }
-
-                                if (previewTime >= phrase.PhraseStart && time < phrase.PhraseEnd)
-                                {
-                                    currentLineHarm2 = phrase;
+                                    catch { }
                                     break;
                                 }
-                            }
-                            if (actualNextLineHarmony == null)
-                            {
-                                actualNextLineHarmony = Harm2Phrases.FirstOrDefault(p => !string.IsNullOrEmpty(p.PhraseText) && p.PhraseStart > previewTime);
-                            }
-                            if (actualLastLineHarmony == null)
-                            {
-                                actualLastLineHarmony = Harm2Phrases.LastOrDefault(p => !string.IsNullOrEmpty(p.PhraseText) && p.PhraseEnd <= previewTime);
-                            }
-                        }
 
-                        LyricPhrase currentLineHarm3 = null;
-                        LyricPhrase lastLineHarm3 = null;
-                        if (doHarm3)
-                        {
-                            for (var i = 0; i < Harm3Phrases.Count(); i++)
-                            {
-                                var phrase = Harm3Phrases[i];
-                                lastLineHarm3 = i > 0 ? Harm3Phrases[i - 1] : null;
-                                
-                                if (previewTime >= phrase.PhraseStart && time < phrase.PhraseEnd)
+                                if (harmonies || phrase2IsDup)
                                 {
-                                    currentLineHarm3 = phrase;
-                                    break;
+                                    lastPhraseIndex++;
+                                }
+                                else
+                                {
+                                    lastPhraseIndex += 2;
                                 }
                             }
-                        }
 
-                        var lineHeight = resolutionY / 11;
-                        var harm1LineTop1 = 0; ;
-                        var harm1LineTop2 = 0;
-                        var harm1LineTop3 = 0;
-                        var harm1LineTop4 = 0;
-                        var harm2LineTop1 = 0;
-                        var harm2LineTop2 = 0;
-                        var harm3LineTop1 = 0;
-                        var harm3LineTop2 = 0;
-
-                        if (doSoloVocals || !Harm2Lyrics.Any()) //do solo vocals
-                        {
-                            harm1LineTop1 = (int)(lineHeight * (2.5 + vertOffset));
-                            harm1LineTop2 = (int)(lineHeight * (4.0 + vertOffset));
-                            harm1LineTop3 = (int)(lineHeight * 5.5);
-                            harm1LineTop4 = (int)(lineHeight * 7.0);
-                        }
-                        if (doHarm3 && Harm3Lyrics.Any())
-                        {
-                            harm1LineTop1 = lineHeight * 0;
-                            harm1LineTop2 = (int)(lineHeight * 1.5);
-                            harm2LineTop1 = lineHeight * 4;
-                            harm2LineTop2 = (int)(lineHeight * 5.5);
-                            harm3LineTop1 = lineHeight * 8;
-                            harm3LineTop2 = (int)(lineHeight * 9.5);
-                        }
-                        else if ((doHarm2 || doHarm3) && Harm2Lyrics.Any())
-                        {
-                            harm1LineTop1 = lineHeight * 2;
-                            harm1LineTop2 = (int)(lineHeight * 3.5);
-                            harm2LineTop1 = lineHeight * 6;
-                            harm2LineTop2 = (int)(lineHeight * 7.5);
-                        }
-
-                        if (time + highlightDelay < phrasesLead.First().PhraseStart)
-                        {
-                            var title = "\"" + Parser.Songs[0].Name.Replace("&", "&&").Replace("feat.", "ft.").Replace("featuring", "ft.") + "\"";
-                            var artist = Parser.Songs[0].Artist.Replace("&", "&&").Replace("feat.", "ft.").Replace("featuring", "ft.");
-                            var album = Parser.Songs[0].Album.Replace("&", "&&");
-                            var bpm = AvgBPM == 0 ? "" : "Tempo: " + Math.Round(AvgBPM, 0, MidpointRounding.AwayFromZero) + " BPM";
-                            var parts = 1;
-                            if ((doHarm2 || doHarm3) && Harm2Lyrics.Any())
+                            if (actualNextLineLead == null)
                             {
-                                parts++;
+                                actualNextLineLead = drawablePhrasesLead.FirstOrDefault(p => p.PhraseStart > previewTime);
+                            }
+
+                            if (actualLastLineLead == null)
+                            {
+                                actualLastLineLead = drawablePhrasesLead.LastOrDefault(p => p.PhraseEnd <= previewTime);
+                            }
+                            
+                            LyricPhrase currentLineHarm2 = null;
+                            LyricPhrase lastLineHarm2 = null;
+                            if (doHarm2 || doHarm3)
+                            {
+                                for (var i = 0; i < Harm2Phrases.Count(); i++)
+                                {
+                                    var phrase = Harm2Phrases[i];
+                                    lastLineHarm2 = i > 0 ? Harm2Phrases[i - 1] : null;
+
+                                    if (phrase.PhraseEnd <= time)
+                                    {
+                                        actualLastLineHarmony = Harm2Phrases[i];
+                                        if (i < Harm2Phrases.Count() - 1)
+                                        {
+                                            actualNextLineHarmony = Harm2Phrases[i + 1];
+                                        }
+                                    }
+
+                                    if (previewTime >= phrase.PhraseStart && time < phrase.PhraseEnd)
+                                    {
+                                        currentLineHarm2 = phrase;
+                                        break;
+                                    }
+                                }
+                                if (actualNextLineHarmony == null)
+                                {
+                                    actualNextLineHarmony = Harm2Phrases.FirstOrDefault(p => HasDisplayableLyrics(p.PhraseText) && p.PhraseStart > previewTime);
+                                }
+                                if (actualLastLineHarmony == null)
+                                {
+                                    actualLastLineHarmony = Harm2Phrases.LastOrDefault(p => HasDisplayableLyrics(p.PhraseText) && p.PhraseEnd <= previewTime);
+                                }
+                            }
+
+                            LyricPhrase currentLineHarm3 = null;
+                            LyricPhrase lastLineHarm3 = null;
+                            if (doHarm3)
+                            {
+                                for (var i = 0; i < Harm3Phrases.Count(); i++)
+                                {
+                                    var phrase = Harm3Phrases[i];
+                                    lastLineHarm3 = i > 0 ? Harm3Phrases[i - 1] : null;
+
+                                    if (previewTime >= phrase.PhraseStart && time < phrase.PhraseEnd)
+                                    {
+                                        currentLineHarm3 = phrase;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            var lineHeight = resolutionY / 11;
+                            var harm1LineTop1 = 0; ;
+                            var harm1LineTop2 = 0;
+                            var harm1LineTop3 = 0;
+                            var harm1LineTop4 = 0;
+                            var harm2LineTop1 = 0;
+                            var harm2LineTop2 = 0;
+                            var harm3LineTop1 = 0;
+                            var harm3LineTop2 = 0;
+
+                            if (doSoloVocals || !Harm2Lyrics.Any()) //do solo vocals
+                            {
+                                harm1LineTop1 = (int)(lineHeight * (2.5 + vertOffset));
+                                harm1LineTop2 = (int)(lineHeight * (4.0 + vertOffset));
+                                harm1LineTop3 = (int)(lineHeight * 5.5);
+                                harm1LineTop4 = (int)(lineHeight * 7.0);
                             }
                             if (doHarm3 && Harm3Lyrics.Any())
                             {
-                                parts++;
+                                harm1LineTop1 = lineHeight * 0;
+                                harm1LineTop2 = (int)(lineHeight * 1.5);
+                                harm2LineTop1 = lineHeight * 4;
+                                harm2LineTop2 = (int)(lineHeight * 5.5);
+                                harm3LineTop1 = lineHeight * 8;
+                                harm3LineTop2 = (int)(lineHeight * 9.5);
                             }
-                            var vocalParts = "Vocals: " + ((doHarm2 || doHarm3) && Harm2Lyrics.Any() ? parts + "-part harmony" : "Solo");
-                            var charter = Parser.Songs[0].ChartAuthor.Replace("&", "&&");
-                            var songKey = "";//GetSongKey(); - need to add detection of official HMX stuff vs customs before this is usable
-                            var genre = Parser.doGenre(Parser.Songs[0].Genre).Replace("&", "&&");
-                            if (!string.IsNullOrEmpty(genre))
+                            else if ((doHarm2 || doHarm3) && Harm2Lyrics.Any())
                             {
-                                genre = "Genre: " + genre;
-                            }
-
-                            var offset = 0;
-                            /*if (album_cover != null)
-                            {
-                                int artSize = 512 * multiplier;
-                                int spacer = 100 * multiplier;
-                                using (Bitmap coverBmp = new Bitmap(coverWidth, coverHeight, PixelFormat.Format24bppRgb))
-                                {
-                                    var coverRect = new Rectangle(0, 0, coverWidth, coverHeight);
-                                    var coverBmpData = coverBmp.LockBits(coverRect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
-                                    Marshal.Copy(coverData, 0, coverBmpData.Scan0, coverData.Length);
-                                    coverBmp.UnlockBits(coverBmpData);
-                                    graphics.DrawImage(coverBmp, spacer, (resolutionY - artSize) / 2, artSize, artSize);
-                                }
-                                offset = artSize + (int)(1.5 * spacer);
-                            }*/
-                            if (coverBitmap != null)
-                            {
-                                int artSize = 512 * multiplier;
-                                int spacer = 100 * multiplier;
-
-                                graphics.DrawImage(coverBitmap, spacer, (resolutionY - artSize) / 2, artSize, artSize);
-
-                                offset = artSize + (int)(1.5 * spacer);
+                                harm1LineTop1 = lineHeight * 2;
+                                harm1LineTop2 = (int)(lineHeight * 3.5);
+                                harm2LineTop1 = lineHeight * 6;
+                                harm2LineTop2 = (int)(lineHeight * 7.5);
                             }
 
-                            // 1–3: Title, Artist, Album (same as now)
-                            DrawCenteredLine(graphics, title, resolutionX, lineHeight * 3, 72f * multiplier, offset);
-                            DrawCenteredLine(graphics, artist, resolutionX, lineHeight * 4, 60f * multiplier, offset);
-                            DrawCenteredLine(graphics, album, resolutionX, lineHeight * 5, 48f * multiplier, offset);
-
-                            // 4: Genre
-                            if (!string.IsNullOrEmpty(genre))
-                                DrawCenteredLine(graphics, genre, resolutionX, lineHeight * 7, 32f * multiplier, offset);
-
-                            // 5: Vocals
-                            DrawCenteredLine(graphics, vocalParts, resolutionX, (int)(lineHeight * 7.7), 32f * multiplier, offset);
-
-                            // 6: Key
-                            if (!string.IsNullOrEmpty(songKey))
-                                DrawCenteredLine(graphics, songKey, resolutionX, (int)(lineHeight * 8.4), 32f * multiplier, offset);
-
-                            // 7: BPM
-                            if (!string.IsNullOrEmpty(bpm) && displayTempo)
-                            {
-                                DrawCenteredLine(graphics, bpm, resolutionX, (int)(lineHeight * (string.IsNullOrEmpty(songKey) ? 8.4 : 9.1)), 32f * multiplier, offset);
-                            }
-                            goto DoSaveFrame;
-                        }
-
-                        double GetFirstLyricStart(List<KaraokeLyric> lyrics, double phraseStart, double phraseEnd)
-                        {
-                            return lyrics
-                                .Where(lyr => lyr.Start >= phraseStart && lyr.Start <= phraseEnd)
-                                .OrderBy(lyr => lyr.Start)
-                                .Select(lyr => lyr.Start)
-                                .FirstOrDefault(); // returns 0.0 if none found
-
-                        }
-                        double GetLastLyricEnd(List<KaraokeLyric> lyrics, double phraseStart, double phraseEnd)
-                        {
-                            return lyrics
-                                .Where(lyr => lyr.End >= phraseStart && lyr.Start <= phraseEnd)
-                                .OrderByDescending(lyr => lyr.End)
-                                .Select(lyr => lyr.End)
-                                .LastOrDefault(); // returns 0.0 if none found
-                        }
-                        // where JoinWordsForDisplay merges hyphen/sustain chains into visible words:
-                        IEnumerable<string> JoinWordsForDisplay(List<KaraokeLyric> syls)
-                        {
-                            var words = new List<string>();
-                            var buf = new List<KaraokeLyric>();
-                            for (int i = 0; i < syls.Count; i++)
-                            {
-                                buf.Add(syls[i]);
-                                string t = syls[i].Lyric ?? "";
-                                bool endWord = !(t.EndsWith("-") || t == "+" ||
-                                                (i + 1 < syls.Count && syls[i + 1].Lyric == "+"));
-                                if (endWord)
-                                {
-                                    string word = string.Join("", buf.Select(b => (b.Lyric ?? "")
-                                        .Replace("+", "").Replace("-", "").Replace("‿", " "))).Trim();
-                                    if (word.Length > 0) words.Add(word);
-                                    buf.Clear();
-                                }
-                            }
-                            if (buf.Count > 0)
-                            {
-                                string tail = string.Join("", buf.Select(b => (b.Lyric ?? "")
-                                    .Replace("+", "").Replace("-", "").Replace("‿", " "))).Trim();
-                                if (tail.Length > 0) words.Add(tail);
-                            }
-                            return words;
-                        }
-
-                        var drewText = false;
-                        var baseFont = new Font(ActiveFontName, 24f);
-                        if ((currentLineLead != null && !string.IsNullOrEmpty(currentLineLead.PhraseText)) ||
-                            (nextLineLead != null && !string.IsNullOrEmpty(nextLineLead.PhraseText)))
-                        {
-                            if ((currentLineLead != null && !string.IsNullOrEmpty(currentLineLead.PhraseText)))
-                            {
-                                var phraseSyllables = lyricsLead
-                                .Where(s => s.End > currentLineLead.PhraseStart && s.Start <= currentLineLead.PhraseEnd)
-                                .OrderBy(s => s.Start).ToList();
-
-                                string rawPhraseText = string.Join(" ", phraseSyllables
-                                .Where(s => !string.IsNullOrWhiteSpace(s.Lyric) && s.Lyric != "+" && s.Lyric != "-")
-                                .Select(s => s.Lyric.Replace("‿", " ")));
-
-                                /*// Get line1 and line2 strings
-                                var (line1Text, line2Text, middlePoint) = SplitLineEvenlyByCharacterMidpoint(rawPhraseText, 0);
-                                
-                                // Now split syllables correctly by line
-                                var (line1Syllables, line2Syllables) = SplitSyllablesByCharacterMidpoint(phraseSyllables, rawPhraseText, middlePoint);
-                                  */
-                                // Build phraseSyllables as you already do (time-windowed, ordered).
-                                var (line1Syllables, line2Syllables) = SplitSyllablesByPixelWidth(phraseSyllables, baseFont, graphics);
-
-                                // For display strings:
-                                string line1Text = string.Join(" ", JoinWordsForDisplay(line1Syllables));
-                                string line2Text = string.Join(" ", JoinWordsForDisplay(line2Syllables));
-
-                                string widestLine = (line1Text.Length > line2Text.Length) ? line1Text : line2Text;
-                                float scaledFontSize = GetScaledFontSize(graphics, widestLine, baseFont, 100f * multiplier, resolutionX);
-                                var displayFont = new Font(baseFont.FontFamily, scaledFontSize);
-
-                                //Size size = TextRenderer.MeasureText(graphics, line1Text.Replace("‿", " "), displayFont);
-                                //int posX = (resolutionX - size.Width) / 2;
-                                SizeF sizeF = graphics.MeasureString(line1Text.Replace("‿", " "), displayFont, int.MaxValue);
-                                float textWidth = sizeF.Width;
-
-                                // center horizontally
-                                float posXf = (resolutionX - textWidth) / 2f;
-                                int posX = (int)Math.Round(posXf);  // snap to pixels if you like
-
-                                double firstLyricTime = GetFirstLyricStart(lyricsLead, currentLineLead.PhraseStart, currentLineLead.PhraseEnd);
-                                double lastLyricTime = lastLineLead != null
-                                    ? GetLastLyricEnd(lyricsLead, lastLineLead.PhraseStart, lastLineLead.PhraseEnd)
-                                    : 0.0;
-
-                                double timeUntilNextPhrase = firstLyricTime - time;
-                                double totalGapDuration = firstLyricTime - lastLyricTime;
-
-                                // Only animate if there's a sufficient gap between last and next lyric
-                                bool shouldAnimate = totalGapDuration >= 1.0; // 1.0s delay required
-                                bool animationIsOngoing = timeUntilNextPhrase >= 0.0;
-
-                                if (shouldAnimate && animationIsOngoing && doEnableHighlightAnimation && !string.IsNullOrEmpty(line1Text) && line1Syllables.Count > 0)
-                                {
-                                    DrawHighlightAnimation(
-                                        graphics,
-                                        displayFont,
-                                        firstLyricTime,  // target time
-                                        posX,
-                                        harm1LineTop1,
-                                        ColorTranslator.FromHtml(highlightColor1),
-                                        time             // current time
-                                    );
-                                }
-
-                                DrawSyllableAccurateLine(
-                                    graphics,
-                                    line1Syllables,                                    
-                                    displayFont,
-                                    resolutionX,
-                                    harm1LineTop1,
-                                    textColor1,
-                                    highlightColor1,
-                                    adjustedTime
-                                );
-
-                                DrawSyllableAccurateLine(
-                                    graphics,
-                                    line2Syllables,
-                                    displayFont,
-                                    resolutionX,
-                                    harm1LineTop2,
-                                    textColor1,
-                                    highlightColor1,
-                                    adjustedTime
-                                );
+                            if (time + highlightDelay < phrasesLead.First().PhraseStart)
+                            {                                
+                                graphics.DrawImageUnscaled(titleCard, 0, 0);
+                                goto DoSaveFrame;
                             }
 
-                            if ((doSoloVocals || !Harm2Lyrics.Any()) && nextLineLead != null && !string.IsNullOrEmpty(nextLineLead.PhraseText))
+                            PreparedPhrase preparedLastLead = FindPreparedPhrase(preparedLead.Phrases, lastLineLead);
+                            PreparedPhrase preparedCurrentLead = FindPreparedPhrase(preparedLead.Phrases, currentLineLead);
+                            PreparedPhrase preparedNextLead = FindPreparedPhrase(preparedLead.Phrases, nextLineLead);
+
+                            PreparedPhrase preparedLastHarm2 = FindPreparedPhrase(preparedHarm2.Phrases, lastLineHarm2);
+                            PreparedPhrase preparedCurrentHarm2 = FindPreparedPhrase(preparedHarm2.Phrases, currentLineHarm2);
+
+                            PreparedPhrase preparedLastHarm3 = FindPreparedPhrase(preparedHarm3.Phrases, lastLineHarm3);
+                            PreparedPhrase preparedCurrentHarm3 = FindPreparedPhrase(preparedHarm3.Phrases, currentLineHarm3);
+
+                            if (time > phrasesLead.Last().PhraseEnd)
                             {
-                                var phraseSyllables = lyricsLead
-                                .Where(s => s.End > nextLineLead.PhraseStart && s.Start <= nextLineLead.PhraseEnd)
-                                .OrderBy(s => s.Start).ToList();
+                                graphics.DrawImageUnscaled(endingCard, 0, 0);
+                                goto DoSaveFrame;
+                            }                            
 
-                                string rawPhraseText = string.Join(" ", phraseSyllables
-                                .Where(s => !string.IsNullOrWhiteSpace(s.Lyric) && s.Lyric != "+" && s.Lyric != "-")
-                                .Select(s => s.Lyric.Replace("‿", " ")));
-
-                                /*// Get line1 and line2 strings
-                                var (line3Text, line4Text, middlePoint) = SplitLineEvenlyByCharacterMidpoint(rawPhraseText, 0);
-
-                                // Now split syllables correctly by line
-                                var (line3Syllables, line4Syllables) = SplitSyllablesByCharacterMidpoint(phraseSyllables, rawPhraseText, middlePoint);
-                                */
-
-                                // Build phraseSyllables as you already do (time-windowed, ordered).
-                                var (line3Syllables, line4Syllables) = SplitSyllablesByPixelWidth(phraseSyllables, baseFont, graphics);
-
-                                // For display strings:
-                                string line3Text = string.Join(" ", JoinWordsForDisplay(line3Syllables));
-                                string line4Text = string.Join(" ", JoinWordsForDisplay(line4Syllables));
-
-                                string widestLine = (line3Text.Length > line4Text.Length) ? line3Text : line4Text;
-                                float scaledFontSize = GetScaledFontSize(graphics, widestLine, baseFont, 100f * multiplier, resolutionX);
-                                var displayFont = new Font(baseFont.FontFamily, scaledFontSize);
-
-                                //Size size = TextRenderer.MeasureText(graphics, line3Text.Replace("‿", " "), displayFont);
-                                //int posX = (resolutionX - size.Width) / 2;
-                                SizeF sizeF = graphics.MeasureString(line3Text.Replace("‿", " "), displayFont, int.MaxValue);
-                                float textWidth = sizeF.Width;
-
-                                // center horizontally
-                                float posXf = (resolutionX - textWidth) / 2f;
-                                int posX = (int)Math.Round(posXf);  // snap to pixels if you like
-
-                                double firstLyricTime = GetFirstLyricStart(lyricsLead, nextLineLead.PhraseStart, nextLineLead.PhraseEnd);
-                                double lastLyricTime = lastLineLead != null
-                                    ? GetLastLyricEnd(lyricsLead, nextLineLead.PhraseStart, nextLineLead.PhraseEnd)
-                                    : 0.0;
-
-                                double timeUntilNextPhrase = firstLyricTime - time;
-                                double totalGapDuration = firstLyricTime - lastLyricTime;
-
-                                // Only animate if there's a sufficient gap between last and next lyric
-                                bool shouldAnimate = totalGapDuration >= 1.0; // 1.0s delay required
-                                bool animationIsOngoing = timeUntilNextPhrase >= 0.0;
-
-                                if (shouldAnimate && animationIsOngoing && doEnableHighlightAnimation && !string.IsNullOrEmpty(line3Text) && line3Syllables.Count > 0)
-                                {
-                                    DrawHighlightAnimation(
-                                        graphics,
-                                        displayFont,
-                                        firstLyricTime,  // target time
-                                        posX,
-                                        harm1LineTop3,
-                                        ColorTranslator.FromHtml(highlightColor1),
-                                        time             // current time
-                                    );
-                                }
-
-                                DrawSyllableAccurateLine(
-                                    graphics,
-                                    line3Syllables,
-                                    displayFont,
-                                    resolutionX,
-                                    harm1LineTop3,
-                                    textColor1,
-                                    highlightColor1,
-                                    adjustedTime
-                                );
-
-                                DrawSyllableAccurateLine(
-                                    graphics,
-                                    line4Syllables,
-                                    displayFont,
-                                    resolutionX,
-                                    harm1LineTop4,
-                                    textColor1,
-                                    highlightColor1,
-                                    adjustedTime
-                                );                                
-                            }
-                            drewText = true;
-                        }
-
-                        if ((doHarm2 || doHarm3) && currentLineHarm2 != null && !string.IsNullOrEmpty(currentLineHarm2.PhraseText))
-                        {
-                            var phraseSyllables = Harm2Lyrics
-                                .Where(s => s.End > currentLineHarm2.PhraseStart && s.Start <= currentLineHarm2.PhraseEnd)
-                                .OrderBy(s => s.Start).ToList();
-
-                            string rawPhraseText = string.Join(" ", phraseSyllables
-                            .Where(s => !string.IsNullOrWhiteSpace(s.Lyric) && s.Lyric != "+" && s.Lyric != "-")
-                            .Select(s => s.Lyric.Replace("‿", " ")));
-
-                            /*// Get line1 and line2 strings
-                            var (line1Text, line2Text, middlePoint) = SplitLineEvenlyByCharacterMidpoint(rawPhraseText, 0);
-
-                            // Now split syllables correctly by line
-                            var (line1Syllables, line2Syllables) = SplitSyllablesByCharacterMidpoint(phraseSyllables, rawPhraseText, middlePoint);
-                            */
-                            // Build phraseSyllables as you already do (time-windowed, ordered).
-                            var (line1Syllables, line2Syllables) = SplitSyllablesByPixelWidth(phraseSyllables, baseFont, graphics);
-
-                            // For display strings:
-                            string line1Text = string.Join(" ", JoinWordsForDisplay(line1Syllables));
-                            string line2Text = string.Join(" ", JoinWordsForDisplay(line2Syllables));
-
-                            string widestLine = (line1Text.Length > line2Text.Length) ? line1Text : line2Text;
-                            float scaledFontSize = GetScaledFontSize(graphics, widestLine, baseFont, 100f * multiplier, resolutionX);
-                            var displayFont = new Font(baseFont.FontFamily, scaledFontSize);
-
-                            //Size size = TextRenderer.MeasureText(graphics, line1Text.Replace("‿", " "), displayFont);
-                            //int posX = (resolutionX - size.Width) / 2;
-                            SizeF sizeF = graphics.MeasureString(line1Text.Replace("‿", " "), displayFont, int.MaxValue);
-                            float textWidth = sizeF.Width;
-
-                            // center horizontally
-                            float posXf = (resolutionX - textWidth) / 2f;
-                            int posX = (int)Math.Round(posXf);  // snap to pixels if you like
-
-                            double firstLyricTime = GetFirstLyricStart(Harm2Lyrics, currentLineHarm2.PhraseStart, currentLineHarm2.PhraseEnd);
-                            double lastLyricTime = lastLineHarm2 != null
-                                ? GetLastLyricEnd(Harm2Lyrics, lastLineHarm2.PhraseStart, lastLineHarm2.PhraseEnd)
-                                : 0.0;
-
-                            double timeUntilNextPhrase = firstLyricTime - time;
-                            double totalGapDuration = firstLyricTime - lastLyricTime;
-
-                            // Only animate if there's a sufficient gap between last and next lyric
-                            bool shouldAnimate = totalGapDuration >= 1.0; // 1.0s delay required
-                            bool animationIsOngoing = timeUntilNextPhrase >= 0.0;
-
-                            if (shouldAnimate && animationIsOngoing && doEnableHighlightAnimation && !string.IsNullOrEmpty(line1Text) && line1Syllables.Count > 0)
-                            {
-                                DrawHighlightAnimation(
-                                    graphics,
-                                    displayFont,
-                                    firstLyricTime,  // target time
-                                    posX,
-                                    harm2LineTop1,
-                                    ColorTranslator.FromHtml(highlightColor2),
-                                    time             // current time
-                                );
-                            }
-
-                            DrawSyllableAccurateLine(
-                                    graphics,
-                                    line1Syllables,
-                                    displayFont,
-                                    resolutionX,
-                                    harm2LineTop1,
-                                    textColor2,
-                                    highlightColor2,
-                                    adjustedTime
-                                );
-
-                            DrawSyllableAccurateLine(
-                                graphics,
-                                line2Syllables,
-                                displayFont,
-                                resolutionX,
-                                harm2LineTop2,
-                                textColor2,
-                                highlightColor2,
-                                adjustedTime
-                            );
-                            drewText = true;
-                        }
-
-                        if (doHarm3 && currentLineHarm3 != null && !string.IsNullOrEmpty(currentLineHarm3.PhraseText))
-                        {     
-                            var phraseSyllables = Harm3Lyrics
-                                .Where(s => s.End > currentLineHarm3.PhraseStart && s.Start <= currentLineHarm2.PhraseEnd)
-                                .OrderBy(s => s.Start).ToList();
-
-                            string rawPhraseText = string.Join(" ", phraseSyllables
-                            .Where(s => !string.IsNullOrWhiteSpace(s.Lyric) && s.Lyric != "+" && s.Lyric != "-")
-                            .Select(s => s.Lyric.Replace("‿", " ")));
-
-                            /*// Get line1 and line2 strings
-                            var (line1Text, line2Text, middlePoint) = SplitLineEvenlyByCharacterMidpoint(rawPhraseText, 0);
-
-                            // Now split syllables correctly by line
-                            var (line1Syllables, line2Syllables) = SplitSyllablesByCharacterMidpoint(phraseSyllables, rawPhraseText, middlePoint);
-                            */
-                            // Build phraseSyllables as you already do (time-windowed, ordered).
-                            var (line1Syllables, line2Syllables) = SplitSyllablesByPixelWidth(phraseSyllables, baseFont, graphics);
-
-                            // For display strings:
-                            string line1Text = string.Join(" ", JoinWordsForDisplay(line1Syllables));
-                            string line2Text = string.Join(" ", JoinWordsForDisplay(line2Syllables));
-
-                            string widestLine = (line1Text.Length > line2Text.Length) ? line1Text : line2Text;
-                            float scaledFontSize = GetScaledFontSize(graphics, widestLine, baseFont, 100f * multiplier, resolutionX);
-                            var displayFont = new Font(baseFont.FontFamily, scaledFontSize);
-
-                            //Size size = TextRenderer.MeasureText(graphics, line1Text.Replace("‿", " "), displayFont);
-                            //int posX = (resolutionX - size.Width) / 2;
-                            SizeF sizeF = graphics.MeasureString(line1Text.Replace("‿", " "), displayFont, int.MaxValue);
-                            float textWidth = sizeF.Width;
-
-                            // center horizontally
-                            float posXf = (resolutionX - textWidth) / 2f;
-                            int posX = (int)Math.Round(posXf);  // snap to pixels if you like
-                                                                // 
-                            double firstLyricTime = GetFirstLyricStart(Harm3Lyrics, currentLineHarm3.PhraseStart, currentLineHarm3.PhraseEnd);
-                            double lastLyricTime = lastLineHarm3 != null
-                                ? GetLastLyricEnd(Harm3Lyrics, lastLineHarm3.PhraseStart, lastLineHarm3.PhraseEnd)
-                                : 0.0;
-
-                            double timeUntilNextPhrase = firstLyricTime - time;
-                            double totalGapDuration = firstLyricTime - lastLyricTime;
-
-                            // Only animate if there's a sufficient gap between last and next lyric
-                            bool shouldAnimate = totalGapDuration >= 1.0; // 1.0s delay required
-                            bool animationIsOngoing = timeUntilNextPhrase >= 0.0;
-
-                            if (shouldAnimate && animationIsOngoing && doEnableHighlightAnimation && !string.IsNullOrEmpty(line1Text) && line1Syllables.Count > 0)
-                            {
-                                DrawHighlightAnimation(
-                                    graphics,
-                                    displayFont,
-                                    firstLyricTime,  // target time
-                                    posX,
-                                    harm3LineTop1,
-                                    ColorTranslator.FromHtml(highlightColor3),
-                                    time             // current time
-                                );
-                            }
-
-                            DrawSyllableAccurateLine(
-                                    graphics,
-                                    line1Syllables,
-                                    displayFont,
-                                    resolutionX,
-                                    harm3LineTop1,
-                                    textColor3,
-                                    highlightColor3,
-                                    adjustedTime
-                             );
-
-                            DrawSyllableAccurateLine(
-                                graphics,
-                                line2Syllables,
-                                displayFont,
-                                resolutionX,
-                                harm3LineTop2,
-                                textColor3,
-                                highlightColor3,
-                                adjustedTime
-                            );
-                            displayFont.Dispose();
-                            drewText = true;
-                        }
-                        baseFont.Dispose();
-                        if (drewText)
-                        {
-                            goto DoSaveFrame;
-                        }
-
-                        /*
-                        if (time > phrasesLead.Last().PhraseEnd && KaraokeLogo != null)
-                        {
-                            lineHeight = resolutionY / 11;
-                            using (Bitmap logoBmp = new Bitmap(logoWidth, logoHeight, PixelFormat.Format24bppRgb))
-                            {
-                                var logoRect = new Rectangle(0, 0, logoWidth, logoHeight);
-                                var logoBmpData = logoBmp.LockBits(logoRect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
-                                Marshal.Copy(logoData, 0, logoBmpData.Scan0, logoData.Length);
-                                logoBmp.UnlockBits(logoBmpData);
-
-                                int logoX = (resolutionX - logoWidth) / 2;
-                                int logoY = (resolutionY - logoHeight) / 2;
-
-                                graphics.DrawImage(logoBmp, logoX, logoY, logoWidth, logoHeight);
-                            }
-                            DrawCenteredLine(graphics, "Created with Nautilus | www.nemosnautilus.com", resolutionX, lineHeight * 10, 24f * multiplier);
-                            goto DoSaveFrame;
-                        }*/
-                        if (time > phrasesLead.Last().PhraseEnd && logoBitmap != null)
-                        {
-                            lineHeight = resolutionY / 11;
-
-                            int logoX = (resolutionX - logoWidth) / 2;
-                            int logoY = (resolutionY - logoHeight) / 2;
-
-                            graphics.DrawImage(logoBitmap, logoX, logoY, logoWidth, logoHeight);
-
-                            DrawCenteredLine(graphics, "Created with Nautilus | www.nemosnautilus.com",
-                                             resolutionX, lineHeight * 10, 24f * multiplier);
-
-                            goto DoSaveFrame;
-                        }
-
-                        try
-                        {
-                            if (!doShowLoadingBar) goto DoSaveFrame;
+                            bool shouldDrawLoadingBar = false;
                             double? LastEnd = 0.0;
-                            if (actualLastLineLead?.PhraseEnd > actualLastLineHarmony?.PhraseEnd)
-                            {
-                                LastEnd = actualLastLineLead?.PhraseEnd;
-                            }
-                            else
-                            {
-                                LastEnd = actualLastLineHarmony?.PhraseEnd;
-                            }
-                            //fallback
-                            if (LastEnd == null)
-                            {
-                                if (actualLastLineLead != null)
-                                {
-                                    LastEnd = actualLastLineLead.PhraseEnd;
-                                }
-                                else if (actualLastLineHarmony != null)
-                                {
-                                    LastEnd = actualLastLineHarmony.PhraseEnd;
-                                }
-                                else
-                                {
-                                    goto DoSaveFrame;
-                                }
-                            }
                             double? NextStart = 0.0;
-                            if (actualNextLineLead?.PhraseStart < actualNextLineHarmony?.PhraseStart)
-                            {
-                                NextStart = actualNextLineLead?.PhraseStart;
-                            }
-                            else
-                            {
-                                NextStart = actualNextLineHarmony?.PhraseStart;
-                            }
-                            //fallback
-                            if (NextStart == null)
-                            {
-                                if (actualNextLineLead != null)
-                                {
-                                    NextStart = actualNextLineLead.PhraseStart;
-                                }
-                                else if (actualNextLineHarmony != null)
-                                {
-                                    NextStart = actualNextLineHarmony.PhraseStart;
-                                }
-                                else
-                                {
-                                    goto DoSaveFrame;
-                                }
-                            }
-                            
-                            var gap = NextStart - LastEnd;
-                            var wait = NextStart - previewTime;
+                            double loadingGap = 0.0;
+                            double wait = 0.0;
 
-                            if (gap >= timeGap && wait > 0)
+                            if (doShowLoadingBar)
                             {
-                                baseFont = new Font(ActiveFontName, 24f * multiplier);
-                                var lineSize = TextRenderer.MeasureText(loadingBarXL, baseFont);
-                                var posX = (resolutionX - lineSize.Width) / 2;
-                                TextRenderer.DrawText(graphics, loadingBarXL, baseFont, new Point(posX, (resolutionY - lineSize.Height) / 2), ColorTranslator.FromHtml(textColor1), Color.Transparent);
+                                bool leadPhraseActive =
+                                    (currentLineLead != null && time >= currentLineLead.PhraseStart && time < currentLineLead.PhraseEnd) ||
+                                    (nextLineLead != null && time >= nextLineLead.PhraseStart && time < nextLineLead.PhraseEnd);
 
-                                var scaledLoadingBar = loadingBarXL.Substring(0, loadingBarXL.Length - (int)(loadingBarXL.Length * (wait / gap)));
-                                TextRenderer.DrawText(graphics, scaledLoadingBar, baseFont, new Point(posX, (resolutionY - lineSize.Height) / 2), ColorTranslator.FromHtml(highlightColor1), Color.Transparent);
+                                bool harm2PhraseActive =
+                                    currentLineHarm2 != null && time >= currentLineHarm2.PhraseStart && time < currentLineHarm2.PhraseEnd;
+
+                                bool harm3PhraseActive =
+                                    currentLineHarm3 != null && time >= currentLineHarm3.PhraseStart && time < currentLineHarm3.PhraseEnd;
+
+                                bool anyPhraseActive = leadPhraseActive || harm2PhraseActive || harm3PhraseActive;
+
+                                if (!anyPhraseActive)
+                                {
+                                    if (actualLastLineLead?.PhraseEnd > actualLastLineHarmony?.PhraseEnd)
+                                    {
+                                        LastEnd = actualLastLineLead?.PhraseEnd;
+                                    }
+                                    else
+                                    {
+                                        LastEnd = actualLastLineHarmony?.PhraseEnd;
+                                    }
+
+                                    // fallback
+                                    if (LastEnd == null)
+                                    {
+                                        if (actualLastLineLead != null)
+                                        {
+                                            LastEnd = actualLastLineLead.PhraseEnd;
+                                        }
+                                        else if (actualLastLineHarmony != null)
+                                        {
+                                            LastEnd = actualLastLineHarmony.PhraseEnd;
+                                        }
+                                    }
+
+                                    if (actualNextLineLead?.PhraseStart < actualNextLineHarmony?.PhraseStart)
+                                    {
+                                        NextStart = actualNextLineLead?.PhraseStart;
+                                    }
+                                    else
+                                    {
+                                        NextStart = actualNextLineHarmony?.PhraseStart;
+                                    }
+
+                                    // fallback
+                                    if (NextStart == null)
+                                    {
+                                        if (actualNextLineLead != null)
+                                        {
+                                            NextStart = actualNextLineLead.PhraseStart;
+                                        }
+                                        else if (actualNextLineHarmony != null)
+                                        {
+                                            NextStart = actualNextLineHarmony.PhraseStart;
+                                        }
+                                    }
+
+                                    if (LastEnd != null && NextStart != null)
+                                    {
+                                        loadingGap = NextStart.Value - LastEnd.Value;
+                                        wait = NextStart.Value - previewTime;
+                                        shouldDrawLoadingBar = loadingGap >= timeGap && wait > 0;
+                                    }
+                                }
+                            }
+
+                            bool currentLeadStillActive =
+                            (currentLineLead != null &&
+                            time < currentLineLead.PhraseEnd) || 
+                            (nextLineLead != null &&
+                            time < nextLineLead.PhraseEnd);
+
+                            if (currentLeadStillActive)
+                            {
+                                shouldDrawLoadingBar = false;
+                            }                            
+
+                            if (shouldDrawLoadingBar)
+                            {
+                                int posX = (resolutionX - loadingBarSize.Width) / 2;
+                                int posY = (resolutionY - loadingBarSize.Height) / 2;
+
+                                graphics.DrawImageUnscaled(loadingBarBaseBmp, posX, posY);
+
+                                double progress = 1.0 - (wait / loadingGap);
+                                progress = Math.Max(0.0, Math.Min(1.0, progress));
+
+                                int highlightWidth = (int)Math.Round(loadingBarSize.Width * progress);
+
+                                if (highlightWidth > 0)
+                                {
+                                    Rectangle src = new Rectangle(0, 0, Math.Min(highlightWidth, loadingBarHighlightBmp.Width), loadingBarHighlightBmp.Height);
+                                    Rectangle dest = new Rectangle(posX, posY, src.Width, src.Height);
+
+                                    graphics.DrawImage(loadingBarHighlightBmp, dest, src, GraphicsUnit.Pixel);
+                                }
+
+                                if (wait / 1000.0 <= 5.5 && wait / 1000.0 > 1.0)
+                                {
+                                    string waitString = ((int)wait / 1000).ToString();
+                                    DrawCenteredLine(
+                                        graphics,
+                                        waitString,
+                                        resolutionX,
+                                        (resolutionY - TextRenderer.MeasureText(waitString, new Font(ActiveFontName, 80f * multiplier)).Height) / 2,
+                                        80f * multiplier);
+                                }
 
                                 if (doShowAnimatedNotes)
                                 {
                                     DrawAnimatedNotes(graphics, noteCounter, spawnFrequency, resolutionX, resolutionY);
                                 }
-                                baseFont.Dispose();
+
+                                goto DoSaveFrame;
+                            }
+
+                            DrawPreparedLeadGroup(
+                                graphics,
+                                preparedLastLead,
+                                preparedCurrentLead,
+                                preparedNextLead,
+                                adjustedTime,
+                                harm1LineTop1,
+                                harm1LineTop2,
+                                harm1LineTop3,
+                                harm1LineTop4,
+                                time,
+                                vertOffset
+                            );
+
+                            DrawPreparedHarmonyGroup(
+                            graphics,
+                            preparedLastHarm2,
+                            preparedCurrentHarm2,
+                            preparedLastHarm3,
+                            preparedCurrentHarm3,
+                            harm2LineTop1,
+                            harm2LineTop2,
+                            harm3LineTop1,
+                            harm3LineTop2,
+                            adjustedTime,
+                            time
+                        );
+
+                        DoSaveFrame:
+                            BitmapToBGRA32IntoBuffer(bmp, rawBuffer);
+                            ffmpegStream.Write(rawBuffer, 0, byteCount);
+
+                            if (enablePreview)
+                            {
+                                if (frame % 10 == 0) //show only every 10 frames
+                                {
+                                    try //try to display preview but screw it if any frame fails just skip it
+                                    {
+                                        var preview = (Bitmap)bmp.Clone();
+                                        this.Invoke(new Action(() =>
+                                        {
+                                            picPreview.Image?.Dispose();
+                                            picPreview.Image = preview;
+                                            lblFrames.Text = frame + "/" + totalFrames;
+                                        }));
+                                    }
+                                    catch { }
+                                }
                             }
                         }
-                        catch { }
-
-                    DoSaveFrame:
-                        BitmapToBGR24IntoBuffer(bmp, rawBuffer);
-                        ffmpegStream.Write(rawBuffer, 0, byteCount);
-
-                        if (enablePreview)
+                        catch (Exception ex)
                         {
-                            if (frame % 10 == 0) //show only every 10 frames
-                            {
-                                try //try to display preview but screw it if any frame fails just skip it
-                                {
-                                    var preview = (Bitmap)bmp.Clone();
-                                    this.Invoke(new Action(() =>
-                                    {
-                                        picPreview.Image?.Dispose();
-                                        picPreview.Image = preview;
-                                        lblFrames.Text = frame + "/" + totalFrames;
-                                    }));
-                                }
-                                catch { }
-                            }
-                        }                        
+                            var message = $"Error rendering frame: {frame} out of {totalFrames}\n\n{ex.Message}\nn\n{ex.StackTrace}";
+                            Log(message);
+                            //MessageBox.Show(message, "Rendering Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }                       
+                    }
+                    
+                    bmp?.Dispose();
+                    DisposeLoadingBarAssets();
+                    ffmpegStream.Flush();
+                    ffmpegStream.Close();
+                    ffmpeg.WaitForExit();
+
+                    this.Invoke(new Action(() =>
+                    {
+                        picPreview.Image?.Dispose();
+                        picPreview.Image = BackgroundOverride;
+                        lblFrames.Visible = false;
+                        if (animatedVideoBackground)
+                        {
+                            picPreview.Visible = false;
+                            videoPreview.Visible = true;
+                            DroppedPreviewVideo(backgroundPath);
+                        }
+                    }));
+                                        
+                    Tools.DeleteFile(bgRawPath);
+                    Tools.DeleteFile(artFilePath);//delete temp album art
+
+                    if (cancelProcess)
+                    {
+                        Tools.DeleteFile(outputVideoPath);//ffmpeg will have produced a partial video, delete it
                     }
                 }
-                catch (Exception ex)
+            }                       
+        }
+
+        private void DrawPreparedHarmonyGroup(
+            Graphics graphics,
+            PreparedPhrase preparedLastHarm2,
+            PreparedPhrase preparedCurrentHarm2,
+            PreparedPhrase preparedLastHarm3,
+            PreparedPhrase preparedCurrentHarm3,
+            int harm2LineTop1,
+            int harm2LineTop2,
+            int harm3LineTop1,
+            int harm3LineTop2,
+            double adjustedTime,
+            double time)
+        {
+            if (preparedCurrentHarm2 != null && (doHarm2 || doHarm3))
+            {
+                bool hasHarm21 = preparedCurrentHarm2.Line1 != null && preparedCurrentHarm2.Line1.HasText;
+                bool hasHarm22 = preparedCurrentHarm2.Line2 != null && preparedCurrentHarm2.Line2.HasText;
+
+                double previousHarm2Time = preparedLastHarm2?.LastLyricTime ?? 0;
+
+                using (var harm2Font = new Font(ActiveFontName, preparedCurrentHarm2.FontSize, FontStyle.Bold))
                 {
-                    var message = $"Error rendering frame: {frame} out of {totalFrames}\n\n{ex.Message}\nn\n{ex.StackTrace}";
-                    Log(message);
-                    //MessageBox.Show(message, "Rendering Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    if (doEnableHighlightAnimation && hasHarm21)
+                    {
+                        DrawPreparedPhraseAnimation(
+                            graphics,
+                            preparedCurrentHarm2,
+                            preparedCurrentHarm2.Line1,
+                            harm2Font,
+                            harm2LineTop1,
+                            time,
+                            ColorTranslator.FromHtml(highlightColor2),
+                            previousHarm2Time
+                        );
+                    }
                 }
+
+                if (hasHarm21)
+                    DrawPreparedLine(graphics, preparedCurrentHarm2.Line1, harm2LineTop1, adjustedTime);
+
+                if (hasHarm22)
+                    DrawPreparedLine(graphics, preparedCurrentHarm2.Line2, harm2LineTop2, adjustedTime);
             }
 
-            bmp?.Dispose();
-            coverBitmap?.Dispose();
-            logoBitmap?.Dispose();
-
-            ffmpegStream.Flush();
-            ffmpegStream.Close();
-            ffmpeg.WaitForExit();
-
-            this.Invoke(new Action(() =>
+            if (preparedCurrentHarm3 != null && doHarm3)
             {
-                picPreview.Image?.Dispose();
-                picPreview.Visible = false;
-                lblFrames.Visible = false;
-            }));
+                bool hasHarm31 = preparedCurrentHarm3.Line1 != null && preparedCurrentHarm3.Line1.HasText;
+                bool hasHarm32 = preparedCurrentHarm3.Line2 != null && preparedCurrentHarm3.Line2.HasText;
 
-            string backgroundPath = Application.StartupPath + "\\bin\\images\\background.mp4";
-            if (animatedVideoBackground && File.Exists(backgroundPath) && !cancelProcess)
-            {
-                string bgRawPath = Path.GetDirectoryName(outputVideoPath) + "\\bg_raw.mp4";
-                if (!cancelProcess)
+                double previousHarm3Time = preparedLastHarm3?.LastLyricTime ?? 0;
+
+                using (var harm3Font = new Font(ActiveFontName, preparedCurrentHarm3.FontSize, FontStyle.Bold))
                 {
-                    Log("Syncing background video to lyrics video ... stand by");                    
-                    string prepArgs =
-                        $"-y " +
-                        $"-stream_loop -1 -i \"{backgroundPath}\" " +
-                        $"-filter_complex \"[0:v]" +
-                            $"scale={resolutionX}:{resolutionY}," +
-                            $"fps={frameRate},format=yuv420p[v]\" " +
-                        $"-map \"[v]\" " +
-                        $"-t {songDuration.ToString(System.Globalization.CultureInfo.InvariantCulture)} " +
-                        $"-c:v libx264 -preset veryfast -crf 18 -an " +
-                        $"\"{bgRawPath}\"";
-
-                    var ffmpegPrep = new Process();
-                    ffmpegPrep.StartInfo.FileName = ffmpegPath;
-                    ffmpegPrep.StartInfo.Arguments = prepArgs;
-                    ffmpegPrep.StartInfo.UseShellExecute = false;
-                    ffmpegPrep.StartInfo.RedirectStandardInput = false;
-                    ffmpegPrep.StartInfo.RedirectStandardOutput = true;
-                    ffmpegPrep.StartInfo.RedirectStandardError = true;
-                    ffmpegPrep.StartInfo.CreateNoWindow = true;
-                    ffmpegPrep.Start();
-                    // Read stderr (blocking until process exits)
-                    string prepStderr = ffmpegPrep.StandardError.ReadToEnd();
-                    ffmpegPrep.WaitForExit();
-
-                    /*Log($"Background prep exit code: {ffmpegPrep.ExitCode}");
-                    if (ffmpegPrep.ExitCode != 0)
+                    if (doEnableHighlightAnimation && hasHarm31)
                     {
-                        Log("Background prep ffmpeg stderr:");
-                        Log(prepStderr);
-                        return; // bail out, don't try to mix
-                    }*/
-
-                    Log("Background video is ready");
+                        DrawPreparedPhraseAnimation(
+                            graphics,
+                            preparedCurrentHarm3,
+                            preparedCurrentHarm3.Line1,
+                            harm3Font,
+                            harm3LineTop1,
+                            time,
+                            ColorTranslator.FromHtml(highlightColor3),
+                            previousHarm3Time
+                        );
+                    }
                 }
 
-                if (!cancelProcess)
-                {
-                    Log("Combining lyrics video with background video ... stand by");
+                if (hasHarm31)
+                    DrawPreparedLine(graphics, preparedCurrentHarm3.Line1, harm3LineTop1, adjustedTime);
 
-                    string mixArgs =
-                        $"-y " +
-                        $"-i \"{bgRawPath}\" " +        // background video [0:v]
-                        $"-i \"{lyricsRawPath}\" " +    // lyrics-only video with green background [1:v][1:a]
-                        $"-filter_complex " +
-                        "\"[1:v]" +                            
-                            "colorkey=0x00FF00:0.2:0.05[fg];" +                    // tweak similarity/blend as needed
-                        "[0:v][fg]overlay=0:0:format=auto[v]\" " +
-                        "-map \"[v]\" " +               // final composited video
-                        "-map 1:a " +                   // audio track from lyrics_raw.mp4
-                        "-c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p " +
-                        "-c:a aac -b:a 192k -shortest " +
-                        $"\"{outputVideoPath}\"";
-                    var ffmpegMix = new Process();
-                    ffmpegMix.StartInfo.FileName = ffmpegPath;
-                    ffmpegMix.StartInfo.Arguments = mixArgs;
-                    ffmpegMix.StartInfo.UseShellExecute = false;
-                    ffmpegMix.StartInfo.RedirectStandardInput = false;
-                    ffmpegMix.StartInfo.RedirectStandardOutput = true;
-                    ffmpegMix.StartInfo.RedirectStandardError = true;
-                    ffmpegMix.StartInfo.CreateNoWindow = true;
-                    ffmpegMix.Start();
-                    string mixStderr = ffmpegMix.StandardError.ReadToEnd();
-                    ffmpegMix.WaitForExit();
-
-                    /*Log($"Mix exit code: {ffmpegMix.ExitCode}");
-                    if (ffmpegMix.ExitCode != 0)
-                    {
-                        Log("Mix ffmpeg stderr:");
-                        Log(mixStderr);
-                        return;
-                    }*/
-                    Log("Your animated karaoke video is ready");
-                }
-
-                Tools.DeleteFile(lyricsRawPath);
-                Tools.DeleteFile(bgRawPath);
+                if (hasHarm32)
+                    DrawPreparedLine(graphics, preparedCurrentHarm3.Line2, harm3LineTop2, adjustedTime);
             }
-            
-            //album_cover?.Dispose();
-            Tools.DeleteFile(artFilePath);//delete temp album art
+        }       
 
-            if(cancelProcess)
+        private void DrawPreparedLine(Graphics g, PreparedLine line, int y, double adjustedTime)
+        {
+            if (line == null || !line.HasText || line.BaseBitmap == null)
+                return;
+
+            g.DrawImage(line.BaseBitmap, line.PosX, y);
+
+            if (line.SyllableMasks == null || line.SyllableMasks.Count == 0 || line.Syllables == null)
             {
-                Tools.DeleteFile(outputVideoPath);//ffmpeg will have produced a partial video, delete it
+                // fallback to old behavior if needed
+                if (line.HighlightBitmap != null)
+                {
+                    float highlightWidth = GetHighlightedPixelWidth(line.Syllables, adjustedTime);
+                    highlightWidth = Math.Max(0f, Math.Min(highlightWidth, line.TextWidth));
+
+                    int hw = (int)highlightWidth;
+                    if (hw > 0)
+                    {
+                        Rectangle src = new Rectangle(0, 0, hw, line.TextHeight);
+                        Rectangle dest = new Rectangle(line.PosX, y, hw, line.TextHeight);
+                        g.DrawImage(line.HighlightBitmap, dest, src, GraphicsUnit.Pixel);
+                    }
+                }
+                return;
+            }
+
+            for (int i = 0; i < line.Syllables.Count && i < line.SyllableMasks.Count; i++)
+            {
+                MergedSyllable syllable = line.Syllables[i];
+                PreparedSyllableMask mask = line.SyllableMasks[i];
+
+                if (mask == null || !mask.HasPixels)
+                    continue;
+
+                if (adjustedTime >= syllable.End)
+                {
+                    g.DrawImage(mask.Bitmap, line.PosX + mask.X, y + mask.Y);
+                }
+                else if (adjustedTime > syllable.Start)
+                {
+                    double duration = syllable.End - syllable.Start;
+                    double progress = duration <= 0
+                        ? 1.0
+                        : (adjustedTime - syllable.Start) / duration;
+
+                    progress = Math.Max(0.0, Math.Min(1.0, progress));
+
+                    int partialWidth = (int)Math.Ceiling(mask.Width * progress);
+                    if (partialWidth > 0)
+                    {
+                        Rectangle src = new Rectangle(0, 0, partialWidth, mask.Height);
+                        Rectangle dest = new Rectangle(line.PosX + mask.X, y + mask.Y, partialWidth, mask.Height);
+                        g.DrawImage(mask.Bitmap, dest, src, GraphicsUnit.Pixel);
+                    }
+
+                    break;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }       
+
+        private void DrawPreparedPhraseAnimation(
+            Graphics graphics,
+            PreparedPhrase phrase,
+            PreparedLine line,
+            Font font,
+            int y,
+            double time,
+            Color color,
+            double previousLastLyricTime)
+        {
+            if (phrase == null || line == null || !line.HasText)
+                return;
+
+            double totalGapDuration = phrase.FirstLyricTime - previousLastLyricTime;
+            double leadDuration = Math.Min(highlightDelay, totalGapDuration);
+
+            if (leadDuration <= 0)
+                return;
+
+            DrawHighlightAnimation(
+                graphics,
+                font,
+                phrase.FirstLyricTime,
+                leadDuration,
+                line.PosX,
+                y,
+                color,
+                time
+            );
+        }
+
+        private void DrawPreparedLeadGroup(
+            Graphics graphics,
+            PreparedPhrase preparedLastLead,
+            PreparedPhrase preparedCurrentLead,
+            PreparedPhrase preparedNextLead,
+            double adjustedTime,
+            int harm1LineTop1,
+            int harm1LineTop2,
+            int harm1LineTop3,
+            int harm1LineTop4,
+            double time,
+            double vertOffset)
+        {
+            bool hasCurrent1 = preparedCurrentLead?.Line1 != null && preparedCurrentLead.Line1.HasText;
+            bool hasCurrent2 = preparedCurrentLead?.Line2 != null && preparedCurrentLead.Line2.HasText;
+            bool hasNext1 = preparedNextLead?.Line1 != null && preparedNextLead.Line1.HasText;
+            bool hasNext2 = preparedNextLead?.Line2 != null && preparedNextLead.Line2.HasText;
+
+            bool hasCurrent = hasCurrent1 || hasCurrent2;
+            bool hasNext = (doSoloVocals || !Harm2Lyrics.Any()) && (hasNext1 || hasNext2);                      
+
+            Color animColor = ColorTranslator.FromHtml(highlightColor1);
+
+            double previousLeadTime = preparedLastLead?.LastLyricTime ?? 0;
+            double previousNextLeadTime = preparedCurrentLead?.LastLyricTime ?? previousLeadTime;
+
+            if (hasCurrent)
+            {
+                using (var currentFont = new Font(ActiveFontName, preparedCurrentLead.FontSize, FontStyle.Bold))
+                {
+                    if (doEnableHighlightAnimation && hasCurrent1)
+                    {
+                        DrawPreparedPhraseAnimation(
+                            graphics,
+                            preparedCurrentLead,
+                            preparedCurrentLead.Line1,
+                            currentFont,
+                            harm1LineTop1,
+                            time,
+                            animColor,
+                            previousLeadTime
+                        );
+                    }
+                }
+
+                if (hasCurrent1)
+                    DrawPreparedLine(graphics, preparedCurrentLead.Line1, harm1LineTop1, adjustedTime);
+
+                if (hasCurrent2)
+                    DrawPreparedLine(graphics, preparedCurrentLead.Line2, harm1LineTop2, adjustedTime);
+            }
+
+            if (hasNext)
+            {
+                using (var nextFont = new Font(ActiveFontName, preparedNextLead.FontSize, FontStyle.Bold))
+                {
+                    if (doEnableHighlightAnimation && hasNext1)
+                    {
+                        DrawPreparedPhraseAnimation(
+                            graphics,
+                            preparedNextLead,
+                            preparedNextLead.Line1,
+                            nextFont,
+                            harm1LineTop3,
+                            time,
+                            animColor,
+                            previousNextLeadTime
+                        );
+                    }
+                }
+
+                if (hasNext1)
+                    DrawPreparedLine(graphics, preparedNextLead.Line1, harm1LineTop3, adjustedTime);
+
+                if (hasNext2)
+                    DrawPreparedLine(graphics, preparedNextLead.Line2, harm1LineTop4, adjustedTime);
             }
         }
 
-        static void BitmapToBGR24IntoBuffer(Bitmap bmp, byte[] buffer)
+        private PreparedPhrase FindPreparedPhrase(List<PreparedPhrase> prepared, LyricPhrase phrase)
+        {
+            if (phrase == null) return null;
+
+            return prepared.FirstOrDefault(p =>
+                Math.Abs(p.PhraseStart - phrase.PhraseStart) < 0.0001 &&
+                Math.Abs(p.PhraseEnd - phrase.PhraseEnd) < 0.0001);
+        }    
+          
+        private PreparedTrack PrepareTrack(
+            Graphics g,
+            List<KaraokeLyric> allLyrics,
+            IEnumerable<LyricPhrase> phrases,
+            Font baseFont,
+            int resolutionX,
+            string textColor,
+            string highlightColor)
+        {
+            var track = new PreparedTrack();
+
+            foreach (var phrase in phrases)
+            {
+                var prepared = PreparePhrase(
+                    g,
+                    allLyrics,
+                    phrase,
+                    baseFont,
+                    resolutionX,
+                    textColor,
+                    highlightColor);
+
+                if (prepared != null && prepared.HasAnyText)
+                {
+                    track.Phrases.Add(prepared);
+                }
+            }
+
+            return track;
+        }
+
+        private PreparedPhrase PreparePhrase(
+            Graphics g,
+            List<KaraokeLyric> allLyrics,
+            LyricPhrase phrase,
+            Font baseFont,
+            int resolutionX,
+            string textColor,
+            string highlightColor)
+        {
+            var phraseSyllables = allLyrics
+                .Where(s => s.End > phrase.PhraseStart && s.Start <= phrase.PhraseEnd)
+                .OrderBy(s => s.Start)
+                .ToList();
+
+            if (phraseSyllables.Count == 0)
+                return null;
+
+            string rawPhraseText = string.Join(" ", phraseSyllables
+                .Where(s => !string.IsNullOrWhiteSpace(s.Lyric) && s.Lyric != "+" && s.Lyric != "-")
+                .Select(s => s.Lyric.Replace("‿", " ")));
+
+            var (line1Syllables, line2Syllables) = SplitSyllablesByPixelWidth(phraseSyllables, baseFont, g);
+
+            string line1Preview = string.Join(" ", JoinWordsForDisplay(line1Syllables));
+            string line2Preview = string.Join(" ", JoinWordsForDisplay(line2Syllables));
+            string widestLine = line1Preview.Length > line2Preview.Length ? line1Preview : line2Preview;
+
+            int multiplier = do4KResolution ? 2 : 1;
+            float scaledFontSize = GetScaledFontSize(g, widestLine, baseFont, 100f * multiplier, resolutionX);
+
+            using (var displayFont = new Font(baseFont.FontFamily, scaledFontSize))
+            {
+                var prepared = new PreparedPhrase
+                {
+                    PhraseStart = phrase.PhraseStart,
+                    PhraseEnd = phrase.PhraseEnd,
+                    PhraseText = rawPhraseText,
+                    FontSize = scaledFontSize,
+                    FirstLyricTime = GetFirstLyricStart(allLyrics, phrase.PhraseStart, phrase.PhraseEnd),
+                    LastLyricTime = GetLastLyricEnd(allLyrics, phrase.PhraseStart, phrase.PhraseEnd),
+                    Line1 = PrepareLine(g, line1Syllables, displayFont, resolutionX, textColor, highlightColor),
+                    Line2 = PrepareLine(g, line2Syllables, displayFont, resolutionX, textColor, highlightColor)
+                };
+                return prepared;
+            }
+        }
+
+        IEnumerable<string> JoinWordsForDisplay(List<KaraokeLyric> syls)
+        {
+            var words = new List<string>();
+            var buf = new List<KaraokeLyric>();
+            for (int i = 0; i < syls.Count; i++)
+            {
+                buf.Add(syls[i]);
+                string t = syls[i].Lyric ?? "";
+                bool endWord = !(t.EndsWith("-") || t == "+" ||
+                                (i + 1 < syls.Count && syls[i + 1].Lyric == "+"));
+                if (endWord)
+                {
+                    string word = string.Join("", buf.Select(b => (b.Lyric ?? "")
+                        .Replace("+", "").Replace("-", "").Replace("‿", " "))).Trim();
+                    if (word.Length > 0) words.Add(word);
+                    buf.Clear();
+                }
+            }
+            if (buf.Count > 0)
+            {
+                string tail = string.Join("", buf.Select(b => (b.Lyric ?? "")
+                    .Replace("+", "").Replace("-", "").Replace("‿", " "))).Trim();
+                if (tail.Length > 0) words.Add(tail);
+            }
+            return words;
+        }
+
+        double GetFirstLyricStart(List<KaraokeLyric> lyrics, double phraseStart, double phraseEnd)
+        {
+            return lyrics
+                .Where(lyr => lyr.Start >= phraseStart && lyr.Start <= phraseEnd)
+                .OrderBy(lyr => lyr.Start)
+                .Select(lyr => lyr.Start)
+                .FirstOrDefault(); // returns 0.0 if none found
+
+        }
+
+        double GetLastLyricEnd(List<KaraokeLyric> lyrics, double phraseStart, double phraseEnd)
+        {
+            return lyrics
+                .Where(lyr => lyr.End >= phraseStart && lyr.Start <= phraseEnd)
+                .OrderByDescending(lyr => lyr.End)
+                .Select(lyr => lyr.End)
+                .LastOrDefault(); // returns 0.0 if none found
+        }
+
+        private PreparedLine PrepareLine(
+            Graphics g,
+            List<KaraokeLyric> originalSyllables,
+            Font font,
+            int resolutionX,
+            string baseColor,
+            string highlightColor)
+        {
+            var prepared = new PreparedLine();
+
+            if (originalSyllables == null || originalSyllables.Count == 0)
+                return prepared;
+                        
+            var merged = MergeSustainedSyllables(originalSyllables);
+            string displayText = ReconstructPhraseTextFromSyllables(merged);
+
+            if (string.IsNullOrWhiteSpace(displayText))
+                return prepared;
+
+            ApplyTextRenderingSettings(g);
+
+            SizeF sizeF = g.MeasureString(displayText.Replace("‿", " "), font, int.MaxValue);
+            int textWidth = Math.Max(1, (int)Math.Ceiling(sizeF.Width));
+            int textHeight = Math.Max(1, (int)Math.Ceiling(sizeF.Height));
+            int posX = (int)Math.Round((resolutionX - textWidth) / 2f);
+
+            BuildSyllablePixelMap(merged, font, g, displayText, textWidth);
+
+            Color baseCol = ColorTranslator.FromHtml(baseColor);
+            Color highlightCol = ColorTranslator.FromHtml(highlightColor);
+            Color strokeCol = ColorTranslator.FromHtml(strokeColor);
+
+            var baseBmp = new Bitmap(textWidth, textHeight);
+            var hiBmp = new Bitmap(textWidth, textHeight);
+            var multiplier = do4KResolution ? 2 : 1;
+
+            using (var gBase = Graphics.FromImage(baseBmp))
+            {
+                gBase.Clear(Color.Transparent);
+                ApplyTextRenderingSettings(gBase);
+                DrawTextWithStroke(gBase, displayText, font, new Point(0, 0), baseCol, strokeCol, 3 * multiplier);
+            }
+
+            using (var gHi = Graphics.FromImage(hiBmp))
+            {
+                gHi.Clear(Color.Transparent);
+                ApplyTextRenderingSettings(gHi);
+                DrawTextWithStroke(gHi, displayText, font, new Point(0, 0), highlightCol, strokeCol, 3 * multiplier);
+            }
+
+            prepared.SyllableMasks = BuildSyllableMasks(
+                merged,
+                displayText,
+                font,
+                textWidth,
+                textHeight,
+                highlightCol,
+                strokeCol
+            );
+
+            prepared.Text = displayText;
+            prepared.Syllables = merged;
+            prepared.TextWidth = textWidth;
+            prepared.TextHeight = textHeight;
+            prepared.PosX = posX;
+            prepared.BaseBitmap = baseBmp;
+            prepared.HighlightBitmap = hiBmp;
+
+            return prepared;
+        }
+
+        private List<PreparedSyllableMask> BuildSyllableMasks(
+            List<MergedSyllable> syllables,
+            string displayText,
+            Font font,
+            int textWidth,
+            int textHeight,
+            Color highlightColor,
+            Color strokeColor)
+        {
+            var result = new List<PreparedSyllableMask>();
+
+            if (syllables == null || syllables.Count == 0 || string.IsNullOrWhiteSpace(displayText))
+                return result;
+
+            int searchIndex = 0;
+            Bitmap previousPrefix = new Bitmap(textWidth, textHeight, PixelFormat.Format32bppArgb);
+
+            try
+            {
+                using (Graphics gPrev = Graphics.FromImage(previousPrefix))
+                {
+                    gPrev.Clear(Color.Transparent);
+                }
+
+                foreach (var syllable in syllables)
+                {
+                    string visible = GetVisibleTextForSyllable(syllable);
+
+                    if (string.IsNullOrWhiteSpace(visible))
+                    {
+                        result.Add(new PreparedSyllableMask
+                        {
+                            Start = syllable.Start,
+                            End = syllable.End
+                        });
+                        continue;
+                    }
+
+                    int idx = displayText.IndexOf(visible, searchIndex, StringComparison.Ordinal);
+                    if (idx < 0)
+                    {
+                        result.Add(new PreparedSyllableMask
+                        {
+                            Start = syllable.Start,
+                            End = syllable.End
+                        });
+                        continue;
+                    }
+
+                    int endIdx = idx + visible.Length;
+                    string prefixText = displayText.Substring(0, endIdx);
+
+                    Bitmap currentPrefix = new Bitmap(textWidth, textHeight, PixelFormat.Format32bppArgb);
+                    try
+                    {
+                        using (Graphics gCurr = Graphics.FromImage(currentPrefix))
+                        {
+                            gCurr.Clear(Color.Transparent);
+                            ApplyTextRenderingSettings(gCurr);
+                            DrawTextWithStroke(gCurr, prefixText, font, new Point(0, 0), highlightColor, strokeColor, 3);
+                        }
+
+                        PreparedSyllableMask mask = ExtractDeltaMask(
+                            previousPrefix,
+                            currentPrefix,
+                            syllable.Start,
+                            syllable.End
+                        );
+
+                        result.Add(mask);
+
+                        Bitmap oldPrev = previousPrefix;
+                        previousPrefix = currentPrefix;
+                        currentPrefix = null;
+                        oldPrev.Dispose();
+                    }
+                    finally
+                    {
+                        if (currentPrefix != null)
+                            currentPrefix.Dispose();
+                    }
+
+                    searchIndex = endIdx;
+                }
+            }
+            finally
+            {
+                if (previousPrefix != null)
+                    previousPrefix.Dispose();
+            }
+
+            return result;
+        }
+
+        private PreparedSyllableMask ExtractDeltaMask(
+            Bitmap previousPrefix,
+            Bitmap currentPrefix,
+            double start,
+            double end)
+        {
+            var mask = new PreparedSyllableMask
+            {
+                Start = start,
+                End = end
+            };
+
+            Rectangle rect = new Rectangle(0, 0, currentPrefix.Width, currentPrefix.Height);
+
+            BitmapData prevData = previousPrefix.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            BitmapData currData = currentPrefix.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+            int minX = currentPrefix.Width;
+            int minY = currentPrefix.Height;
+            int maxX = -1;
+            int maxY = -1;
+
+            try
+            {
+                int stride = currData.Stride;
+                int height = currentPrefix.Height;
+                int width = currentPrefix.Width;
+
+                unsafe
+                {
+                    byte* prevPtr = (byte*)prevData.Scan0;
+                    byte* currPtr = (byte*)currData.Scan0;
+
+                    for (int y = 0; y < height; y++)
+                    {
+                        byte* prevRow = prevPtr + (y * stride);
+                        byte* currRow = currPtr + (y * stride);
+
+                        for (int x = 0; x < width; x++)
+                        {
+                            int offset = x * 4;
+
+                            byte prevA = prevRow[offset + 3];
+                            byte currA = currRow[offset + 3];
+
+                            if (currA > prevA)
+                            {
+                                if (x < minX) minX = x;
+                                if (y < minY) minY = y;
+                                if (x > maxX) maxX = x;
+                                if (y > maxY) maxY = y;
+                            }
+                        }
+                    }
+
+                    if (maxX < minX || maxY < minY)
+                    {
+                        return mask;
+                    }
+
+                    int outW = maxX - minX + 1;
+                    int outH = maxY - minY + 1;
+
+                    Bitmap cropped = new Bitmap(outW, outH, PixelFormat.Format32bppArgb);
+                    BitmapData outData = cropped.LockBits(
+                        new Rectangle(0, 0, outW, outH),
+                        ImageLockMode.WriteOnly,
+                        PixelFormat.Format32bppArgb);
+
+                    try
+                    {
+                        int outStride = outData.Stride;
+                        byte* outPtr = (byte*)outData.Scan0;
+
+                        for (int y = minY; y <= maxY; y++)
+                        {
+                            byte* prevRow = prevPtr + (y * stride);
+                            byte* currRow = currPtr + (y * stride);
+                            byte* outRow = outPtr + ((y - minY) * outStride);
+
+                            for (int x = minX; x <= maxX; x++)
+                            {
+                                int srcOffset = x * 4;
+                                int dstOffset = (x - minX) * 4;
+
+                                byte prevA = prevRow[srcOffset + 3];
+                                byte currA = currRow[srcOffset + 3];
+
+                                int diffA = currA - prevA;
+                                if (diffA < 0) diffA = 0;
+
+                                if (diffA > 0)
+                                {
+                                    outRow[dstOffset + 0] = currRow[srcOffset + 0]; // B
+                                    outRow[dstOffset + 1] = currRow[srcOffset + 1]; // G
+                                    outRow[dstOffset + 2] = currRow[srcOffset + 2]; // R
+                                    outRow[dstOffset + 3] = (byte)diffA;            // A
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        cropped.UnlockBits(outData);
+                    }
+
+                    mask.X = minX;
+                    mask.Y = minY;
+                    mask.Width = outW;
+                    mask.Height = outH;
+                    mask.Bitmap = cropped;
+                }
+            }
+            finally
+            {
+                previousPrefix.UnlockBits(prevData);
+                currentPrefix.UnlockBits(currData);
+            }
+
+            return mask;
+        }
+
+        public class PreparedLine : IDisposable
+        {
+            public string Text { get; set; } = "";
+            public List<MergedSyllable> Syllables { get; set; } = new List<MergedSyllable>();
+
+            public int TextWidth { get; set; }
+            public int TextHeight { get; set; }
+            public int PosX { get; set; }
+
+            public Bitmap BaseBitmap { get; set; }
+            public Bitmap HighlightBitmap { get; set; }
+
+            public List<PreparedSyllableMask> SyllableMasks { get; set; } = new List<PreparedSyllableMask>();
+
+            public bool HasText
+            {
+                get { return !string.IsNullOrWhiteSpace(Text) && Syllables.Count > 0; }
+            }
+
+            public void Dispose()
+            {
+                if (BaseBitmap != null) BaseBitmap.Dispose();
+                if (HighlightBitmap != null) HighlightBitmap.Dispose();
+
+                if (SyllableMasks != null)
+                {
+                    foreach (var mask in SyllableMasks)
+                    {
+                        if (mask != null) mask.Dispose();
+                    }
+                    SyllableMasks.Clear();
+                }
+            }
+        }
+
+        public class PreparedPhrase : IDisposable
+        {
+            public double PhraseStart { get; set; }
+            public double PhraseEnd { get; set; }
+
+            public double FirstLyricTime { get; set; }
+            public double LastLyricTime { get; set; }
+
+            public float FontSize { get; set; }
+
+            public PreparedLine Line1 { get; set; } = new PreparedLine();
+            public PreparedLine Line2 { get; set; } = new PreparedLine();
+
+            public string PhraseText { get; set; } = "";
+
+            public bool HasAnyText => Line1.HasText || Line2.HasText;
+
+            public void Dispose()
+            {
+                Line1.Dispose();
+                Line2.Dispose();
+            }
+        }
+
+        public class PreparedTrack
+        {
+            public List<PreparedPhrase> Phrases { get; } = new List<PreparedPhrase>();
+        }
+
+        static void BitmapToBGRA32IntoBuffer(Bitmap bmp, byte[] buffer)
         {
             if (bmp == null || buffer == null)
                 throw new ArgumentNullException("Bitmap or buffer is null");
@@ -3346,14 +3884,14 @@ namespace Nautilus
                 throw new ArgumentException("Bitmap has invalid dimensions");
 
             var rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-            var bmpData = bmp.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            var bmpData = bmp.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
             try
             {
                 int byteCount = Math.Abs(bmpData.Stride) * bmp.Height;
 
-                if (byteCount > buffer.Length)
-                    throw new ArgumentException("Buffer size is too small for bitmap data");
+                if (byteCount != buffer.Length)
+                    throw new ArgumentException($"Buffer size mismatch. Expected {byteCount}, got {buffer.Length}");
 
                 Marshal.Copy(bmpData.Scan0, buffer, 0, byteCount);
             }
@@ -3361,35 +3899,7 @@ namespace Nautilus
             {
                 bmp.UnlockBits(bmpData);
             }
-        }   
-
-        public string ProcessLine(string line)
-        {
-            if (line == null) return "";
-            string newline;
-            newline = line.Replace("$", "");
-            newline = newline.Replace("%", "");
-            newline = newline.Replace("#", "");
-            newline = newline.Replace("^", "");
-            newline = newline.Replace("-+", "");
-            newline = newline.Replace("+-", "");
-            newline = newline.Replace("+- ", "");
-            newline = newline.Replace("- + ", "");
-            newline = newline.Replace("+- ", "");
-            newline = newline.Replace("+- ", "");
-            newline = newline.Replace("- ", "");
-            newline = newline.Replace(" + ", " ");
-            newline = newline.Replace(" +", "");
-            newline = newline.Replace("+ ", "");
-            newline = newline.Replace("+-", "");
-            newline = newline.Replace("=", "-");
-            newline = newline.Replace("§", "‿");
-            newline = newline.Replace("- ", "-");
-            newline = newline.Replace("-", "");
-            newline = newline.Replace("+", " ");
-            newline = newline.Replace("  ", " ").Trim();            
-            return newline.Replace("/", "").Trim();
-        }
+        }       
 
         public float GetScaledFontSize(Graphics g, string line, Font preferedFont, float maxSize, int frameWidth)
         {            
@@ -3436,7 +3946,6 @@ namespace Nautilus
             highlightDelayToolStripMenuItem.Enabled = chkMP4.Checked;
             keeptomlFileToolStripMenuItem.Enabled = chkCDG.Checked;
             cDGMP3ModeToolStripMenuItem.Enabled = chkCDG.Checked;
-            //cboStroke.Enabled = chkCDG.Checked;
             if (!chkCDG.Checked)
             {
                 keeptomlFileToolStripMenuItem.Checked = false;
@@ -3445,15 +3954,7 @@ namespace Nautilus
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var message = "This tool is designed to take any Rock Band song file (official or custom, encrypted or not) and convert it to matched " +
-                ".mp3 and .cdg files that are used by most karaoke emulators and professional karaoke players. In essence, as the title says " +
-                "it is a Rock Band to Karaoke Converter\r\n\r\nIt is limited in what it can do because the .cdg format is very limited itself, but " +
-                "the goal is compatibility with as many karaoke players as possible\r\n\r\nYou can drag and drop one or multiple files and it'll batch " +
-                " process them\r\n\r\nOutput files are in a 'Karaoke' folder in the same directory as the source file(s)\r\n\r\nThis tool wraps around the" +
-                " cdgmaker Python application by Josiah Winslow (https://github.com/WinslowJosiah/cdgmaker) made to work as an executable on Windows after " +
-                "many modifications by me\r\n\r\nI'm still learning all the ins and outs of the original Python application so if I missed " +
-                "something let me know so I can try to address it in a future update\r\n\r\nYou can also generate Youtube-style videos of your karaoke song(s) in mp4" +
-                " format\r\n\r\nOptions are plenty and mostly self explanatory\r\n\r\nEnjoy!";
+            var message = Tools.ReadHelpFile("cnv");
             var helper = new HelpForm(Text + " - Help", message, false, false);
             helper.ShowDialog();
         }
@@ -3472,8 +3973,7 @@ namespace Nautilus
 
         private void lblBackgroundQuestion_MouseClick(object sender, MouseEventArgs e)
         {
-            const string message = "If enabled and using the MP4 format, this will use the background.png image located in the \\bin\\images\\ folder\n\n" +
-                "The image can be any resolution you want (but I recommend 1080P or higher) and image must be in PNG format";
+            const string message = "This is the background color used when not using Background Image or Background Video";
             MessageBox.Show(message, "Background", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -3695,6 +4195,33 @@ namespace Nautilus
             return merged;
         }
 
+        public class PreparedSyllableMask : IDisposable
+        {
+            public double Start { get; set; }
+            public double End { get; set; }
+
+            public int X { get; set; }
+            public int Y { get; set; }
+            public int Width { get; set; }
+            public int Height { get; set; }
+
+            public Bitmap Bitmap { get; set; }
+
+            public bool HasPixels
+            {
+                get { return Bitmap != null && Width > 0 && Height > 0; }
+            }
+
+            public void Dispose()
+            {
+                if (Bitmap != null)
+                {
+                    Bitmap.Dispose();
+                    Bitmap = null;
+                }
+            }
+        }
+
         public class MergedSyllable
         {
             public string Lyric { get; set; }
@@ -3704,72 +4231,9 @@ namespace Nautilus
             // Used for drawing:
             public float Width { get; set; }
 
-            // Optional: where this syllable starts, in pixels, from the left of the line.
-            // Not strictly required for your current highlight logic, but useful for debugging.
+            // Optional: where this syllable starts, in pixels, from the left of the line
             public float OffsetX { get; set; }
-        }
-
-        public static List<MergedSyllable> MergeSyllables(List<KaraokeLyric> syllables)
-        {
-            var merged = new List<MergedSyllable>();
-            int i = 0;
-
-            while (i < syllables.Count)
-            {
-                var s = syllables[i];
-                string text = s.Lyric;
-                double start = s.Start;
-                double end = s.End;
-
-                if (string.IsNullOrWhiteSpace(text))
-                {
-                    i++;
-                    continue;
-                }
-
-                // Start with the current lyric (skip "+" only)
-                string combinedText = (text == "+" ? "" : text);
-                int j = i + 1;
-
-                // Merge trailing + sustains
-                while (j < syllables.Count && syllables[j].Lyric == "+")
-                {
-                    end = syllables[j].End;
-                    j++;
-                }
-
-                // If current ends in '-' continue to the next non-'+' syllable
-                while (combinedText.EndsWith("-") && j < syllables.Count)
-                {
-                    // Include next syllable if it's not just "+"
-                    if (syllables[j].Lyric != "+")
-                    {
-                        combinedText += syllables[j].Lyric;
-                        end = syllables[j].End;
-                    }
-
-                    j++;
-
-                    // Also absorb any sustains after the continued part
-                    while (j < syllables.Count && syllables[j].Lyric == "+")
-                    {
-                        end = syllables[j].End;
-                        j++;
-                    }
-                }
-
-                merged.Add(new MergedSyllable
-                {
-                    Lyric = combinedText,
-                    Start = start,
-                    End = end
-                });
-
-                i = j;
-            }
-
-            return merged;
-        }
+        }               
 
         public List<MergedSyllable> BuildSyllablePixelMap(
             List<MergedSyllable> syllables,
@@ -3816,7 +4280,7 @@ namespace Nautilus
 
                 prevPrefixWidth = prefixWidth;
                 searchIndex = endIdx;
-            }
+            }            
 
             // Optional but recommended: normalize widths so they sum exactly
             // to the measured total text width.
@@ -3832,27 +4296,7 @@ namespace Nautilus
 
             return syllables;
         }
-
-        public List<MergedSyllable> BuildSyllablePixelMap1(List<MergedSyllable> syllables, Font font, Graphics g)
-        {
-            foreach (var syllable in syllables)
-            {
-                string visibleText = syllable.Lyric.Replace("‿", " ");
-                if (string.IsNullOrWhiteSpace(visibleText) || visibleText == "+")
-                {
-                    syllable.Width = 0;
-                }
-                else
-                {
-                    //SizeF size = TextRenderer.MeasureText(g, visibleText, font);
-                    SizeF size = g.MeasureString(visibleText, font);
-                    syllable.Width = size.Width;
-                }
-            }
-
-            return syllables;
-        }
-
+                       
         public static float GetHighlightedPixelWidth(List<MergedSyllable> syllables, double currentTime)
         {
             float total = 0f;
@@ -3878,115 +4322,46 @@ namespace Nautilus
             return total;
         }
 
-        private void DrawHighlightAnimation(Graphics g, Font f, double lyricStart, int x, int y, Color color, double time)
+        private void DrawHighlightAnimation(
+            Graphics g,
+            Font f,
+            double lyricStart,
+            double leadDuration,
+            int x,
+            int y,
+            Color color,
+            double time)
         {
-            double leadTime = lyricStart - time;
-            if (leadTime < 0) return;
-            if (leadTime > highlightDelay) return;
-            
-            int multiplier = do4KResolution ? 2 : 1;
-            int cursorSpacer = 200 * multiplier; // Controls travel distance
-            const string cursor = "•";
-            float cursorX = x - cursorSpacer;                       
+            if (leadDuration <= 0) return;
 
-            double normalized = MathHelper.Clamp(leadTime / highlightDelay, 0.0, 1.0); // 1.0 → 0.0
-            cursorX = x - (float)(cursorSpacer * normalized);
+            double timeUntilLyric = lyricStart - time;
+            if (timeUntilLyric < 0) return;
+            if (timeUntilLyric > leadDuration) return;
+
+            int multiplier = do4KResolution ? 2 : 1;
+            float travelDistance = 200f * multiplier;
+            float paddingBeforeLyric = 0f;// 1f * multiplier; // keeps arrow from touching lyric text
+            const string cursor = "•";
+
+            // Measure the actual drawn size of the arrow
+            SizeF cursorSize = g.MeasureString(cursor, f, PointF.Empty, StringFormat.GenericTypographic);
+
+            // End position: arrow stops just before the lyric start
+            float endX = x - cursorSize.Width - paddingBeforeLyric;
+
+            // Start position: farther to the left
+            float startX = endX - travelDistance;
+
+            // 0.0 at animation start, 1.0 at lyric start
+            double progress = 1.0 - MathHelper.Clamp(timeUntilLyric / leadDuration, 0.0, 1.0);
+
+            float cursorX = startX + (float)((endX - startX) * progress);
+
             using (var brush = new SolidBrush(color))
             {
-                g.DrawString(cursor, f, brush, new PointF(cursorX, y));
+                g.DrawString(cursor, f, brush, new PointF(cursorX, y), StringFormat.GenericTypographic);
             }
-        }
-
-        public class WordSyllableMap
-        {
-            public string DisplayText;
-            public double Start;
-            public double End;
-            public int Width;
-        }
-
-        public List<WordSyllableMap> GroupSyllablesIntoWords(List<KaraokeLyric> syllables, Font font, Graphics g)
-        {
-            var result = new List<WordSyllableMap>();
-            var currentGroup = new List<KaraokeLyric>();
-
-            for (int i = 0; i < syllables.Count; i++)
-            {
-                var s = syllables[i];
-                currentGroup.Add(s);
-
-                bool isLast = i == syllables.Count - 1;
-                bool continuesWord =
-                    s.Lyric.EndsWith("-") || s.Lyric == "+" ||
-                    (!isLast && syllables[i + 1].Lyric == "+");
-
-                if (continuesWord && !isLast)
-                {
-                    continue; // keep grouping
-                }
-
-                // Finalize group
-                string displayText = string.Join("", currentGroup.Select(syl => syl.Lyric))
-                    .Replace("+", "").Replace("-", "").Replace("‿", " ");
-                displayText = ProcessLine(displayText);
-
-                double start = currentGroup.First().Start;
-                double end = currentGroup.Last().End;
-                int width = TextRenderer.MeasureText(g, displayText, font).Width;
-
-                result.Add(new WordSyllableMap
-                {
-                    DisplayText = displayText,
-                    Start = start,
-                    End = end,
-                    Width = width
-                });
-
-                currentGroup.Clear();
-            }
-
-            return result;
-        }
-
-        public string BuildRawLineText(List<MergedSyllable> syllables)
-        {
-            var words = new List<string>();
-            string currentWord = "";
-
-            for (int i = 0; i < syllables.Count; i++)
-            {
-                var text = syllables[i].Lyric;
-
-                if (string.IsNullOrWhiteSpace(text))
-                    continue;
-
-                if (text == "+")
-                {
-                    // Skip sustain from display
-                    continue;
-                }
-
-                string clean = text.Replace("‿", "");
-                bool endsWithHyphen = clean.EndsWith("-");
-                bool nextIsSustain = i + 1 < syllables.Count && syllables[i + 1].Lyric == "+";
-
-                currentWord += clean;
-
-                // If ends with hyphen or is followed by a sustain → continue word
-                if (endsWithHyphen || nextIsSustain)
-                    continue;
-
-                // Otherwise, word is complete
-                words.Add(currentWord);
-                currentWord = "";
-            }
-
-            // Add any leftover word
-            if (!string.IsNullOrEmpty(currentWord))
-                words.Add(currentWord);
-
-            return ProcessLine(string.Join(" ", words)).Replace(" -", "-");
-        }
+        }      
 
         private static void ApplyTextRenderingSettings(Graphics g)
         {
@@ -3994,6 +4369,24 @@ namespace Nautilus
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+        }
+
+        private bool HasDisplayableLyrics(string phraseText)
+        {
+            if (string.IsNullOrWhiteSpace(phraseText))
+                return false;
+
+            string text = phraseText.Trim();
+
+            string[] ignoredMarkers =
+            {
+                "[clap]",
+                "[cowbell]",
+                "[tambourine]",
+                "[percussion]"
+            };
+
+            return !ignoredMarkers.Any(m => text.Equals(m, StringComparison.OrdinalIgnoreCase));
         }
 
         public string ReconstructPhraseTextFromSyllables(List<MergedSyllable> phraseSyllables)
@@ -4077,87 +4470,10 @@ namespace Nautilus
 
         private string GetVisibleTextForSyllable(MergedSyllable s)
         {
-            // Make this mirror the logic in ReconstructPhraseTextFromSyllables
-            // as closely as possible.
             var raw = s.Lyric?.Trim() ?? string.Empty;
             var clean = CleanSyllable(raw);
             return clean.Replace("‿", " ");
         }
-
-        public void DrawSyllableAccurateLine(
-            Graphics g,
-            List<KaraokeLyric> syllablesForThisLine,
-            Font font,
-            int resolutionX,
-            int y,
-            string baseColor,
-            string highlightColor,
-            double adjustedTime)
-        {
-            if (syllablesForThisLine.Count == 0)
-                return;                       
-
-            var merged = MergeSustainedSyllables(syllablesForThisLine);
-
-            string displayText = ReconstructPhraseTextFromSyllables(merged);
-
-            ApplyTextRenderingSettings(g);
-
-            SizeF visualSizeF = g.MeasureString(displayText, font);            
-            
-            int textWidth = (int)Math.Ceiling((double)visualSizeF.Width);
-            int textHeight = (int)Math.Ceiling((double)visualSizeF.Height);
-
-            int posX = (resolutionX - textWidth) / 2;
-
-            var pixelmap = BuildSyllablePixelMap(merged, font, g, displayText, textWidth);
-
-            float highlightWidth = GetHighlightedPixelWidth(pixelmap, adjustedTime);
-
-            highlightWidth = Math.Max(0f, Math.Min(highlightWidth, textWidth));
-
-            Color baseCol = ColorTranslator.FromHtml(baseColor);
-            Color highlightCol = ColorTranslator.FromHtml(highlightColor);
-            Color strokeCol = ColorTranslator.FromHtml(strokeColor);
-
-            DrawTextWithStroke(
-                g,
-                displayText,
-                font,
-                new Point(posX, y),
-                baseCol,
-                strokeCol,
-                3
-            );
-
-            //using (Bitmap bmp = new Bitmap(visualSize.Width, visualSize.Height))
-            using (Bitmap bmp = new Bitmap(textWidth, textHeight))
-            using (Graphics gBmp = Graphics.FromImage(bmp))
-            {
-                gBmp.Clear(Color.Transparent);
-
-                // Draw stroked highlight into bitmap
-                DrawTextWithStroke(
-                    gBmp,
-                    displayText,
-                    font,
-                    new Point(0, 0),
-                    highlightCol,
-                    strokeCol,
-                    3
-                );
-
-                // Slice highlight region
-                Rectangle src = new Rectangle(0, 0, (int)highlightWidth, bmp.Height);
-                Rectangle dest = new Rectangle(posX, y, (int)highlightWidth, bmp.Height);
-
-                if (src.Width > 0)
-                {
-                    g.DrawImage(bmp, dest, src, GraphicsUnit.Pixel);
-                }
-            }            
-        }
-
 
         private void OneTwentyFiveDelay_Click(object sender, EventArgs e)
         {
@@ -4202,7 +4518,7 @@ namespace Nautilus
 
         private void lblStrokeQuestion_MouseClick(object sender, MouseEventArgs e)
         {
-            const string message = "Color of the outline for the words. Black is best.\b\bOnly applies to CDG+MP3 format (for now)";
+            const string message = "Color of the outline for the words. Black is best.";
             MessageBox.Show(message, "Stroke", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }               
 
@@ -4217,7 +4533,8 @@ namespace Nautilus
             animatedBackgroundToolStripMenuItem.Checked = false;
             staticImageBackgroundToolStripMenuItem.Checked = false;
 
-            enableMP4TitleCardShadows.Enabled = true;
+            videoPreview.Visible = false;
+            picPreview.Visible = true;
 
             UpdateTextParents();
         }
@@ -4234,12 +4551,16 @@ namespace Nautilus
                 return;
             }
 
+            videoPreview.Visible = false;
+            picPreview.Visible = true;
+            cboBackground.SelectedIndex = 0;//black
+
+            droppedImage = false;
+            picPreview.Image = Image.FromFile(background);
             solidColorToolStripMenuItem.Checked = false;
             animatedBackgroundToolStripMenuItem.Checked = false;
             staticImageBackgroundToolStripMenuItem.Checked = true;
 
-            enableMP4TitleCardShadows.Enabled = true;
-            
             var bg = Image.FromFile(background);
             picBackground1.Image = bg;
             lblTextHighlight1.Parent = picBackground1;
@@ -4278,19 +4599,17 @@ namespace Nautilus
                 return;                
             }
 
-            solidColorToolStripMenuItem.Checked = false;
-            animatedBackgroundToolStripMenuItem.Checked = true;
-            staticImageBackgroundToolStripMenuItem.Checked = false;
-            enableMP4TitleCardShadows.Enabled = false;
-            enableMP4TitleCardShadows.Checked = false;
-            enableMP4StrokeToolStripMenuItem.Checked = true;
-            
+            DroppedPreviewVideo(background);            
             UpdateTextParents();
         }
 
         private void UpdateTextParents()
         {         
             picBackground1.Image = null;
+            if (animatedBackgroundToolStripMenuItem.Checked)
+            {
+                picBackground1.BackColor = Color.Black;
+            }
             lblTextHighlight1.Parent = picBackground1;
             lblTextHighlight1.BackColor = Color.Transparent;
             lblTextHighlight1.Location = new Point(0, 43);
@@ -4299,6 +4618,10 @@ namespace Nautilus
             lblTextColor1.Location = new Point(0, 12);
 
             picBackground2.Image = null;
+            if (animatedBackgroundToolStripMenuItem.Checked)
+            {
+                picBackground2.BackColor = Color.Black;
+            }
             lblTextHighlight2.Parent = picBackground2;
             lblTextHighlight2.BackColor = Color.Transparent;
             lblTextHighlight2.Location = new Point(0, 43);
@@ -4307,27 +4630,26 @@ namespace Nautilus
             lblTextColor2.Location = new Point(0, 12);
 
             picBackground3.Image = null;
+            if (animatedBackgroundToolStripMenuItem.Checked)
+            {
+                picBackground3.BackColor = Color.Black;
+            }
             lblTextHighlight3.Parent = picBackground3;
             lblTextHighlight3.BackColor = Color.Transparent;
             lblTextHighlight3.Location = new Point(0, 43);
             lblTextColor3.Parent = picBackground3;
             lblTextColor3.BackColor = Color.Transparent;
             lblTextColor3.Location = new Point(0, 12);
+
+            picPreview.Image = null;
+            picPreview.BackColor = picBackground1.BackColor;
         }
 
         private void noDelayToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CheckUncheckDelay(sender);
         }
-    }
-
-    public class SyllablePixelMap
-    {
-        public string Text { get; set; }
-        public double Start { get; set; }
-        public double End { get; set; }
-        public float Width { get; set; }
-    }
+    }    
 
     public class KaraokeLyric
     {
