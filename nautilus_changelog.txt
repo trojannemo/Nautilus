@@ -6,11 +6,32 @@ Developed by TrojanNemo
 
 FEATURES / CHANGE LOG:
 
+v5.6.4
+
+ROCK BAND TO KARAOKE CONVERTER
+- Fixed new bug introduced in v5.6.3 where enabling Tempo on title card would have wrong formatting
+
+FILE INDEXER
+- Fixed bug where PS3 Mode would delete an entire pack folder when deleting a single song - thanks to Carl Mylo for reporting
+- Added feature where it now deletes the song entry from the songs.dta file when delete one or multiple songs in PS3 mode
+- Other minor fixes and improvements around PS3 mode
+
+MOGG MAKER
+- Fixed HUGE bug that I guess tells me nobody is using this tool - mogg files created with 8 or less channels would be created incorrectly due to encoding in logical order instead of the physical order that ogg expects - should be fixed now
+
+STEMS ISOLATOR
+- Fixed Downmix to Stereo feature that had been broken by change in MoggSplitter
+
+DTA PARSER
+- Fixed bug that would assign the songs/name/name/ path as the song's title with certain DTA files
+
+---
+
 v5.6.3
 
 ROCK BAND TO KARAOKE CONVERTER
 - Fixed bug that would break compatibility with certain older RB1 era files (was assuming there would be album art in every file)
-- Added toggle option for Tempo being show on in the intro/title card
+- Added toggle option for Tempo being shown on in the intro/title card
 
 VISUALIZER
 - NOW accepts ALL understood file formats as arguments for command line launching (i.e. connecting to cPlayer and unannounced Clone Hero project)
@@ -3144,4 +3165,3 @@ ALBUM ART CONVERTER (NEW!)
 - converts from png_xbox -> bmp and bmp -> png_xbox
 ----one or multiple files at a time
 ----option to delete original files
-
