@@ -287,6 +287,12 @@
     <Compile Include="SngLib\SngFile.cs" />
     <Compile Include="SngLib\SngSerializer.cs" />
     <Compile Include="SngLib\SongLib.cs" />
+    <Compile Include="UltraStarConverter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UltraStarConverter.Designer.cs">
+      <DependentUpon>UltraStarConverter.cs</DependentUpon>
+    </Compile>
     <Compile Include="Wine.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -679,6 +685,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ThemeSelector.resx">
       <DependentUpon>ThemeSelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UltraStarConverter.resx">
+      <DependentUpon>UltraStarConverter.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Updater.resx">
       <DependentUpon>Updater.cs</DependentUpon>

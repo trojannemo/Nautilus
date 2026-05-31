@@ -97,6 +97,10 @@ namespace Nautilus
             {
                 Application.Run(new CDGConverter());
             }
+            else if (argument.Contains("-ultrastar"))
+            {
+                Application.Run(new UltraStarConverter());
+            }
             else if (argument.Contains("-extractor"))
             {
                 Application.Run(new BatchExtractor(Color.FromArgb(197, 34, 35), Color.Black));

@@ -328,7 +328,7 @@ namespace Nautilus
         public void ReadMidi(string midiFile)
         {
             MIDITools.Initialize(true);
-            MIDITools.ReadMIDIFile(midiFile);
+            MIDITools.ReadMIDIFile(midiFile, 0, true);
             try
             {
                 if (MIDITools.LyricsVocals.Lyrics.Any() || MIDITools.PhrasesVocals.Phrases.Any())
@@ -3618,6 +3618,11 @@ namespace Nautilus
             Application.DoEvents();
             CheckLoadFonts();
 
+            if (!string.IsNullOrEmpty(inputFile))
+            {
+                HandleDragDrop(inputFile);
+            }
+
             var themes_folder = Application.StartupPath + "\\res\\vis_themes\\";
             switch (DateTime.Now.Month)
             {
@@ -3715,12 +3720,7 @@ namespace Nautilus
                         MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     ThemeName = "";
                 }
-            }
-
-            if (!string.IsNullOrEmpty(inputFile))
-            {
-                HandleDragDrop(inputFile);
-            }
+            }            
         }
 
         private void GetLogo(string image_path)
@@ -6145,8 +6145,8 @@ namespace Nautilus
             }
         }
 
-        private readonly System.Drawing.Color lyricColor = System.Drawing.Color.Yellow;
-        private readonly System.Drawing.Color LabelBackgroundColor = System.Drawing.Color.FromArgb(127, 40, 40, 40);
+        private readonly Color lyricColor = Color.Yellow;
+        private readonly Color LabelBackgroundColor = Color.FromArgb(127, 40, 40, 40);
         private void DrawLyricsKaraoke(IEnumerable<LyricPhrase> phrases, IEnumerable<Lyric> lyrics, Control label, Color color, Graphics graphics)
         {
             var time = GetCorrectedTime();
@@ -6165,12 +6165,12 @@ namespace Nautilus
             var measure = TextRenderer.MeasureText(ProcessLine(line.PhraseText, doWholeWordsLyrics), label.Font);
             var left = (label.Width - measure.Width) / 2;
             TextRenderer.DrawText(graphics, ProcessLine(line.PhraseText, doWholeWordsLyrics), label.Font, new Point(left, 0), Color.White);
-            var line2 = lyrics.Where(lyr => !(lyr.LyricStart < line.PhraseStart)).TakeWhile(lyr => !(lyr.LyricStart > time)).Aggregate("", (current, lyr) => current + " " + lyr.LyricText);
+            var line2 = lyrics.Where(lyr => !(lyr.Start < line.PhraseStart)).TakeWhile(lyr => !(lyr.Start > time)).Aggregate("", (current, lyr) => current + " " + lyr.Text);
             if (string.IsNullOrEmpty(line2)) return;
             TextRenderer.DrawText(graphics, ProcessLine(line2, doWholeWordsLyrics), label.Font, new Point(left, 0), color);
         }
 
-        private void DrawLyricsStatic(IEnumerable<LyricPhrase> phrases, Control label, System.Drawing.Color color, Graphics graphics)
+        private void DrawLyricsStatic(IEnumerable<LyricPhrase> phrases, Control label, Color color, Graphics graphics)
         {
             var time = GetCorrectedTime();
             var doWholeWordsLyrics = useWholeWords.Checked;
@@ -6209,10 +6209,10 @@ namespace Nautilus
             }
             for (var i = 0; i < lyrics.Count(); i++)
             {
-                if (lyrics[i].LyricStart < time) continue;
-                if (lyrics[i].LyricStart > time + playbackWindow) return;
-                var left = (int)(((lyrics[i].LyricStart - time) / playbackWindow) * label.Width);
-                TextRenderer.DrawText(graphics, ProcessLine(lyrics[i].LyricText, true), label.Font, new Point(left, 0), color);
+                if (lyrics[i].Start < time) continue;
+                if (lyrics[i].Start > time + playbackWindow) return;
+                var left = (int)(((lyrics[i].Start - time) / playbackWindow) * label.Width);
+                TextRenderer.DrawText(graphics, ProcessLine(lyrics[i].Text, true), label.Font, new Point(left, 0), color);
             }
         }
 
@@ -6262,7 +6262,7 @@ namespace Nautilus
                 newline = newline.Replace("+ ", "");
                 newline = newline.Replace("+-", "");
                 newline = newline.Replace("=", "-");
-                newline = newline.Replace("§", "‿");
+                newline = newline.Replace("§", " ");// Replace("§", "‿");
                 newline = newline.Replace("- ", "-").Trim();
                 if (newline.EndsWith("+", StringComparison.Ordinal))
                 {
@@ -6277,7 +6277,7 @@ namespace Nautilus
             {
                 newline = line;
             }
-            return newline.Replace("/", "").Trim();
+            return newline.Replace("/", "").Replace("§", " ").Trim();
         }
 
         private void lyricsKaraoke_Click(object sender, EventArgs e)

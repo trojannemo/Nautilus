@@ -114,7 +114,7 @@ namespace Nautilus
                 btnVisualizer, btnMIDICleaner, btnSongAnalyzer, btnAudioAnalyzer, btnVolumeNormalizer, btnSaveFileImageEditor, btnScores,
                 btnSetlistManager, btnBatchExtractor, btnBatchRenamer, btnBatchProcessor, btnEventManager, btnFileIndexer, btnCharEditor,
                 btnAdvancedArtConverter, btnCONConverter, btnWiiConverter, btnPS3Converter, btnPhaseShiftConverter, btnRBAEditor, btnMiloMod,
-                btnUpgradeBundler, btnStemsIsolator, btnBatchCryptor, btnMoggMaker, btnStudio, btnAudioConverter, btnCDG
+                btnUpgradeBundler, btnStemsIsolator, btnBatchCryptor, btnMoggMaker, btnStudio, btnAudioConverter, btnCDG, btnUltraStarConverter
             };
             FormButtons = new List<MyButton>();
             foreach (var mybutton in buttons.Select(button => new MyButton
@@ -926,7 +926,7 @@ namespace Nautilus
             var greens = new List<Button> { btnRBtoUSB, btnPackCreator, btnQuickPackEditor, btnQuickDTAEditor, btnCONCreator, btnCONExplorer };
             var reds = new List<Button> { btnVisualizer, btnSongAnalyzer, btnAudioAnalyzer, btnMIDICleaner, btnMoggMaker, btnAudioConverter, btnVolumeNormalizer };
             var yellows = new List<Button> { btnSetlistManager, btnBatchExtractor, btnBatchRenamer, btnBatchProcessor, btnEventManager, btnFileIndexer, btnSaveFileImageEditor };
-            var blues = new List<Button> { btnAdvancedArtConverter, btnCONConverter, btnWiiConverter, btnPS3Converter, btnPhaseShiftConverter, btnRBAEditor, btnCDG };
+            var blues = new List<Button> { btnAdvancedArtConverter, btnCONConverter, btnWiiConverter, btnPS3Converter, btnPhaseShiftConverter, btnRBAEditor, btnCDG, btnUltraStarConverter };
             var oranges = new List<Button> { btnUpgradeBundler, btnStemsIsolator, btnBatchCryptor, btnStudio, btnCharEditor, btnMiloMod, btnScores };
 
             if (greens.Contains(CurrentButton))
@@ -2170,6 +2170,15 @@ namespace Nautilus
             activeForm = cdg;
             activeForms.Add(activeForm);
             cdg.Show();
+        }
+
+        private void btnUltraStarConverter_Click(object sender, EventArgs e)
+        {
+            if (MovedButton) return;
+            var ultraStar = new UltraStarConverter();
+            activeForm = ultraStar;
+            activeForms.Add(activeForm);
+            ultraStar.Show();
         }
     }
 

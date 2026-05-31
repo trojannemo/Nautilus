@@ -148,6 +148,7 @@
             this.columnA1 = new System.Windows.Forms.PictureBox();
             this.btnAudioConverter = new System.Windows.Forms.Button();
             this.btnCDG = new System.Windows.Forms.Button();
+            this.btnUltraStarConverter = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.contextMenuStrip2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picSettings)).BeginInit();
@@ -1148,7 +1149,7 @@
             this.btnCONConverter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCONConverter.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCONConverter.ForeColor = System.Drawing.Color.Black;
-            this.btnCONConverter.Location = new System.Drawing.Point(438, 327);
+            this.btnCONConverter.Location = new System.Drawing.Point(439, 489);
             this.btnCONConverter.Name = "btnCONConverter";
             this.btnCONConverter.Size = new System.Drawing.Size(122, 43);
             this.btnCONConverter.TabIndex = 21;
@@ -1255,7 +1256,7 @@
             this.btnRBAEditor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnRBAEditor.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnRBAEditor.ForeColor = System.Drawing.Color.Black;
-            this.btnRBAEditor.Location = new System.Drawing.Point(438, 390);
+            this.btnRBAEditor.Location = new System.Drawing.Point(439, 390);
             this.btnRBAEditor.Name = "btnRBAEditor";
             this.btnRBAEditor.Size = new System.Drawing.Size(122, 43);
             this.btnRBAEditor.TabIndex = 25;
@@ -1591,13 +1592,29 @@
             this.btnCDG.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCDG.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCDG.ForeColor = System.Drawing.Color.Black;
-            this.btnCDG.Location = new System.Drawing.Point(438, 264);
+            this.btnCDG.Location = new System.Drawing.Point(439, 264);
             this.btnCDG.Name = "btnCDG";
             this.btnCDG.Size = new System.Drawing.Size(122, 43);
             this.btnCDG.TabIndex = 57;
             this.btnCDG.Text = "RB to Karaoke Converter";
             this.btnCDG.UseVisualStyleBackColor = false;
             this.btnCDG.Click += new System.EventHandler(this.btnCDG_Click);
+            // 
+            // btnUltraStarConverter
+            // 
+            this.btnUltraStarConverter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.btnUltraStarConverter.ContextMenuStrip = this.contextMenuStrip1;
+            this.btnUltraStarConverter.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnUltraStarConverter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnUltraStarConverter.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnUltraStarConverter.ForeColor = System.Drawing.Color.Black;
+            this.btnUltraStarConverter.Location = new System.Drawing.Point(439, 327);
+            this.btnUltraStarConverter.Name = "btnUltraStarConverter";
+            this.btnUltraStarConverter.Size = new System.Drawing.Size(122, 43);
+            this.btnUltraStarConverter.TabIndex = 58;
+            this.btnUltraStarConverter.Text = "UltraStar Converter";
+            this.btnUltraStarConverter.UseVisualStyleBackColor = false;
+            this.btnUltraStarConverter.Click += new System.EventHandler(this.btnUltraStarConverter_Click);
             // 
             // MainForm
             // 
@@ -1606,8 +1623,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.LightBlue;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(714, 444);
+            this.ClientSize = new System.Drawing.Size(714, 443);
             this.ContextMenuStrip = this.contextMenuStrip2;
+            this.Controls.Add(this.btnUltraStarConverter);
             this.Controls.Add(this.btnCDG);
             this.Controls.Add(this.btnAudioConverter);
             this.Controls.Add(this.picSettings);
@@ -1831,6 +1849,7 @@
         private System.Windows.Forms.PictureBox picSettings;
         private System.Windows.Forms.Button btnAudioConverter;
         private System.Windows.Forms.Button btnCDG;
+        private System.Windows.Forms.Button btnUltraStarConverter;
     }
 }
 

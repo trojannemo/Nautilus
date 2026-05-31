@@ -1,20 +1,20 @@
-﻿using System;
+﻿using NAudio.Midi;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using NAudio.Midi;
 
 namespace Nautilus
 {
     class MIDIStuff
     {
-        private int TicksPerQuarter;
-        private List<TempoEvent> TempoEvents;
-        private List<TimeSignature> TimeSignatures;
-        private MidiFile MIDIFile;
+        public int TicksPerQuarter;
+        public List<TempoEvent> TempoEvents;
+        public List<TimeSignature> TimeSignatures;
+        private MidiEventCollection MIDIFile;
         public MIDIChart MIDIInfo;
         public MIDIChart MIDI_Chart;
         public long LengthLong;
@@ -22,6 +22,10 @@ namespace Nautilus
         private LyricCollection InternalHarmonies1;
         private LyricCollection InternalHarmonies2;
         private LyricCollection InternalHarmonies3;
+        private List<MIDINote> InternalVocalNotes;
+        private List<MIDINote> InternalHarm1Notes;
+        private List<MIDINote> InternalHarm2Notes;
+        private List<MIDINote> InternalHarm3Notes;
         public LyricCollection LyricsVocals;
         public LyricCollection LyricsHarm1;
         public LyricCollection LyricsHarm2;
@@ -36,6 +40,11 @@ namespace Nautilus
         public PhraseCollection PhrasesHarm3;
         private List<PracticeSection> InternalPracticeSessions;
         public List<PracticeSection> PracticeSessions;
+        private const int SOLO_MARKER = 103;
+        private const int FILL_MARKER = 120;
+        private const int OD_MARKER = 116;
+        private const int HOPOon = 101;
+        private const int HOPOoff = 102;
 
         public void Initialize(bool doall)
         {
@@ -45,6 +54,10 @@ namespace Nautilus
             InternalPhrasesHarm1 = new PhraseCollection();
             InternalPhrasesHarm2 = new PhraseCollection();
             InternalPhrasesHarm3 = new PhraseCollection();
+            InternalVocalNotes = new List<MIDINote>();
+            InternalHarm1Notes = new List<MIDINote>();
+            InternalHarm2Notes = new List<MIDINote>();
+            InternalHarm3Notes = new List<MIDINote>();
             InternalPhrasesVocals.Initialize();
             InternalPhrasesHarm1.Initialize();
             InternalPhrasesHarm2.Initialize();
@@ -64,22 +77,36 @@ namespace Nautilus
             }
         }
 
-        public bool ReadMIDIFile(string midi, bool output_info = true)
+        private List<SpecialMarker> GetSpecialMarker(IEnumerable<MidiEvent> track, int marker_note)
+        {
+            var markers = (from notes in track where notes.CommandCode == MidiCommandCode.NoteOn select (NoteOnEvent)notes into note where note.Velocity > 0 && note.NoteNumber == marker_note let time = GetRealtime(note.AbsoluteTime) let end = GetRealtime(note.AbsoluteTime + note.NoteLength) select new SpecialMarker { MarkerBegin = time, MarkerEnd = end }).ToList();
+            return markers;
+        }
+
+        public bool ReadMIDIFile(string midi, int HOPOThreshhold, bool output_info = true)
         {
             if (!File.Exists(midi)) return false;
             var Tools = new NemoTools();
             LengthLong = 0;
             MIDIFile = null;
-            MIDIFile = Tools.NemoLoadMIDI(midi);
+            if (Path.GetExtension(midi).Equals(".chart"))
+            {
+                MIDIFile = ChartToRockBandMidi.ConvertChartToMidi(midi);
+            }
+            else
+            {
+                MIDIFile = Tools.NemoLoadMIDI(midi).Events;
+            }
             if (MIDIFile == null) return false;
             try
             {
                 TicksPerQuarter = MIDIFile.DeltaTicksPerQuarterNote;
                 BuildTempoList();
                 BuildTimeSignatureList();
-                for (var i = 0; i < MIDIFile.Events.Tracks; i++)
+                var didFNFProVocals = false;
+                for (var i = 0; i < MIDIFile.Tracks; i++)
                 {
-                    var trackname = MIDIFile.Events[i][0].ToString();
+                    var trackname = MIDIFile[i][0].ToString();
                     if (trackname.Contains("DRUMS") && !trackname.Contains("FNF") && !trackname.Contains("BAND"))
                     {
                         if (trackname.Contains("PLASTIC")) //for Fortnite Festival
@@ -87,14 +114,16 @@ namespace Nautilus
                             MIDIInfo.Drums = new MIDITrack { Name = "Drums", ValidNotes = new List<int> { 100, 99, 98, 97, 96 } };
                             MIDIInfo.Drums.Initialize();
                         }
-                        GetDiscoFlips(MIDIFile.Events[i]);
-                        GetToms(MIDIFile.Events[i]);
+                        GetDiscoFlips(MIDIFile[i]);
+                        MIDIInfo.Drums.Toms = GetToms(MIDIFile[i]);
+                        MIDIInfo.Drums.Overdrive = GetSpecialMarker(MIDIFile[i], OD_MARKER);
                         List<MIDINote> toadd;
-                        CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.Drums.ValidNotes, out toadd, true);
+                        CheckMIDITrack(MIDIFile[i], MIDIInfo.Drums, MIDIInfo.Drums.ValidNotes, out toadd, true);
                         if (!output_info) continue;
                         MIDIInfo.Drums.ChartedNotes.AddRange(toadd);
                         MIDIInfo.Drums.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.Drums.ChartedNotes);
-                        MIDIInfo.Drums.Solos = GetInstrumentSolos(MIDIFile.Events[i], 103);
+                        MIDIInfo.Drums.Solos = GetInstrumentSolos(MIDIFile[i], SOLO_MARKER);
+                        MIDIInfo.Drums.Fills = GetSpecialMarker(MIDIFile[i], FILL_MARKER);
                         foreach (var note in MIDIInfo.Drums.ChartedNotes)
                         {
                             switch (note.NoteNumber)
@@ -133,12 +162,15 @@ namespace Nautilus
                             MIDIInfo.Bass = new MIDITrack { Name = "Bass", ValidNotes = new List<int> { 100, 99, 98, 97, 96 } };
                             MIDIInfo.Bass.Initialize();
                         }
+                        MIDIInfo.Bass.Overdrive = GetSpecialMarker(MIDIFile[i], OD_MARKER);
+                        MIDIInfo.Bass.HOPOoff = GetSpecialMarker(MIDIFile[i], HOPOoff);
+                        MIDIInfo.Bass.HOPOon = GetSpecialMarker(MIDIFile[i], HOPOon);
                         List<MIDINote> toadd;
-                        CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.Bass.ValidNotes, out toadd);
-                        if (!output_info) continue;
+                        CheckMIDITrack(MIDIFile[i], MIDIInfo.Bass, MIDIInfo.Bass.ValidNotes, out toadd);
+                        //if (!output_info) continue;
                         MIDIInfo.Bass.ChartedNotes.AddRange(toadd);
                         MIDIInfo.Bass.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.Bass.ChartedNotes);
-                        MIDIInfo.Bass.Solos = GetInstrumentSolos(MIDIFile.Events[i], 103);
+                        MIDIInfo.Bass.Solos = GetInstrumentSolos(MIDIFile[i], SOLO_MARKER);
                         foreach (var note in MIDIInfo.Bass.ChartedNotes)
                         {
                             switch (note.NoteNumber)
@@ -159,6 +191,98 @@ namespace Nautilus
                                     note.NoteName = "O";
                                     break;
                             }
+                            foreach (var hopo in MIDIInfo.Bass.HOPOoff)
+                            {
+                                if (hopo.MarkerBegin <= note.NoteStart && hopo.MarkerEnd > note.NoteStart)
+                                {
+                                    note.isHOPOoff = true;
+                                    break;
+                                }
+                            }
+                            foreach (var hopo in MIDIInfo.Bass.HOPOon)
+                            {
+                                if (hopo.MarkerBegin <= note.NoteStart && hopo.MarkerEnd > note.NoteStart)
+                                {
+                                    note.isHOPOon = true;
+                                    note.IsForcedHOPOon = true;
+                                    break;
+                                }
+                            }
+                        }
+                        // Step 1: Sort by tick time
+                        MIDIInfo.Bass.ChartedNotes = MIDIInfo.Bass.ChartedNotes.OrderBy(n => n.Ticks).ToList();
+
+                        // Step 2: Mark chords (same tick time)
+                        for (int z = 0; z < MIDIInfo.Bass.ChartedNotes.Count;)
+                        {
+                            long tick = MIDIInfo.Bass.ChartedNotes[z].Ticks;
+                            int count = 1;
+
+                            // Look ahead to count how many notes share the same tick
+                            while (z + count < MIDIInfo.Bass.ChartedNotes.Count && MIDIInfo.Bass.ChartedNotes[z + count].Ticks == tick)
+                                count++;
+
+                            // Mark as chord if more than one note at the same tick
+                            if (count > 1)
+                            {
+                                for (int j = 0; j < count; j++)
+                                {
+                                    MIDIInfo.Bass.ChartedNotes[z + j].IsChord = true;
+                                    MIDIInfo.Bass.ChartedNotes[z + j].isHOPOon = false; // Enforce: chords cannot be HOPO
+                                }
+                            }
+                            z += count;
+                        }
+
+                        // Step 3: Apply HOPO logic (skip chords and forced off)
+                        MIDINote lastPlayableNote = null;
+
+                        for (int n = 0; n < MIDIInfo.Bass.ChartedNotes.Count; n++)
+                        {
+                            var curr = MIDIInfo.Bass.ChartedNotes[n];
+
+                            // Skip if this note is part of a chord or explicitly forced off
+                            if (curr.IsChord || curr.isHOPOoff)
+                            {
+                                lastPlayableNote = curr;
+                                continue;
+                            }
+
+                            // If there's no valid previous note, can't be HOPO
+                            if (lastPlayableNote == null)
+                            {
+                                lastPlayableNote = curr;
+                                continue;
+                            }
+
+                            // Rule 1: If same note number as previous and not forced on, HOPO off
+                            if (curr.NoteNumber == lastPlayableNote.NoteNumber && !curr.IsForcedHOPOon)
+                            {
+                                curr.isHOPOon = false;
+                                lastPlayableNote = curr;
+                                continue;
+                            }
+
+                            // Rule 2: If this note is the start of a repeated note group → force HOPO off
+                            if (n + 1 < MIDIInfo.Bass.ChartedNotes.Count)
+                            {
+                                var next = MIDIInfo.Bass.ChartedNotes[n + 1];
+                                if (!next.IsChord && next.NoteNumber == curr.NoteNumber)
+                                {
+                                    curr.isHOPOon = false;
+                                    lastPlayableNote = curr;
+                                    continue;
+                                }
+                            }
+
+                            // Rule 3: Timing check
+                            long deltaTicks = curr.Ticks - lastPlayableNote.Ticks;
+                            if (deltaTicks <= HOPOThreshhold)
+                            {
+                                curr.isHOPOon = true;
+                            }
+
+                            lastPlayableNote = curr;
                         }
                     }
                     else if ((trackname.Contains("GUITAR") && !trackname.Contains("FNF") && !trackname.Contains("REAL") && !trackname.Contains("COOP")) || trackname.Contains("T1 GEMS"))
@@ -168,12 +292,15 @@ namespace Nautilus
                             MIDIInfo.Guitar = new MIDITrack { Name = "Guitar", ValidNotes = new List<int> { 100, 99, 98, 97, 96 } };
                             MIDIInfo.Guitar.Initialize();
                         }
+                        MIDIInfo.Guitar.Overdrive = GetSpecialMarker(MIDIFile[i], OD_MARKER);
+                        MIDIInfo.Bass.HOPOoff = GetSpecialMarker(MIDIFile[i], HOPOoff);
+                        MIDIInfo.Bass.HOPOon = GetSpecialMarker(MIDIFile[i], HOPOon);
                         List<MIDINote> toadd;
-                        CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.Guitar.ValidNotes, out toadd);
-                        if (!output_info) continue;
+                        CheckMIDITrack(MIDIFile[i], MIDIInfo.Guitar, MIDIInfo.Guitar.ValidNotes, out toadd);
+                        //if (!output_info) continue;
                         MIDIInfo.Guitar.ChartedNotes.AddRange(toadd);
                         MIDIInfo.Guitar.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.Guitar.ChartedNotes);
-                        MIDIInfo.Guitar.Solos = GetInstrumentSolos(MIDIFile.Events[i], 103);
+                        MIDIInfo.Guitar.Solos = GetInstrumentSolos(MIDIFile[i], SOLO_MARKER);
                         foreach (var note in MIDIInfo.Guitar.ChartedNotes)
                         {
                             switch (note.NoteNumber)
@@ -194,6 +321,99 @@ namespace Nautilus
                                     note.NoteName = "O";
                                     break;
                             }
+                            foreach (var hopo in MIDIInfo.Guitar.HOPOoff)
+                            {
+                                if (hopo.MarkerBegin <= note.NoteStart && hopo.MarkerEnd > note.NoteStart)
+                                {
+                                    note.isHOPOoff = true;
+                                    break;
+                                }
+                            }
+                            foreach (var hopo in MIDIInfo.Guitar.HOPOon)
+                            {
+                                if (hopo.MarkerBegin <= note.NoteStart && hopo.MarkerEnd > note.NoteStart)
+                                {
+                                    note.isHOPOon = true;
+                                    note.IsForcedHOPOon = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Step 1: Sort by tick time
+                        MIDIInfo.Guitar.ChartedNotes = MIDIInfo.Guitar.ChartedNotes.OrderBy(n => n.Ticks).ToList();
+
+                        // Step 2: Mark chords (same tick time)
+                        for (int z = 0; z < MIDIInfo.Guitar.ChartedNotes.Count;)
+                        {
+                            long tick = MIDIInfo.Guitar.ChartedNotes[z].Ticks;
+                            int count = 1;
+
+                            // Look ahead to count how many notes share the same tick
+                            while (z + count < MIDIInfo.Guitar.ChartedNotes.Count && MIDIInfo.Guitar.ChartedNotes[z + count].Ticks == tick)
+                                count++;
+
+                            // Mark as chord if more than one note at the same tick
+                            if (count > 1)
+                            {
+                                for (int j = 0; j < count; j++)
+                                {
+                                    MIDIInfo.Guitar.ChartedNotes[z + j].IsChord = true;
+                                    MIDIInfo.Guitar.ChartedNotes[z + j].isHOPOon = false; // Enforce: chords cannot be HOPO
+                                }
+                            }
+                            z += count;
+                        }
+
+                        // Step 3: Apply HOPO logic (skip chords and forced off)
+                        MIDINote lastPlayableNote = null;
+
+                        for (int n = 0; n < MIDIInfo.Guitar.ChartedNotes.Count; n++)
+                        {
+                            var curr = MIDIInfo.Guitar.ChartedNotes[n];
+
+                            // Skip if this note is part of a chord or explicitly forced off
+                            if (curr.IsChord || curr.isHOPOoff)
+                            {
+                                lastPlayableNote = curr;
+                                continue;
+                            }
+
+                            // If there's no valid previous note, can't be HOPO
+                            if (lastPlayableNote == null)
+                            {
+                                lastPlayableNote = curr;
+                                continue;
+                            }
+
+                            // Rule 1: If same note number as previous and not forced on, HOPO off
+                            if (curr.NoteNumber == lastPlayableNote.NoteNumber && !curr.IsForcedHOPOon)
+                            {
+                                curr.isHOPOon = false;
+                                lastPlayableNote = curr;
+                                continue;
+                            }
+
+                            // Rule 2: If this note is the start of a repeated note group → force HOPO off
+                            if (n + 1 < MIDIInfo.Guitar.ChartedNotes.Count)
+                            {
+                                var next = MIDIInfo.Guitar.ChartedNotes[n + 1];
+                                if (!next.IsChord && next.NoteNumber == curr.NoteNumber)
+                                {
+                                    curr.isHOPOon = false;
+                                    lastPlayableNote = curr;
+                                    continue;
+                                }
+                            }
+
+                            // Rule 3: Timing check
+                            long deltaTicks = curr.Ticks - lastPlayableNote.Ticks;
+                            if (deltaTicks <= HOPOThreshhold)
+                            {
+                                curr.isHOPOon = true;
+                            }
+
+                            lastPlayableNote = curr;
                         }
                     }
                     else if (trackname.Contains("KEYS") && !trackname.Contains("FNF") && !trackname.Contains("REAL") && !trackname.Contains("ANIM"))
@@ -203,12 +423,13 @@ namespace Nautilus
                             MIDIInfo.Keys = new MIDITrack { Name = "Keys", ValidNotes = new List<int> { 100, 99, 98, 97, 96 } }; //not supported currently but future proofing
                             MIDIInfo.Keys.Initialize();
                         }
+                        MIDIInfo.Keys.Overdrive = GetSpecialMarker(MIDIFile[i], OD_MARKER);
                         List<MIDINote> toadd;
-                        CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.Keys.ValidNotes, out toadd);
+                        CheckMIDITrack(MIDIFile[i], MIDIInfo.Keys, MIDIInfo.Keys.ValidNotes, out toadd);
                         if (!output_info) continue;
                         MIDIInfo.Keys.ChartedNotes.AddRange(toadd);
                         MIDIInfo.Keys.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.Keys.ChartedNotes);
-                        MIDIInfo.Keys.Solos = GetInstrumentSolos(MIDIFile.Events[i], 103);
+                        MIDIInfo.Keys.Solos = GetInstrumentSolos(MIDIFile[i], SOLO_MARKER);
                         foreach (var note in MIDIInfo.Keys.ChartedNotes)
                         {
                             switch (note.NoteNumber)
@@ -234,47 +455,71 @@ namespace Nautilus
                     else if (trackname.Contains("REAL_KEYS_X"))
                     {
                         List<MIDINote> toadd;
-                        CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.ProKeys.ValidNotes, out toadd);
+                        MIDIInfo.ProKeys.Overdrive = GetSpecialMarker(MIDIFile[i], OD_MARKER);
+                        CheckMIDITrack(MIDIFile[i], MIDIInfo.ProKeys, MIDIInfo.ProKeys.ValidNotes, out toadd);
                         if (!output_info) continue;
                         MIDIInfo.ProKeys.ChartedNotes.AddRange(toadd);
                         MIDIInfo.ProKeys.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.ProKeys.ChartedNotes);
-                        MIDIInfo.ProKeys.Solos = GetInstrumentSolos(MIDIFile.Events[i], 115);
+                        MIDIInfo.ProKeys.Solos = GetInstrumentSolos(MIDIFile[i], 115);
                     }
-                    else if (trackname.Contains("VOCALS") || trackname.Contains("vocals_1_expert")) //PowerGig
+                    else if (trackname.Contains("VOCALS") && !trackname.Contains("FNF") && !didFNFProVocals)
                     {
-                        List<MIDINote> toadd;
-                        CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.Vocals.ValidNotes, out toadd);
+                        if (trackname.Contains("PRO VOCALS"))
+                        {
+                            didFNFProVocals = true;
+                        }
+                        List<MIDINote> toAdd;
+                        CheckMIDITrack(MIDIFile[i], MIDIInfo.Vocals, MIDIInfo.Vocals.ValidNotes, out toAdd);
                         if (!output_info) continue;
-                        MIDIInfo.Vocals.ChartedNotes.AddRange(toadd);
+                        MIDIInfo.Vocals.ChartedNotes.AddRange(toAdd);
                         MIDIInfo.Vocals.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.Vocals.ChartedNotes);
-                        GetPhraseMarkers(MIDIFile.Events[i], InternalPhrasesVocals, trackname.Contains("vocals_1_expert"));
-                        GetInternalLyrics(MIDIFile.Events[i], 0, InternalPhrasesVocals);
-                        MIDIInfo.UsesCowbell = SongUsesCowbell(MIDIFile.Events[i]);
+                        GetPhraseMarkers(MIDIFile[i], InternalPhrasesVocals);
+                        GetInternalLyrics(MIDIFile[i], 0, InternalPhrasesVocals);
+                        MIDIInfo.UsesPercussion = SongUsesPercussion(MIDIFile[i]);
+
+                        //only do this if we have exact match of lyrics and vocal notes
+                        var ChartedNotesNoPercussion = new List<MIDINote>();
+                        for (var c = 0; c < MIDIInfo.Vocals.ChartedNotes.Count; c++)
+                        {
+                            if ((MIDIInfo.Vocals.ChartedNotes[c].NoteNumber < 96)) //avoid percussion
+                            {
+                                ChartedNotesNoPercussion.Add(MIDIInfo.Vocals.ChartedNotes[c]);
+                            }
+                        }
+                        if (ChartedNotesNoPercussion.Count == InternalVocals.Lyrics.Count)
+                        {
+                            ChartedNotesNoPercussion.Sort((a, b) => a.NoteStart.CompareTo(b.NoteStart));
+
+                            for (int z = 0; z < ChartedNotesNoPercussion.Count; z++)
+                            {
+                                InternalVocals.Lyrics[z].Duration = ChartedNotesNoPercussion[z].NoteLength;
+                            }
+                        }
                     }
                     else if (trackname.Contains("HARM1"))
                     {
                         List<MIDINote> toadd;
-                        CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.Harm1.ValidNotes, out toadd);
+                        CheckMIDITrack(MIDIFile[i], MIDIInfo.Harm1, MIDIInfo.Harm1.ValidNotes, out toadd);
                         if (!output_info) continue;
                         MIDIInfo.Harm1.ChartedNotes.AddRange(toadd);
                         MIDIInfo.Harm1.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.Harm1.ChartedNotes);
-                        GetPhraseMarkers(MIDIFile.Events[i], InternalPhrasesHarm1);
-                        GetInternalLyrics(MIDIFile.Events[i], 1, InternalPhrasesHarm1);
+                        GetPhraseMarkers(MIDIFile[i], InternalPhrasesHarm1);
+                        GetInternalLyrics(MIDIFile[i], 1, InternalPhrasesHarm1);
                     }
                     else if (trackname.Contains("HARM2"))
                     {
                         List<MIDINote> toadd;
-                        CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.Harm2.ValidNotes, out toadd);
+                        CheckMIDITrack(MIDIFile[i], MIDIInfo.Harm2, MIDIInfo.Harm2.ValidNotes, out toadd);
                         if (!output_info) continue;
                         MIDIInfo.Harm2.ChartedNotes.AddRange(toadd);
                         MIDIInfo.Harm1.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.Harm2.ChartedNotes, MIDIInfo.Harm1.NoteRange);
-                        GetPhraseMarkers(MIDIFile.Events[i], InternalPhrasesHarm2);
-                        GetInternalLyrics(MIDIFile.Events[i], 2, InternalPhrasesHarm2);
+                        GetPhraseMarkers(MIDIFile[i], InternalPhrasesHarm2);
+                        GetInternalLyrics(MIDIFile[i], 2, InternalPhrasesHarm2);
                     }
                     else if (trackname.Contains("HARM3"))
                     {
                         List<MIDINote> toadd;
-                        CheckMIDITrack(MIDIFile.Events[i], MIDIInfo.Harm3.ValidNotes, out toadd);
+                        CheckMIDITrack(MIDIFile[i], MIDIInfo.Harm3, MIDIInfo.Harm3.ValidNotes, out toadd);
                         if (!output_info) continue;
                         MIDIInfo.Harm3.ChartedNotes.AddRange(toadd);
                         MIDIInfo.Harm1.NoteRange = MIDIInfo.GetNoteVariety(MIDIInfo.Harm3.ChartedNotes, MIDIInfo.Harm1.NoteRange);
@@ -289,11 +534,11 @@ namespace Nautilus
                         {
                             InternalPhrasesHarm3.Phrases.Add(phrase);
                         }
-                        GetInternalLyrics(MIDIFile.Events[i], 3, InternalPhrasesHarm3);
+                        GetInternalLyrics(MIDIFile[i], 3, InternalPhrasesHarm3);
                     }
                     else if (trackname.Contains("EVENTS") && output_info)
                     {
-                        foreach (var note in MIDIFile.Events[i])
+                        foreach (var note in MIDIFile[i])
                         {
                             switch (note.CommandCode)
                             {
@@ -325,8 +570,10 @@ namespace Nautilus
                     }
                 }
             }
-            catch (Exception)
+            catch// (Exception ex)
             {
+                //Clipboard.SetText(ex.Message + "\n\n" + ex.StackTrace + "\n\n" + ex.StackTrace);
+                //MessageBox.Show("Error when loading with MidiProcessor:\n" + ex.Message);
                 return false;
             }
             MIDIInfo.AverageBPM = AverageBPM();
@@ -373,9 +620,10 @@ namespace Nautilus
             }
         }
 
-        private void GetToms(IList<MidiEvent> track)
+        private List<MIDINote> GetToms(IList<MidiEvent> track)
         {
             var ValidToms = new List<int> { 110, 111, 112 };
+            var toms = new List<MIDINote>();
             for (var z = 0; z < track.Count(); z++)
             {
                 try
@@ -399,11 +647,12 @@ namespace Nautilus
                         NoteNumber = note.NoteNumber,
                         isTom = true
                     };
-                    MIDIInfo.Toms.Add(n);
+                    toms.Add(n);
                 }
                 catch (Exception)
                 { }
             }
+            return toms;
         }
 
         private List<SpecialMarker> GetInstrumentSolos(IEnumerable<MidiEvent> track, int solo_note)
@@ -411,9 +660,10 @@ namespace Nautilus
             return (from notes in track where notes.CommandCode == MidiCommandCode.NoteOn select (NoteOnEvent)notes into note where note.Velocity > 0 && note.NoteNumber == solo_note let time = GetRealtime(note.AbsoluteTime) let end = GetRealtime(note.AbsoluteTime + note.NoteLength) select new SpecialMarker { MarkerBegin = time, MarkerEnd = end }).ToList();
         }
 
-        private static bool SongUsesCowbell(IEnumerable<MidiEvent> track)
+        private static bool SongUsesPercussion(IEnumerable<MidiEvent> track)
         {
-            return track.Any(midiEvent => midiEvent.CommandCode == MidiCommandCode.MetaEvent && midiEvent.ToString().Contains("[cowbell"));
+            return track.Any(midiEvent => midiEvent.CommandCode == MidiCommandCode.MetaEvent && (midiEvent.ToString().Contains("[cowbell_")
+            || midiEvent.ToString().Contains("[clap_") || midiEvent.ToString().Contains("[tambourine_")));
         }
 
         private void InternalsToPublics()
@@ -460,9 +710,8 @@ namespace Nautilus
             InternalPracticeSessions.Add(practice);
         }
 
-        private void GetPhraseMarkers(IEnumerable<MidiEvent> track, PhraseCollection collection, bool isPowerGig = false)
+        private void GetPhraseMarkers(IEnumerable<MidiEvent> track, PhraseCollection collection)
         {
-            double lastStartTime = 0.0;
             foreach (var notes in track)
             {
                 switch (notes.CommandCode)
@@ -493,36 +742,13 @@ namespace Nautilus
                                 break;
                         }
                         break;
-                    case MidiCommandCode.MetaEvent:
-                        if (!isPowerGig) continue;
-                        var vocal_event = (MetaEvent)notes;
-                        if ((vocal_event.MetaEventType == MetaEventType.Lyric ||
-                             vocal_event.MetaEventType == MetaEventType.TextEvent) &&
-                            !vocal_event.ToString().Contains("["))
-                        {
-                            var lyric = GetCleanMIDILyric(vocal_event.ToString());
-                            if (string.IsNullOrEmpty(lyric)) continue;
-                            if (lyric.Equals("\\r")) //as best as I can guess, this is their phrase marker
-                            {
-                                var endTime = GetRealtime(vocal_event.AbsoluteTime);
-                                var phrase = new LyricPhrase
-                                {
-                                    PhraseStart = lastStartTime,
-                                    PhraseEnd = endTime,//we have no end time so just use the same start and end
-                                };
-                                collection.Phrases.Add(phrase); //new line
-                                lastStartTime = endTime;
-                                break;
-                            }                            
-                        }
-                        break;
                 }
             }
         }
 
         private void GetInternalLyrics(IEnumerable<MidiEvent> track, int type, PhraseCollection collection)
         {
-            if (!collection.Phrases.Any()) return;            
+            if (!collection.Phrases.Any()) return;
             foreach (var notes in track)
             {
                 switch (notes.CommandCode)
@@ -534,7 +760,7 @@ namespace Nautilus
                             !vocal_event.ToString().Contains("["))
                         {
                             var lyric = GetCleanMIDILyric(vocal_event.ToString());
-                            if (string.IsNullOrEmpty(lyric.Replace("\\r",""))) continue;
+                            if (string.IsNullOrEmpty(lyric)) continue;
                             var time = GetRealtime(vocal_event.AbsoluteTime);
                             var index = 0;
                             for (var i = 0; i < collection.Phrases.Count; i++)
@@ -543,7 +769,7 @@ namespace Nautilus
                                 index = i;
                             }
                             collection.Phrases[index].PhraseText = collection.Phrases[index].PhraseText + " " + lyric;
-                            var l = new Lyric { LyricText = lyric, LyricStart = time };
+                            var l = new Lyric { Text = lyric, Start = time, Ticks = vocal_event.AbsoluteTime, DisplayText = ProcessLine(lyric, true) };
                             switch (type)
                             {
                                 case 0:
@@ -561,7 +787,98 @@ namespace Nautilus
                             }
                         }
                         break;
+                    case MidiCommandCode.NoteOn:
+                        var note = (NoteOnEvent)notes;
+                        if (note.Velocity <= 0) continue;
+
+                        if (note.NoteNumber <= 84 && note.NoteNumber >= 36)
+                        {
+                            var n = new MIDINote()
+                            {
+                                NoteNumber = note.NoteNumber,
+                                NoteStart = GetRealtime(note.AbsoluteTime),
+                                Ticks = note.AbsoluteTime,
+                                NoteEnd = GetRealtime(note.AbsoluteTime + note.NoteLength)
+                            };
+                            switch (type)
+                            {
+                                case 1:
+                                    InternalHarm1Notes.Add(n);
+                                    break;
+                                case 2:
+                                    InternalHarm2Notes.Add(n);
+                                    break;
+                                case 3:
+                                    InternalHarm3Notes.Add(n);
+                                    break;
+                                default:
+                                    InternalVocalNotes.Add(n);
+                                    break;
+                            }
+                        }
+                        break;
                 }
+            }
+
+            switch (type)
+            {
+                case 0:
+                default:
+                    foreach (var lyric in InternalVocals.Lyrics)
+                    {
+                        foreach (var note in InternalVocalNotes)
+                        {
+                            if (note.Ticks <= lyric.Ticks && note.Ticks >= lyric.Ticks)
+                            {
+                                lyric.End = note.NoteEnd;
+                                lyric.Duration = lyric.End - lyric.Start;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case 1:
+                    foreach (var lyric in InternalHarmonies1.Lyrics)
+                    {
+                        foreach (var note in InternalHarm1Notes)
+                        {
+                            if (note.Ticks <= lyric.Ticks && note.Ticks >= lyric.Ticks)
+                            {
+                                lyric.End = note.NoteEnd;
+                                lyric.Duration = lyric.End - lyric.Start;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case 2:
+                    foreach (var lyric in InternalHarmonies2.Lyrics)
+                    {
+                        foreach (var note in InternalHarm2Notes)
+                        {
+                            if (note.Ticks <= lyric.Ticks && note.Ticks >= lyric.Ticks)
+                            {
+                                lyric.End = note.NoteEnd;
+                                lyric.Duration = lyric.End - lyric.Start;
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case 3:
+                    foreach (var lyric in InternalHarmonies3.Lyrics)
+                    {
+                        foreach (var note in InternalHarm3Notes)
+                        {
+                            if (note.Ticks <= lyric.Ticks && note.Ticks >= lyric.Ticks)
+                            {
+                                lyric.End = note.NoteEnd;
+                                lyric.Duration = lyric.End - lyric.Start;
+                                break;
+                            }
+                        }
+                    }
+                    break;
             }
         }
 
@@ -585,15 +902,50 @@ namespace Nautilus
                 }
                 if (index == -1) return "";
                 var lyric = raw_event.Substring(index + 1, raw_event.Length - index - 1);
-                return lyric.Replace("\\n", "").Replace("*", ""); //clean up weird PowerGig lyric symbols
+                return lyric;
             }
             catch (Exception)
             {
                 return "";
             }
         }
+        public string ProcessLine(string line, bool clean)
+        {
+            if (line == null) return "";
+            string newline;
+            if (clean)
+            {
+                newline = line.Replace("$", "");
+                newline = newline.Replace("%", "");
+                newline = newline.Replace("#", "");
+                newline = newline.Replace("^", "");
+                newline = newline.Replace("- + ", "");
+                newline = newline.Replace("+- ", "");
+                newline = newline.Replace("- ", "");
+                newline = newline.Replace(" + ", " ");
+                newline = newline.Replace(" +", "");
+                newline = newline.Replace("+ ", "");
+                newline = newline.Replace("+-", "");
+                newline = newline.Replace("=", "-");
+                newline = newline.Replace("§", "‿");
+                newline = newline.Replace("- ", "-").Trim();
+                if (newline.EndsWith("+", StringComparison.Ordinal))
+                {
+                    newline = newline.Substring(0, newline.Length - 1).Trim();
+                }
+                if (newline.EndsWith("-", StringComparison.Ordinal))
+                {
+                    newline = newline.Substring(0, newline.Length - 1);
+                }
+            }
+            else
+            {
+                newline = line;
+            }
+            return newline.Replace("/", "").Trim();
+        }
 
-        private void CheckMIDITrack(IList<MidiEvent> track, ICollection<int> valid_notes, out List<MIDINote> output, bool isDrums = false)
+        private void CheckMIDITrack(IList<MidiEvent> track, MIDITrack instrument, ICollection<int> valid_notes, out List<MIDINote> output, bool isDrums = false)
         {
             output = new List<MIDINote>();
             for (var z = 0; z < track.Count(); z++)
@@ -609,9 +961,13 @@ namespace Nautilus
                     var note = (NoteOnEvent)notes;
                     if (note.Velocity <= 0) continue;
                     if (!valid_notes.Contains(note.NoteNumber)) continue;
-                    var time = GetRealtime(note.AbsoluteTime);
+                    /*var time = GetRealtime(note.AbsoluteTime);
                     var length = GetRealtime(note.NoteLength);
-                    var end = Math.Round(time + length, 5);
+                    var end = Math.Round(time + length, 5);*/
+                    var time = GetRealtime(note.AbsoluteTime);
+                    var end = GetRealtime(note.AbsoluteTime + note.NoteLength);
+                    var length = Math.Round(end - time, 5);
+                    end = Math.Round(end, 5);
                     if (isDrums && MIDIInfo.DiscoFlips.Any() && (note.NoteNumber == 97 || note.NoteNumber == 98))
                     {
                         if (MIDIInfo.DiscoFlips.Where(flip => flip.MarkerBegin <= time).Any(flip => flip.MarkerEnd > time || flip.MarkerEnd == -1.0))
@@ -619,7 +975,8 @@ namespace Nautilus
                             note.NoteNumber = note.NoteNumber == 97 ? 98 : 97;
                         }
                     }
-                    var isTom = MIDIInfo.Toms.Where(tom => tom.NoteStart <= time).Where(tom => tom.NoteEnd >= time).Any(tom => tom.NoteNumber - note.NoteNumber == 12);
+                    var isTom = instrument.Toms.Where(tom => tom.NoteStart <= time).Where(tom => tom.NoteEnd >= time).Any(tom => tom.NoteNumber - note.NoteNumber == 12);
+                    var hasOD = instrument.Overdrive.Where(OD => OD.MarkerBegin <= time).Any(OD => OD.MarkerEnd >= end);
                     var n = new MIDINote
                     {
                         NoteStart = time,
@@ -627,7 +984,9 @@ namespace Nautilus
                         NoteEnd = end,
                         NoteNumber = note.NoteNumber,
                         NoteName = note.NoteName,
-                        isTom = isTom
+                        isTom = isTom,
+                        hasOD = hasOD,
+                        Ticks = notes.AbsoluteTime,
                     };
                     output.Add(n);
                 }
@@ -636,7 +995,7 @@ namespace Nautilus
             }
         }
 
-        private double GetRealtime(long absdelta)
+        public double GetRealtime(long absdelta)
         {
             //code by raynebc
             var BPM = 120.0;   //As per the MIDI specification, until a tempo change is reached, 120BPM is assumed
@@ -652,61 +1011,67 @@ namespace Nautilus
             return Math.Round(time / 1000, 5);
         }
 
-
         private void BuildTimeSignatureList()
         {
             TimeSignatures = new List<TimeSignature>();
-            foreach (var ev in MIDIFile.Events[0])
+            foreach (var ev in MIDIFile[0])
             {
                 if (ev.CommandCode != MidiCommandCode.MetaEvent) continue;
-                var signature = (MetaEvent)ev;
-                if (signature.MetaEventType != MetaEventType.TimeSignature) continue;
-                //Track the time signature change
-                var index1 = signature.ToString().IndexOf(" ", signature.ToString().IndexOf("TimeSignature", StringComparison.Ordinal), StringComparison.Ordinal) + 1;
-                var index2 = signature.ToString().IndexOf("/", StringComparison.Ordinal);
-                var numerator = Convert.ToInt16(signature.ToString().Substring(index1, index2 - index1));
-                //Track the time signature change
-                index1 = signature.ToString().IndexOf("/", StringComparison.Ordinal) + 1;
-                index2 = signature.ToString().IndexOf(" ", signature.ToString().IndexOf("/", StringComparison.Ordinal), StringComparison.Ordinal);
-                var denominator = Convert.ToInt16(signature.ToString().Substring(index1, index2 - index1));
-                var time_sig = new TimeSignature
+                var meta = ev as MetaEvent;
+                if (meta?.MetaEventType != MetaEventType.TimeSignature) continue;
+
+                var ts = meta as TimeSignatureEvent;
+                if (ts == null) continue;
+
+                // The actual denominator is 2 raised to the power of denominator exponent
+                int numerator = ts.Numerator;
+                int denominator = (int)Math.Pow(2, ts.Denominator);
+
+                var timeSig = new TimeSignature
                 {
                     AbsoluteTime = ev.AbsoluteTime,
                     Numerator = numerator,
                     Denominator = denominator
                 };
-                TimeSignatures.Add(time_sig);
+
+                TimeSignatures.Add(timeSig);
             }
         }
 
         private void BuildTempoList()
         {
-            //code provided by raynebc
-            //Build tempo list
-            var currentbpm = 120.00;
-            var realtime = 0.0;
-            var reldelta = 0;   //The number of delta ticks since the last tempo change
             TempoEvents = new List<TempoEvent>();
-            foreach (var ev in MIDIFile.Events[0])
+
+            double currentBpm = 120.0;
+            double realTimeMs = 0.0;
+            int relDeltaTicks = 0;
+
+            foreach (var ev in MIDIFile[0])
             {
-                reldelta += ev.DeltaTime;
+                relDeltaTicks += ev.DeltaTime;
+
                 if (ev.CommandCode != MidiCommandCode.MetaEvent) continue;
-                var tempo = (MetaEvent)ev;
-                if (tempo.MetaEventType != MetaEventType.SetTempo) continue;
-                var relativetime = (double)reldelta / TicksPerQuarter * (60000.0 / currentbpm);
-                var index1 = tempo.ToString().IndexOf("SetTempo", StringComparison.Ordinal) + 9;
-                var index2 = tempo.ToString().IndexOf("bpm", StringComparison.Ordinal);
-                var bpm = tempo.ToString().Substring(index1, index2 - index1);
-                currentbpm = Convert.ToDouble(bpm);   //As per the MIDI specification, until a tempo change is reached, 120BPM is assumed
-                realtime += relativetime;   //Add that to the ongoing current real time of the MIDI
-                reldelta = 0;
-                var tempo_event = new TempoEvent
+
+                var meta = ev as MetaEvent;
+                if (meta?.MetaEventType != MetaEventType.SetTempo) continue;
+
+                var tempoEvent = meta as NAudio.Midi.TempoEvent;
+                if (tempoEvent == null) continue;
+
+                // Convert ticks to ms using current tempo
+                double deltaMs = relDeltaTicks / (double)TicksPerQuarter * (60000.0 / currentBpm);
+                realTimeMs += deltaMs;
+
+                // Convert microseconds/quarter note to BPM
+                currentBpm = 60000000.0 / tempoEvent.MicrosecondsPerQuarterNote;
+                relDeltaTicks = 0;
+
+                TempoEvents.Add(new TempoEvent
                 {
-                    AbsoluteTime = tempo.AbsoluteTime,
-                    RealTime = realtime,
-                    BPM = currentbpm
-                };
-                TempoEvents.Add(tempo_event);
+                    AbsoluteTime = ev.AbsoluteTime,
+                    RealTime = realTimeMs,
+                    BPM = currentBpm
+                });
             }
         }
 
@@ -752,17 +1117,33 @@ namespace Nautilus
         public List<int> ValidNotes { get; set; }
         public List<int> NoteRange { get; set; }
         public int ActiveIndex { get; set; }
+        public List<MIDINote> Toms { get; set; }
         public List<SpecialMarker> Solos { get; set; }
+        public List<SpecialMarker> Overdrive { get; set; }
+        public List<SpecialMarker> Fills { get; set; }
+        public List<SpecialMarker> HOPOon { get; set; }
+        public List<SpecialMarker> HOPOoff { get; set; }
+
         public void Sort()
         {
             ChartedNotes.Sort((a, b) => a.NoteStart.CompareTo(b.NoteStart));
             Solos.Sort((a, b) => a.MarkerBegin.CompareTo(b.MarkerBegin));
+            Overdrive.Sort((a, b) => a.MarkerBegin.CompareTo(b.MarkerBegin));
+            Fills.Sort((a, b) => a.MarkerBegin.CompareTo(b.MarkerBegin));
+            HOPOoff.Sort((a, b) => a.MarkerBegin.CompareTo(b.MarkerBegin));
+            HOPOon.Sort((a, b) => a.MarkerBegin.CompareTo(b.MarkerBegin));
         }
+
         public void Initialize()
         {
             ChartedNotes = new List<MIDINote>();
             NoteRange = new List<int>();
             Solos = new List<SpecialMarker>();
+            Toms = new List<MIDINote>();
+            Fills = new List<SpecialMarker>();
+            Overdrive = new List<SpecialMarker>();
+            HOPOoff = new List<SpecialMarker>();
+            HOPOon = new List<SpecialMarker>();
         }
     }
 
@@ -778,8 +1159,8 @@ namespace Nautilus
         public MIDITrack Harm2 { get; set; }
         public MIDITrack Harm3 { get; set; }
         public double AverageBPM { get; set; }
-        public bool UsesCowbell { get; set; }
-        public List<MIDINote> Toms { get; set; }
+        public bool UsesPercussion { get; set; }
+
         public List<SpecialMarker> DiscoFlips;
 
         public void Initialize()
@@ -808,9 +1189,8 @@ namespace Nautilus
             Harm2.Initialize();
             Harm3.Initialize();
             DiscoFlips = new List<SpecialMarker>();
-            Toms = new List<MIDINote>();
             AverageBPM = 0.0;
-            UsesCowbell = false;
+            UsesPercussion = false;
         }
 
         public int GetTrackCount()
@@ -886,7 +1266,7 @@ namespace Nautilus
         public List<Lyric> Lyrics { get; set; }
         public void Sort()
         {
-            Lyrics.Sort((a, b) => a.LyricStart.CompareTo(b.LyricStart));
+            Lyrics.Sort((a, b) => a.Start.CompareTo(b.Start));
         }
         public void Initialize()
         {
@@ -896,8 +1276,12 @@ namespace Nautilus
 
     public class Lyric
     {
-        public string LyricText { get; set; }
-        public double LyricStart { get; set; }
+        public string Text { get; set; }
+        public double Start { get; set; }
+        public double Duration { get; set; }
+        public double End { get; set; }
+        public long Ticks { get; set; }
+        public string DisplayText { get; set; }
     }
 
     public class MIDINote
@@ -909,8 +1293,16 @@ namespace Nautilus
         public string NoteName { get; set; }
         public Color NoteColor { get; set; }
         public bool isTom { get; set; }
+        public bool hasOD { get; set; }
+        public bool isHOPOon { get; set; }
+        public bool IsForcedHOPOon { get; set; }
+        public bool isHOPOoff { get; set; }
 
         public long Ticks { get; set; }
+
+        public bool IsChord { get; set; }
+
+        public bool SkTriggered { get; set; }
     }
 
     public class TempoEvent

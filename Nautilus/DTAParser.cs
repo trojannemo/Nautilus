@@ -694,7 +694,7 @@ namespace Nautilus
                             }
                             else if (line.Contains("(tracks"))
                             {
-                                while (line != null && line.Trim() != ")" && !line.Trim().Contains(")))"))
+                                while (line != null && line.Trim() != ")")// && !line.Trim().Contains(")))"))
                                 {
                                     if (line.ToLowerInvariant().Contains("bass") && !didBass)
                                     {
@@ -872,7 +872,7 @@ namespace Nautilus
 
                                 didVols = true;
                             }
-                            else if (line.Contains("(vols") && !didVols)
+                            /*else if (line.Contains("(vols") && !didVols)
                             {
                                 if (!line.Contains(")"))
                                 {
@@ -887,6 +887,54 @@ namespace Nautilus
                                 song.OriginalAttenuationValues = line;
 
                                 didVols = true;
+                            }*/
+                            else if (line.Contains("(vols") && !didVols)
+                            {
+                                var vols = new List<string>();
+                                int parenDepth = 0;
+                                bool started = false;
+
+                                while (z < entry.Count)
+                                {
+                                    line = entry[z];
+
+                                    foreach (char c in line)
+                                    {
+                                        if (c == '(')
+                                        {
+                                            parenDepth++;
+                                            started = true;
+                                        }
+                                        else if (c == ')')
+                                        {
+                                            parenDepth--;
+                                        }
+                                    }
+
+                                    string cleaned = line
+                                        .Replace("(vols", "")
+                                        .Replace("vols", "")
+                                        .Replace("(", "")
+                                        .Replace(")", "")
+                                        .Replace("'", "")
+                                        .Replace("\t", " ")
+                                        .Trim();
+
+                                    if (!string.IsNullOrWhiteSpace(cleaned))
+                                    {
+                                        vols.Add(cleaned);
+                                    }
+
+                                    if (started && parenDepth <= 0)
+                                        break;
+
+                                    z++;
+                                }
+
+                                var attenuation = RemoveDTAComments(string.Join(" ", vols));
+                                song.AttenuationValues = attenuation;
+                                song.OriginalAttenuationValues = attenuation;
+                                didVols = true;
                             }
                             else if (line.Contains("'pans'") && !didPans)
                             {
@@ -895,7 +943,7 @@ namespace Nautilus
                                 song.PanningValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("pans", "").Replace("\t", " ").Trim();
                                 didPans = true;
                             }
-                            else if (line.Contains("(pans") && !didPans)
+                            /*else if (line.Contains("(pans") && !didPans)
                             {
                                 if (!line.Contains(")"))
                                 {
@@ -903,6 +951,52 @@ namespace Nautilus
                                     line = entry[z];
                                 }
                                 song.PanningValues = line.Replace("(", "").Replace(")", "").Replace("'", "").Replace("pans", "").Replace("\t", " ").Trim();
+                                didPans = true;
+                            }*/
+                            else if (line.Contains("(pans") && !didPans)
+                            {
+                                var pans = new List<string>();
+                                int parenDepth = 0;
+                                bool started = false;
+
+                                while (z < entry.Count)
+                                {
+                                    line = entry[z];
+
+                                    foreach (char c in line)
+                                    {
+                                        if (c == '(')
+                                        {
+                                            parenDepth++;
+                                            started = true;
+                                        }
+                                        else if (c == ')')
+                                        {
+                                            parenDepth--;
+                                        }
+                                    }
+
+                                    string cleaned = line
+                                        .Replace("(pans", "")
+                                        .Replace("pans", "")
+                                        .Replace("(", "")
+                                        .Replace(")", "")
+                                        .Replace("'", "")
+                                        .Replace("\t", " ")
+                                        .Trim();
+
+                                    if (!string.IsNullOrWhiteSpace(cleaned))
+                                    {
+                                        pans.Add(cleaned);
+                                    }
+
+                                    if (started && parenDepth <= 0)
+                                        break;
+
+                                    z++;
+                                }
+
+                                song.PanningValues = string.Join(" ", pans);
                                 didPans = true;
                             }
                             else if (line.Contains("(cores") && !didCores)

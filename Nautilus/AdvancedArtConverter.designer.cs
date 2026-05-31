@@ -49,6 +49,9 @@
             this.btnFromPS3 = new System.Windows.Forms.Button();
             this.chkCleanUpPS3 = new System.Windows.Forms.CheckBox();
             this.picPin = new System.Windows.Forms.PictureBox();
+            this.btnToPS4 = new System.Windows.Forms.Button();
+            this.btnFromPS4 = new System.Windows.Forms.Button();
+            this.chkCleanUpPS4 = new System.Windows.Forms.CheckBox();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabXbox = new System.Windows.Forms.TabPage();
             this.panel3 = new System.Windows.Forms.Panel();
@@ -68,6 +71,12 @@
             this.chkPS3PNG = new System.Windows.Forms.CheckBox();
             this.chkPS3JPG = new System.Windows.Forms.CheckBox();
             this.chkPS3BMP = new System.Windows.Forms.CheckBox();
+            this.tabPS4 = new System.Windows.Forms.TabPage();
+            this.panel7 = new System.Windows.Forms.Panel();
+            this.panel8 = new System.Windows.Forms.Panel();
+            this.chkPS4PNG = new System.Windows.Forms.CheckBox();
+            this.chkPS4JPG = new System.Windows.Forms.CheckBox();
+            this.chkPS4BMP = new System.Windows.Forms.CheckBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.advancedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.textureSizeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -82,15 +91,7 @@
             this.helpToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.picWorking = new System.Windows.Forms.PictureBox();
-            this.tabPS4 = new System.Windows.Forms.TabPage();
-            this.panel7 = new System.Windows.Forms.Panel();
-            this.btnToPS4 = new System.Windows.Forms.Button();
-            this.panel8 = new System.Windows.Forms.Panel();
-            this.btnFromPS4 = new System.Windows.Forms.Button();
-            this.chkPS4PNG = new System.Windows.Forms.CheckBox();
-            this.chkPS4JPG = new System.Windows.Forms.CheckBox();
-            this.chkPS4BMP = new System.Windows.Forms.CheckBox();
-            this.chkCleanUpPS4 = new System.Windows.Forms.CheckBox();
+            this.chkRemoveKeep = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip2.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPin)).BeginInit();
@@ -104,11 +105,11 @@
             this.tabPS3.SuspendLayout();
             this.panel5.SuspendLayout();
             this.panel6.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
             this.tabPS4.SuspendLayout();
             this.panel7.SuspendLayout();
             this.panel8.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).BeginInit();
             this.SuspendLayout();
             // 
             // txtFolder
@@ -180,9 +181,9 @@
             this.lstLog.ContextMenuStrip = this.contextMenuStrip1;
             this.lstLog.FormattingEnabled = true;
             this.lstLog.HorizontalScrollbar = true;
-            this.lstLog.Location = new System.Drawing.Point(4, 285);
+            this.lstLog.Location = new System.Drawing.Point(8, 317);
             this.lstLog.Name = "lstLog";
-            this.lstLog.Size = new System.Drawing.Size(261, 132);
+            this.lstLog.Size = new System.Drawing.Size(261, 145);
             this.lstLog.TabIndex = 1;
             this.toolTip1.SetToolTip(this.lstLog, "Application log");
             this.lstLog.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
@@ -195,13 +196,13 @@
             this.exportLogFileToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.ShowImageMargin = false;
-            this.contextMenuStrip1.Size = new System.Drawing.Size(123, 26);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(122, 26);
             // 
             // exportLogFileToolStripMenuItem
             // 
             this.exportLogFileToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.exportLogFileToolStripMenuItem.Name = "exportLogFileToolStripMenuItem";
-            this.exportLogFileToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.exportLogFileToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
             this.exportLogFileToolStripMenuItem.Text = "Export log file";
             this.exportLogFileToolStripMenuItem.Click += new System.EventHandler(this.exportLogFileToolStripMenuItem_Click);
             // 
@@ -329,11 +330,11 @@
             this.chkCleanUpXbox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.chkCleanUpXbox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.chkCleanUpXbox.ForeColor = System.Drawing.Color.Black;
-            this.chkCleanUpXbox.Location = new System.Drawing.Point(6, 134);
+            this.chkCleanUpXbox.Location = new System.Drawing.Point(6, 165);
             this.chkCleanUpXbox.Name = "chkCleanUpXbox";
-            this.chkCleanUpXbox.Size = new System.Drawing.Size(224, 23);
+            this.chkCleanUpXbox.Size = new System.Drawing.Size(217, 23);
             this.chkCleanUpXbox.TabIndex = 19;
-            this.chkCleanUpXbox.Text = "Delete originals after converting?";
+            this.chkCleanUpXbox.Text = "Delete originals after converting";
             this.toolTip1.SetToolTip(this.chkCleanUpXbox, "Select this option to delete the original png_xbox file(s)");
             this.chkCleanUpXbox.UseVisualStyleBackColor = true;
             this.chkCleanUpXbox.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
@@ -413,6 +414,58 @@
             this.toolTip1.SetToolTip(this.picPin, "Click to pin on top");
             this.picPin.MouseClick += new System.Windows.Forms.MouseEventHandler(this.picPin_MouseClick);
             // 
+            // btnToPS4
+            // 
+            this.btnToPS4.AllowDrop = true;
+            this.btnToPS4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(129)))), ((int)(((byte)(216)))));
+            this.btnToPS4.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnToPS4.Enabled = false;
+            this.btnToPS4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnToPS4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnToPS4.ForeColor = System.Drawing.Color.White;
+            this.btnToPS4.Location = new System.Drawing.Point(6, 5);
+            this.btnToPS4.Name = "btnToPS4";
+            this.btnToPS4.Size = new System.Drawing.Size(224, 30);
+            this.btnToPS4.TabIndex = 13;
+            this.btnToPS4.Text = "Convert all input files to *.png_ps4";
+            this.toolTip1.SetToolTip(this.btnToPS4, "Click to convert file(s) from Rock Band format");
+            this.btnToPS4.UseVisualStyleBackColor = false;
+            this.btnToPS4.Click += new System.EventHandler(this.btnToPS4_Click);
+            // 
+            // btnFromPS4
+            // 
+            this.btnFromPS4.AllowDrop = true;
+            this.btnFromPS4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(129)))), ((int)(((byte)(216)))));
+            this.btnFromPS4.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnFromPS4.Enabled = false;
+            this.btnFromPS4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnFromPS4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnFromPS4.ForeColor = System.Drawing.Color.White;
+            this.btnFromPS4.Location = new System.Drawing.Point(15, 6);
+            this.btnFromPS4.Name = "btnFromPS4";
+            this.btnFromPS4.Size = new System.Drawing.Size(208, 30);
+            this.btnFromPS4.TabIndex = 21;
+            this.btnFromPS4.Text = "Convert all PS4 files";
+            this.toolTip1.SetToolTip(this.btnFromPS4, "Click to convert file(s) from Rock Band format");
+            this.btnFromPS4.UseVisualStyleBackColor = false;
+            this.btnFromPS4.EnabledChanged += new System.EventHandler(this.btnFromPS4_EnabledChanged);
+            this.btnFromPS4.Click += new System.EventHandler(this.btnFromPS4_Click);
+            // 
+            // chkCleanUpPS4
+            // 
+            this.chkCleanUpPS4.AllowDrop = true;
+            this.chkCleanUpPS4.AutoSize = true;
+            this.chkCleanUpPS4.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkCleanUpPS4.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkCleanUpPS4.ForeColor = System.Drawing.Color.Black;
+            this.chkCleanUpPS4.Location = new System.Drawing.Point(6, 134);
+            this.chkCleanUpPS4.Name = "chkCleanUpPS4";
+            this.chkCleanUpPS4.Size = new System.Drawing.Size(224, 23);
+            this.chkCleanUpPS4.TabIndex = 25;
+            this.chkCleanUpPS4.Text = "Delete originals after converting?";
+            this.toolTip1.SetToolTip(this.chkCleanUpPS4, "Select this option to delete the original png_xbox file(s)");
+            this.chkCleanUpPS4.UseVisualStyleBackColor = true;
+            // 
             // tabControl1
             // 
             this.tabControl1.AllowDrop = true;
@@ -426,7 +479,7 @@
             this.tabControl1.Multiline = true;
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(261, 192);
+            this.tabControl1.Size = new System.Drawing.Size(261, 226);
             this.tabControl1.TabIndex = 10;
             this.tabControl1.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
             this.tabControl1.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
@@ -435,6 +488,7 @@
             // 
             this.tabXbox.AllowDrop = true;
             this.tabXbox.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.tabXbox.Controls.Add(this.chkRemoveKeep);
             this.tabXbox.Controls.Add(this.panel3);
             this.tabXbox.Controls.Add(this.panel4);
             this.tabXbox.Controls.Add(this.chkCleanUpXbox);
@@ -442,7 +496,7 @@
             this.tabXbox.Location = new System.Drawing.Point(4, 29);
             this.tabXbox.Name = "tabXbox";
             this.tabXbox.Padding = new System.Windows.Forms.Padding(3);
-            this.tabXbox.Size = new System.Drawing.Size(253, 159);
+            this.tabXbox.Size = new System.Drawing.Size(253, 193);
             this.tabXbox.TabIndex = 0;
             this.tabXbox.Text = "Xbox 360";
             this.tabXbox.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
@@ -704,134 +758,6 @@
             this.chkPS3BMP.DragDrop += new System.Windows.Forms.DragEventHandler(this.HandleDragDrop);
             this.chkPS3BMP.DragEnter += new System.Windows.Forms.DragEventHandler(this.HandleDragEnter);
             // 
-            // menuStrip1
-            // 
-            this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.advancedToolStripMenuItem,
-            this.helpToolStripMenuItem1});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(271, 24);
-            this.menuStrip1.TabIndex = 12;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // advancedToolStripMenuItem
-            // 
-            this.advancedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.textureSizeToolStripMenuItem,
-            this.textureTypeToolStripMenuItem,
-            this.keepDDSFiles});
-            this.advancedToolStripMenuItem.Name = "advancedToolStripMenuItem";
-            this.advancedToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
-            this.advancedToolStripMenuItem.Text = "Advanced";
-            // 
-            // textureSizeToolStripMenuItem
-            // 
-            this.textureSizeToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.textureSizeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.x256,
-            this.x512,
-            this.x1024,
-            this.x2048});
-            this.textureSizeToolStripMenuItem.Name = "textureSizeToolStripMenuItem";
-            this.textureSizeToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
-            this.textureSizeToolStripMenuItem.Text = "Texture size";
-            // 
-            // x256
-            // 
-            this.x256.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.x256.Name = "x256";
-            this.x256.Size = new System.Drawing.Size(164, 22);
-            this.x256.Text = "256x256";
-            this.x256.Click += new System.EventHandler(this.x256ToolStripMenuItem_Click);
-            // 
-            // x512
-            // 
-            this.x512.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.x512.Checked = true;
-            this.x512.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.x512.Name = "x512";
-            this.x512.Size = new System.Drawing.Size(164, 22);
-            this.x512.Text = "512x512 (default)";
-            this.x512.Click += new System.EventHandler(this.x512defaultToolStripMenuItem_Click);
-            // 
-            // x1024
-            // 
-            this.x1024.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.x1024.Name = "x1024";
-            this.x1024.Size = new System.Drawing.Size(164, 22);
-            this.x1024.Text = "1024x1024";
-            this.x1024.Click += new System.EventHandler(this.x1024ToolStripMenuItem_Click);
-            // 
-            // x2048
-            // 
-            this.x2048.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.x2048.Name = "x2048";
-            this.x2048.Size = new System.Drawing.Size(164, 22);
-            this.x2048.Text = "2048x2048";
-            this.x2048.Click += new System.EventHandler(this.x2048muricaToolStrip_Click);
-            // 
-            // textureTypeToolStripMenuItem
-            // 
-            this.textureTypeToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.textureTypeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.textureDXT1,
-            this.textureDXT5});
-            this.textureTypeToolStripMenuItem.Name = "textureTypeToolStripMenuItem";
-            this.textureTypeToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
-            this.textureTypeToolStripMenuItem.Text = "Texture type";
-            // 
-            // textureDXT1
-            // 
-            this.textureDXT1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.textureDXT1.Name = "textureDXT1";
-            this.textureDXT1.Size = new System.Drawing.Size(221, 22);
-            this.textureDXT1.Text = "DXT1 (smaller file size)";
-            this.textureDXT1.Click += new System.EventHandler(this.textureDXT1_Click);
-            // 
-            // textureDXT5
-            // 
-            this.textureDXT5.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.textureDXT5.Checked = true;
-            this.textureDXT5.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.textureDXT5.Name = "textureDXT5";
-            this.textureDXT5.Size = new System.Drawing.Size(221, 22);
-            this.textureDXT5.Text = "DXT5 (higher image quality)";
-            this.textureDXT5.Click += new System.EventHandler(this.textureDXT5_Click);
-            // 
-            // keepDDSFilesToolStripMenuItem
-            // 
-            this.keepDDSFiles.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.keepDDSFiles.CheckOnClick = true;
-            this.keepDDSFiles.Name = "keepDDSFilesToolStripMenuItem";
-            this.keepDDSFiles.Size = new System.Drawing.Size(215, 22);
-            this.keepDDSFiles.Text = "Don\'t delete .dds / .tpl files";
-            this.keepDDSFiles.Click += new System.EventHandler(this.keepDDSFilesToolStripMenuItem_Click);
-            // 
-            // helpToolStripMenuItem1
-            // 
-            this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
-            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem1.Text = "&Help";
-            this.helpToolStripMenuItem1.Click += new System.EventHandler(this.helpToolStripMenuItem1_Click);
-            // 
-            // helpToolStripMenuItem
-            // 
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(32, 19);
-            // 
-            // picWorking
-            // 
-            this.picWorking.Image = global::Nautilus.Properties.Resources.working;
-            this.picWorking.Location = new System.Drawing.Point(128, 5);
-            this.picWorking.Name = "picWorking";
-            this.picWorking.Size = new System.Drawing.Size(110, 15);
-            this.picWorking.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.picWorking.TabIndex = 67;
-            this.picWorking.TabStop = false;
-            this.picWorking.Visible = false;
-            // 
             // tabPS4
             // 
             this.tabPS4.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
@@ -856,24 +782,6 @@
             this.panel7.Size = new System.Drawing.Size(240, 44);
             this.panel7.TabIndex = 27;
             // 
-            // btnToPS4
-            // 
-            this.btnToPS4.AllowDrop = true;
-            this.btnToPS4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(129)))), ((int)(((byte)(216)))));
-            this.btnToPS4.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnToPS4.Enabled = false;
-            this.btnToPS4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnToPS4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnToPS4.ForeColor = System.Drawing.Color.White;
-            this.btnToPS4.Location = new System.Drawing.Point(6, 5);
-            this.btnToPS4.Name = "btnToPS4";
-            this.btnToPS4.Size = new System.Drawing.Size(224, 30);
-            this.btnToPS4.TabIndex = 13;
-            this.btnToPS4.Text = "Convert all input files to *.png_ps4";
-            this.toolTip1.SetToolTip(this.btnToPS4, "Click to convert file(s) from Rock Band format");
-            this.btnToPS4.UseVisualStyleBackColor = false;
-            this.btnToPS4.Click += new System.EventHandler(this.btnToPS4_Click);
-            // 
             // panel8
             // 
             this.panel8.AllowDrop = true;
@@ -886,25 +794,6 @@
             this.panel8.Name = "panel8";
             this.panel8.Size = new System.Drawing.Size(240, 74);
             this.panel8.TabIndex = 26;
-            // 
-            // btnFromPS4
-            // 
-            this.btnFromPS4.AllowDrop = true;
-            this.btnFromPS4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(129)))), ((int)(((byte)(216)))));
-            this.btnFromPS4.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnFromPS4.Enabled = false;
-            this.btnFromPS4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnFromPS4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnFromPS4.ForeColor = System.Drawing.Color.White;
-            this.btnFromPS4.Location = new System.Drawing.Point(15, 6);
-            this.btnFromPS4.Name = "btnFromPS4";
-            this.btnFromPS4.Size = new System.Drawing.Size(208, 30);
-            this.btnFromPS4.TabIndex = 21;
-            this.btnFromPS4.Text = "Convert all PS4 files";
-            this.toolTip1.SetToolTip(this.btnFromPS4, "Click to convert file(s) from Rock Band format");
-            this.btnFromPS4.UseVisualStyleBackColor = false;
-            this.btnFromPS4.EnabledChanged += new System.EventHandler(this.btnFromPS4_EnabledChanged);
-            this.btnFromPS4.Click += new System.EventHandler(this.btnFromPS4_Click);
             // 
             // chkPS4PNG
             // 
@@ -947,20 +836,148 @@
             this.chkPS4BMP.Text = "*.bmp";
             this.chkPS4BMP.UseVisualStyleBackColor = true;
             // 
-            // chkCleanUpPS4
+            // menuStrip1
             // 
-            this.chkCleanUpPS4.AllowDrop = true;
-            this.chkCleanUpPS4.AutoSize = true;
-            this.chkCleanUpPS4.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.chkCleanUpPS4.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.chkCleanUpPS4.ForeColor = System.Drawing.Color.Black;
-            this.chkCleanUpPS4.Location = new System.Drawing.Point(6, 134);
-            this.chkCleanUpPS4.Name = "chkCleanUpPS4";
-            this.chkCleanUpPS4.Size = new System.Drawing.Size(224, 23);
-            this.chkCleanUpPS4.TabIndex = 25;
-            this.chkCleanUpPS4.Text = "Delete originals after converting?";
-            this.toolTip1.SetToolTip(this.chkCleanUpPS4, "Select this option to delete the original png_xbox file(s)");
-            this.chkCleanUpPS4.UseVisualStyleBackColor = true;
+            this.menuStrip1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.advancedToolStripMenuItem,
+            this.helpToolStripMenuItem1});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(271, 24);
+            this.menuStrip1.TabIndex = 12;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // advancedToolStripMenuItem
+            // 
+            this.advancedToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.textureSizeToolStripMenuItem,
+            this.textureTypeToolStripMenuItem,
+            this.keepDDSFiles});
+            this.advancedToolStripMenuItem.Name = "advancedToolStripMenuItem";
+            this.advancedToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
+            this.advancedToolStripMenuItem.Text = "Advanced";
+            // 
+            // textureSizeToolStripMenuItem
+            // 
+            this.textureSizeToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.textureSizeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.x256,
+            this.x512,
+            this.x1024,
+            this.x2048});
+            this.textureSizeToolStripMenuItem.Name = "textureSizeToolStripMenuItem";
+            this.textureSizeToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
+            this.textureSizeToolStripMenuItem.Text = "Texture size";
+            // 
+            // x256
+            // 
+            this.x256.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.x256.Name = "x256";
+            this.x256.Size = new System.Drawing.Size(163, 22);
+            this.x256.Text = "256x256";
+            this.x256.Click += new System.EventHandler(this.x256ToolStripMenuItem_Click);
+            // 
+            // x512
+            // 
+            this.x512.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.x512.Checked = true;
+            this.x512.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.x512.Name = "x512";
+            this.x512.Size = new System.Drawing.Size(163, 22);
+            this.x512.Text = "512x512 (default)";
+            this.x512.Click += new System.EventHandler(this.x512defaultToolStripMenuItem_Click);
+            // 
+            // x1024
+            // 
+            this.x1024.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.x1024.Name = "x1024";
+            this.x1024.Size = new System.Drawing.Size(163, 22);
+            this.x1024.Text = "1024x1024";
+            this.x1024.Click += new System.EventHandler(this.x1024ToolStripMenuItem_Click);
+            // 
+            // x2048
+            // 
+            this.x2048.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.x2048.Name = "x2048";
+            this.x2048.Size = new System.Drawing.Size(163, 22);
+            this.x2048.Text = "2048x2048";
+            this.x2048.Click += new System.EventHandler(this.x2048muricaToolStrip_Click);
+            // 
+            // textureTypeToolStripMenuItem
+            // 
+            this.textureTypeToolStripMenuItem.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.textureTypeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.textureDXT1,
+            this.textureDXT5});
+            this.textureTypeToolStripMenuItem.Name = "textureTypeToolStripMenuItem";
+            this.textureTypeToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
+            this.textureTypeToolStripMenuItem.Text = "Texture type";
+            // 
+            // textureDXT1
+            // 
+            this.textureDXT1.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.textureDXT1.Name = "textureDXT1";
+            this.textureDXT1.Size = new System.Drawing.Size(222, 22);
+            this.textureDXT1.Text = "DXT1 (smaller file size)";
+            this.textureDXT1.Click += new System.EventHandler(this.textureDXT1_Click);
+            // 
+            // textureDXT5
+            // 
+            this.textureDXT5.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.textureDXT5.Checked = true;
+            this.textureDXT5.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.textureDXT5.Name = "textureDXT5";
+            this.textureDXT5.Size = new System.Drawing.Size(222, 22);
+            this.textureDXT5.Text = "DXT5 (higher image quality)";
+            this.textureDXT5.Click += new System.EventHandler(this.textureDXT5_Click);
+            // 
+            // keepDDSFiles
+            // 
+            this.keepDDSFiles.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
+            this.keepDDSFiles.CheckOnClick = true;
+            this.keepDDSFiles.Name = "keepDDSFiles";
+            this.keepDDSFiles.Size = new System.Drawing.Size(215, 22);
+            this.keepDDSFiles.Text = "Don\'t delete .dds / .tpl files";
+            this.keepDDSFiles.Click += new System.EventHandler(this.keepDDSFilesToolStripMenuItem_Click);
+            // 
+            // helpToolStripMenuItem1
+            // 
+            this.helpToolStripMenuItem1.Name = "helpToolStripMenuItem1";
+            this.helpToolStripMenuItem1.Size = new System.Drawing.Size(44, 20);
+            this.helpToolStripMenuItem1.Text = "&Help";
+            this.helpToolStripMenuItem1.Click += new System.EventHandler(this.helpToolStripMenuItem1_Click);
+            // 
+            // helpToolStripMenuItem
+            // 
+            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(32, 19);
+            // 
+            // picWorking
+            // 
+            this.picWorking.Image = global::Nautilus.Properties.Resources.working;
+            this.picWorking.Location = new System.Drawing.Point(128, 5);
+            this.picWorking.Name = "picWorking";
+            this.picWorking.Size = new System.Drawing.Size(110, 15);
+            this.picWorking.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picWorking.TabIndex = 67;
+            this.picWorking.TabStop = false;
+            this.picWorking.Visible = false;
+            // 
+            // chkRemoveKeep
+            // 
+            this.chkRemoveKeep.AllowDrop = true;
+            this.chkRemoveKeep.AutoSize = true;
+            this.chkRemoveKeep.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.chkRemoveKeep.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkRemoveKeep.ForeColor = System.Drawing.Color.Black;
+            this.chkRemoveKeep.Location = new System.Drawing.Point(6, 136);
+            this.chkRemoveKeep.Name = "chkRemoveKeep";
+            this.chkRemoveKeep.Size = new System.Drawing.Size(215, 23);
+            this.chkRemoveKeep.TabIndex = 22;
+            this.chkRemoveKeep.Text = "Remove _keep from file names";
+            this.toolTip1.SetToolTip(this.chkRemoveKeep, "Select this option to remove _keep from the resulting file names");
+            this.chkRemoveKeep.UseVisualStyleBackColor = true;
             // 
             // AdvancedArtConverter
             // 
@@ -968,7 +985,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(271, 425);
+            this.ClientSize = new System.Drawing.Size(271, 464);
             this.Controls.Add(this.picPin);
             this.Controls.Add(this.picWorking);
             this.Controls.Add(this.btnRefresh);
@@ -1008,14 +1025,14 @@
             this.panel5.ResumeLayout(false);
             this.panel6.ResumeLayout(false);
             this.panel6.PerformLayout();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).EndInit();
             this.tabPS4.ResumeLayout(false);
             this.tabPS4.PerformLayout();
             this.panel7.ResumeLayout(false);
             this.panel8.ResumeLayout(false);
             this.panel8.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picWorking)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1084,6 +1101,7 @@
         private System.Windows.Forms.CheckBox chkPS4JPG;
         private System.Windows.Forms.CheckBox chkPS4BMP;
         private System.Windows.Forms.CheckBox chkCleanUpPS4;
+        private System.Windows.Forms.CheckBox chkRemoveKeep;
     }
 }
 

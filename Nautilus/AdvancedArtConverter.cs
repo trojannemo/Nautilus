@@ -305,6 +305,18 @@ namespace Nautilus
             }
         }
 
+        private void RemoveKeepFromFileNames()
+        {
+            if (!chkRemoveKeep.Checked) return;
+            var images = Directory.GetFiles(txtFolder.Text, "*.*").ToList();
+            if (images.Count == 0) return;
+            foreach (var image in images)
+            {
+                if (!image.Contains("_keep.")) continue;
+                Tools.MoveFile(image, image.Replace("_keep.", "."));
+            }
+        }
+
         private void btnFolder_Click(object sender, EventArgs e)
         {
             //if user selects new folder, assign that value
@@ -528,6 +540,7 @@ namespace Nautilus
                 {
                     ToWii(image);
                 }
+                RemoveKeepFromFileNames();
                 Log("Done");
                 picWorking.Visible = false;
                 btnRefresh.PerformClick();
@@ -578,6 +591,7 @@ namespace Nautilus
                 {
                     ToXbox(image, true);
                 }
+                RemoveKeepFromFileNames();
                 Log("Done");
                 picWorking.Visible = false;
                 btnRefresh.PerformClick();
@@ -628,6 +642,7 @@ namespace Nautilus
                 {
                     ToPS3(image, true);
                 }
+                RemoveKeepFromFileNames();
                 Log("Done");
                 picWorking.Visible = false;
                 btnRefresh.PerformClick();
@@ -973,7 +988,8 @@ namespace Nautilus
                 foreach (var image in imagesPNG.Where(image => !image.EndsWith(".png_wii", StringComparison.Ordinal) && !image.EndsWith(".png_xbox", StringComparison.Ordinal) && !image.EndsWith(".png_ps3", StringComparison.Ordinal) && !image.EndsWith(".png_ps4", StringComparison.Ordinal)))
                 {
                     ToPS4(image);
-                }                
+                }
+                RemoveKeepFromFileNames();
                 Log("Done");
                 picWorking.Visible = false;
                 btnRefresh.PerformClick();
